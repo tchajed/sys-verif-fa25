@@ -1,6 +1,11 @@
 {
   "name": "sys_verif",
   "description": "Course website for Systems Verification Fall 2024",
+  "source": "src/index.html",
+  "scripts": {
+    "start": "parcel",
+    "build": "parcel build"
+  },
   "author": "Tej Chajed",
   "license": "CC0-1.0",
   "version": "0.1.0",
