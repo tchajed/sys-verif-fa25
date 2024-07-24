@@ -2,6 +2,7 @@
   "name": "sys_verif",
   "description": "Course website for Systems Verification Fall 2024",
   "source": "src/index.html",
+  "browserslist": "> 0.5%, last 2 versions, not dead",
   "scripts": {
     "start": "parcel",
     "build": "parcel build"
