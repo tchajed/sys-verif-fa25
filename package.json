@@ -13,6 +13,7 @@
     "@parcel/transformer-sass": "^2.12.0",
     "@picocss/pico": "^2.0.6",
     "parcel": "^2.12.0",
+    "posthtml-include": "^2.0.1",
     "sass": "^1.76.0"
   },
   "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
