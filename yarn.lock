@@ -411,7 +411,7 @@
   dependencies:
     "@parcel/plugin" "2.12.0"
 
-"@parcel/plugin@2.12.0":
+"@parcel/plugin@2.12.0", "@parcel/plugin@^2.0.0-alpha.1.1":
   version "2.12.0"
   resolved "https://registry.yarnpkg.com/@parcel/plugin/-/plugin-2.12.0.tgz#3db4237e8977ef5b5378b65eaffb809d2026431a"
   integrity sha512-nc/uRA8DiMoe4neBbzV6kDndh/58a4wQuGKw5oEoIwBCHUvE2W8ZFSu7ollSXUGRzfacTt4NdY8TwS73ScWZ+g==
@@ -1454,6 +1454,13 @@ ordered-binary@^1.4.1:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/ordered-binary/-/ordered-binary-1.5.1.tgz#94ccbf14181711081ee23931db0dc3f58aaa0df6"
   integrity sha512-5VyHfHY3cd0iza71JepYG50My+YUbrFtGoUz2ooEydPyPM7Aai/JW098juLr+RG6+rDJuzNNTsEQu2DZa1A41A==
+
+parcel-transformer-strip-index-html@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/parcel-transformer-strip-index-html/-/parcel-transformer-strip-index-html-0.1.1.tgz#41fe0cfcdbba45111330603f7c9aaf0143c476d6"
+  integrity sha512-bQ0s0Gs1LWk2YkEFH7t3/bBY/zgXdQbU9CtTrQOEXEsCEQc4NWHfxlzhfFssp2vODOq932CSmfu2IR5WJfwFtA==
+  dependencies:
+    "@parcel/plugin" "^2.0.0-alpha.1.1"
 
 parcel@^2.12.0:
   version "2.12.0"

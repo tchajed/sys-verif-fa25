@@ -5,7 +5,7 @@
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "scripts": {
     "start": "parcel",
-    "build": "parcel build"
+    "build": "parcel build --public-url '.'"
   },
   "author": "Tej Chajed",
   "license": "CC0-1.0",
@@ -14,6 +14,7 @@
     "@parcel/transformer-sass": "^2.12.0",
     "@picocss/pico": "^2.0.6",
     "parcel": "^2.12.0",
+    "parcel-transformer-strip-index-html": "^0.1.1",
     "posthtml-include": "^2.0.1",
     "sass": "^1.76.0"
   },
