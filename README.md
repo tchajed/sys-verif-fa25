@@ -1,5 +1,7 @@
 # Systems verification Fall 2024 course website
 
-Run a dev server: `yarn start`
+[Deployed site](https://tchajed.github.io/sys-verif-fa24/)
 
-Build static site: `yarn build`
+Run a dev server: `pnpm docs:dev`
+
+Build static site: `pnpm docs:build`
