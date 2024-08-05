@@ -20,6 +20,8 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
+        with:
+          run_install: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -29,9 +31,7 @@ jobs:
       - name: Build Docs
         env:
           NODE_OPTIONS: --max_old_space_size=8192
-        run: |-
-          pnpm run docs:build
-          > docs/.vuepress/dist/.nojekyll
+        run: pnpm run docs:build
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v3
         if: github.ref == 'refs/heads/main'
