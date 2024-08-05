@@ -5,7 +5,7 @@
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "scripts": {
     "start": "parcel",
-    "build": "parcel build --public-url '.'"
+    "build": "parcel build --public-url './sys-verif-fa24/'"
   },
   "author": "Tej Chajed",
   "license": "CC0-1.0",
