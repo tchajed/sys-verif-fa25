@@ -1,8 +1,7 @@
 ---
-title: Home
+title: "CS 839: Systems Verification"
+toc: false
 ---
-
-# CS 839: Systems Verification
 
 In this class, you'll get an introduction to systems verification: how to
 mathematically prove the correctness of programs with machine-checked proofs.

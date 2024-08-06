@@ -7,3 +7,10 @@
 Run a dev server: `pnpm docs:dev`
 
 Build static site: `pnpm docs:build`
+
+Tech stack:
+
+- pnpm
+- [VuePress 2](https://vuepress.vuejs.org/)
+- [VuePress Hope theme](https://theme-hope.vuejs.press/)
+- Build and deploy via GitHub Pages [workflow](./.github/workflows/deploy.yml)

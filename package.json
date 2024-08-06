@@ -7,7 +7,7 @@
   "scripts": {
     "docs:build": "vuepress build docs",
     "docs:clean-dev": "vuepress dev docs --clean-cache --host localhost",
-    "docs:dev": "vuepress dev docs",
+    "docs:dev": "vuepress dev docs --host localhost",
     "docs:update-package": "pnpm dlx vp-update"
   },
   "devDependencies": {
@@ -15,7 +15,6 @@
     "katex": "^0.16.11",
     "vue": "^3.4.36",
     "vuepress": "2.0.0-rc.14",
-    "vuepress-plugin-md-enhance": "2.0.0-rc.52",
     "vuepress-theme-hope": "2.0.0-rc.52"
   },
   "packageManager": "pnpm@9.6.0+sha512.38dc6fba8dba35b39340b9700112c2fe1e12f10b17134715a4aa98ccf7bb035e76fd981cf0bb384dfa98f8d6af5481c2bef2f4266a24bfa20c34eb7147ce0b5e"

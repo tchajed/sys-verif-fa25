@@ -10,13 +10,16 @@ export default defineUserConfig({
   description: 'Systems Verification Fall 2024',
 
   theme: hopeTheme({
-    logo: '/logo.png',
-    favicon: '/favicon.png',
-    iconAssets: "fontawesome",
-    navbar: ['/', '/assignments'],
+    navbar: [{
+      text: 'Calendar',
+      link: '/',
+    }, '/assignments'],
 
     sidebar: [
-      '/',
+      {
+        link: '/',
+        text: 'Home',
+      },
       '/syllabus',
       '/assignments',
     ],
@@ -26,11 +29,17 @@ export default defineUserConfig({
     contributors: false,
     editLink: false,
     pageInfo: ["Date"],
+    toc: true, // disabled on home page
+    print: false,
+
     plugins: {
       mdEnhance: {
         katex: true,
       }
     },
+    logo: '/logo.png',
+    favicon: '/favicon.png',
+    iconAssets: "fontawesome",
   }),
 
   bundler: viteBundler(),
