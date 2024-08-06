@@ -1,7 +1,6 @@
 import { hopeTheme } from 'vuepress-theme-hope'
 import { defineUserConfig } from 'vuepress/cli'
 import { viteBundler } from '@vuepress/bundler-vite'
-import { mdEnhancePlugin } from 'vuepress-plugin-md-enhance'
 
 export default defineUserConfig({
   lang: 'en-US',
@@ -27,13 +26,12 @@ export default defineUserConfig({
     contributors: false,
     editLink: false,
     pageInfo: ["Date"],
+    plugins: {
+      mdEnhance: {
+        katex: true,
+      }
+    },
   }),
-
-  plugins: [
-    mdEnhancePlugin({
-      katex: true,
-    })
-  ]
 
   bundler: viteBundler(),
 })
