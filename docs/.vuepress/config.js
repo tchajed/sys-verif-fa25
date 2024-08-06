@@ -1,4 +1,4 @@
-import { defaultTheme } from '@vuepress/theme-default'
+import { hopeTheme } from 'vuepress-theme-hope'
 import { defineUserConfig } from 'vuepress/cli'
 import { viteBundler } from '@vuepress/bundler-vite'
 
@@ -9,12 +9,22 @@ export default defineUserConfig({
   title: 'CS 839',
   description: 'Systems Verification Fall 2024',
 
-  theme: defaultTheme({
-    logo: 'https://vuejs.press/images/hero.png',
+  theme: hopeTheme({
+    iconAssets: "fontawesome",
 
     navbar: ['/', '/assignments'],
 
-    sidebar: ['/README.md', '/assignments.md', '/syllabus.md'],
+    sidebar: [
+      '/',
+      '/syllabus',
+      '/assignments',
+    ],
+
+    // control page meta information shown
+    // see https://theme-hope.vuejs.press/guide/feature/meta.html
+    contributors: false,
+    editLink: false,
+    pageInfo: ["Date"],
   }),
 
   bundler: viteBundler(),
