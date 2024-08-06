@@ -12,7 +12,7 @@ export default defineUserConfig({
   theme: hopeTheme({
     navbar: [
       {
-        text: "Calendar",
+        text: "Home",
         link: "/",
       },
       "/assignments",
