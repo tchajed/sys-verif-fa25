@@ -22,7 +22,7 @@ You do not need to have used Go before, even though we will verify code written 
 
 ## Assignments
 
-There will be two programming exercises in Coq, one written theory assignment, and a final project in Coq. See the [assignments page](./assignments.md) for details.
+There will be two programming exercises in Coq, one written theory assignment, and a final project in Coq. See the [assignments page](./assignments/) for details.
 
 Grading: TBD
 

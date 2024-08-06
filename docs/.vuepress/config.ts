@@ -19,9 +19,9 @@ export default defineUserConfig({
     // 'icon'.
     //
     // README.md is used for the index page of a directory.
-    navbar: ["/", "/assignments"],
+    navbar: ["/", "/assignments/"],
 
-    sidebar: ["/", "/syllabus", "/assignments"],
+    sidebar: ["/", "/syllabus", "/assignments/"],
 
     // control page meta information shown
     // see https://theme-hope.vuejs.press/guide/feature/meta.html
@@ -34,6 +34,7 @@ export default defineUserConfig({
     plugins: {
       mdEnhance: {
         katex: true,
+        tasklist: true,
       },
     },
     logo: "/logo.png",
