@@ -1,10 +1,26 @@
-import { hopeTheme, sidebar } from "vuepress-theme-hope";
+import { hopeTheme, navbar, sidebar } from "vuepress-theme-hope";
 import { defineUserConfig } from "vuepress";
 import { viteBundler } from "@vuepress/bundler-vite";
 
+// Vue Router picks up configuration for paths in the navbar and sidebar from
+// the YAML frontmatter, for example the 'title' (or first h1), 'shortTitle',
+// and 'icon'.
+//
+// README.md is used for the index page of a directory.
+
+const navbarConfig = navbar(["/", "/assignments/"]);
 const sidebarConfig = sidebar({
-  "/": ["", "syllabus", "assignments/"],
-  "/assignments/": "structure",
+  "/": [
+    "",
+    "syllabus",
+    {
+      text: "Assignments",
+      icon: "file-lines",
+      prefix: "assignments/",
+      link: "/assignments/",
+      children: ["setup", "hw1-coq", "hw2-go", "hw3-sep-logic", "project"],
+    },
+  ],
 });
 
 export default defineUserConfig({
@@ -19,13 +35,7 @@ export default defineUserConfig({
   description: "Systems Verification Fall 2024",
 
   theme: hopeTheme({
-    // Vue Router picks up configuration for these paths from the YAML
-    // frontmatter, for example the 'title' (or first h1), 'shortTitle', and
-    // 'icon'.
-    //
-    // README.md is used for the index page of a directory.
-    navbar: ["/", "/assignments/"],
-
+    navbar: navbarConfig,
     sidebar: sidebarConfig,
 
     // control page meta information shown
