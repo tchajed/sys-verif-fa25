@@ -36,6 +36,7 @@ export default defineUserConfig({
 
   theme: hopeTheme({
     navbar: navbarConfig,
+    repo: "https://github.com/tchajed/sys-verif-fa24-proofs",
     sidebar: sidebarConfig,
 
     // control page meta information shown
