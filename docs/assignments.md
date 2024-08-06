@@ -1,3 +1,7 @@
+---
+icon: 'file-lines'
+---
+
 # Assignments
 
 ## Assignment 1 (Coq)

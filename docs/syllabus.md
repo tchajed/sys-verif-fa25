@@ -1,3 +1,7 @@
+---
+icon: 'circle-exclamation'
+---
+
 # Syllabus
 
 ## Learning objectives
@@ -22,7 +26,7 @@ There will be two programming exercises in Coq, one written theory assignment, a
 
 Grading: TBD
 
-Handin: TBD (probably Canvas)
+Hand-in: submit to Canvas
 
 ## Late policy
 

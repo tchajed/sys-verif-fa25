@@ -12,5 +12,6 @@ Tech stack:
 
 - pnpm
 - [VuePress 2](https://vuepress.vuejs.org/)
-- [VuePress Hope theme](https://theme-hope.vuejs.press/)
+  - Using the [VuePress Hope theme](https://theme-hope.vuejs.press/) (rather than the default)
+  - Pretty much the whole setup is at [config.ts](docs/.vuepress/config.ts)
 - Build and deploy via GitHub Pages [workflow](./.github/workflows/deploy.yml)
