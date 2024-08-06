@@ -10,8 +10,9 @@ export default defineUserConfig({
   description: 'Systems Verification Fall 2024',
 
   theme: hopeTheme({
+    logo: '/logo.png',
+    favicon: '/favicon.png',
     iconAssets: "fontawesome",
-
     navbar: ['/', '/assignments'],
 
     sidebar: [
