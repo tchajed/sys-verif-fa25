@@ -1,13 +1,19 @@
+---
+order: 1
+shortTitle: "HW1: Coq"
+---
+
 # Assignment 1: Coq
 
 The goal of this assignment is to get you some familiarity with proving theorems in Coq. You'll also be getting started with verification by proving properties about functional programs - eventually we'll move on to reasoning about imperative programs.
 
-The [main assignments page](../) has instructions on getting the
-sys-verif-fa24-proofs repo and Coq set up; follow those first.
+## Part 0: setup
+
+The [main assignments page](../) has instructions on getting the sys-verif-fa24-proofs repo and Coq set up. Follow those first.
 
 ::: warning
 
-Getting the software setup might be unexpectedly difficult, so do it early and ask for help quickly. Seriously!
+Getting the software set up can be difficult, so do it early and ask for help quickly if you get stuck.
 
 :::
 
@@ -22,7 +28,7 @@ Read the chapter and do the exercises marked with `FILL IN HERE` in Basics.v in 
 
 ::: important
 
-This chapter has a lot of small, easy exercises. If these are difficult, that's a bad sign. If they're easy, note that proofs will become more difficult quickly after this, but you'll need the practice.
+This chapter has a lot of small, easy exercises to get you practice. If these are difficult, that's a bad sign. If they're easy, note that proofs will become more difficult quickly after this.
 
 :::
 

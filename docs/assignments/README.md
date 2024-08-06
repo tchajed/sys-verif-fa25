@@ -6,7 +6,18 @@ icon: 'file-lines'
 
 ## Assignment repo
 
-You'll do the programming assignments using the starter code in <https://github.com/tchajed/sys-verif-fa24-proofs>. **Please do not fork the repo**, since this will make your submission public. GitHub does not support private forks of public repositories. Instead, you can either work locally, or follow the below instructions to work in a private repo that is not a GitHub fork (I do recommend doing that so you have a backup). If you accidentally fork the repo, don't panic, you should be able to delete and re-create it.
+The programming assignments will be distributed in [sys-verif-fa24-proofs](https://github.com/tchajed/sys-verif-fa24-proofs).
+
+::: danger Clone, don't fork
+
+**Please do not fork the repo**, since this will make your submission public. GitHub does not support private forks of public repositories. Instead, you can either clone and work locally, or follow the below instructions to work in a private repo that is not a GitHub fork (I do recommend doing that so you have a backup).
+
+:::
+
+::: details Creating a private GitHub repo for your work
+
+If you already accidentally forked the repo, don't panic, you should be able to
+delete and re-create it.
 
 Create a new private repo called sys-verif-fa24-proofs (without any content). (As a student, you can get unlimited private repos with the [student pack](https://education.github.com/pack/join).) Follow these instructions to set it up (fill in your username in the first step):
 
@@ -21,11 +32,15 @@ git push --set-upstream origin main
 
 You now have a copy of the repo, with the `main` branch tracking your private repo, and with a remote `upstream` pointing to the class repo. You can now do something like `git fetch upstream` and `git merge upstream/main` to pull in new changes.
 
+:::
+
 ## Installing Coq
 
-### Docker + VS Code
+I recommend using Docker and VS Code, but you can install Coq and configure an IDE on your own.
 
-The setup I recommend is to use Docker, VS Code, and a container I created for this class. This setup should work well on macOS and Linux; it should also be workable in Windows with WSL, but I don't have much experience with that. To use this setup, you'll need to:
+::: details Using Docker and VS Code
+
+The setup I recommend is to use Docker, VS Code, and a container I created for this class. This setup should work well on macOS and Linux; it should also be workable in Windows with WSL, but I don't have much experience with that.
 
 Install [Docker](https://www.docker.com/get-started/)
 
@@ -39,9 +54,17 @@ Install the [Dev Containers extension](https://marketplace.visualstudio.com/item
 
 The most important VS Code feature to learn is the Command Palette, accessed from View > Command Palette. The shortcut is worth learning (ctrl-shift-p, cmd-shift-p on macOS). The command palette gives search access to most editor functionality and shows keyboard shortcuts if you want to learn them.
 
-### Install Coq and an IDE on your own
+Once you have the dev container extension, use the "Dev Containers: Reopen in
+Container" command on the sys-verif-fa24-proofs repo. This will use Coq from the
+container while still running VS Code natively. You can use the built-in VS Code
+terminal to run `make` to ensure your code compiles.
 
-You can also try to install Coq on your own. Make sure to get Coq 8.19.2 for compatibility (Coq 8.20 is also likely to work when it's released).
+:::
+
+::: details Install Coq on your own
+
+
+Make sure to get Coq 8.19.2 for compatibility (Coq 8.20 is also likely to work when it's released).
 
 You will need an IDE for Coq:
 
@@ -49,12 +72,11 @@ You will need an IDE for Coq:
 - If you use Emacs, then [Proof General](https://proofgeneral.github.io/) is excellent (this is what I personally use, with Doom Emacs and vim keybindings).
 - If you use Vim or Neovim, then [Coqtail](https://github.com/whonore/Coqtail) is also decent.
 
+:::
+
 ## List of assignments
 
 - [Assignment 1 (Coq)](./hw1-coq)
-- Assignment 2 (GooseLang verification)
-- Assignment 3 (Separation logic theory)
-
-  Note that this is a theory assignment for which you'll submit a written document.
-
-- Final project
+- [Assignment 2 (Verifying Go code)](./hw2-go)
+- [Assignment 3 (Separation logic theory)](./hw3-sep-logic)
+- [Final project](./project)

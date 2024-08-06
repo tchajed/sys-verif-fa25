@@ -1,6 +1,11 @@
-import { hopeTheme } from "vuepress-theme-hope";
+import { hopeTheme, sidebar } from "vuepress-theme-hope";
 import { defineUserConfig } from "vuepress";
 import { viteBundler } from "@vuepress/bundler-vite";
+
+const sidebarConfig = sidebar({
+  "/": ["", "syllabus", "assignments/"],
+  "/assignments/": "structure",
+});
 
 export default defineUserConfig({
   lang: "en-US",
@@ -21,7 +26,7 @@ export default defineUserConfig({
     // README.md is used for the index page of a directory.
     navbar: ["/", "/assignments/"],
 
-    sidebar: ["/", "/syllabus", "/assignments/"],
+    sidebar: sidebarConfig,
 
     // control page meta information shown
     // see https://theme-hope.vuejs.press/guide/feature/meta.html
