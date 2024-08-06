@@ -1,6 +1,0 @@
-{
-  "extends": ["@parcel/config-default"],
-  "transformers": {
-    "*.html": ["@parcel/transformer-posthtml", "parcel-transformer-strip-index-html", "@parcel/transformer-html"]
-  }
-}
