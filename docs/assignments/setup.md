@@ -1,5 +1,6 @@
 ---
 icon: gears
+order: 1
 ---
 
 # Setup
@@ -38,7 +39,11 @@ You now have a copy of the repo, with the `main` branch tracking your private re
 
 ## Installing Coq
 
-The setup I recommend is to use Docker, VS Code, and a container I created for this class. This setup should work well on macOS and Linux; it should also be workable in Windows with WSL, but I don't have much experience with that.
+The setup I recommend is to use Docker, VS Code, and a container I created for this class.
+
+::: details Option 1: VS Code + Docker dev container
+
+ This setup should work well on macOS and Linux; it should also be workable in Windows with WSL, but I don't have much experience with that.
 
 Install [Docker](https://www.docker.com/get-started/)
 
@@ -57,8 +62,11 @@ Container" command on the sys-verif-fa24-proofs repo. This will use Coq from the
 container while still running VS Code natively. You can use the built-in VS Code
 terminal to run `make` to ensure your code compiles.
 
-::: details Install Coq on your own
+:::
 
+If you feel very comfortable setting up your own tools, you can instead install Coq on your own.
+
+::: details Option 2: install Coq on your own
 
 Make sure to get Coq 8.19.2 for compatibility (Coq 8.20 is also likely to work when it's released).
 

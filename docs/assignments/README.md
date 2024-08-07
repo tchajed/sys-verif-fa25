@@ -1,5 +1,10 @@
 ---
 icon: file-lines
+index: false
+dir:
+  collapsible: true
+  expanded: true
+  link: true
 ---
 
 # Assignments

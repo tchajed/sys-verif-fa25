@@ -8,7 +8,7 @@ import { viteBundler } from "@vuepress/bundler-vite";
 //
 // README.md is used for the index page of a directory.
 
-const navbarConfig = navbar(["/", "/assignments/"]);
+const navbarConfig = navbar(["/", "/assignments/", "/notes/"]);
 const sidebarConfig = sidebar({
   "/": [
     "",
@@ -18,15 +18,12 @@ const sidebarConfig = sidebar({
       icon: "file-lines",
       prefix: "assignments/",
       link: "/assignments/",
-      children: [
-        "setup",
-        "assignment1",
-        "assignment2",
-        "assignment3",
-        "project",
-      ],
+      children: "structure",
     },
+    "notes/",
   ],
+  "/notes/": "structure",
+  "/assignments/": "structure",
 });
 
 export default defineUserConfig({
@@ -43,6 +40,7 @@ export default defineUserConfig({
   theme: hopeTheme({
     navbar: navbarConfig,
     repo: "https://github.com/tchajed/sys-verif-fa24-proofs",
+    headerDepth: 2,
     sidebar: sidebarConfig,
 
     // control page meta information shown

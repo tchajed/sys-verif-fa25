@@ -1,6 +1,8 @@
 ---
-order: 3
+order: 4
 shortTitle: "Assignment 3: Separation Logic"
+# not released yet
+index: false
 ---
 
 # Assignment 3: Separation Logic theory

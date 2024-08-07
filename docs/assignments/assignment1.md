@@ -1,5 +1,5 @@
 ---
-order: 1
+order: 2
 shortTitle: "Assignment 1: Coq"
 ---
 
