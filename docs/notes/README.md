@@ -8,3 +8,5 @@ dir:
 # Lecture notes
 
 Notes for each lecture's material.
+
+<Catalog base="/notes" hideHeading="true" />
