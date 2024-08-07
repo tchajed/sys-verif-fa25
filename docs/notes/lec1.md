@@ -51,9 +51,7 @@ We'll focus in this class on understanding how to use verification, but before w
 
 ::: details Fun stories where verification wouldn't have mattered
 
-Here are four stories, all coincidentally from game development, where verification would not have been the solution.
-
-Testing your assumptions: (I can't find the original story so some details may be wrong.) An early version of Warcraft had issues with Windows Error Reports that didn't make sense, like crashes on lines of code that didn't even read from memory. Eventually they started to suspect these were from machines that were overclocked, so they would do a big memory copy in the background and check that it succeeded; if it failed, they ignored errors from that machine.
+Here are three stories, all coincidentally from game development, where verification would not have been the solution.
 
 Changing the spec: Starcraft 1 was plagued by path-finding problems during development. The algorithm was okay, but in some cases just didn't work. One of those was harvesting units, which would repeatedly go between your base and some minerals like crystals or vespene gas. While the player was busy doing something else, the harvesters would jam up and be unable to continue harvesting, holding up all builds and being extremely frustrating. The solution implemented was to have harvesting units ignore collisions if they were on their way to get minerals or carrying back minerals; they just changed the spec to workaround a difficult implementation. ([source](https://www.codeofhonor.com/blog/the-starcraft-path-finding-hack))
 
@@ -62,6 +60,8 @@ Bugs are sometimes okay: The first release of The Elder Scrolls V: Skyrim was fu
 Bugs are sometimes not okay: The first release of Cyberpunk 2077 was also full of bugs. These were often performance bugs and crashes; we could write a specification that the game never crashed, but performance would be quite challenging. In this case the bugs were bad enough on Xbox One and PlayStation 4 that CD Project Red had to issue refunds ([source](https://www.polygon.com/2021/4/22/22398340/cd-projekt-red-april-2021-investors-call-refund-details-costs)). _However_, these bugs were basically fixed in "patch 2.0" and the game is highly regarded after this fix. The reason for these bugs was basically schedule pressure, and verification as it currently stands is unlikely to let you ship sooner, only with better guarantees that you won't have bugs later.
 
 :::
+
+Verification matters when you have a specification, and bugs are consequential.
 
 ## Example: fast exponentiation
 
@@ -105,3 +105,21 @@ $$
   \forall b, n\ldotp 0 \leq n \to \texttt{FastExp}(b, n) = \texttt{SlowExp}(b, n).
 $$
 The equation looks pretty but it's still not totally precise! Why can we treat `FastExp` (and `SlowExp` for that matter) as a function? What if it doesn't terminate, or prints to the screen? What about a similar function that takes a pointer as an input? We'll solve these issues eventually.
+
+If we can formalize the statement above, and _prove_ it, we gain a lot of confidence in `FastExp`'s correctness: it's as good as using `SlowExp`, with the advantage of being faster (due to a separate analysis; performance isn't part of the verification guarantees).
+
+## Outline of this class
+
+- **Coq foundations: functional programs**
+  - Coq: mechanized theorem proving
+  - Functional programming
+  - Specifying and verifying functional programs
+- **Separation logic: Go programs**
+  - GooseLang: Modeling Go programs
+  - Separation logic for heap reasoning
+  - Verifying Go programs
+  - Sequential data structure case studies
+- **Concurrency**
+  - Ghost state
+  - Separation logic specs for concurrency primitives
+  - Concurrent data structure case studies
