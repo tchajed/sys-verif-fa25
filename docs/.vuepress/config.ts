@@ -18,7 +18,13 @@ const sidebarConfig = sidebar({
       icon: "file-lines",
       prefix: "assignments/",
       link: "/assignments/",
-      children: ["setup", "hw1-coq", "hw2-go", "hw3-sep-logic", "project"],
+      children: [
+        "setup",
+        "assignment1",
+        "assignment2",
+        "assignment3",
+        "project",
+      ],
     },
   ],
 });

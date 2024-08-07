@@ -1,6 +1,6 @@
 ---
 order: 1
-shortTitle: "HW1: Coq"
+shortTitle: "Assignment 1: Coq"
 ---
 
 # Assignment 1: Coq

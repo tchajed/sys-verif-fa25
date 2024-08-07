@@ -1,6 +1,6 @@
 ---
 order: 3
-shortTitle: "HW3: Separation Logic"
+shortTitle: "Assignment 3: Separation Logic"
 ---
 
 # Assignment 3: Separation Logic theory
