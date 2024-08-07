@@ -57,6 +57,7 @@ export default defineUserConfig({
       mdEnhance: {
         katex: true,
         tasklist: true,
+        include: true,
       },
     },
     logo: "/logo.png",
