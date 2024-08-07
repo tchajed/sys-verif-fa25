@@ -1,3 +1,6 @@
+---
+category: lecture
+---
 # Lecture 1: What is verification?
 
 ::: important Main idea

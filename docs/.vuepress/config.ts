@@ -43,14 +43,6 @@ export default defineUserConfig({
     headerDepth: 2,
     sidebar: sidebarConfig,
 
-    // control page meta information shown
-    // see https://theme-hope.vuejs.press/guide/feature/meta.html
-    contributors: false,
-    editLink: false,
-    pageInfo: ["Date"],
-    toc: true, // disabled on home page
-    print: false,
-
     plugins: {
       mdEnhance: {
         katex: true,
@@ -58,6 +50,17 @@ export default defineUserConfig({
         include: true,
       },
     },
+
+    // control page meta information shown
+    // see https://theme-hope.vuejs.press/guide/feature/meta.html
+    contributors: false,
+    editLink: false, // web repo is private
+    pageInfo: ["Date", "Category", "Tag"],
+    toc: true, // disabled on home page
+    print: false,
+
+    author: "Tej Chajed",
+    license: "CC0-1.0",
     logo: "/logo.png",
     favicon: "/favicon.png",
     iconAssets: "fontawesome",
