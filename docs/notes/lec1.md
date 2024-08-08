@@ -4,7 +4,7 @@ category: lecture
 # Lecture 1: What is verification?
 
 ::: important Main idea
-Program verification consists of some _code_ we want to run, a _specification_ that says what the code "should" do, and a _proof_ that shows the code follows the specification.
+Program verification consists of some _code_ we want to run, a _specification_ that says what the code should do, and a _proof_ that shows the code follows the specification.
 :::
 
 In this class, code will be a Go program and proofs will be written by a human and checked by a machine. Verification encompasses other approaches, though.
