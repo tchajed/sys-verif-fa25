@@ -17,3 +17,5 @@ VuePress
 shiki
 config.ts
 frontmatter
+corepack
+Node.js
