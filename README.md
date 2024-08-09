@@ -13,7 +13,7 @@ Tech stack:
 - pnpm
 - [VuePress 2](https://vuepress.vuejs.org/)
   - Using the [VuePress Hope theme](https://theme-hope.vuejs.press/) (rather than the default)
-  - Pretty much the whole setup is at [config.ts](docs/.vuepress/config.ts)
+  - Pretty much the whole setup is in [config.ts](docs/.vuepress/config.ts). YAML frontmatter in individual pages takes care of some aspects.
 - Build and deploy via GitHub Pages [workflow](./.github/workflows/deploy.yml)
 
 ## Coq syntax highlighting
