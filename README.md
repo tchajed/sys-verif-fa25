@@ -15,3 +15,11 @@ Tech stack:
   - Using the [VuePress Hope theme](https://theme-hope.vuejs.press/) (rather than the default)
   - Pretty much the whole setup is at [config.ts](docs/.vuepress/config.ts)
 - Build and deploy via GitHub Pages [workflow](./.github/workflows/deploy.yml)
+
+## Coq syntax highlighting
+
+Highlighting uses shiki, which doesn't have Coq in its default bundle of languages. We use the grammar from VSCoq, which can be updated with this:
+
+```sh
+wget -O docs/assets/coq.tmLanguage.json 'https://raw.githubusercontent.com/coq-community/vscoq/main/client/syntax/coq.tmLanguage.json'
+```

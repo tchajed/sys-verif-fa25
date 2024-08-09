@@ -1,6 +1,8 @@
 import { hopeTheme, navbar, sidebar } from "vuepress-theme-hope";
 import { defineUserConfig } from "vuepress";
 import { viteBundler } from "@vuepress/bundler-vite";
+import { ShikiLang } from "@vuepress/plugin-shiki";
+import * as fs from "fs";
 
 // Vue Router picks up configuration for paths in the navbar and sidebar from
 // the YAML frontmatter, for example the 'title' (or first h1), 'shortTitle',
@@ -25,6 +27,22 @@ const sidebarConfig = sidebar({
   "/notes/": "structure",
   "/assignments/": "structure",
 });
+
+// Load the Coq grammar manually since shiki doesn't have it. The grammar
+// definition comes from VS Coq.
+
+const coqGrammar: any = JSON.parse(
+  // TODO: is there a way to make this path relative to the vuepress or docs
+  // directories?
+  fs.readFileSync("docs/assets/coq.tmLanguage.json", "utf-8")
+);
+
+const coqLang: ShikiLang = {
+  ...coqGrammar,
+  // need to override the capitalized name "Coq" in the grammar (even using Coq
+  // as the language in a markdown block doesn't work)
+  name: "coq",
+};
 
 export default defineUserConfig({
   lang: "en-US",
@@ -54,7 +72,7 @@ export default defineUserConfig({
         include: true,
       },
       shiki: {
-        langs: ["go", "bash"],
+        langs: [coqLang, "go", "bash"],
         themes: {
           light: "one-light",
           dark: "one-dark-pro",
