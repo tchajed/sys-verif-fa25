@@ -54,6 +54,7 @@ export default defineUserConfig({
         include: true,
       },
       shiki: {
+        langs: ["ocaml", "go", "bash"],
         themes: {
           light: "one-light",
           dark: "one-dark-pro",

@@ -24,7 +24,7 @@ delete and re-create it.
 
 Create a new private repo called sys-verif-fa24-proofs (without any content). (As a student, you can get unlimited private repos with the [student pack](https://education.github.com/pack/join).) Follow these instructions to set it up (fill in your username in the first step):
 
-```sh
+```bash
 GH_USER=<username>
 git clone https://github.com/tchajed/sys-verif-fa24-proofs
 cd sys-verif-fa24-proofs
