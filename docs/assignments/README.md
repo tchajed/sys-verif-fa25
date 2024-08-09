@@ -1,5 +1,5 @@
 ---
-icon: file-lines
+icon: "list-check"
 index: false
 dir:
   collapsible: true

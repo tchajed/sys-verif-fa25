@@ -1,7 +1,7 @@
 ---
 title: "CS 839: Systems Verification"
 shortTitle: "Home"
-icon: "house"
+icon: "circle-check"
 toc: false
 ---
 

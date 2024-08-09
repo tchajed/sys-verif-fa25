@@ -1,6 +1,7 @@
 ---
 order: 2
 shortTitle: "Assignment 1: Coq"
+icon: file-lines
 ---
 
 # Assignment 1: Coq

@@ -15,7 +15,7 @@ const sidebarConfig = sidebar({
     "syllabus",
     {
       text: "Assignments",
-      icon: "file-lines",
+      icon: "list-check",
       prefix: "assignments/",
       link: "/assignments/",
       children: "structure",
@@ -52,6 +52,12 @@ export default defineUserConfig({
         katex: true,
         tasklist: true,
         include: true,
+      },
+      shiki: {
+        themes: {
+          light: "one-light",
+          dark: "one-dark-pro",
+        },
       },
     },
 
