@@ -85,8 +85,8 @@ export default defineUserConfig({
     contributors: false,
     editLink: false, // web repo is private
     pageInfo: ["Date", "Category", "Tag"],
-    toc: true, // disabled on home page
-    print: false,
+    toc: true, // usually desired, but disabled on home page
+    print: false, // no need to offer print button
 
     author: "Tej Chajed",
     license: "CC0-1.0",
