@@ -59,6 +59,8 @@ export default defineUserConfig({
           light: "one-light",
           dark: "one-dark-pro",
         },
+        highlightLines: true,
+        notationHighlight: true,
       },
     },
 
