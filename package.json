@@ -14,7 +14,7 @@
     "@vuepress/bundler-vite": "2.0.0-rc.14",
     "@vuepress/plugin-shiki": "2.0.0-rc.40",
     "katex": "^0.16.11",
-    "vue": "^3.4.37",
+    "vue": "^3.4.38",
     "vuepress": "2.0.0-rc.14",
     "vuepress-theme-hope": "2.0.0-rc.52"
   },
