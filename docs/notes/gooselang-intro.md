@@ -1,9 +1,10 @@
 ---
 order: -1
 category: lecture
+tags: [draft]
 ---
 
-# Verifying Go code
+# Draft: Verifying Go code
 
 ::: warning
 This note is a draft.

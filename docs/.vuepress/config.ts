@@ -60,7 +60,8 @@ export default defineUserConfig({
           dark: "one-dark-pro",
         },
         highlightLines: true,
-        notationHighlight: true,
+        notationDiff: true,
+        // notationHighlight: true,
       },
     },
 
