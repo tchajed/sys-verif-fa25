@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "@vuepress/bundler-vite": "2.0.0-rc.14",
-    "@vuepress/plugin-shiki": "2.0.0-rc.40",
+    "@vuepress/plugin-shiki": "2.0.0-rc.41",
     "katex": "^0.16.11",
     "vue": "^3.4.38",
     "vuepress": "2.0.0-rc.14",
