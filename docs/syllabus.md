@@ -4,6 +4,16 @@ icon: 'circle-exclamation'
 
 # Syllabus
 
+This class is called _systems verification_. The core idea is understanding how to write a mathematical proof that a program is correct, a process called (program) _verification_. The class is called "_systems_ verification" because we will focus on techniques applicable to low-level systems software with features like pointers and concurrency (in some future version of this class I hope to also cover distributed systems, but the techniques aren't quite there yet).
+
+The class is divided into three sections:
+
+**Functional programs**: We'll start by learning how to write and verify _functional_ programs, a style of programming which emphasizes functions and where we won't have complications like modifying variables. This is also where we'll introduce the Coq proof assistant, which we'll use to do the proofs in this class.
+
+**Imperative programs**: Next, we'll introduce the techniques to reason about imperative programs, which can modify heap-allocated variables. We'll also increase the realism by switching to reasoning about programs written in Go. The theoretical tool that allows us to reason about the heap is separation logic.
+
+**Concurrent programs**: Finally, we'll introduce techniques to reason about concurrency. It turns out separation logic will help once again with this challenge.
+
 ## Learning objectives
 
 By the end of this class, you should be able to:
@@ -14,11 +24,11 @@ By the end of this class, you should be able to:
 
 ## Prerequisites
 
-The two main requirements are "mathematical maturity" and "programming experience." Mathematical maturity means you're comfortable with the precision of using and learning new math, which is required to understand program proofs. Programming experience is needed since the proofs will be programs written in the Coq proof assistant, and also to appreciate the value of correct software.
+The two main requirements are "mathematical maturity" and "programming experience." Mathematical maturity means you're comfortable with the precision of using and learning new math, which is required to understand program proofs. Programming experience is needed since the proofs will be programs written in the Coq proof assistant (which you'll need to be able to learn efficiently), and also to appreciate the value of correct software.
 
-You do not need background using Coq.
+You do not need to have any experience with the Coq proof assistant.
 
-You do not need to have used Go before, even though we will verify code written in it; you should be able to get up-to-speed in reading Go quickly.
+You do not need to have used Go before. We will verify code written in Go, but you won't be writing or modifying it (except optionally as part of the project). You should be able to get up-to-speed in reading Go quickly if you have some familiarity with C syntax.
 
 ## Assignments
 
