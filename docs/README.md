@@ -17,4 +17,7 @@ prove the correctness of programs with machine-checked proofs.
 :::
 
 ## Calendar
+
+The schedule is still under construction.
+
 <!-- @include: ./calendar.snippet.md -->
