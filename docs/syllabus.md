@@ -4,7 +4,7 @@ icon: 'circle-exclamation'
 
 # Syllabus
 
-This class is called _systems verification_. The core idea is understanding how to write a mathematical proof that a program is correct, a process called (program) _verification_. The class is called "_systems_ verification" because we will focus on techniques applicable to low-level systems software with features like pointers and concurrency (in some future version of this class I hope to also cover distributed systems, but the techniques aren't quite there yet).
+This class is an introduction to _systems verification_. The core idea is understanding how to write a mathematical proof that a program is correct, a process called (program) _verification_. The class is called "_systems_ verification" because we will focus on techniques applicable to low-level systems software with features like pointers and concurrency (in some future version of this class I hope to also cover distributed systems, but the techniques aren't quite there yet).
 
 The class is divided into three sections:
 

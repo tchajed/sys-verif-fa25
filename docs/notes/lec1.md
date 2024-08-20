@@ -7,11 +7,11 @@ category: lecture
 Program verification consists of some _code_ we want to run, a _specification_ that says what the code should do, and a _proof_ that shows the code follows the specification.
 :::
 
-In this class, code will be a Go program and proofs will be written by a human and checked by a machine. Verification encompasses other approaches, though.
+Program verification is a process of proving that a program does what it's supposed to do. In this class, we'll be interested in Go programs (including concurrency), the proofs will be written by a developer (that is, you) and checked by a machine for high assurance that they are correct. We'll talk more about what the proofs actually show but basically it will be "functional correctness": the program does what it's supposed to, and it doesn't read out of bounds or raise an exception.
 
-Verification is different from other software engineering approaches in having a _soundness guarantee_: we can clearly articulate what the process guarantees, subject to some assumptions.
+In general to verify a program we need a _specification_ that says what the should do which we intend to prove about the code. In this class, code will be a Go program and proofs are human-written and machine-checked. Verification encompasses other approaches, though; we can have very little proof (with simpler specs and highly automated checking), no code (e.g., synthesizing from the specification), or others in between.
 
-In this class you'll learn to read and write specifications, carry out proofs, and articulate the resulting guarantees.
+Verification is different from other software engineering approaches that also aim to make correct software in that it has a _soundness guarantee_: we can clearly articulate what the process guarantees, subject to some assumptions. Compare this with, for example, testing, which has been empirically shown to improve correctness but doesn't guarantee anything about lack of bugs or even fewer bugs. One of the things you'll learn in this class is how to articulate what the guarantees of verification are.
 
 ## Motivation: important software still has bugs
 

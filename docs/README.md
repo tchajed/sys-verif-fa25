@@ -5,8 +5,8 @@ icon: "circle-check"
 toc: false
 ---
 
-In this class, you'll get an introduction to systems verification: how to
-mathematically prove the correctness of programs with machine-checked proofs.
+This class is an introduction to systems verification: how to mathematically
+prove the correctness of programs with machine-checked proofs.
 
 ::: info Course info
 **Instructor**: Tej Chajed &lsaquo;<chajed@wisc.edu>&rsaquo; \
