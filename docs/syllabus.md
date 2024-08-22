@@ -18,8 +18,8 @@ The class is divided into three sections:
 
 - **Institution name:** University of Wisconsin-Madison
 - **Course number**: CS 839-007: Systems Verification
-- **Credits**: 3
-- **Requisites**: no official requirements; mathematical maturity and programming experience expected
+- **Credits**: 3 credit hours
+- **Requisites**: mathematical maturity and programming experience (see [below](#prerequisites))
 - **Meeting time and location**: Monday/Wednesday 9:30-10:45am, Engineering Hall 2349
 - **Instruction modality**: in-person
 - **Instructor contact info**: \

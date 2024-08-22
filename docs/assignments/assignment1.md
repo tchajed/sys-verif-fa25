@@ -6,14 +6,17 @@ icon: file-lines
 
 # Assignment 1: Coq
 
-The goal of this assignment is to get you some familiarity with proving theorems in Coq. You'll also be getting started with verification by proving properties about functional programs - eventually we'll move on to reasoning about imperative programs.
+This assignment has two purposes:
+
+1. Learn how to use Coq to prove theorems. This is a skill you'll build on and use to verify programs in the rest of the class, so it's important you put enough practice in now.
+2. Practice verifying functional programs. The nice thing about this domain is that we can start with small programs and specs. Functional programs themselves are often used in the _specifications_ of more complex imperative programs, so it's also a way to practice the functional style of programming.
 
 ## Part 0: setup
 
 The [main assignments page](../) has instructions on getting the sys-verif-fa24-proofs repo and Coq set up. Follow those first.
 
 ::: warning
-Getting the software set up can be difficult, so do it early and ask for help quickly if you get stuck.
+You might run into unexpected difficulties with installing the software, so do it early and ask for help quickly if you get stuck. It isn't a goal of the class to teach you to install software, but it is necessary to make progress on anything else.
 :::
 
 ## Part 1: Basics from Software Foundations
