@@ -19,9 +19,6 @@ Instead, you can either clone and work locally, or follow the below instructions
 
 ::: details Creating a private GitHub repo for your work
 
-If you already accidentally forked the repo, don't panic, you should be able to
-delete and re-create it.
-
 Create a new private repo called sys-verif-fa24-proofs (without any content). (As a student, you can get unlimited private repos with the [student pack](https://education.github.com/pack/join).) Follow these instructions to set it up (fill in your username in the first step):
 
 ```bash
@@ -34,6 +31,8 @@ git push --set-upstream origin main
 ```
 
 You now have a copy of the repo, with the `main` branch tracking your private repo, and with a remote `upstream` pointing to the class repo. You can now do something like `git fetch upstream` and `git merge upstream/main` to pull in new changes.
+
+You don't actually have to call your repo sys-verif-fa24-proofs, but that's how I'll refer to it. If you accidentally forked the course repo, don't panic; you can just delete the fork and re-create it.
 
 :::
 
@@ -57,10 +56,7 @@ Install the [Dev Containers extension](https://marketplace.visualstudio.com/item
 
 The most important VS Code feature to learn is the Command Palette, accessed from View > Command Palette. The shortcut is worth learning (ctrl-shift-p, cmd-shift-p on macOS). The command palette gives search access to most editor functionality and shows keyboard shortcuts if you want to learn them.
 
-Once you have the dev container extension, use the "Dev Containers: Reopen in
-Container" command on the sys-verif-fa24-proofs repo. This will use Coq from the
-container while still running VS Code natively. You can use the built-in VS Code
-terminal to run `make` to ensure your code compiles.
+Once you have the dev container extension, use the "Dev Containers: Reopen in Container" command on the sys-verif-fa24-proofs repo. This will use Coq from the container while still running VS Code natively. You can use the built-in VS Code terminal to run `make` to ensure your code compiles.
 
 :::
 
@@ -75,5 +71,7 @@ You will need an IDE for Coq:
 - I'd recommend VS Code with the VSCoq extension.
 - If you use Emacs, then [Proof General](https://proofgeneral.github.io/) is excellent (this is what I personally use, with Doom Emacs and vim keybindings).
 - If you use Vim or Neovim, then [Coqtail](https://github.com/whonore/Coqtail) is also decent.
+
+If you don't use VS Code, you'll need to follow the [Iris editor setup instructions](https://gitlab.mpi-sws.org/iris/iris/-/blob/master/docs/editor.md?ref_type=heads) to be able to input Unicode characters easily. For VS code that setup is already provided by the assignment repo.
 
 :::

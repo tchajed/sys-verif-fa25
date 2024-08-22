@@ -13,7 +13,7 @@ This assignment has two purposes:
 
 ## Part 0: setup
 
-The [main assignments page](../) has instructions on getting the sys-verif-fa24-proofs repo and Coq set up. Follow those first.
+The [assignment setup page](./setup) has instructions on getting the sys-verif-fa24-proofs repo and Coq set up. Follow those first.
 
 ::: warning
 You might run into unexpected difficulties with installing the software, so do it early and ask for help quickly if you get stuck. It isn't a goal of the class to teach you to install software, but it is necessary to make progress on anything else.
