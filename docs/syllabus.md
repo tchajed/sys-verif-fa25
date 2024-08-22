@@ -14,13 +14,31 @@ The class is divided into three sections:
 
 **Concurrent programs**: Finally, we'll introduce techniques to reason about concurrency. It turns out separation logic will help once again with this challenge.
 
-## Learning objectives
+## General identifying information
+
+- **Institution name:** University of Wisconsin-Madison
+- **Course number**: CS 839-007: Systems Verification
+- **Credits**: 3
+- **Requisites**: no official requirements; mathematical maturity and programming experience expected
+- **Meeting time and location**: Monday/Wednesday 9:30-10:45am, Engineering Hall 2349
+- **Instruction modality**: in-person
+- **Instructor contact info**: \
+  Prof. Tej Chajed &lsaquo;<chajed@wisc.edu>&rsaquo; \
+  office hours: Monday/Wednesday 2-3pm in CS 7361
+
+## Course learning outcomes
 
 By the end of this class, you should be able to:
 
-- Articulate the guarantees of formal verification
-- Verify programs using separation logic
-- Prove theorems in the Coq proof assistant
+1. Prove theorems in the Coq proof assistant
+2. Verify imperative programs using separation logic
+3. Verify (small) concurrent programs
+4. Articulate the guarantees of formal verification
+
+## Expected workload
+
+This class is 3 credit hours. That means you can expect to spend 3 hours in
+lecture and 6 hours outside of lecture each week.
 
 ## Prerequisites
 

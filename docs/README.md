@@ -11,7 +11,7 @@ prove the correctness of programs with machine-checked proofs.
 ::: info Course info
 **Instructor**: Tej Chajed &lsaquo;<chajed@wisc.edu>&rsaquo; \
 **Office**: CS 7361 \
-**Office hours**: schedule by email \
+**Office hours**: Mon/Wed 2-3pm \
 **Lecture**: Mon/Wed 9:30-10:45am \
 **Classroom**: Engineering Hall 2349
 :::
