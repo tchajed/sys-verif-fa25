@@ -9,7 +9,7 @@ icon: file-lines
 This assignment has two purposes:
 
 1. Learn how to use Coq to prove theorems. This is a skill you'll build on and use to verify programs in the rest of the class, so it's important you put enough practice in now.
-2. Practice verifying functional programs. This is a warm up to imperative and concurrent programs as well as useful on its own, since functional programs are often used in the _specification_ of imperative programs.
+2. Practice with functional programs. This is a warm up to imperative and concurrent programs as well as useful on its own, since functional programs are often used in the _specification_ of imperative programs.
 
 ## Submitting
 

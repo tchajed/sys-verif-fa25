@@ -1,8 +1,7 @@
 ---
 order: 3
-shortTitle: "Assignment 2: Verifying Go"
-# not released yet
-index: false
+icon: file-lines
+shortTitle: "Assignment 2: Go programs"
 ---
 
 # Assignment 2: Verifying Go programs

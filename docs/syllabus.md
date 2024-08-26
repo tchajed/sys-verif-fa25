@@ -55,9 +55,31 @@ You do not need to have used Go before. We will verify code written in Go, but y
 
 There will be two programming assignments in Coq, one written theory assignment, and a final project in Coq. See the [assignments page](./assignments/) for details.
 
-Grading: TBD
+Grading:
+
+- Assignment 1: 20%
+- Assignment 2: 25%
+- Assignment 3 (theory): 15%
+- Final project: 40%
+
+Here's a grading scale to give you a rough idea, but cutoffs may be lower if the assigned points are unexpectedly low:
+
+| grade | percentage |
+| ----: | ---------- |
+|     A | $\geq$ 93  |
+|    AB | $\geq$ 86  |
+|     B | $\geq$ 80  |
+|    BC | $\geq$ 74  |
+
+The idea behind grading is that if you make an earnest attempt at every assignment, and if you get stuck you're able to explain what you tried, you should get at least an AB.
 
 Hand-in: submit to Canvas. See more details in the [assignment setup](./assignments/setup) page.
+
+## Collaboration
+
+You can work on assignments and the final project in groups of up to two. Both of you should submit, but it's okay if the submissions are identical. Please clearly state who you worked with by putting your partner's name in a comment at the top of each file you modify.
+
+The first assignment is crucial to learning Coq, so I would suggest that even if you have a partner you type out the solutions independently so you both get experience using Coq as an interactive tool.
 
 ## Late policy
 
