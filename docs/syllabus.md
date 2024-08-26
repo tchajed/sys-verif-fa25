@@ -35,14 +35,17 @@ By the end of this class, you should be able to:
 3. Verify (small) concurrent programs
 4. Articulate the guarantees of formal verification
 
+Hopefully you also will have had fun.
+
 ## Expected workload
 
-This class is 3 credit hours. That means you can expect to spend 3 hours in
-lecture and 6 hours outside of lecture each week.
+This class is 3 credit hours. That means you can expect to spend 3 hours in lecture and 6 hours outside of lecture each week.
+
+You'll spend most of the time on this class outside of lecture doing the assignments. There aren't many due dates, but you should still be putting in some time each week so you make steady progress and have time to ask questions, think about the material, re-read lecture notes, and get unstuck. If you start an assignment a day or two before it's due you're going to have a bad time.
 
 ## Prerequisites
 
-The two main requirements are "mathematical maturity" and "programming experience." Mathematical maturity means you're comfortable with the precision of using and learning new math, which is required to understand program proofs. Programming experience is needed since the proofs will be programs written in the Coq proof assistant (which you'll need to be able to learn efficiently), and also to appreciate the value of correct software.
+The two main requirements are "mathematical maturity" and "programming experience." Mathematical maturity means you're comfortable with the precision of using and learning new math, which is required to understand program proofs. Programming experience is needed since the proofs will be programs written in the Coq proof assistant (which you'll need to be able to learn efficiently).
 
 You do not need to have any experience with the Coq proof assistant.
 
@@ -50,11 +53,11 @@ You do not need to have used Go before. We will verify code written in Go, but y
 
 ## Assignments
 
-There will be two programming exercises in Coq, one written theory assignment, and a final project in Coq. See the [assignments page](./assignments/) for details.
+There will be two programming assignments in Coq, one written theory assignment, and a final project in Coq. See the [assignments page](./assignments/) for details.
 
 Grading: TBD
 
-Hand-in: submit to Canvas
+Hand-in: submit to Canvas. See more details in the [assignment setup](./assignments/setup) page.
 
 ## Late policy
 
