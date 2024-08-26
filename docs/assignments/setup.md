@@ -7,7 +7,7 @@ order: 1
 
 ## Assignment repo
 
-The programming assignments will be distributed in [sys-verif-fa24-proofs](https://github.com/tchajed/sys-verif-fa24-proofs).
+The programming assignments will be distributed in [sys-verif-fa24-proofs](https://github.com/tchajed/sys-verif-fa24-proofs). You'll need it as a git repository so you can get updates with `git pull`. (I assume you're somewhat familiar with git, but please ask for help if this assumption proves wrong.)
 
 ::: danger Clone, don't fork
 
@@ -38,7 +38,7 @@ You don't actually have to call your repo sys-verif-fa24-proofs, but that's how 
 
 ## Installing Coq
 
-The setup I recommend is to use Docker, VS Code, and a container I created for this class.
+The setup I recommend is to use Docker, VS Code, and a container I created for this class. To test your setup is working correctly, run `make` in the sys-verif-fa24-proofs repo; this should start compiling a bunch of things, and will take a few minutes the first time you run it.
 
 ::: details Option 1: VS Code + Docker dev container
 
@@ -75,3 +75,11 @@ You will need an IDE for Coq:
 If you don't use VS Code, you'll need to follow the [Iris editor setup instructions](https://gitlab.mpi-sws.org/iris/iris/-/blob/master/docs/editor.md?ref_type=heads) to be able to input Unicode characters easily. For VS code that setup is already provided by the assignment repo.
 
 :::
+
+## Submitting assignments
+
+We'll use the course [Canvas page](https://canvas.wisc.edu/courses/425519) for submitting assignments (and not much else).
+
+You'll do all the programming in the sys-verif-fa24-proofs repo. To submit your code, run the script `./etc/prepare-submit` which will package your code into `hw.tar.gz`, and submit that file to the assignment in Canvas. I'm having you submit all the code in the repo (not just for the relevant assignment) to simplify the setup for you.
+
+For all assignments, you're **strongly encouraged** to submit early with partial progress. There aren't many assignments, but you should still be doing some work every week, and this will give me an idea of how far along you are in between due dates. If you want any specific feedback, please add a comment on Canvas so I take a look quickly and respond.
