@@ -58,8 +58,8 @@ There will be two programming assignments in Coq, one written theory assignment,
 Grading:
 
 - Assignment 1: 20%
-- Assignment 2: 25%
-- Assignment 3 (theory): 15%
+- Assignment 2 (theory): 15%
+- Assignment 3: 25%
 - Final project: 40%
 
 Here's a grading scale to give you a rough idea, but cutoffs may be lower if the assigned points are unexpectedly low:

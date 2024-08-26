@@ -18,6 +18,6 @@ prove the correctness of programs with machine-checked proofs.
 
 ## Calendar
 
-The schedule is still under construction.
+The schedule is still under construction. Consider anything more than ~2 weeks out to be subject to changes.
 
 <!-- @include: ./calendar.snippet.md -->

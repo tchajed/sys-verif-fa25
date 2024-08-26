@@ -1,6 +1,6 @@
 ---
 order: 2
-shortTitle: "Assignment 1: Coq"
+shortTitle: "Assignment 1"
 icon: file-lines
 ---
 
