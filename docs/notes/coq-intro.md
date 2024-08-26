@@ -1,5 +1,6 @@
 ---
 category: lecture
+order: 2
 ---
 
 # Lecture 2: Introduction to Coq
@@ -77,4 +78,3 @@ Proof.
   reflexivity.
 Qed.
 ```
-

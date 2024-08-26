@@ -1,5 +1,6 @@
 ---
 category: lecture
+order: 1
 ---
 # Lecture 1: What is verification?
 
@@ -110,6 +111,60 @@ $$
 The equation looks pretty but it's still not totally precise! Why can we treat `FastExp` (and `SlowExp` for that matter) as a function? What if it doesn't terminate, or prints to the screen? What about a similar function that takes a pointer as an input? We'll solve these issues eventually.
 
 If we can formalize the statement above, and _prove_ it, we gain a lot of confidence in `FastExp`'s correctness: it's as good as using `SlowExp`, with the advantage of being faster (due to a separate analysis; performance isn't part of the verification guarantees).
+
+## Example: pointer aliasing
+
+Quick: does the following function modify `*y`?
+
+```go
+func ModifyOne(x *int, y *int) int {
+  *x = 1
+  // what is *y?
+}
+```
+
+The answer is that it depends!  When reasoning about imperative programs with pointers, a key challenge is _pointer aliasing_: It's possible `x == y` (as pointers) and it does, or they might be distinct. If such a simple one-line function is complicated to think about, how can we handle thinking about larger programs?
+
+The answer in this class will be to use _separation logic_, a powerful way to reason about such programs by capturing when pointers don't alias. If you're familiar with Rust, there's a deep connection with ownership in Rust. Separation logic is a more general way to think about ownership that will allow us to not only know our programs are safe, but also that they do the right thing.
+
+## Example: concurrent read-optimized hash map
+
+Verification really shines with concurrency, where it's hard to even think about correctness without some scaffolding.
+
+In contrast, I think you could re-invent the proof of fast exponentiation's correctness. The strategy (in short, using a loop invariant) is something you could pull out of your math classes. The specific example would take some time, especially because it relies on some perhaps unfamiliar math facts, but you could do it.
+
+Concurrency is much harder. Consider the following concurrent data structure, an example of something we can prove with the techniques of this class, where my proof is about 200 lines of Coq code.
+
+```go
+type HashMap struct {
+  clean *atomicPtr
+  mu    *sync.Mutex
+}
+
+func (h *HashMap) Load(key uint64) (uint64, bool) {
+  clean := h.clean.load()
+  value, ok := clean[key]
+  return value, ok
+}
+
+// Clone the input map by copying all values.
+func mapClone(m map[uint64]uint64) map[uint64]uint64 { ... }
+
+func (h *HashMap) dirty() map[uint64]uint64 {
+  clean := h.clean.load()
+  return mapClone(clean)
+}
+
+func (h *HashMap) Store(key uint64, value uint64) {
+  h.mu.Lock()
+  dirty := h.dirty()
+  dirty[key] = value
+  h.clean.store(dirty)
+  h.mu.Unlock()
+}
+```
+
+Do you see what's going on? I certainly didn't the first time. Basically, the "clean" pointer has the current, logical, read-only value of the map, and it is returned by `h.dirty()`. The mutex `mu` is required to change its value, so that between reading the current value and storing no concurrent changes can happen.
 
 ## Outline of this class
 
