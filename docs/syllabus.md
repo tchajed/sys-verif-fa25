@@ -75,6 +75,17 @@ The idea behind grading is that if you make an earnest attempt at every assignme
 
 Hand-in: submit to Canvas. See more details in the [assignment setup](./assignments/setup) page.
 
+## Office hours
+
+I'll hold office hours twice a week, using my office, CS 7361. Office hours are time I've blocked off for you, so please use them! You can stop by and ask whatever you want, including but not limited to:
+
+1. Help with a Coq programming assignment
+2. A conceptual question about the lecture material
+3. A question about something beyond the lecture
+4. Advice on anything communication related
+
+I encourage all of you to stop by office hours just to introduce yourself and say hi during the first two weeks of the semester.
+
 ## Collaboration
 
 You can work on assignments and the final project in groups of up to two. Both of you should submit, but it's okay if the submissions are identical. Please clearly state who you worked with by putting your partner's name in a comment at the top of each file you modify.
@@ -93,4 +104,15 @@ Students are encouraged to learn about and utilize UW-Madison's mental health se
 
 ## Course communication
 
-If you have any questions, please email me at <chajed@wisc.edu>. If you want to meet, I'm happy to set up a time - send me an email with some suggested times.
+If you have any questions, you can either (a) email me the question at <chajed@wisc.edu>, (b) come to office hours, or (c) (if office hours don't work for you) schedule a time by sending me an email with some suggested times.
+
+## Asking questions
+
+Asking questions about programming problems is a skill, an extremely useful one. We'll talk about how to ask questions at some point in the semester, with some details specific to Coq. At a high level, you should:
+
+1. Include all of your code as an attachment if I need to open it up. You can run `./etc/prepare-submit` and attach `hw.tar.gz`.
+2. Describe what you're trying to do and your understanding of the proof state.
+3. (Particularly for class) Describe what you've tried so far.
+4. Aim to make your question easy to read.
+
+Some questions will be about conceptual challenges and others will be about the mechanics of using Coq. Both are fine to ask, but it's good for you to understand what you're running into. If it's a conceptual difficulty, try to ask something that isn't too specific to the Coq code. If it's a mechanical question about Coq, try to explain your informal proof argument or how you want to manipulate the proof state - for example, if you say you have a theorem that says `∀ n, P n ∨ Q` and in a proof you want to consider the two cases `P 3` and `Q`, then I know this is a purely mechanical question about using Coq and can give you a direct answer.
