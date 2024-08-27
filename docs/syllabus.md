@@ -6,6 +6,12 @@ icon: 'circle-exclamation'
 
 This class is an introduction to _systems verification_. The core idea is understanding how to write a mathematical proof that a program is correct, a process called (program) _verification_. The class is called "_systems_ verification" because we will focus on techniques applicable to low-level systems software with features like pointers and concurrency (in some future version of this class I hope to also cover distributed systems, but the techniques aren't quite there yet).
 
+::: important Read the syllabus!
+
+This syllabus is a bit long. I suggest you skim it at the beginning of class so you know what's covered, and then refer back to it if something comes up.
+
+:::
+
 The class is divided into three sections:
 
 **Functional programs**: We'll start by learning how to write and verify _functional_ programs, a style of programming which emphasizes functions and where we won't have complications like modifying variables. This is also where we'll introduce the Coq proof assistant, which we'll use to do the proofs in this class.
@@ -101,6 +107,10 @@ For the programming exercises and theory assignment, you get 3 "late days" to us
 I realize this class isn't the only thing in your life. If this class ever feels overwhelming on top of whatever else you're responsible for, please let me know and we can work something out. Do this early! I don't want it to stress you out, I want you to learn something.
 
 Students are encouraged to learn about and utilize UW-Madison's mental health services and/or other resources as needed. Visit [uhs.wisc.edu](https://www.uhs.wisc.edu/) or call University Health Services at (608) 265-5600 to learn more.
+
+## Academic policies
+
+See this list of [standard syllabus statements](https://teachlearn.wisc.edu/course-syllabi/#policies) with university policies, including academic integrity, diversity & inclusion, and accommodations for students with disabilities.
 
 ## Course communication
 
