@@ -1,4 +1,5 @@
 ---
+# Auto-generated from literate source. DO NOT EDIT.
 category: lecture
 order: 2
 ---
@@ -78,3 +79,4 @@ Proof.
   reflexivity.
 Qed.
 ```
+

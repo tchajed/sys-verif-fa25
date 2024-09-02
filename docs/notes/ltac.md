@@ -1,8 +1,9 @@
 ---
+# Auto-generated from literate source. DO NOT EDIT.
 order: -2
 ---
-# Ltac reference
 
+# Ltac reference
 
 ```coq
 From sys_verif Require Import options.
@@ -261,7 +262,7 @@ rewrite gmap_lookup_delete_ne.
   k' : Z
   Hne : k ≠ k'
   ============================
-  <[k:=v]> m !! k' = delete k m !! k'
+  k ≠ k'
 ```
 
 ```txt title="goal 2"
@@ -271,7 +272,7 @@ rewrite gmap_lookup_delete_ne.
   k' : Z
   Hne : k ≠ k'
   ============================
-  k ≠ k'
+  <[k:=v]> m !! k' = delete k m !! k'
 ```
 
 ::::
@@ -321,17 +322,17 @@ rewrite -> gmap_lookup_delete_ne by done.
   k' : Z
   Hne : k ≠ k'
   ============================
-  k ≠ k' // [!code --]
+  <[k:=v]> m !! k' = delete k m !! k' // [!code --]
   delete k (<[k:=v]> m) !! k' = delete k m !! k' // [!code ++]
 ```
 ::::
 It's more cumbersome but we can still assert that the side condition is
-  proven with SSReflect's rewrite. The syntax here is `t; [ | t2 ]`, which runs
-  `t2` only on the second goal from `t`. (You can also do `t; [t1 | ]` or even
+  proven with SSReflect's rewrite. The syntax here is `t; [ t1 | ]`, which runs
+  `t2` only on the first goal from `t`. (You can also do `t; [ | t2 ]` or even
   `t; [ t1 |t2 ]`).
 
 ```coq
-rewrite gmap_lookup_delete_ne; [ | done ].
+rewrite gmap_lookup_delete_ne; [ done | ].
 ```
 
 
