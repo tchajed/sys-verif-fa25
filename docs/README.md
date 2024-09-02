@@ -5,7 +5,7 @@ icon: "circle-check"
 toc: false
 ---
 
-This class is an introduction to systems verification: how to mathematically
+This class is a graduate-level class on _systems verification_: how to mathematically
 prove the correctness of programs with machine-checked proofs.
 
 ::: info Course info
