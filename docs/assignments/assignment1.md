@@ -15,6 +15,10 @@ This assignment has two purposes:
 
 See [submitting assignments](./setup#submitting-assignments) on the assignment setup page.
 
+**The assignment is due Tuesday, Oct 1st at 11pm.** However, you are welcome and encouraged to submit early with partial progress to keep me informed of how the class is doing. If you have questions, just mention them briefly in the Canvas submission so I know to look.
+
+I would recommend aiming to finish parts 0 and 1 by Tuesday, Sep 17th to be on track.
+
 ## Part 0: setup
 
 The [assignment setup page](./setup) has instructions on getting the sys-verif-fa24-proofs repo and installing Coq. Follow those first.
