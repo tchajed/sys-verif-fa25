@@ -29,7 +29,7 @@ You might run into unexpected difficulties with installing the software, so do i
 
 ## Part 1: Software Foundations exercises
 
-We'll use the free online textbook Software Foundations to learn the basics of using Coq to prove theorems. You'll read the three early chapters ([Basics](https://softwarefoundations.cis.upenn.edu/lf-current/Basics.html), [Induction](https://softwarefoundations.cis.upenn.edu/lf-current/Induction.html), and [Logic](https://softwarefoundations.cis.upenn.edu/lf-current/Logic.html)) and do (a selection of) the exercises in Coq.
+We'll use the free online textbook Software Foundations to learn the basics of using Coq to prove theorems. You'll read the three early chapters ([Basics](https://softwarefoundations.cis.upenn.edu/lf-current/Basics.html), [Induction](https://softwarefoundations.cis.upenn.edu/lf-current/Induction.html), and [Logic](https://softwarefoundations.cis.upenn.edu/lf-current/Logic.html)) and do (a selection of) the exercises in Coq. I also strongly encourage you to look at the [Polymorphism](https://softwarefoundations.cis.upenn.edu/lf-current/Poly.html) chapter, particularly if you haven't used generics.
 
 Software Foundations is written as a Coq file per chapter, with places for you to fill in your answers. You should do the exercises in the sys-verif-fa24-proofs repo by filling out the missing definitions and proofs in the three chapter files in `src/software_foundations/`, `Basics.v`, `Induction.v`, and `Logic.v`. You should also read the chapters, either online or within VS Code (the HTML version is a nice rendering of the Coq sources).
 
@@ -42,6 +42,9 @@ Most of these chapters is assigned, but there are a few optional parts:
   - You can skip the last section, "Bin to Nat and Back to Bin" (but do the previous one, "Nat to Bin and Back to Nat").
 - Logic:
   - You can skip the last section, "The Logic of Coq". I omit this because it's not terribly relevant to this class but I personally think this part is fascinating.
+- Poly:
+  - This is only assigned as optional reading, but don't let that stop you from doing the exercises.
+  - The last section on Church Numerals is a theoretic topic that isn't relevant to this class.
 
 ::: important
 These chapters have a lot of small, easy exercises to get you practice. If you find anything difficult, come to office hours sooner rather than later to get it sorted out. If they're easy, note that proofs will become more difficult quickly after this.
