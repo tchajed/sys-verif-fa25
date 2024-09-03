@@ -57,7 +57,7 @@ You do not need to have any experience with the Coq proof assistant.
 
 You do not need to have used Go before. We will verify code written in Go, but you won't be writing or modifying it (except optionally as part of the project). You should be able to get up-to-speed in reading Go quickly if you have some familiarity with C syntax.
 
-## Assignments
+## Assignments and grading
 
 There will be two programming assignments in Coq, one written theory assignment, and a final project in Coq. See the [assignments page](./assignments/) for details.
 
