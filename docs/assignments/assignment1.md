@@ -27,7 +27,7 @@ You might run into unexpected difficulties with installing the software, so do i
 
 We'll use the free online textbook Software Foundations to learn the basics of using Coq to prove theorems. You'll read the three early chapters ([Basics](https://softwarefoundations.cis.upenn.edu/lf-current/Basics.html), [Induction](https://softwarefoundations.cis.upenn.edu/lf-current/Induction.html), and [Logic](https://softwarefoundations.cis.upenn.edu/lf-current/Logic.html)) and do (a selection of) the exercises in Coq.
 
-Software Foundations is written as a Coq file per chapter, with places for you to fill in your answers. You should do the exercises in the sys-verif-fa24-proofs repo by filling out the missing definitions and proofs in the three chapter files in `src/software_foundations/`, `Basics.v`, `Induction.v`, and `Logic.v`. You should also read the chapters, either online or within VS Code (the HTML version is just a nice rendering of the Coq sources).
+Software Foundations is written as a Coq file per chapter, with places for you to fill in your answers. You should do the exercises in the sys-verif-fa24-proofs repo by filling out the missing definitions and proofs in the three chapter files in `src/software_foundations/`, `Basics.v`, `Induction.v`, and `Logic.v`. You should also read the chapters, either online or within VS Code (the HTML version is a nice rendering of the Coq sources).
 
 Most of these chapters is assigned, but there are a few optional parts:
 
@@ -45,4 +45,4 @@ These chapters have a lot of small, easy exercises to get you practice. If you f
 
 ## Part 2: verifying functional programs
 
-TODO: provide additional exercises
+This part will be released soon as a separate Coq file with additional exercises.
