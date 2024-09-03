@@ -5,8 +5,12 @@ icon: "circle-check"
 toc: false
 ---
 
-This class is a graduate-level class on _systems verification_: how to mathematically
-prove the correctness of programs with machine-checked proofs.
+This is a graduate-level class on _systems verification_: how to mathematically
+prove the correctness of programs with machine-checked proofs. A core technique
+throughout the class is _separation logic_, which we will use to reason about
+real-world programs written in Go, including using loop invariants, reasoning
+about slices, pointer-based data structures, and concurrency. Programming
+assignments will involve proving theorems with the Coq proof assistant.
 
 ::: info Course info
 **Instructor**: Tej Chajed &lsaquo;<chajed@wisc.edu>&rsaquo; \
