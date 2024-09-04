@@ -44,7 +44,7 @@ Most of these chapters is assigned, but there are a few optional parts:
   - You can skip the last section, "The Logic of Coq". I omit this because it's not terribly relevant to this class but I personally think this part is fascinating.
 - Poly:
   - This is only assigned as optional reading, but don't let that stop you from doing the exercises.
-  - The last section on Church Numerals is a theoretic topic that isn't relevant to this class.
+  - The last section on Church Numerals is a theoretical topic that isn't relevant to this class.
 
 ::: important
 These chapters have a lot of small, easy exercises to get you practice. If you find anything difficult, come to office hours sooner rather than later to get it sorted out. If they're easy, note that proofs will become more difficult quickly after this.
