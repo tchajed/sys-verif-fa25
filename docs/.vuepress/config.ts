@@ -1,6 +1,7 @@
 import { hopeTheme, navbar, sidebar } from "vuepress-theme-hope";
 import { defineUserConfig } from "vuepress";
 import { viteBundler } from "@vuepress/bundler-vite";
+import { googleAnalyticsPlugin } from '@vuepress/plugin-google-analytics'
 
 // Vue Router picks up configuration for paths in the navbar and sidebar from
 // the YAML frontmatter, for example the 'title' (or first h1), 'shortTitle',
@@ -80,6 +81,11 @@ export default defineUserConfig({
     iconAssets: "fontawesome",
   }),
 
+  plugins: [
+    googleAnalyticsPlugin({
+        id: 'G-RMW4PR7J1M',
+    }),
+  ],
   bundler: viteBundler(),
   host: "localhost",
 });
