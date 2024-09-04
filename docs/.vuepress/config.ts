@@ -69,7 +69,7 @@ export default defineUserConfig({
     // control page meta information shown
     // see https://theme-hope.vuejs.press/guide/feature/meta.html
     contributors: false,
-    editLink: false, // web repo is private
+    editLink: false, // feedback is better than edits/PRs
     pageInfo: ["Date", "Category", "Tag"],
     toc: true, // usually desired, but disabled on home page
     print: false, // no need to offer print button
