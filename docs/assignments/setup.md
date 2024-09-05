@@ -26,8 +26,9 @@ GH_USER=<username>
 git clone https://github.com/tchajed/sys-verif-fa24-proofs
 cd sys-verif-fa24-proofs
 git remote rename origin upstream
-git remote add upstream git@github.com:$GH_USER/sys-verif-fa24-proofs.git
+git remote add origin git@github.com:$GH_USER/sys-verif-fa24-proofs.git
 git push --set-upstream origin main
+git submodule update --init --recursive
 ```
 
 You now have a copy of the repo, with the `main` branch tracking your private repo, and with a remote `upstream` pointing to the class repo. You can now do something like `git fetch upstream` and `git merge upstream/main` to pull in new changes.
@@ -38,7 +39,7 @@ You don't actually have to call your repo sys-verif-fa24-proofs, but that's how 
 
 ## Installing Coq
 
-The setup I recommend is to use Docker, VS Code, and a container I created for this class. To test your setup is working correctly, run `make` in the sys-verif-fa24-proofs repo; this should start compiling a bunch of things, and will take a few minutes the first time you run it.
+The setup I recommend is to use Docker, VS Code, and a container I created for this class.
 
 ::: details Option 1: VS Code + Docker dev container
 
@@ -56,7 +57,7 @@ Install the [Dev Containers extension](https://marketplace.visualstudio.com/item
 
 The most important VS Code feature to learn is the Command Palette, accessed from View > Command Palette. The shortcut is worth learning (ctrl-shift-p, cmd-shift-p on macOS). The command palette gives search access to most editor functionality and shows keyboard shortcuts if you want to learn them.
 
-Once you have the dev container extension, use the "Dev Containers: Reopen in Container" command on the sys-verif-fa24-proofs repo. This will use Coq from the container while still running VS Code natively. You can use the built-in VS Code terminal to run `make` to ensure your code compiles.
+Once you have the dev container extension, use the "Dev Containers: Reopen in Container" command on the sys-verif-fa24-proofs repo. This will use Coq from the container while still running VS Code natively. You should now use the built-in VS Code terminal to run `make` to ensure your code compiles.
 
 :::
 
@@ -64,13 +65,15 @@ If you feel very comfortable setting up your own tools, you can instead install 
 
 ::: details Option 2: install Coq on your own
 
-Make sure to get Coq 8.19.2 for compatibility (Coq 8.20 is also likely to work when it's released).
+Make sure to get Coq 8.19.2 for compatibility (Coq 8.20 is likely to work but use Coq 8.19 so we're all using the same software).
 
 You will need an IDE for Coq:
 
 - I'd recommend VS Code with the VSCoq extension.
 - If you use Emacs, then [Proof General](https://proofgeneral.github.io/) is excellent (this is what I personally use, with Doom Emacs and vim keybindings).
 - If you use Vim or Neovim, then [Coqtail](https://github.com/whonore/Coqtail) is also decent.
+
+Once you have Coq installed, run `make` to make sure everything is working.
 
 If you don't use VS Code, you'll need to follow the [Iris editor setup instructions](https://gitlab.mpi-sws.org/iris/iris/-/blob/master/docs/editor.md?ref_type=heads) to be able to input Unicode characters easily. For VS code that setup is already provided by the assignment repo.
 
