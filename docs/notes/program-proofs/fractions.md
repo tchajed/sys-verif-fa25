@@ -1,16 +1,11 @@
-<!-- Auto-generated from literate source. DO NOT EDIT. -->
+---
+# Auto-generated from literate source. DO NOT EDIT.
+tags: literate
+---
+
 # Fractional permissions
 Fractional permissions are a feature of separation logic that supports
   read-only permissions. This is especially important for concurrency.
-
-
-```coq
-From sys_verif.program_proof Require Import prelude.
-
-Section proof.
-Context `{hG: heapGS Σ, !ffi_semantics _ _, !ext_types _}.
-
-```
 
 Going into this document, I assume you have some familiarity with separation
 logic, enough to understand what `l ↦ v` means as a separation logic proposition
@@ -300,6 +295,5 @@ Proof.
   iApply "HΦ". auto.
 Qed.
 
-End proof.
 ```
 

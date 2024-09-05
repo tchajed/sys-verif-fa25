@@ -1,6 +1,7 @@
 ---
 # Auto-generated from literate source. DO NOT EDIT.
 category: lecture
+tags: literate
 order: 2
 ---
 

@@ -1,4 +1,8 @@
-<!-- Auto-generated from literate source. DO NOT EDIT. -->
+---
+# Auto-generated from literate source. DO NOT EDIT.
+tags: literate
+---
+
 # Inputting special symbols
 One early question when you start using Perennial (and Iris, which it is
 based on) is "how do you type all those funny symbols?".
