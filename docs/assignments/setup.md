@@ -83,6 +83,6 @@ If you don't use VS Code, you'll need to follow the [Iris editor setup instructi
 
 We'll use the course [Canvas page](https://canvas.wisc.edu/courses/425519) for submitting assignments (and not much else).
 
-You'll do all the programming in the sys-verif-fa24-proofs repo. To submit your code, run the script `./etc/prepare-submit` which will package your code into `hw.tar.gz`, and submit that file to the assignment in Canvas. I'm having you submit all the code in the repo (not just for the relevant assignment) to simplify the setup for you.
+You'll do all the programming in the sys-verif-fa24-proofs repo. To submit your code, run the script `./etc/prepare-submit` to generate `hw.tar.gz`. Then, go to the assignment's page on Canvas and submit that file. I'm having you submit all the code in the repo (not just for the relevant assignment) to simplify the setup for you.
 
-For all assignments, you're **strongly encouraged** to submit early with partial progress. There aren't many assignments, but you should still be doing some work every week, and this will give me an idea of how far along you are in between due dates. If you want any specific feedback, please add a comment on Canvas so I take a look quickly and respond.
+For all assignments, you're **strongly encouraged** to submit early with partial progress, once a week. There aren't many assignments, but you should still be doing some work every week, and this will give me an idea of how far along you are in between due dates. If you want any specific feedback, please add a comment on Canvas so I take a look quickly and respond.

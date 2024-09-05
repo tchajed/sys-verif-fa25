@@ -52,4 +52,5 @@ These chapters have a lot of small, easy exercises to get you practice. If you f
 
 ## Part 2: verifying functional programs
 
-This part will be released soon as a separate Coq file with additional exercises.
+Finish the exercises in `src/sys_verif/coq/assignment1_part2.v`. You can view a
+rendering of [Assignment 1 part 2](./assignment1_part2.md) as a reference.
