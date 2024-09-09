@@ -65,7 +65,8 @@ If you feel very comfortable setting up your own tools, you can instead install 
 
 ::: details Option 2: install Coq on your own
 
-Make sure to get Coq 8.19.2 for compatibility (Coq 8.20 is likely to work but use Coq 8.19 so we're all using the same software).
+Install Coq 8.20.0 for compatibility (Coq 8.19 is very likely to work
+if you can't get the latest version).
 
 You will need an IDE for Coq:
 
