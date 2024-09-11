@@ -469,7 +469,6 @@ You can see the use of bullets `-` and `+` to structure the proof above. You
 can also use `{ ... }` (used once above), which are often preferred if the proof
 of the first subgoal is small compared to the rest of the proof (such as the
 single-line `{ reflexivity. }` above).
-## Exercise: safe vs unsafe tactics
 
 ```coq
 Lemma add_comm n1 n2 :
@@ -489,10 +488,19 @@ An important part of your job in constructing both the informal and
 rewrite add_0_r.
     reflexivity.
   - simpl.
-    
 ```
 
-### Exercise: what lemma to prove?
+
+:::: info Goal
+```txt title="goal 1"
+not = fun A : Prop => A -> False
+     : Prop -> Prop
+
+Arguments not A%type_scope
+```
+
+::::
+## Exercise: what lemma to prove?
 
 ```coq
 Abort.
