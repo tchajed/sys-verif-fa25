@@ -14,12 +14,10 @@ By the end of this lecture, you should be able to
 1. Prove theorems about `nat`s with induction
 2. Translate informal proof to tactics
 
-
-```coq
-Set Default Goal Selector "!".
-
-```
-
+## Logistics
+Make sure you have keyboard shortcuts working. The essential command is
+"Coq: Interpret to Point", but it's sometimes useful to also have "Coq: Step
+Forward" and "Coq: Step Backward".
 ## Review exercise: safe vs unsafe tactics (part 1)
 
 Recall some tactics we saw last lecture:
@@ -30,15 +28,16 @@ Recall some tactics we saw last lecture:
 - `simpl`
 - `exists` (provides a witness when the goal is `exists (x: T), P x`)
 
-Define an **unsafe tactic** as one that can turn a true goal into an unprovable
-(false) goal. Define a **safe tactic** as a not unsafe tactic (bonus exercise:
-can you rephrase that without a double negation?).
+Define an **safe tactic** as one that if the goal is true, creates only true
+goals. Define an **unsafe** tactic as a not unsafe tactic (bonus question: can
+you rephrase that without the negation?)
 
 Which of the above tactics are safe? Why?
 ## Proofs about recursive functions
 
 ```coq
 Module NatDefs.
+  (* copy of standard library nat and `Nat.add` (typically written x + y) *)
   Inductive nat : Type :=
   | O
   | S (n: nat).
@@ -51,6 +50,12 @@ Module NatDefs.
     end.
 End NatDefs.
 
+```
+
+We'll go back to using the standard library definitions for the rest of the
+file.
+
+```coq
 Module MoreNatProofs.
 
 Lemma add_0_l n :
@@ -69,6 +74,12 @@ induction:
 
 
 ```coq
+(** This will generally be set for you in this class. It enforces structured
+proofs, requiring a bullet ([-], [+], and [*] in Ltac) or curly brace when
+there's more than one subgoal.
+*)
+Set Default Goal Selector "!".
+
 Lemma add_0_r_failed n :
   n + 0 = n.
 Proof.
