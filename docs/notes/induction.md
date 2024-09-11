@@ -29,7 +29,7 @@ Recall some tactics we saw last lecture:
 - `exists` (provides a witness when the goal is `exists (x: T), P x`)
 
 Define an **safe tactic** as one that if the goal is true, creates only true
-goals. Define an **unsafe** tactic as a not unsafe tactic (bonus question: can
+goals. Define an **unsafe** tactic as a not safe tactic (bonus question: can
 you rephrase that without the negation?)
 
 Which of the above tactics are safe? Why?
