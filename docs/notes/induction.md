@@ -31,10 +31,10 @@ Recall some tactics we saw last lecture:
 - `exists` (provides a witness when the goal is `exists (x: T), P x`)
 
 Define an **unsafe tactic** as one that can turn a true goal into an unprovable
-(false) goal. Define a **safe tactic** as a not unsafe tactic (bonus exercise: how to
-state that?).
+(false) goal. Define a **safe tactic** as a not unsafe tactic (bonus exercise:
+can you rephrase that without a double negation?).
 
-Which of the above goals are safe? Why?
+Which of the above tactics are safe? Why?
 ## Proofs about recursive functions
 
 ```coq
