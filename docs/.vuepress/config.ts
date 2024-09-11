@@ -14,6 +14,7 @@ const sidebarConfig = sidebar({
   "/": [
     "",
     "syllabus",
+    "resources",
     {
       text: "Assignments",
       icon: "list-check",

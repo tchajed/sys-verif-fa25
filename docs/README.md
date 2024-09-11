@@ -20,6 +20,10 @@ assignments will involve proving theorems with the Coq proof assistant.
 **Classroom**: Engineering Hall 2349
 :::
 
+## Resources
+
+See the course [lecture notes](./notes/) and the [resources](./resources.md) page.
+
 ## Calendar
 
 The schedule is still under construction. Consider anything more than ~2 weeks out to be subject to changes.
