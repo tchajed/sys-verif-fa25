@@ -41,6 +41,9 @@ Most of these chapters is assigned, but there are a few optional parts:
 - Induction:
   - You can skip the last section, "Bin to Nat and Back to Bin" (but do the previous one, "Nat to Bin and Back to Nat").
 - Logic:
+  - You should read "Working with Decidable Properties" but don't need to do the
+    proofs. We'll use an approach slightly different from what the chapter
+    explains, and you won't need to do any related proofs.
   - You can skip the last section, "The Logic of Coq". I omit this because it's not terribly relevant to this class but I personally think this part is fascinating.
 - Poly:
   - This is only assigned as optional reading, but don't let that stop you from doing the exercises.
