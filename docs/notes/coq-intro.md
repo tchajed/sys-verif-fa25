@@ -35,10 +35,11 @@ Three programming languages: terms, vernacular, tactics
 - Vernacular is a sequence of stateful commands. They create definitions, change
   attributes. They can also be queries which don't affect the state but help you
   write code. When you use Coq interactively, you've executed a prefix of the
-  vernacular commands. You can move forward and backward, undoing commands. When you are done with a development, you generally
-  re-run Coq in "batch mode" like a compiler, which runs the same commands. This
-  is needed to make sure everything gets checked, and because it produces a
-  compiled output file that Coq imports.
+  vernacular commands. You can move forward and backward, undoing commands.
+- When you are done with a development, you generally re-run Coq in "batch mode"
+  like a compiler, which runs the same vernacular commands and produces a
+  compiled output file. This is needed to make sure everything gets checked, and
+  because Coq uses those outputs when it needs to import another file.
 - Vernacular commands create new types, definitions, and start proofs. Creating
   new types is especially interesting.
 - Tactics are used to prove theorems. This is yet another language (quite
@@ -180,7 +181,7 @@ Definition andb' (b1 b2: bool) : bool :=
 
 Note on `if`: since booleans aren't built-in, and we just defined `bool`
 above, Coq's `if` expression works for any type with two constructors.
-Just to convince you, `andb'` has the same behavior as `andb` above.
+Just to convince you `andb'` has the same behavior as `andb` above.
 
 ```coq
 Lemma andb'_eq_andb : forall b1 b2, andb' b1 b2 = andb b1 b2.
