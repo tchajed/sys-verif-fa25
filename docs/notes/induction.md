@@ -588,16 +588,46 @@ Definition map {A B} (ma: option A) (f: A -> B) : option B :=
   
 ```
 
-Notice the extra type argument we had to provide to `Some`, and the
-  somewhat odd `_` in the pattern match. To make it easier to work with
+`Some` and `None` take an extra type argument `A: Type` that comes from
+  the inductive definition. You'll notice we supply an `_` in the pattern match;
+  this is because that argument is fixed to be `A` based on the type of `ma` and
+  can't actually be pattern matched on. To make it easier to work with
   polymorphic functions, Coq has a feature called _implicit arguments_.
 These commands modify how type inference treats `Some` and `None`, making
   the type argument implicit (that's what the curly braces mean). Don't worry
-  about the syntax; you won't need to do this yourself.
+  about the syntax; you won't need to do this yourself. Ordinarily we would do
+  this setup right after defining the type, but for illustration we first wrote
+  `map`.
 
 ```coq
 Arguments Some {A} x.
   Arguments None {A}.
+
+  
+```
+
+Now we can just supply the element to `Some` and let type inference figure
+  out what type it should produce:
+
+```coq
+Definition some_ex : option nat := Some 3.
+  
+```
+
+Even this works, using the annotation `option nat` to figure out what type
+  to pass to `None`.
+
+```coq
+Definition none_ex : option nat := None.
+
+  
+```
+
+It is also possible to pass the type arguments if needed. `@None` is just
+  like `None` but with all implicit arguments made explicit:
+
+```coq
+Definition none_ex_2 := @None nat.
 
   
 ```
