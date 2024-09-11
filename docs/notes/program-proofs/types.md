@@ -5,9 +5,15 @@ tags:
 - draft
 ---
 
-::: warning Draft under construction
+::: warning Draft
 This is still very much a work-in-progress.
 :::
+
+# Types in GooseLang
+
+GooseLang pervasively uses types when interacting with memory (eg, loads,
+stores, pointers, slices). Here we explain how those types work.
+
 
 
 ```coq
@@ -15,13 +21,8 @@ This is still very much a work-in-progress.
 auto-generated code *)
 Open Scope struct_scope.
 
+
 ```
-
-# Types in GooseLang
-
-GooseLang pervasively uses types when interacting with memory (eg, loads,
-stores, pointers, slices). Here we explain how those types work.
-
 
 Let's start with a classic Swap example, with pointers to integers:
 

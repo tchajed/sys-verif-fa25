@@ -35,6 +35,7 @@ Define an **unsafe tactic** as one that can turn a true goal into an unprovable
 state that?).
 
 Which of the above goals are safe? Why?
+## Proofs about recursive functions
 
 ```coq
 Module NatDefs.
@@ -50,11 +51,6 @@ Module NatDefs.
     end.
 End NatDefs.
 
-```
-
-## More proof tactics
-
-```coq
 Module MoreNatProofs.
 
 Lemma add_0_l n :
