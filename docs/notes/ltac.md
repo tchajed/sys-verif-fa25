@@ -7,8 +7,92 @@ order: -2
 
 ```coq
 From sys_verif Require Import options.
-
 From stdpp Require Import gmap.
+
+```
+
+## Computation: `simpl`, `reflexivity`
+
+```coq
+Inductive play := rock | paper | scissors.
+Definition beats (p1 p2: play) : bool :=
+  match p1, p2 with
+  | rock, scissors => true
+  | scissors, paper => true
+  | paper, rock => true
+  | _, _ => false
+  end.
+
+```
+
+`simpl` computes or "reduces" functions in the goal
+
+`reflexivity` solves a goal of the form `a = a` or fails. It also solves `a = b`
+if `a` and `b` compute to the same thing (so `simpl` is unnecessary in the proof
+below).
+
+```coq
+Lemma beats_ex_1 : beats paper rock = true.
+Proof.
+  simpl.
+```
+
+
+:::: info Goal
+```txt title="goal 1"
+  ============================
+  true = true
+```
+
+::::
+
+```coq
+ reflexivity.
+Qed.
+
+```
+
+## `destruct` for inductive datatype
+
+```coq
+Lemma beats_irrefl (p: play) : beats p p = false.
+Proof.
+  destruct p.
+  - reflexivity.
+  - reflexivity.
+  - reflexivity.
+Qed.
+
+```
+
+## Using `;` to chain tactics
+`t1; t2` runs `t1`, then `t2` on every subgoal generated from `t1`. This can
+be used to shorten proofs, like this one (compare to `beats_irrefl` above):
+
+```coq
+Lemma beats_irrefl' (p: play) : beats p p = false.
+Proof.
+  (* we don't need to repeat [reflexivity] three times *)
+  destruct p; reflexivity.
+Qed.
+
+```
+
+`t1; [t2 | t3]` runs `t1`, then runs `t2` on the first generated subgoal and
+`t3` on the second. It fails if there aren't exactly two subgoals.
+
+`t3` can be ommitted (as below), in which case nothing is run in that subgoal.
+
+This generalizes to more than two with `t1; [t2 | t3 | t4]` and so on.
+
+```coq
+Lemma add_0_r (n: nat) :
+  n + 0 = n.
+Proof.
+  induction n as [ |n IHn]; simpl; [ reflexivity | ].
+  (* note that we already ran `simpl` in this goal *)
+  rewrite IHn. reflexivity.
+Qed.
 
 ```
 
@@ -83,6 +167,23 @@ Lemma propositional_demo_3 (P Q R : Prop) :
   (P -> Q) -> (Q -> R) -> P -> R.
 Proof.
   intuition auto.
+Qed.
+
+```
+
+`destruct` on a hypothesis of the form `A ∨ B` produces two goals, one for
+`A` and one for `B`. Below we also use `as [HP | HQ]` to name the hypothesis in
+each goal.
+
+```coq
+Lemma propositional_demo_or (P Q : Prop) :
+  (Q -> P) ->
+  (P ∨ Q) -> P.
+Proof.
+  intros H1 HPQ.
+  destruct HPQ as [HP | HQ].
+  - assumption.
+  - apply H1. assumption.
 Qed.
 
 ```
@@ -362,5 +463,61 @@ If you're only going to remember one of these, I would use the first
 
 ```coq
 End rewriting.
+
 ```
+
+### General automation tactics
+
+`lia` solves goals involving arithmetic (with `nat` or `Z`).
+
+`auto` runs a proof search using hints that can be programmed with commands like
+`Hint Resolve`, for example. `auto` automatically tries to solve both sides of
+an `and`, introduces `forall`s, and tries to apply `P -> Q` in the context, but
+the programmed hints greatly affect what it can do. Solves the goal or does nothing.
+
+`done` solves "simple" goals with limited automation. Fails or solves the goal.
+
+
+## Proof automation
+
+This is a bigger topic than this reference can cover, but here are a few tactics
+you might see when reading code and a brief description.
+
+
+### Tacticals
+
+A "tactical" is a tactic that takes another tactic as an argument and modifies how it works.
+
+`try t` runs `t` and catches any failures, doing nothing in that case.
+
+`repeat t` runs `t` until it fails to make progress.
+
+`progress t` runs `t` and fails if it doesn't make progress. (Think about
+`simpl` vs `progress simpl`.)
+
+`solve [ t ]` runs `t` and fails if it doesn't solve the goal
+
+`t1 || t2` runs `t1` and _if it fails to make progress_ runs `t2`.
+
+`first [ t1 | t2 ]` runs `t1`, but if it fails instead runs `t2`.
+
+`first t` runs `t` on the first subgoal. `t1; first t2` is the same as `t1; [ t2
+| .. ]` (the `..` allows this to work regardless of how many additional subgoals
+there are, including none).
+
+
+### Primitives
+
+Some tactics make more sense to use from automation or with tacticals than in
+interactive use.
+
+`fail <n> "msg"` fails and reports `msg`. `fail "msg"` is equivalent to `fail 0
+"msg"`. The `n` is used to break through n levels of "catching" failures, so for
+example `try fail "msg"` does nothing, but `try fail 1 "msg"` breaks through the
+`try` and fails.
+
+`idtac` does nothing. Can be useful when a tactic is required.
+
+`idtac "msg"` prints a string to the responses output
+
 
