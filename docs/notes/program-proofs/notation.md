@@ -52,12 +52,16 @@ Print ex2.
 ```
 
 
+
 :::: note Output
+
 ```txt title="coq output"
 ex2 = <<1; 34; 4; 7>>
      : List Z
 ```
+
 ::::
+
 The notations are truly being used for printing; it's not just that printing
 `ex2` shows how the term was defined. Here's an example where we write a list
 without the notation but it gets printed with it:
@@ -67,12 +71,16 @@ Check (Cons 1 (Cons 3 (Cons 7 Nil))).
 ```
 
 
+
 :::: note Output
+
 ```txt title="coq output"
 <<1; 3; 7>>
      : List Z
 ```
+
 ::::
+
 ## How notations work
 
 The most important aspect of notations to remember is that they are organized
@@ -220,7 +228,9 @@ About takes_nat_scope.
 ```
 
 
+
 :::: note Output
+
 ```txt title="coq output"
 takes_nat_scope : ∀ {A : Type}, A → A
 
@@ -229,4 +239,6 @@ Arguments takes_nat_scope {A} x%nat_scope
 takes_nat_scope is transparent
 Expands to: Constant __input.takes_nat_scope
 ```
+
 ::::
+

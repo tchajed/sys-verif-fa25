@@ -77,7 +77,9 @@ Proof.
 ```
 
 
+
 :::: info Goal diff
+
 ```txt title="goal diff"
   ext : ffi_syntax
   ffi : ffi_model
@@ -95,6 +97,7 @@ Proof.
   --------------------------------------∗
   l ↦[uint64T]{#1 / 2} #x ∗ l ↦[uint64T]{#1 / 2} #x
 ```
+
 ::::
 
 ```coq
@@ -106,7 +109,9 @@ Proof.
 ```
 
 
+
 :::: info Goal diff
+
 ```txt title="goal diff"
   ext : ffi_syntax
   ffi : ffi_model
@@ -124,6 +129,7 @@ Proof.
   --------------------------------------∗
   l ↦[uint64T] #x
 ```
+
 ::::
 
 ```coq
@@ -159,7 +165,9 @@ Proof.
 ```
 
 
+
 :::: info Goal
+
 ```txt title="goal 1"
   ext : ffi_syntax
   ffi : ffi_model
@@ -174,7 +182,9 @@ Proof.
   (l ↦[uint64T] #x)%I = (l ↦[uint64T] #x)%I
 ```
 
+
 ::::
+
 
 ```coq
   reflexivity.
@@ -251,7 +261,9 @@ iMod (struct_pointsto_persist with "H") as "#Hro".
 ```
 
 
+
 :::: info Goal diff
+
 ```txt title="goal diff"
   ext : ffi_syntax
   ffi : ffi_model
@@ -271,6 +283,7 @@ iMod (struct_pointsto_persist with "H") as "#Hro".
   --------------------------------------∗
   |={⊤}=> Φ #l
 ```
+
 ::::
 
 ```coq

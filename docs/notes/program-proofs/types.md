@@ -54,7 +54,9 @@ Print ty.
 ```
 
 
+
 :::: note Output
+
 ```txt title="coq output"
 Inductive ty (val_tys : val_types) : Type :=
     baseT : typing.base_ty → ty
@@ -84,7 +86,9 @@ Arguments chanValT {val_tys} vt%heap_type
 Arguments extT {val_tys} x
 Arguments prophT {val_tys}
 ```
+
 ::::
+
 `uint64T` itself is an example of a `baseT`.
 Types are being used in this translation as part of the _behavior_ or
 _semantics_ of this program. Typically types are part of what is formally called

@@ -39,13 +39,17 @@ Proof.
 ```
 
 
+
 :::: info Goal
+
 ```txt title="goal 1"
   ============================
   true = true
 ```
 
+
 ::::
+
 
 ```coq
  reflexivity.
@@ -112,7 +116,9 @@ Proof.
 ```
 
 
+
 :::: info Goal diff
+
 ```txt title="goal diff"
   P, Q, R : Prop
   HPQ : P → Q
@@ -122,6 +128,7 @@ Proof.
   R // [!code --]
   Q // [!code ++]
 ```
+
 ::::
 
 ```coq
@@ -142,7 +149,9 @@ Proof.
 ```
 
 
+
 :::: info Goal diff
+
 ```txt title="goal diff"
   P, Q, R : Prop
   HPQ : P → Q
@@ -152,6 +161,7 @@ Proof.
   ============================
   R
 ```
+
 ::::
 
 ```coq
@@ -276,7 +286,9 @@ Proof.
 ```
 
 
+
 :::: info Goal diff
+
 ```txt title="goal diff"
   n1, n2, x : nat
   Heq : n1 = n2
@@ -284,6 +296,7 @@ Proof.
   n1 + x = n2 + x // [!code --]
   n2 + x = n2 + x // [!code ++]
 ```
+
 ::::
 It's a seemingly small change but the left and right-hand sides are now
   equal!
@@ -327,7 +340,9 @@ Proof.
 ```
 
 
+
 :::: info Goal diff
+
 ```txt title="goal diff"
   m : gmap Z V
   k : Z
@@ -336,6 +351,7 @@ Proof.
   delete k (<[k:=v]> m) !! k = delete k m !! k // [!code --]
   None = delete k m !! k // [!code ++]
 ```
+
 ::::
 
 ```coq
@@ -362,7 +378,9 @@ rewrite !gmap_lookup_delete.
 ```
 
 
+
 :::: info Goal
+
 ```txt title="goal 1"
   m : gmap Z V
   k : Z
@@ -371,7 +389,9 @@ rewrite !gmap_lookup_delete.
   None = None
 ```
 
+
 ::::
+
 
 ```coq
   done.
@@ -418,7 +438,9 @@ rewrite gmap_lookup_delete_ne.
 ```
 
 
+
 :::: info Goals
+
 ```txt title="goal 1"
   m : gmap Z V
   k : Z
@@ -439,7 +461,9 @@ rewrite gmap_lookup_delete_ne.
   <[k:=v]> m !! k' = delete k m !! k'
 ```
 
+
 ::::
+
 
 ```coq
   (* We could now write a structured proof with `{ proof1. } proof2.` or
@@ -478,7 +502,9 @@ rewrite -> gmap_lookup_delete_ne by done.
 ```
 
 
+
 :::: info Goal diff
+
 ```txt title="goal diff"
   m : gmap Z V
   k : Z
@@ -489,6 +515,7 @@ rewrite -> gmap_lookup_delete_ne by done.
   <[k:=v]> m !! k' = delete k m !! k' // [!code --]
   delete k (<[k:=v]> m) !! k' = delete k m !! k' // [!code ++]
 ```
+
 ::::
 It's more cumbersome but we can still assert that the side condition is
   proven with SSReflect's rewrite. The syntax here is `t; [ t1 | ]`, which runs
@@ -500,7 +527,9 @@ rewrite gmap_lookup_delete_ne; [ done | ].
 ```
 
 
+
 :::: info Goal diff
+
 ```txt title="goal diff"
   m : gmap Z V
   k : Z
@@ -510,6 +539,7 @@ rewrite gmap_lookup_delete_ne; [ done | ].
   ============================
   <[k:=v]> m !! k' = delete k m !! k'
 ```
+
 ::::
 Another trick is to use `rewrite lem //`, and then only proceed if this
   leaves one goal. This won't work when you want a tactic more powerful than

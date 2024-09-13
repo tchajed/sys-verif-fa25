@@ -86,7 +86,9 @@ Proof.
 ```
 
 
+
 :::: note Output
+
 ```txt title="coq output"
 lookup_delete_lt:
   ∀ {A : Type} (l : list A) (i j : nat),
@@ -142,7 +144,9 @@ lookup_delete_Some:
     → ∀ {A : Type} (m : M A) (i j : K) (y : A),
         delete i m !! j = Some y ↔ i ≠ j ∧ m !! j = Some y
 ```
+
 ::::
+
 
 ```coq
   rewrite lookup_delete //.
@@ -160,7 +164,9 @@ Proof.
 ```
 
 
+
 :::: info Goal
+
 ```txt title="goal 1"
   m : gmap Z nat
   k : Z
@@ -169,7 +175,9 @@ Proof.
   ∀ i : Z, delete k (<[k:=v]> m) !! i = delete k m !! i
 ```
 
+
 ::::
+
 
 ```coq
   intros k'.
@@ -278,7 +286,9 @@ Proof.
 ```
 
 
+
 :::: info Goal
+
 ```txt title="goal 1"
   x : Z
   i : interval
@@ -286,7 +296,9 @@ Proof.
   in_interval x i → low i ≤ x
 ```
 
+
 ::::
+
 
 ```coq
   rewrite /in_interval.

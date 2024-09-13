@@ -96,12 +96,16 @@ Compute (next_weekday friday).
 ```
 
 
+
 :::: note Output
+
 ```txt title="coq output"
      = monday
      : day
 ```
+
 ::::
+
 The main use of Coq is to prove theorems - it is a proof assistant after
 all. We'll get to more interesting theorems shortly, but for now let's prove a
 "unit test" theorem.
@@ -117,13 +121,17 @@ Proof.
 ```
 
 
+
 :::: info Goal
+
 ```txt title="goal 1"
   ============================
   tuesday = tuesday
 ```
 
+
 ::::
+
 
 ```coq
   reflexivity.
@@ -257,24 +265,32 @@ Compute (all_zero (bits B1 B0 B1 B0)).
 ```
 
 
+
 :::: note Output
+
 ```txt title="coq output"
      = false
      : bool
 ```
+
 ::::
+
 
 ```coq
 Compute (all_zero (bits B0 B0 B0 B0)).
 ```
 
 
+
 :::: note Output
+
 ```txt title="coq output"
      = true
      : bool
 ```
+
 ::::
+
 
 ```coq
 End TuplePlayground.
@@ -524,7 +540,9 @@ Proof.
 ```
 
 
+
 :::: info Goal diff
+
 ```txt title="goal diff"
   n, m : nat
   Hn : n = 0 // [!code ++]
@@ -532,6 +550,7 @@ Proof.
   n = 0 -> m = 0 -> n + m = 0 // [!code --]
   m = 0 -> n + m = 0 // [!code ++]
 ```
+
 ::::
 
 ```coq
@@ -547,7 +566,9 @@ rewrite Hn.
 ```
 
 
+
 :::: info Goal diff
+
 ```txt title="goal diff"
   n, m : nat
   Hn : n = 0
@@ -556,6 +577,7 @@ rewrite Hn.
   n + m = 0 // [!code --]
   0 + m = 0 // [!code ++]
 ```
+
 ::::
 
 ```coq
@@ -578,38 +600,50 @@ Proof.
 ```
 
 
+
 :::: note Output
+
 ```txt title="coq output"
 Notation "x <> y  :> T" := (not (eq x y)) : type_scope
   (default interpretation)
 Notation "x <> y" := (not (eq x y)) : type_scope (default interpretation)
 ```
+
 ::::
+
 
 ```coq
   Locate "~".
 ```
 
 
+
 :::: note Output
+
 ```txt title="coq output"
 Notation "~ x" := (not x) : type_scope (default interpretation)
 ```
+
 ::::
+
 
 ```coq
   Print not.
 ```
 
 
+
 :::: note Output
+
 ```txt title="coq output"
 not = fun A : Prop => A -> False
      : Prop -> Prop
 
 Arguments not A%type_scope
 ```
+
 ::::
+
 
 ```coq
   (** We see that [a <> b] is notation for [not (a = b)], which is by definition

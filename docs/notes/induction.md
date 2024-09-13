@@ -165,7 +165,9 @@ destruct H as [HP | HQ].
 ```
 
 
+
 :::: info Goals
+
 ```txt title="goal 1"
   P, Q, R : Prop
   HR1 : P -> R
@@ -184,7 +186,9 @@ destruct H as [HP | HQ].
   R
 ```
 
+
 ::::
+
 
 ```coq
   - apply (HR1 HP).
@@ -207,7 +211,9 @@ split.
 ```
 
 
+
 :::: info Goals
+
 ```txt title="goal 1"
   P, Q, R : Prop
   HR1 : P -> R
@@ -225,7 +231,9 @@ split.
   P
 ```
 
+
 ::::
+
 
 ```coq
   - assumption.
@@ -289,7 +297,9 @@ Proof.
 ```
 
 
+
 :::: info Goal diff
+
 ```txt title="goal diff"
   P, Q : Prop
   HP : P
@@ -298,6 +308,7 @@ Proof.
   P // [!code --]
   Q // [!code ++]
 ```
+
 ::::
 
 ```coq
@@ -313,7 +324,9 @@ rewrite Hn.
 ```
 
 
+
 :::: info Goal diff
+
 ```txt title="goal diff"
   n, m : nat
   Hn : n = 0 // [!code ++]
@@ -321,6 +334,7 @@ rewrite Hn.
   n = 0 -> m = 0 -> n + m = 0 // [!code --]
   m = 0 -> n + m = 0 // [!code ++]
 ```
+
 ::::
 
 ```coq
@@ -343,7 +357,9 @@ Proof.
 ```
 
 
+
 :::: note Output
+
 ```txt title="coq output"
 goal 1 is:
   
@@ -353,14 +369,18 @@ goal 1 is:
   ============================
   n + m = 0
 ```
+
 ::::
+
 
 ```coq
   Locate "~".
 ```
 
 
+
 :::: note Output
+
 ```txt title="coq output"
 goal 1 is:
   
@@ -370,20 +390,26 @@ goal 1 is:
   ============================
   0 + m = 0
 ```
+
 ::::
+
 
 ```coq
   Print not.
 ```
 
 
+
 :::: note Output
+
 ```txt title="coq output"
 Notation "x <> y  :> T" := (not (eq x y)) : type_scope
   (default interpretation)
 Notation "x <> y" := (not (eq x y)) : type_scope (default interpretation)
 ```
+
 ::::
+
 
 ```coq
   (** We see that [a <> b] is notation for [not (a = b)], which is by definition
@@ -440,11 +466,15 @@ Proof.
 ```
 
 
+
 :::: note Output
+
 ```txt title="coq output"
 Notation "~ x" := (not x) : type_scope (default interpretation)
 ```
+
 ::::
+
 
 ```coq
   unfold iff.
@@ -491,7 +521,9 @@ rewrite add_0_r.
 ```
 
 
+
 :::: info Goal
+
 ```txt title="goal 1"
 not = fun A : Prop => A -> False
      : Prop -> Prop
@@ -499,7 +531,9 @@ not = fun A : Prop => A -> False
 Arguments not A%type_scope
 ```
 
+
 ::::
+
 ## Exercise: what lemma to prove?
 
 ```coq
