@@ -7,8 +7,7 @@ order: 2
 
 # Lecture 2: Introduction to Coq
 
-In this lecture, we'll introduce Coq as a system, functional programming, and
-proving theorems about functional programs.
+In this lecture, we'll introduce Coq as a system, functional programming, and proving theorems about functional programs.
 
 ## Learning outcomes
 
@@ -18,45 +17,22 @@ By the end of this lecture, you should be able to
 2. Implement functions with pattern matching and recursion
 3. Prove simple theorems about functions
 
-
 ## Coq as an interactive theorem prover
 
-Coq is a lot like a programming language, but it is fundamentally _interactive_
-in a way that is unlike programming languages you've used. The interaction is
-necessary to write theorems, but understanding the interaction model is an
-important part of how you will write definitions, find already proven lemmas,
-and debug type errors.
+Coq is a lot like a programming language, but it is fundamentally _interactive_ in a way that is unlike programming languages you've used. The interaction is necessary to write theorems, but understanding the interaction model is an important part of how you will write definitions, find already proven lemmas, and debug type errors.
 
 Three programming languages: terms, vernacular, tactics
 
 - Calculus of inductive constructions is the theory behind the term language.
-- Due to dependent types, there is no distinction between terms and types; it's
-  all the same language.
-- Vernacular is a sequence of stateful commands. They create definitions, change
-  attributes. They can also be queries which don't affect the state but help you
-  write code. When you use Coq interactively, you've executed a prefix of the
-  vernacular commands. You can move forward and backward, undoing commands.
-- When you are done with a development, you generally re-run Coq in "batch mode"
-  like a compiler, which runs the same vernacular commands and produces a
-  compiled output file. This is needed to make sure everything gets checked, and
-  because Coq uses those outputs when it needs to import another file.
-- Vernacular commands create new types, definitions, and start proofs. Creating
-  new types is especially interesting.
-- Tactics are used to prove theorems. This is yet another language (quite
-  different from both vernacular and terms) that is stateful. At any point in a
-  proof, you have N goals left. Tactics make progress or solve  goals. Once a
-  theorem is proven, you can generally ignore how it was proven; only the
-  statement matters. However, the tactics are also code that is subject to
-  maintenance as definitions/theorems change.
-
-
+- Due to dependent types, there is no distinction between terms and types; it's all the same language.
+- Vernacular is a sequence of stateful commands. They create definitions, change attributes. They can also be queries which don't affect the state but help you write code. When you use Coq interactively, you've executed a prefix of the vernacular commands. You can move forward and backward, undoing commands.
+- When you are done with a development, you generally re-run Coq in "batch mode" like a compiler, which runs the same vernacular commands and produces a compiled output file. This is needed to make sure everything gets checked, and because Coq uses those outputs when it needs to import another file.
+- Vernacular commands create new types, definitions, and start proofs. Creating new types is especially interesting.
+- Tactics are used to prove theorems. This is yet another language (quite different from both vernacular and terms) that is stateful. At any point in a proof, you have N goals left. Tactics make progress or solve goals. Once a theorem is proven, you can generally ignore how it was proven; only the statement matters. However, the tactics are also code that is subject to maintenance as definitions/theorems change.
 
 ## Functional programming
 
-To write functional programs, we'll start by defining some data types for
-our functions to operate on.
-This is an "enumerated type". It defines `day`, and seven constructors for
-that type.
+To write functional programs, we'll start by defining some data types for our functions to operate on. This is an "enumerated type". It defines `day`, and seven constructors for that type.
 
 ```coq
 Inductive day : Type :=
@@ -87,15 +63,11 @@ Definition next_weekday (d: day) : day :=
 
 ```
 
-Coq has a number of commands for interacting with the system while it's
-running. The first one we'll see is `Compute` below, which allows us to manually
-check the behavior of the function we just defined.
+Coq has a number of commands for interacting with the system while it's running. The first one we'll see is `Compute` below, which allows us to manually check the behavior of the function we just defined.
 
 ```coq
 Compute (next_weekday friday).
 ```
-
-
 
 :::: note Output
 
@@ -106,21 +78,15 @@ Compute (next_weekday friday).
 
 ::::
 
-The main use of Coq is to prove theorems - it is a proof assistant after
-all. We'll get to more interesting theorems shortly, but for now let's prove a
-"unit test" theorem.
+The main use of Coq is to prove theorems - it is a proof assistant after all. We'll get to more interesting theorems shortly, but for now let's prove a "unit test" theorem.
 
-NOTE: Theorem/Lemma/Example are all synonyms. In this class we'll try to stick
-to Lemma.
-
+NOTE: Theorem/Lemma/Example are all synonyms. In this class we'll try to stick to Lemma.
 
 ```coq
 Lemma next_weekday_test : next_weekday (next_weekday friday) = tuesday.
 Proof.
   simpl.
 ```
-
-
 
 :::: info Goal
 
@@ -129,9 +95,7 @@ Proof.
   tuesday = tuesday
 ```
 
-
 ::::
-
 
 ```coq
   reflexivity.
@@ -175,9 +139,7 @@ Proof. simpl. reflexivity. Qed.
 
 ```
 
-Note `if` is an _expression_ and not a _statement_ (there are no
-statements). Like Rust but not C or Go. Python has both (`if:` vs `e1 if b else
-e2`).
+Note `if` is an _expression_ and not a _statement_ (there are no statements). Like Rust but not C or Go. Python has both (`if:` vs `e1 if b else e2`).
 
 ```coq
 Definition negb' (b: bool) : bool :=
@@ -187,9 +149,7 @@ Definition andb' (b1 b2: bool) : bool :=
 
 ```
 
-Note on `if`: since booleans aren't built-in, and we just defined `bool`
-above, Coq's `if` expression works for any type with two constructors.
-Just to convince you `andb'` has the same behavior as `andb` above.
+Note on `if`: since booleans aren't built-in, and we just defined `bool` above, Coq's `if` expression works for any type with two constructors. Just to convince you `andb'` has the same behavior as `andb` above.
 
 ```coq
 Lemma andb'_eq_andb : forall b1 b2, andb' b1 b2 = andb b1 b2.
@@ -203,10 +163,7 @@ Qed.
 
 ### In-class exercise: decoding type errors
 
-Think about these two errors on your own and try to explain how they were
-produced. What is needed to fix each?
-
-
+Think about these two errors on your own and try to explain how they were produced. What is needed to fix each?
 
 ```coq
 Fail Definition complex_expr1 (b1 b2 b3: bool) :=
@@ -246,9 +203,7 @@ Inductive bit : Type :=
 
 ```
 
-A single constructor with multiple parameters creates a "tuple" type (in PL
-called a "product" type). Coq has syntactic sugar for "record types" that extend
-this feature slightly.
+A single constructor with multiple parameters creates a "tuple" type (in PL called a "product" type). Coq has syntactic sugar for "record types" that extend this feature slightly.
 
 ```coq
 Inductive nybble : Type :=
@@ -264,8 +219,6 @@ Definition all_zero (nb : nybble) : bool :=
 Compute (all_zero (bits B1 B0 B1 B0)).
 ```
 
-
-
 :::: note Output
 
 ```txt title="coq output"
@@ -275,12 +228,9 @@ Compute (all_zero (bits B1 B0 B1 B0)).
 
 ::::
 
-
 ```coq
 Compute (all_zero (bits B0 B0 B0 B0)).
 ```
-
-
 
 :::: note Output
 
@@ -290,7 +240,6 @@ Compute (all_zero (bits B0 B0 B0 B0)).
 ```
 
 ::::
-
 
 ```coq
 End TuplePlayground.
@@ -304,8 +253,7 @@ Module NatPlayground.
 
 ```
 
-So far, every type has finitely many values. For infinite types, we need
-something more.
+So far, every type has finitely many values. For infinite types, we need something more.
 
 ```coq
 Inductive nat : Type :=
@@ -316,13 +264,9 @@ Inductive nat : Type :=
 
 There's a lot to unpack here.
 
-First, what values does `nat` have? It produces the numbers `O`, `S O`, `S (S
-O)`, which we will interpret as 0, 1, 2, ....
+First, what values does `nat` have? It produces the numbers `O`, `S O`, `S (S O)`, which we will interpret as 0, 1, 2, ....
 
-Second, this _defines_ `nat`, `O : nat`, and `S : nat -> nat`, but doesn't give
-them any meaning - we'll do that as humans reading the code, and via the
-functions we define.
-
+Second, this _defines_ `nat`, `O : nat`, and `S : nat -> nat`, but doesn't give them any meaning - we'll do that as humans reading the code, and via the functions we define.
 
 Another definition of numbers that we could use to mean the same thing:
 
@@ -346,11 +290,7 @@ End NatPlayground.
 
 We'll do another exercise to get you thinking about how to approach a proof.
 
-You will always have two challenges in completing a proof in this class: (1) why
-is the theorem true?, and (2) how do we turn that into a Coq proof?. It's
-extremely helpful to understand the distinction to be able to develop these
-skills independently.
-
+You will always have two challenges in completing a proof in this class: (1) why is the theorem true?, and (2) how do we turn that into a Coq proof?. It's extremely helpful to understand the distinction to be able to develop these skills independently.
 
 Let's go back to our `day` type.
 
@@ -368,8 +308,7 @@ Definition next_day (d: day) : day :=
 
 ```
 
-Proving an [exists] is complicated and we'll have more to say, but try to
-think through this intuitively for now.
+Proving an [exists] is complicated and we'll have more to say, but try to think through this intuitively for now.
 
 ```coq
 Lemma wednesday_has_prev_day : exists d, next_day d = wednesday.
@@ -384,9 +323,7 @@ Qed.
 
 Now let's prove something more interesting: every day has a previous day.
 
-Think-pair-share and come up with an informal proof strategy. Then I'll show how
-to translate it to a Coq proof.
-
+Think-pair-share and come up with an informal proof strategy. Then I'll show how to translate it to a Coq proof.
 
 ```coq
 Lemma every_day_has_prev : forall d, exists d', next_day d' = d.
@@ -399,35 +336,25 @@ Abort.
 
 ## Option monad
 
-This section introduces two more core features of functional programming:
-polymorphic types (also called "generics" in other languages) and "higher-order
-functions" (functions that take other functions as parameters).
-
-
+This section introduces two more core features of functional programming: polymorphic types (also called "generics" in other languages) and "higher-order functions" (functions that take other functions as parameters).
 
 ```coq
 Module Option.
 
-  
+
 ```
 
-`option` is a polymorphic type: it takes a type `A` as an argument, and
-  (maybe) contains a value of that arbitrary type. `option A` is the simplest
-  "container" type.
+`option` is a polymorphic type: it takes a type `A` as an argument, and (maybe) contains a value of that arbitrary type. `option A` is the simplest "container" type.
 
 ```coq
 Inductive option (A: Type) :=
   | Some (x: A)
   | None.
 
-  
+
 ```
 
-Here are some functions you can define on `option`. There are good
-  motivations for _why_ you should define these particular ones, but we won't
-  get into that (and it isn't all that important for this class). For now, just
-  try to understand the behavior.
-`map` runs `f` "inside" the optional value.
+Here are some functions you can define on `option`. There are good motivations for _why_ you should define these particular ones, but we won't get into that (and it isn't all that important for this class). For now, just try to understand the behavior. `map` runs `f` "inside" the optional value.
 
 ```coq
 Definition map {A B} (ma: option A) (f: A -> B) : option B :=
@@ -436,26 +363,19 @@ Definition map {A B} (ma: option A) (f: A -> B) : option B :=
     | None _ => None B
     end.
 
-  
+
 ```
 
-Notice the extra type argument we had to provide to `Some`, and the
-  somewhat odd `_` in the pattern match. To make it easier to work with
-  polymorphic functions, Coq has a feature called _implicit arguments_.
-These commands modify how type inference treats `Some` and `None`, making
-  the type argument implicit (that's what the curly braces mean). Don't worry
-  about the syntax; you won't need to do this yourself.
+Notice the extra type argument we had to provide to `Some`, and the somewhat odd `_` in the pattern match. To make it easier to work with polymorphic functions, Coq has a feature called _implicit arguments_. These commands modify how type inference treats `Some` and `None`, making the type argument implicit (that's what the curly braces mean). Don't worry about the syntax; you won't need to do this yourself.
 
 ```coq
 Arguments Some {A} x.
   Arguments None {A}.
 
-  
+
 ```
 
-We'll now define `return_` (it should be called `return` but that's a Coq
-  keyword) and `bind`. These make `option` into a _Monad_ but you don't need
-  to understand that, just read the definitions.
+We'll now define `return_` (it should be called `return` but that's a Coq keyword) and `bind`. These make `option` into a _Monad_ but you don't need to understand that, just read the definitions.
 
 ```coq
 Definition return_ {A} (x: A) : option A := Some x.
@@ -466,11 +386,10 @@ Definition return_ {A} (x: A) : option A := Some x.
     | None => None
     end.
 
-  
+
 ```
 
-These are some properties of `return_` and `bind` (again, good reason for
-  these but not relevant here).
+These are some properties of `return_` and `bind` (again, good reason for these but not relevant here).
 
 ```coq
 Lemma return_left_id {A B} (x: A) (f: A -> option B) :
@@ -503,9 +422,7 @@ Qed.
 
 ```
 
-The above proof is a "proof by computation" which followed from the
-definition of `add`. We'll now go through some "propositional" proofs that
-follow from the rules for manipulating logical AND (`∧`) and OR (`∨`).
+The above proof is a "proof by computation" which followed from the definition of `add`. We'll now go through some "propositional" proofs that follow from the rules for manipulating logical AND (`∧`) and OR (`∨`).
 
 ```coq
 Lemma O_or_succ n :
@@ -525,10 +442,7 @@ Qed.
 
 This proof uses `intros` and `rewrite`.
 
-Coq allows you to write `intros` without arguments, in which case it will
-automatically select names. We strongly recommend in this class to always give
-names, since it makes your proof easier to read and modify, as well as making it
-easier to read the context while you're developing a proof.
+Coq allows you to write `intros` without arguments, in which case it will automatically select names. We strongly recommend in this class to always give names, since it makes your proof easier to read and modify, as well as making it easier to read the context while you're developing a proof.
 
 ```coq
 Lemma eq_add_O_2 n m :
@@ -538,8 +452,6 @@ Proof.
   [intros] tactic - notice the effect on the goal *)
   intros Hn.
 ```
-
-
 
 :::: info Goal diff
 
@@ -556,7 +468,7 @@ Proof.
 ```coq
   intros Hm.
 
-  
+
 ```
 
 `rewrite` is another fundamental proof technique
@@ -564,8 +476,6 @@ Proof.
 ```coq
 rewrite Hn.
 ```
-
-
 
 :::: info Goal diff
 
@@ -588,8 +498,7 @@ Qed.
 
 ```
 
-This lemma is a proof of a disequality, a "not equals". Even this isn't
-built-in to Coq but built from simpler primitives.
+This lemma is a proof of a disequality, a "not equals". Even this isn't built-in to Coq but built from simpler primitives.
 
 ```coq
 Lemma neq_succ_0 n :
@@ -598,8 +507,6 @@ Proof.
   (* Wade through the sea of notation *)
   Locate "<>".
 ```
-
-
 
 :::: note Output
 
@@ -611,12 +518,9 @@ Notation "x <> y" := (not (eq x y)) : type_scope (default interpretation)
 
 ::::
 
-
 ```coq
   Locate "~".
 ```
-
-
 
 :::: note Output
 
@@ -626,12 +530,9 @@ Notation "~ x" := (not x) : type_scope (default interpretation)
 
 ::::
 
-
 ```coq
   Print not.
 ```
-
-
 
 :::: note Output
 
@@ -643,7 +544,6 @@ Arguments not A%type_scope
 ```
 
 ::::
-
 
 ```coq
   (** We see that [a <> b] is notation for [not (a = b)], which is by definition
@@ -677,4 +577,3 @@ Qed.
 
 End MoreNatProofs.
 ```
-

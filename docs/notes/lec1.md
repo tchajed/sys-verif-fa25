@@ -2,10 +2,13 @@
 category: lecture
 order: 1
 ---
+
 # Lecture 1: What is verification?
 
 ::: important Main idea
+
 Program verification consists of some _code_ we want to run, a _specification_ that says what the code should do, and a _proof_ that shows the code follows the specification.
+
 :::
 
 When you write a program, how do you know it does what you want? You've definitely seen testing: run the program and see what it does. Maybe you also write some test cases and re-run them when the code changes. But testing isn't enough to be confident in your code, which you might want if it was really important.
@@ -49,7 +52,7 @@ Verification is distinguished in this list for giving a guarantee for all inputs
 
 - CompCert is a verified C compiler that was an early success of verification (ok, it's more than a decade old), using techniques closely related to what we'll use in this class. A study of C compilers found bugs in every compiler: CompCert had no wrong code generation bugs, and the bugs found were in the (at the time) unverified frontend.
 - seL4 is a verified microkernel used in critical applications like helicopter software and other defense applications.
-- Fiat Crypto and HACL* were used to verify cryptography primitives used in the Chrome and Firefox browsers, respectively. This code is subtle, performance critical, has to run on many architectures, and bugs can cause security vulnerabilities. Chrome was particularly interested in verifying the browser crypto because fixing vulnerabilities requires an update that users might take weeks to install.
+- Fiat Crypto and HACL\* were used to verify cryptography primitives used in the Chrome and Firefox browsers, respectively. This code is subtle, performance critical, has to run on many architectures, and bugs can cause security vulnerabilities. Chrome was particularly interested in verifying the browser crypto because fixing vulnerabilities requires an update that users might take weeks to install.
 - Amazon Web Services (AWS) uses formal methods to reason about the protocols that their services implement. They especially care about things like avoiding data loss in S3, their core storage service.
 - Bedrock Systems is a company developing a verified hypervisor; one key customer is automative companies wanting to replace N different computers with a hypervisor they trust to isolate the components.
 
@@ -113,9 +116,11 @@ func SlowExp(b int, n int) int {
 ```
 
 The specification of `FastExp` can now be written as:
+
 $$
   \forall b, n\ldotp 0 \leq n \to \texttt{FastExp}(b, n) = \texttt{SlowExp}(b, n).
 $$
+
 The equation looks pretty but it's still not totally precise! Why can we treat `FastExp` (and `SlowExp` for that matter) as a function? What if it doesn't terminate, or prints to the screen? What about a similar function that takes a pointer as an input? We'll solve these issues eventually.
 
 If we can formalize the statement above, and _prove_ it, we gain a lot of confidence in `FastExp`'s correctness: it's as good as using `SlowExp`, with the advantage of being faster (due to a separate analysis; performance isn't part of the verification guarantees).
@@ -131,7 +136,7 @@ func ModifyOne(x *int, y *int) int {
 }
 ```
 
-The answer is that it depends!  When reasoning about imperative programs with pointers, a key challenge is _pointer aliasing_: It's possible `x == y` (as pointers) and it does, or they might be distinct. If such a simple one-line function is complicated to think about, how can we handle thinking about larger programs?
+The answer is that it depends! When reasoning about imperative programs with pointers, a key challenge is _pointer aliasing_: It's possible `x == y` (as pointers) and it does, or they might be distinct. If such a simple one-line function is complicated to think about, how can we handle thinking about larger programs?
 
 The answer in this class will be to use _separation logic_, a powerful way to reason about such programs by capturing when pointers don't alias. If you're familiar with Rust, there's a deep connection with ownership in Rust. Separation logic is a more general way to think about ownership that will allow us to not only know our programs are safe, but also that they do the right thing.
 

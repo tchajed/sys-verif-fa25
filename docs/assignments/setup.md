@@ -43,7 +43,7 @@ The setup I recommend is to use Docker, VS Code, and a container I created for t
 
 ::: details Option 1: VS Code + Docker dev container
 
- This setup should work well on macOS and Linux; it should also be workable in Windows with WSL, but I don't have much experience with that.
+This setup should work well on macOS and Linux; it should also be workable in Windows with WSL, but I don't have much experience with that.
 
 Install [Docker](https://www.docker.com/get-started/)
 
@@ -65,8 +65,7 @@ If you feel very comfortable setting up your own tools, you can instead install 
 
 ::: details Option 2: install Coq on your own
 
-Install Coq 8.20.0 for compatibility (Coq 8.19 is very likely to work
-if you can't get the latest version).
+Install Coq 8.20.0 for compatibility (Coq 8.19 is very likely to work if you can't get the latest version).
 
 You will need an IDE for Coq:
 

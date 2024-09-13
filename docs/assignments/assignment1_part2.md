@@ -7,13 +7,14 @@ index: false
 ---
 
 # Assignment 1: Part 2
+
 ::: info
-This is a rendered version of the Coq assignment. You should do the assignment
-in the file `src/sys_verif/coq/assignment1_part2.v`.
+
+This is a rendered version of the Coq assignment. You should do the assignment in the file `src/sys_verif/coq/assignment1_part2.v`.
+
 :::
-Remember that part 1 of this assignment is to complete some of the chapters
-of Software Foundations (and you should do that first); see the [main assignment](./assignment1.md)
-for the full description.
+
+Remember that part 1 of this assignment is to complete some of the chapters of Software Foundations (and you should do that first); see the [main assignment](./assignment1.md) for the full description.
 
 ```coq
 From sys_verif Require Import options.
@@ -23,7 +24,7 @@ Open Scope Z_scope.
 
 ```
 
-## Fixing type errors 
+## Fixing type errors
 
 ```coq
 Module list_defs.
@@ -31,14 +32,9 @@ Module list_defs.
 
 Here you'll get practice fixing type-checking errors.
 
-The first group of definitions uses the `concat` function, which takes a list of
-lists and produces a single list that concatenates all the elements. However,
-some of the calls below were written by a slightly confused developer.
+The first group of definitions uses the `concat` function, which takes a list of lists and produces a single list that concatenates all the elements. However, some of the calls below were written by a slightly confused developer.
 
-For each `Fail Definition` below, fix the definition so it passes the type
-checker and remove the `Fail`. You should try to preserve the "intent" of the
-original definition; don't just replace the whole thing with something trivial
-that works.
+For each `Fail Definition` below, fix the definition so it passes the type checker and remove the `Fail`. You should try to preserve the "intent" of the original definition; don't just replace the whole thing with something trivial that works.
 
 ```coq
 Lemma good_concat : concat [[2; 3]; [1]; [4; 5]] = [2; 3; 1; 4; 5].
@@ -50,8 +46,7 @@ Fail Definition bad_concat_2 := concat [[2; 3; 4]; concat [[1]]; [[7; 10]]].
 
 ```
 
-Assume that `(x: list nat)` is correct in this definition (that is, don't
-change that part).
+Assume that `(x: list nat)` is correct in this definition (that is, don't change that part).
 
 ```coq
 Fail Definition bad_concat_3 (x: list nat) :=
@@ -59,8 +54,7 @@ Fail Definition bad_concat_3 (x: list nat) :=
 
 ```
 
-This next group is a bit tricker, because of how `l !! x` is overloaded, but
-we intend to always use it with lists, where `x` should be of type `nat`.
+This next group is a bit tricker, because of how `l !! x` is overloaded, but we intend to always use it with lists, where `x` should be of type `nat`.
 
 ```coq
 Definition good_lookup_fact (x: list nat): Prop :=
@@ -85,8 +79,6 @@ Proof.
   Search ((delete _ _) !! _).
 ```
 
-
-
 :::: note Output
 
 ```txt title="coq output"
@@ -97,48 +89,48 @@ lookup_delete_ge:
   ∀ {A : Type} (l : list A) (i j : nat),
     (i <= j)%nat → delete i l !! j = l !! S j
 lookup_delete:
-  ∀ {K : Type} {M : Type → Type} {H : FMap M} {H0 : 
-                                               ∀ A : Type, 
-                                                 Lookup K A (M A)} 
-    {H1 : ∀ A : Type, Empty (M A)} {H2 : ∀ A : Type, PartialAlter K A (M A)} 
-    {H3 : OMap M} {H4 : Merge M} {H5 : ∀ A : Type, MapFold K A (M A)} 
+  ∀ {K : Type} {M : Type → Type} {H : FMap M} {H0 :
+                                               ∀ A : Type,
+                                                 Lookup K A (M A)}
+    {H1 : ∀ A : Type, Empty (M A)} {H2 : ∀ A : Type, PartialAlter K A (M A)}
+    {H3 : OMap M} {H4 : Merge M} {H5 : ∀ A : Type, MapFold K A (M A)}
     {EqDecision0 : EqDecision K},
     FinMap K M → ∀ {A : Type} (m : M A) (i : K), delete i m !! i = None
 lookup_delete_ne:
-  ∀ {K : Type} {M : Type → Type} {H : FMap M} {H0 : 
-                                               ∀ A : Type, 
-                                                 Lookup K A (M A)} 
-    {H1 : ∀ A : Type, Empty (M A)} {H2 : ∀ A : Type, PartialAlter K A (M A)} 
-    {H3 : OMap M} {H4 : Merge M} {H5 : ∀ A : Type, MapFold K A (M A)} 
+  ∀ {K : Type} {M : Type → Type} {H : FMap M} {H0 :
+                                               ∀ A : Type,
+                                                 Lookup K A (M A)}
+    {H1 : ∀ A : Type, Empty (M A)} {H2 : ∀ A : Type, PartialAlter K A (M A)}
+    {H3 : OMap M} {H4 : Merge M} {H5 : ∀ A : Type, MapFold K A (M A)}
     {EqDecision0 : EqDecision K},
     FinMap K M
     → ∀ {A : Type} (m : M A) (i j : K), i ≠ j → delete i m !! j = m !! j
 lookup_delete_is_Some:
-  ∀ {K : Type} {M : Type → Type} {H : FMap M} {H0 : 
-                                               ∀ A : Type, 
-                                                 Lookup K A (M A)} 
-    {H1 : ∀ A : Type, Empty (M A)} {H2 : ∀ A : Type, PartialAlter K A (M A)} 
-    {H3 : OMap M} {H4 : Merge M} {H5 : ∀ A : Type, MapFold K A (M A)} 
+  ∀ {K : Type} {M : Type → Type} {H : FMap M} {H0 :
+                                               ∀ A : Type,
+                                                 Lookup K A (M A)}
+    {H1 : ∀ A : Type, Empty (M A)} {H2 : ∀ A : Type, PartialAlter K A (M A)}
+    {H3 : OMap M} {H4 : Merge M} {H5 : ∀ A : Type, MapFold K A (M A)}
     {EqDecision0 : EqDecision K},
     FinMap K M
     → ∀ {A : Type} (m : M A) (i j : K),
         is_Some (delete i m !! j) ↔ i ≠ j ∧ is_Some (m !! j)
 lookup_delete_None:
-  ∀ {K : Type} {M : Type → Type} {H : FMap M} {H0 : 
-                                               ∀ A : Type, 
-                                                 Lookup K A (M A)} 
-    {H1 : ∀ A : Type, Empty (M A)} {H2 : ∀ A : Type, PartialAlter K A (M A)} 
-    {H3 : OMap M} {H4 : Merge M} {H5 : ∀ A : Type, MapFold K A (M A)} 
+  ∀ {K : Type} {M : Type → Type} {H : FMap M} {H0 :
+                                               ∀ A : Type,
+                                                 Lookup K A (M A)}
+    {H1 : ∀ A : Type, Empty (M A)} {H2 : ∀ A : Type, PartialAlter K A (M A)}
+    {H3 : OMap M} {H4 : Merge M} {H5 : ∀ A : Type, MapFold K A (M A)}
     {EqDecision0 : EqDecision K},
     FinMap K M
     → ∀ {A : Type} (m : M A) (i j : K),
         delete i m !! j = None ↔ i = j ∨ m !! j = None
 lookup_delete_Some:
-  ∀ {K : Type} {M : Type → Type} {H : FMap M} {H0 : 
-                                               ∀ A : Type, 
-                                                 Lookup K A (M A)} 
-    {H1 : ∀ A : Type, Empty (M A)} {H2 : ∀ A : Type, PartialAlter K A (M A)} 
-    {H3 : OMap M} {H4 : Merge M} {H5 : ∀ A : Type, MapFold K A (M A)} 
+  ∀ {K : Type} {M : Type → Type} {H : FMap M} {H0 :
+                                               ∀ A : Type,
+                                                 Lookup K A (M A)}
+    {H1 : ∀ A : Type, Empty (M A)} {H2 : ∀ A : Type, PartialAlter K A (M A)}
+    {H3 : OMap M} {H4 : Merge M} {H5 : ∀ A : Type, MapFold K A (M A)}
     {EqDecision0 : EqDecision K},
     FinMap K M
     → ∀ {A : Type} (m : M A) (i j : K) (y : A),
@@ -146,7 +138,6 @@ lookup_delete_Some:
 ```
 
 ::::
-
 
 ```coq
   rewrite lookup_delete //.
@@ -163,8 +154,6 @@ Proof.
   apply map_eq.
 ```
 
-
-
 :::: info Goal
 
 ```txt title="goal 1"
@@ -175,9 +164,7 @@ Proof.
   ∀ i : Z, delete k (<[k:=v]> m) !! i = delete k m !! i
 ```
 
-
 ::::
-
 
 ```coq
   intros k'.
@@ -199,17 +186,11 @@ End map_proofs.
 Module set_proofs.
 ```
 
-
 ### Exercise
 
-`set_solver` on its own fails on the proof below. For this exercise, finish
-the proof by `assert`ing the right fact, proving it, then calling
-`set_solver`. This is good practice for thinking through why the property
-holds and what the automation is missing.
+`set_solver` on its own fails on the proof below. For this exercise, finish the proof by `assert`ing the right fact, proving it, then calling `set_solver`. This is good practice for thinking through why the property holds and what the automation is missing.
 
-(In the future, we won't restrict what tactics you can use to prove theorems,
-but early on it's good for practice.)
-
+(In the future, we won't restrict what tactics you can use to prove theorems, but early on it's good for practice.)
 
 ```coq
 Lemma set_property3 (s1 s2: gset Z) :
@@ -219,9 +200,7 @@ Proof.
 Admitted.
 ```
 
-An alternate proof is to use `set_solver by lia`, a feature of the set
-  solver that extends the automation with the ability to call `lia` when needed.
-  This extra power is enough to do the proof above.
+An alternate proof is to use `set_solver by lia`, a feature of the set solver that extends the automation with the ability to call `lia` when needed. This extra power is enough to do the proof above.
 
 ```coq
 Lemma set_property3_alt_proof (s1 s2: gset Z) :
@@ -237,8 +216,8 @@ End set_proofs.
 ```
 
 ## Verification of a functional interval library
-In this last sub-section, you'll prove the correctness of some operations on
-intervals.
+
+In this last sub-section, you'll prove the correctness of some operations on intervals.
 
 ```coq
 Module interval_verification.
@@ -248,16 +227,9 @@ Record interval :=
 
 ```
 
-All of the interval specifications will be proven in terms of `in_interval` below, which says
-when `x: Z` is an element of an interval.
+All of the interval specifications will be proven in terms of `in_interval` below, which says when `x: Z` is an element of an interval.
 
-You should think of an interval as abstractly representing a set of integers,
-and this definition defines that set. In the future, the gap between what the
-code and the abstraction will be larger (e.g., the code won't have unbounded
-integers at all), so it'll be easier to see what the difference is. On the other
-hand, because the code and the spec are closely related in this example, the
-specs and proofs are quite short.
-
+You should think of an interval as abstractly representing a set of integers, and this definition defines that set. In the future, the gap between what the code and the abstraction will be larger (e.g., the code won't have unbounded integers at all), so it'll be easier to see what the difference is. On the other hand, because the code and the spec are closely related in this example, the specs and proofs are quite short.
 
 ```coq
 Instance in_interval : ElemOf Z interval :=
@@ -266,17 +238,11 @@ Instance in_interval : ElemOf Z interval :=
 
 ```
 
-Making the `in_interval` definition an `Instance` of `ElemOf` extends the
-`∈` notation to have a meaning for our intervals, "overloading" its more common
-meaning as element-of for sets.
+Making the `in_interval` definition an `Instance` of `ElemOf` extends the `∈` notation to have a meaning for our intervals, "overloading" its more common meaning as element-of for sets.
 
-This is what it looks like to use `in_interval` in a theorem.
-Notice that we unfold `elem_of`, which is what the `∈` notation is defined as,
-and then we can unfold `in_interval`.
+This is what it looks like to use `in_interval` in a theorem. Notice that we unfold `elem_of`, which is what the `∈` notation is defined as, and then we can unfold `in_interval`.
 
-This unfolding is required for `lia` to work, since otherwise it doesn't
-understand that `x ∈ i` is a useful arithmetic fact.
-
+This unfolding is required for `lia` to work, since otherwise it doesn't understand that `x ∈ i` is a useful arithmetic fact.
 
 ```coq
 Lemma in_interval_fact x (i: interval) :
@@ -284,8 +250,6 @@ Lemma in_interval_fact x (i: interval) :
 Proof.
   rewrite /elem_of.
 ```
-
-
 
 :::: info Goal
 
@@ -296,9 +260,7 @@ Proof.
   in_interval x i → low i ≤ x
 ```
 
-
 ::::
-
 
 ```coq
   rewrite /in_interval.
@@ -307,8 +269,7 @@ Qed.
 
 ```
 
-First, we give you definitions of `union` and `intersect` and their
-specifications. Prove the implementations meet these specifications.
+First, we give you definitions of `union` and `intersect` and their specifications. Prove the implementations meet these specifications.
 
 ```coq
 Definition union (i1 i2: interval): interval :=
@@ -343,8 +304,7 @@ Qed.
 
 ```
 
-Aside: we proved specifications only in one direction; do you see why the
-other direction isn't true?
+Aside: we proved specifications only in one direction; do you see why the other direction isn't true?
 
 ```coq
 (* Next, implement `is_empty` and prove the specification below for it. *)
@@ -378,10 +338,7 @@ Admitted.
 
 ```
 
-As a sanity check of your `contains_spec` precondition, we've used that
-theorem to prove a specific `contains` fact. This proof won't go through if, for
-example, you add the precondition `False`, which we consider to be an incorrect
-solution. You should not need to change the proof below.
+As a sanity check of your `contains_spec` precondition, we've used that theorem to prove a specific `contains` fact. This proof won't go through if, for example, you add the precondition `False`, which we consider to be an incorrect solution. You should not need to change the proof below.
 
 ```coq
 Lemma contains_spec_check :
@@ -392,9 +349,6 @@ Qed.
 
 ```
 
-
-
 ```coq
 End interval_verification.
 ```
-

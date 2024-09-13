@@ -28,17 +28,13 @@ Definition beats (p1 p2: play) : bool :=
 
 `simpl` computes or "reduces" functions in the goal
 
-`reflexivity` solves a goal of the form `a = a` or fails. It also solves `a = b`
-if `a` and `b` compute to the same thing (so `simpl` is unnecessary in the proof
-below).
+`reflexivity` solves a goal of the form `a = a` or fails. It also solves `a = b` if `a` and `b` compute to the same thing (so `simpl` is unnecessary in the proof below).
 
 ```coq
 Lemma beats_ex_1 : beats paper rock = true.
 Proof.
   simpl.
 ```
-
-
 
 :::: info Goal
 
@@ -47,9 +43,7 @@ Proof.
   true = true
 ```
 
-
 ::::
-
 
 ```coq
  reflexivity.
@@ -71,8 +65,8 @@ Qed.
 ```
 
 ## Using `;` to chain tactics
-`t1; t2` runs `t1`, then `t2` on every subgoal generated from `t1`. This can
-be used to shorten proofs, like this one (compare to `beats_irrefl` above):
+
+`t1; t2` runs `t1`, then `t2` on every subgoal generated from `t1`. This can be used to shorten proofs, like this one (compare to `beats_irrefl` above):
 
 ```coq
 Lemma beats_irrefl' (p: play) : beats p p = false.
@@ -83,8 +77,7 @@ Qed.
 
 ```
 
-`t1; [t2 | t3]` runs `t1`, then runs `t2` on the first generated subgoal and
-`t3` on the second. It fails if there aren't exactly two subgoals.
+`t1; [t2 | t3]` runs `t1`, then runs `t2` on the first generated subgoal and `t3` on the second. It fails if there aren't exactly two subgoals.
 
 `t3` can be ommitted (as below), in which case nothing is run in that subgoal.
 
@@ -114,8 +107,6 @@ Proof.
   intros HPQ HQR HP.
   apply HQR.
 ```
-
-
 
 :::: info Goal diff
 
@@ -148,8 +139,6 @@ Proof.
   apply HPQ in HP.
 ```
 
-
-
 :::: info Goal diff
 
 ```txt title="goal diff"
@@ -173,14 +162,9 @@ Qed.
 
 An automated proof using `intuition`.
 
-You'll almost always want to use `intuition auto` - `intuition` takes another
-tactic to use for solving side conditions but `auto` is a good choice.
+You'll almost always want to use `intuition auto` - `intuition` takes another tactic to use for solving side conditions but `auto` is a good choice.
 
-Note: the tactic name `intuition`, confusingly, does not refer to an obvious or
-instinctive proof, but to _intuitionistic logic_. This is a version of logic in
-which doesn't use _classical logic_'s "excluded middle", which says that `∀ P, P
-∨ ¬P` holds.  For the most part you can ignore this distinction, and Coq
-supports assuming the law of excluded middle and thus using classical logic.
+Note: the tactic name `intuition`, confusingly, does not refer to an obvious or instinctive proof, but to _intuitionistic logic_. This is a version of logic in which doesn't use _classical logic_'s "excluded middle", which says that `∀ P, P ∨ ¬P` holds. For the most part you can ignore this distinction, and Coq supports assuming the law of excluded middle and thus using classical logic.
 
 ```coq
 Lemma propositional_demo_3 (P Q R : Prop) :
@@ -191,9 +175,7 @@ Qed.
 
 ```
 
-`destruct` on a hypothesis of the form `A ∨ B` produces two goals, one for
-`A` and one for `B`. Below we also use `as [HP | HQ]` to name the hypothesis in
-each goal.
+`destruct` on a hypothesis of the form `A ∨ B` produces two goals, one for `A` and one for `B`. Below we also use `as [HP | HQ]` to name the hypothesis in each goal.
 
 ```coq
 Lemma propositional_demo_or (P Q : Prop) :
@@ -212,20 +194,15 @@ Qed.
 
 ### `subst`
 
-`subst` repeatedly finds an equality of the form `x = ...` and substitutes `x`
-for the right-hand side: it rewrites the lemma everywhere, then removes `x` from
-the context (since it is no longer used). Useful to clean up the context.
+`subst` repeatedly finds an equality of the form `x = ...` and substitutes `x` for the right-hand side: it rewrites the lemma everywhere, then removes `x` from the context (since it is no longer used). Useful to clean up the context.
 
 ## List tactics
 
-You'll mainly use list lemmas together with the general tactics `apply`, `apply ... in`,
-and `assert`.
+You'll mainly use list lemmas together with the general tactics `apply`, `apply ... in`, and `assert`.
 
 ### `autorewrite with len`, `list_elem`
 
-We have two useful tactics: `autorewrite with len` simplifies `length (...)` for
-various list functions, and `list_elem` is best explaining by the demo below.
-
+We have two useful tactics: `autorewrite with len` simplifies `length (...)` for various list functions, and `list_elem` is best explaining by the demo below.
 
 ```coq
 Lemma list_reasoning_demo (l1 l2: list Z) (i: nat) (x: Z) :
@@ -251,10 +228,7 @@ Qed.
 
 ```
 
-`list_elem l i as x` takes a list `l`, an index `i`, and produces a variable
-`x` and a hypothesis `Hx_lookup : l !! i = Some x`. As a side condition, you
-must prove `i < length l` (required for such an `x` to exist); some automation
-tries to prove this fact for you, though.
+`list_elem l i as x` takes a list `l`, an index `i`, and produces a variable `x` and a hypothesis `Hx_lookup : l !! i = Some x`. As a side condition, you must prove `i < length l` (required for such an `x` to exist); some automation tries to prove this fact for you, though.
 
 ```coq
 Lemma list_elem_demo (l1 l2: list Z) (i: nat) :
@@ -271,8 +245,7 @@ Qed.
 
 ## Rewriting
 
-Rewriting is the act of using `a = b` to replace `a` with `b`. It's a powerful
-and useful proof technique.
+Rewriting is the act of using `a = b` to replace `a` with `b`. It's a powerful and useful proof technique.
 
 Let's first see a simple example:
 
@@ -285,8 +258,6 @@ Proof.
   rewrite Heq.
 ```
 
-
-
 :::: info Goal diff
 
 ```txt title="goal diff"
@@ -298,8 +269,8 @@ Proof.
 ```
 
 ::::
-It's a seemingly small change but the left and right-hand sides are now
-  equal!
+
+It's a seemingly small change but the left and right-hand sides are now equal!
 
 ```coq
 reflexivity.
@@ -339,8 +310,6 @@ Proof.
   rewrite gmap_lookup_delete.
 ```
 
-
-
 :::: info Goal diff
 
 ```txt title="goal diff"
@@ -361,23 +330,20 @@ Qed.
 
 ```
 
-###  rewrite !
+### rewrite !
 
 ```coq
 Lemma lookup_delete_ex2 m k v :
   delete k (<[k := v]> m) !! k = delete k m !! k.
 Proof.
-  
+
 ```
 
-`rewrite !lem` rewrites `lem` one or more times (fails if it never
-  applies)
+`rewrite !lem` rewrites `lem` one or more times (fails if it never applies)
 
 ```coq
 rewrite !gmap_lookup_delete.
 ```
-
-
 
 :::: info Goal
 
@@ -389,9 +355,7 @@ rewrite !gmap_lookup_delete.
   None = None
 ```
 
-
 ::::
-
 
 ```coq
   done.
@@ -399,17 +363,16 @@ Qed.
 
 ```
 
-###  rewrite //
+### rewrite //
 
 ```coq
 Lemma lookup_delete_ex3  m k v :
   delete k (<[k := v]> m) !! k = delete k m !! k.
 Proof.
-  
+
 ```
 
-The `//` is an _action_ that tries to prove "trivial" goals (or subgoals
-  from rewrite side conditions). We can use it to give a one-line proof.
+The `//` is an _action_ that tries to prove "trivial" goals (or subgoals from rewrite side conditions). We can use it to give a one-line proof.
 
 ```coq
 rewrite !gmap_lookup_delete //.
@@ -425,19 +388,14 @@ Lemma lookup_delete_ne_ex1 m k v k' :
   delete k (<[k := v]> m) !! k' = delete k m !! k'.
 Proof.
   intros Hne.
-  
+
 ```
 
-This lemma to rewrite with has a premise or _side condition_: it only
-  applies if the two keys involved are not equal. By default, `rewrite` creates
-  a subgoal for every side condition, so we are left with the modified goal and
-  the side condition.
+This lemma to rewrite with has a premise or _side condition_: it only applies if the two keys involved are not equal. By default, `rewrite` creates a subgoal for every side condition, so we are left with the modified goal and the side condition.
 
 ```coq
 rewrite gmap_lookup_delete_ne.
 ```
-
-
 
 :::: info Goals
 
@@ -461,9 +419,7 @@ rewrite gmap_lookup_delete_ne.
   <[k:=v]> m !! k' = delete k m !! k'
 ```
 
-
 ::::
-
 
 ```coq
   (* We could now write a structured proof with `{ proof1. } proof2.` or
@@ -473,8 +429,7 @@ Abort.
 
 ```
 
-Let's demonstrate something else for this kind of simple side
-  condition.
+Let's demonstrate something else for this kind of simple side condition.
 
 ```coq
 Lemma lookup_delete_ne_ex2 m k v k' :
@@ -482,26 +437,16 @@ Lemma lookup_delete_ne_ex2 m k v k' :
   delete k (<[k := v]> m) !! k' = delete k m !! k'.
 Proof.
   intros Hne.
-  
+
 ```
 
-Adding `by t` to a `rewrite` causes it to succeed only if all side
-  conditions can be proven with the tactic `t`. This is especially useful
-  because if a side condition is false, the goal might become unprovable after
-  applying the rewrite, and we want to avoid getting stuck in those situations
-  (without realizing it).
+Adding `by t` to a `rewrite` causes it to succeed only if all side conditions can be proven with the tactic `t`. This is especially useful because if a side condition is false, the goal might become unprovable after applying the rewrite, and we want to avoid getting stuck in those situations (without realizing it).
 
-  Unfortunately Coq actually has two `rewrite` tactics: one from the standard
-  library and one from a library called SSReflect; the latter is what we're
-  using because it has some other useful features, but `rewrite ... by t` is
-  only in the standard one. We can use the standard rewrite with `rewrite ->`.
-
+Unfortunately Coq actually has two `rewrite` tactics: one from the standard library and one from a library called SSReflect; the latter is what we're using because it has some other useful features, but `rewrite ... by t` is only in the standard one. We can use the standard rewrite with `rewrite ->`.
 
 ```coq
 rewrite -> gmap_lookup_delete_ne by done.
 ```
-
-
 
 :::: info Goal diff
 
@@ -517,16 +462,12 @@ rewrite -> gmap_lookup_delete_ne by done.
 ```
 
 ::::
-It's more cumbersome but we can still assert that the side condition is
-  proven with SSReflect's rewrite. The syntax here is `t; [ t1 | ]`, which runs
-  `t2` only on the first goal from `t`. (You can also do `t; [ | t2 ]` or even
-  `t; [ t1 |t2 ]`).
+
+It's more cumbersome but we can still assert that the side condition is proven with SSReflect's rewrite. The syntax here is `t; [ t1 | ]`, which runs `t2` only on the first goal from `t`. (You can also do `t; [ | t2 ]` or even `t; [ t1 |t2 ]`).
 
 ```coq
 rewrite gmap_lookup_delete_ne; [ done | ].
 ```
-
-
 
 :::: info Goal diff
 
@@ -541,18 +482,15 @@ rewrite gmap_lookup_delete_ne; [ done | ].
 ```
 
 ::::
-Another trick is to use `rewrite lem //`, and then only proceed if this
-  leaves one goal. This won't work when you want a tactic more powerful than
-  `done`.
+
+Another trick is to use `rewrite lem //`, and then only proceed if this leaves one goal. This won't work when you want a tactic more powerful than `done`.
 
 ```coq
 rewrite lookup_insert_ne //.
 Qed.
 ```
 
-If you're only going to remember one of these, I would use the first
-  whenever you have a side condition. Hopefully someday the SSReflect
-  `rewrite` supports a `by` clause...
+If you're only going to remember one of these, I would use the first whenever you have a side condition. Hopefully someday the SSReflect `rewrite` supports a `by` clause...
 
 ```coq
 End rewriting.
@@ -563,24 +501,15 @@ End rewriting.
 
 `lia` solves goals involving arithmetic (with `nat` or `Z`).
 
-`auto` runs a proof search using hints that can be programmed with commands like
-`Hint Resolve`, for example. `auto` automatically tries to solve both sides of
-an `and`, introduces `forall`s, and tries to apply `P -> Q` in the context, but
-the programmed hints greatly affect what it can do. Solves the goal or does nothing.
+`auto` runs a proof search using hints that can be programmed with commands like `Hint Resolve`, for example. `auto` automatically tries to solve both sides of an `and`, introduces `forall`s, and tries to apply `P -> Q` in the context, but the programmed hints greatly affect what it can do. Solves the goal or does nothing.
 
-`set_solver` is a tactic from the [std++](https://gitlab.mpi-sws.org/iris/stdpp)
-library that automates solving many goals involving sets, with support for
-reasoning about `∈`, `∪` (union), `∩` (intersection), `s1 ∖ s2` (set
-subtraction), `⊆`, and equality between sets.
+`set_solver` is a tactic from the [std++](https://gitlab.mpi-sws.org/iris/stdpp) library that automates solving many goals involving sets, with support for reasoning about `∈`, `∪` (union), `∩` (intersection), `s1 ∖ s2` (set subtraction), `⊆`, and equality between sets.
 
 `done` solves "simple" goals with limited automation. Fails or solves the goal.
 
-
 ## Proof automation
 
-This is a bigger topic than this reference can cover, but here are a few tactics
-you might see when reading code and a brief description.
-
+This is a bigger topic than this reference can cover, but here are a few tactics you might see when reading code and a brief description.
 
 ### Tacticals
 
@@ -590,8 +519,7 @@ A "tactical" is a tactic that takes another tactic as an argument and modifies h
 
 `repeat t` runs `t` until it fails to make progress.
 
-`progress t` runs `t` and fails if it doesn't make progress. (Think about
-`simpl` vs `progress simpl`.)
+`progress t` runs `t` and fails if it doesn't make progress. (Think about `simpl` vs `progress simpl`.)
 
 `solve [ t ]` runs `t` and fails if it doesn't solve the goal
 
@@ -599,23 +527,14 @@ A "tactical" is a tactic that takes another tactic as an argument and modifies h
 
 `first [ t1 | t2 ]` runs `t1`, but if it fails instead runs `t2`.
 
-`first t` runs `t` on the first subgoal. `t1; first t2` is the same as `t1; [ t2
-| .. ]` (the `..` allows this to work regardless of how many additional subgoals
-there are, including none).
-
+`first t` runs `t` on the first subgoal. `t1; first t2` is the same as `t1; [ t2 | .. ]` (the `..` allows this to work regardless of how many additional subgoals there are, including none).
 
 ### Primitives
 
-Some tactics make more sense to use from automation or with tacticals than in
-interactive use.
+Some tactics make more sense to use from automation or with tacticals than in interactive use.
 
-`fail <n> "msg"` fails and reports `msg`. `fail "msg"` is equivalent to `fail 0
-"msg"`. The `n` is used to break through n levels of "catching" failures, so for
-example `try fail "msg"` does nothing, but `try fail 1 "msg"` breaks through the
-`try` and fails.
+`fail <n> "msg"` fails and reports `msg`. `fail "msg"` is equivalent to `fail 0 "msg"`. The `n` is used to break through n levels of "catching" failures, so for example `try fail "msg"` does nothing, but `try fail 1 "msg"` breaks through the `try` and fails.
 
 `idtac` does nothing. Can be useful when a tactic is required.
 
 `idtac "msg"` prints a string to the responses output
-
-

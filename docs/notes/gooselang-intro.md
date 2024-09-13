@@ -6,9 +6,7 @@ tags: [draft]
 
 # Lecture 10: Verifying Go code
 
-::: warning
-This note is a draft.
-:::
+::: warning This note is a draft. :::
 
 Recall the FastExp example:
 

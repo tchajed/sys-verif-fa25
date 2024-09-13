@@ -15,9 +15,9 @@ By the end of this lecture, you should be able to
 2. Translate informal proof to tactics
 
 ## Logistics
-Make sure you have keyboard shortcuts working. The essential command is
-"Coq: Interpret to Point", but it's sometimes useful to also have "Coq: Step
-Forward" and "Coq: Step Backward".
+
+Make sure you have keyboard shortcuts working. The essential command is "Coq: Interpret to Point", but it's sometimes useful to also have "Coq: Step Forward" and "Coq: Step Backward".
+
 ## Review exercise: safe vs unsafe tactics (part 1)
 
 Recall some tactics we saw last lecture:
@@ -28,11 +28,10 @@ Recall some tactics we saw last lecture:
 - `simpl`
 - `exists` (provides a witness when the goal is `exists (x: T), P x`)
 
-Define an **safe tactic** as one that if the goal is true, creates only true
-goals. Define an **unsafe** tactic as a not safe tactic (bonus question: can
-you rephrase that without the negation?)
+Define an **safe tactic** as one that if the goal is true, creates only true goals. Define an **unsafe** tactic as a not safe tactic (bonus question: can you rephrase that without the negation?)
 
 Which of the above tactics are safe? Why?
+
 ## Proofs about recursive functions
 
 ```coq
@@ -52,8 +51,7 @@ End NatDefs.
 
 ```
 
-We'll go back to using the standard library definitions for the rest of the
-file.
+We'll go back to using the standard library definitions for the rest of the file.
 
 ```coq
 Module MoreNatProofs.
@@ -67,11 +65,7 @@ Qed.
 
 ```
 
-The above proof is a "proof by computation" which followed from the
-definition of `add`. The reverse doesn't follow from just computation: `add`
-pattern matches on `n`, but it's a variable. Instead, we need to prove this by
-induction:
-
+The above proof is a "proof by computation" which followed from the definition of `add`. The reverse doesn't follow from just computation: `add` pattern matches on `n`, but it's a variable. Instead, we need to prove this by induction:
 
 ```coq
 (** This will generally be set for you in this class. It enforces structured
@@ -93,18 +87,14 @@ Abort.
 
 ```
 
-Recall the _principle of induction_: if $P$ is some property of natural
-numbers and we want to prove $\forall n, P(n)$, then we can do the proof as
-follows:
+Recall the _principle of induction_: if $P$ is some property of natural numbers and we want to prove $\forall n, P(n)$, then we can do the proof as follows:
 
 - **base case:** show that $P(0)$ is true
 - **inductive step:** for any $n'$, assume $P(n')$ and prove $P(1 + n')$.
 
 From these two we conclude exactly what we wanted: $\forall n, P(n)$.
 
-This is exactly what we can do with the `induction` tactic. What Coq will do for us is
-infer the property of `n` we're proving based on the goal.
-
+This is exactly what we can do with the `induction` tactic. What Coq will do for us is infer the property of `n` we're proving based on the goal.
 
 ```coq
 Lemma add_0_r n :
@@ -122,26 +112,19 @@ Qed.
 
 ```
 
-We'll now go through some "propositional" proofs that follow from the rules for
-manipulating logical AND (`∧`) and OR (`∨`).
+We'll now go through some "propositional" proofs that follow from the rules for manipulating logical AND (`∧`) and OR (`∨`).
 
-First, let's just recall the rules with toy examples. In these examples, `P`,
-`Q`, `R` will be used as arbitrary "propositions" - for the intuition it's
-sufficient to think of these as boolean-valued facts that can be true or false.
-They would be things like `n = 3` or `n < m`. The reason they aren't booleans in
-Coq is a deep theoretical one we won't worry about.
-
+First, let's just recall the rules with toy examples. In these examples, `P`, `Q`, `R` will be used as arbitrary "propositions" - for the intuition it's sufficient to think of these as boolean-valued facts that can be true or false. They would be things like `n = 3` or `n < m`. The reason they aren't booleans in Coq is a deep theoretical one we won't worry about.
 
 ```coq
 Lemma or_intro_r (P Q R: Prop) :
   Q -> P \/ Q.
 Proof.
   intros HQ.
-  
+
 ```
 
-Pick the right disjunct to prove. Similarly, `left` would leave use to
-  prove `P`.
+Pick the right disjunct to prove. Similarly, `left` would leave use to prove `P`.
 
 ```coq
 right.
@@ -154,17 +137,14 @@ Lemma or_elim (P Q R: Prop) :
   (P \/ Q) -> R.
 Proof.
   intros HR1 HR2 H.
-  
+
 ```
 
-`destruct` on H, which is an `∨`, leaves us with two goals: why? what are
-  they?
+`destruct` on H, which is an `∨`, leaves us with two goals: why? what are they?
 
 ```coq
 destruct H as [HP | HQ].
 ```
-
-
 
 :::: info Goals
 
@@ -186,9 +166,7 @@ destruct H as [HP | HQ].
   R
 ```
 
-
 ::::
-
 
 ```coq
   - apply (HR1 HP).
@@ -201,7 +179,7 @@ Lemma and_intro P Q :
   P /\ Q.
 Proof.
   intros HP HQ.
-  
+
 ```
 
 `split` turns a proof of A ∧ B into two separate goals
@@ -209,8 +187,6 @@ Proof.
 ```coq
 split.
 ```
-
-
 
 :::: info Goals
 
@@ -231,9 +207,7 @@ split.
   P
 ```
 
-
 ::::
-
 
 ```coq
   - assumption.
@@ -244,7 +218,7 @@ Lemma and_elim_r P Q :
   (P /\ Q) -> Q.
 Proof.
   intros H.
-  
+
 ```
 
 `destruct` on an `∧` has a very different effect - why?
@@ -258,9 +232,7 @@ Qed.
 
 ### Proof trees
 
-On board: we can visualize the effect of each of these strategies as a _proof
-tree_.
-
+On board: we can visualize the effect of each of these strategies as a _proof tree_.
 
 ### Back to nat
 
@@ -282,10 +254,7 @@ Qed.
 
 This proof uses `intros` and `rewrite`.
 
-Coq allows you to write `intros` without arguments, in which case it will
-automatically select names. We strongly recommend in this class to always give
-names, since it makes your proof easier to read and modify, as well as making it
-easier to read the context while you're developing a proof.
+Coq allows you to write `intros` without arguments, in which case it will automatically select names. We strongly recommend in this class to always give names, since it makes your proof easier to read and modify, as well as making it easier to read the context while you're developing a proof.
 
 ```coq
 Lemma eq_add_O_2 n m :
@@ -295,8 +264,6 @@ Proof.
   [intros] tactic - notice the effect on the goal *)
   intros Hn.
 ```
-
-
 
 :::: info Goal diff
 
@@ -314,7 +281,7 @@ Proof.
 ```coq
   intros Hm.
 
-  
+
 ```
 
 `rewrite` is another fundamental proof technique
@@ -322,8 +289,6 @@ Proof.
 ```coq
 rewrite Hn.
 ```
-
-
 
 :::: info Goal diff
 
@@ -345,8 +310,7 @@ Qed.
 
 ```
 
-This lemma is a proof of a disequality, a "not equals". Even this isn't
-built-in to Coq but built from simpler primitives.
+This lemma is a proof of a disequality, a "not equals". Even this isn't built-in to Coq but built from simpler primitives.
 
 ```coq
 Lemma neq_succ_0 n :
@@ -356,13 +320,11 @@ Proof.
   Locate "<>".
 ```
 
-
-
 :::: note Output
 
 ```txt title="coq output"
 goal 1 is:
-  
+
   n, m : nat
   Hn : n = 0
   Hm : m = 0
@@ -372,18 +334,15 @@ goal 1 is:
 
 ::::
 
-
 ```coq
   Locate "~".
 ```
-
-
 
 :::: note Output
 
 ```txt title="coq output"
 goal 1 is:
-  
+
   n, m : nat
   Hn : n = 0
   Hm : m = 0
@@ -393,12 +352,9 @@ goal 1 is:
 
 ::::
 
-
 ```coq
   Print not.
 ```
-
-
 
 :::: note Output
 
@@ -409,7 +365,6 @@ Notation "x <> y" := (not (eq x y)) : type_scope (default interpretation)
 ```
 
 ::::
-
 
 ```coq
   (** We see that [a <> b] is notation for [not (a = b)], which is by definition
@@ -443,8 +398,7 @@ Qed.
 
 ```
 
-Here's a toy example to illustrate what using and proving with AND looks
-like.
+Here's a toy example to illustrate what using and proving with AND looks like.
 
 ```coq
 Lemma and_or_example (P Q: Prop) :
@@ -465,8 +419,6 @@ Proof.
   Locate "<->".
 ```
 
-
-
 :::: note Output
 
 ```txt title="coq output"
@@ -474,7 +426,6 @@ Notation "~ x" := (not x) : type_scope (default interpretation)
 ```
 
 ::::
-
 
 ```coq
   unfold iff.
@@ -495,10 +446,7 @@ Qed.
 
 ```
 
-You can see the use of bullets `-` and `+` to structure the proof above. You
-can also use `{ ... }` (used once above), which are often preferred if the proof
-of the first subgoal is small compared to the rest of the proof (such as the
-single-line `{ reflexivity. }` above).
+You can see the use of bullets `-` and `+` to structure the proof above. You can also use `{ ... }` (used once above), which are often preferred if the proof of the first subgoal is small compared to the rest of the proof (such as the single-line `{ reflexivity. }` above).
 
 ```coq
 Lemma add_comm n1 n2 :
@@ -506,21 +454,16 @@ Lemma add_comm n1 n2 :
 Proof.
   induction n1 as [|n1 IHn].
   - simpl.
-    
+
 ```
 
-An important part of your job in constructing both the informal and
-    formal proof is to think about how previously proven (by you or someone
-    else) lemmas might help you. In this case we did this part of the proof
-    above.
+An important part of your job in constructing both the informal and formal proof is to think about how previously proven (by you or someone else) lemmas might help you. In this case we did this part of the proof above.
 
 ```coq
 rewrite add_0_r.
     reflexivity.
   - simpl.
 ```
-
-
 
 :::: info Goal
 
@@ -530,7 +473,6 @@ not = fun A : Prop => A -> False
 
 Arguments not A%type_scope
 ```
-
 
 ::::
 
@@ -559,13 +501,10 @@ Lemma add_comm n1 n2 :
 Proof.
   induction n1 as [|n1 IHn].
   - simpl.
-    
+
 ```
 
-An important part of your job in constructing both the informal and
-    formal proof is to think about how previously proven (by you or someone
-    else) lemmas might help you. In this case we did this part of the proof
-    above.
+An important part of your job in constructing both the informal and formal proof is to think about how previously proven (by you or someone else) lemmas might help you. In this case we did this part of the proof above.
 
 ```coq
 rewrite add_0_r.
@@ -582,35 +521,25 @@ End MoreNatProofs.
 
 ## Option monad
 
-This section introduces two more core features of functional programming:
-polymorphic types (also called "generics" in other languages) and "higher-order
-functions" (functions that take other functions as parameters).
-
-
+This section introduces two more core features of functional programming: polymorphic types (also called "generics" in other languages) and "higher-order functions" (functions that take other functions as parameters).
 
 ```coq
 Module Option.
 
-  
+
 ```
 
-`option` is a polymorphic type: it takes a type `A` as an argument, and
-  (maybe) contains a value of that arbitrary type. `option A` is the simplest
-  "container" type.
+`option` is a polymorphic type: it takes a type `A` as an argument, and (maybe) contains a value of that arbitrary type. `option A` is the simplest "container" type.
 
 ```coq
 Inductive option (A: Type) :=
   | Some (x: A)
   | None.
 
-  
+
 ```
 
-Here are some functions you can define on `option`. There are good
-  motivations for _why_ you should define these particular ones, but we won't
-  get into that (and it isn't all that important for this class). For now, just
-  try to understand the behavior.
-`map` runs `f` "inside" the optional value.
+Here are some functions you can define on `option`. There are good motivations for _why_ you should define these particular ones, but we won't get into that (and it isn't all that important for this class). For now, just try to understand the behavior. `map` runs `f` "inside" the optional value.
 
 ```coq
 Definition map {A B} (ma: option A) (f: A -> B) : option B :=
@@ -619,56 +548,42 @@ Definition map {A B} (ma: option A) (f: A -> B) : option B :=
     | None _ => None B
     end.
 
-  
+
 ```
 
-`Some` and `None` take an extra type argument `A: Type` that comes from
-  the inductive definition. You'll notice we supply an `_` in the pattern match;
-  this is because that argument is fixed to be `A` based on the type of `ma` and
-  can't actually be pattern matched on. To make it easier to work with
-  polymorphic functions, Coq has a feature called _implicit arguments_.
-These commands modify how type inference treats `Some` and `None`, making
-  the type argument implicit (that's what the curly braces mean). Don't worry
-  about the syntax; you won't need to do this yourself. Ordinarily we would do
-  this setup right after defining the type, but for illustration we first wrote
-  `map`.
+`Some` and `None` take an extra type argument `A: Type` that comes from the inductive definition. You'll notice we supply an `_` in the pattern match; this is because that argument is fixed to be `A` based on the type of `ma` and can't actually be pattern matched on. To make it easier to work with polymorphic functions, Coq has a feature called _implicit arguments_. These commands modify how type inference treats `Some` and `None`, making the type argument implicit (that's what the curly braces mean). Don't worry about the syntax; you won't need to do this yourself. Ordinarily we would do this setup right after defining the type, but for illustration we first wrote `map`.
 
 ```coq
 Arguments Some {A} x.
   Arguments None {A}.
 
-  
+
 ```
 
-Now we can just supply the element to `Some` and let type inference figure
-  out what type it should produce:
+Now we can just supply the element to `Some` and let type inference figure out what type it should produce:
 
 ```coq
 Definition some_ex : option nat := Some 3.
-  
+
 ```
 
-Even this works, using the annotation `option nat` to figure out what type
-  to pass to `None`.
+Even this works, using the annotation `option nat` to figure out what type to pass to `None`.
 
 ```coq
 Definition none_ex : option nat := None.
 
-  
+
 ```
 
-It is also possible to pass the type arguments if needed. `@None` is just
-  like `None` but with all implicit arguments made explicit:
+It is also possible to pass the type arguments if needed. `@None` is just like `None` but with all implicit arguments made explicit:
 
 ```coq
 Definition none_ex_2 := @None nat.
 
-  
+
 ```
 
-We'll now define `return_` (it should be called `return` but that's a Coq
-  keyword) and `bind`. These make `option` into a _Monad_ but you don't need
-  to understand that, just read the definitions.
+We'll now define `return_` (it should be called `return` but that's a Coq keyword) and `bind`. These make `option` into a _Monad_ but you don't need to understand that, just read the definitions.
 
 ```coq
 Definition return_ {A} (x: A) : option A := Some x.
@@ -679,11 +594,10 @@ Definition return_ {A} (x: A) : option A := Some x.
     | None => None
     end.
 
-  
+
 ```
 
-These are some properties of `return_` and `bind` (again, good reason for
-  these but not relevant here).
+These are some properties of `return_` and `bind` (again, good reason for these but not relevant here).
 
 ```coq
 Lemma return_left_id {A B} (x: A) (f: A -> option B) :
@@ -700,4 +614,3 @@ Lemma return_left_id {A B} (x: A) (f: A -> option B) :
 
 End Option.
 ```
-
