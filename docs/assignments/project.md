@@ -28,3 +28,11 @@ Many programs rely on a such a library for manipulating text encoded as UTF-8. T
 A principle task for you in this project is to understand and encode the UTF-8 spec using pure Coq functions; this would be of independent interest and you'll learn something valuable.
 
 Note that implementing Unicode on top of UTF-8 is a massive task. I haven't looked into what this would entail and if there's a useful and small-enough starting point, but you're welcome to do that study and report back.
+
+## Verify a range map data structure
+
+Verify a data structure that can efficiently map a (potentially large) range of keys to a single value. Example use cases include processing a firewall configuration, where the keys would be IP addresses and rules apply to whole IP address ranges, or for efficiently filtering based on `.gitignore` rules.
+
+You can simplify the implementation by only supporting integer keys. A more sophisticated implementation would support strings; Goose does not (currently) support string comparison with `s1 < s2`, so you would need to implement this yourself.
+
+This requires some data structure design. A starting point would be to maintain a list of sorted ranges that you search with binary search.
