@@ -21,19 +21,10 @@ Adapt the [implementation](https://cs.opensource.google/go/go/+/refs/tags/go1.23
 
 ## Verify a UTF-8 library
 
-Verify a library for UTF-8; a minimum implementation would be
-[Valid](https://pkg.go.dev/unicode/utf8@go1.23.1#Valid) (which checks if a
-byte sequence has only valid UTF-8-encoded runes) and
-[DecodeRune](https://pkg.go.dev/unicode/utf8@go1.23.1#DecodeRune) (which find
-the end of the first rune in a byte sequence).
+Verify a library for UTF-8; a minimum implementation would be [Valid](https://pkg.go.dev/unicode/utf8@go1.23.1#Valid) (which checks if a byte sequence has only valid UTF-8-encoded runes) and [DecodeRune](https://pkg.go.dev/unicode/utf8@go1.23.1#DecodeRune) (which find the end of the first rune in a byte sequence).
 
-Many programs rely on a such a library for manipulating text encoded as UTF-8.
-This code is a bit tricky to write, and needs to be high performance.
+Many programs rely on a such a library for manipulating text encoded as UTF-8. This code is a bit tricky to write, and needs to be high performance.
 
-A principle task for you in this project is to understand and encode the UTF-8
-spec using pure Coq functions; this would be of independent interest and you'll
-learn something valuable.
+A principle task for you in this project is to understand and encode the UTF-8 spec using pure Coq functions; this would be of independent interest and you'll learn something valuable.
 
-Note that implementing Unicode on top of UTF-8 is a massive task. I haven't
-looked into what this would entail and if there's a useful and small-enough
-starting point, but you're welcome to do that study and report back.
+Note that implementing Unicode on top of UTF-8 is a massive task. I haven't looked into what this would entail and if there's a useful and small-enough starting point, but you're welcome to do that study and report back.
