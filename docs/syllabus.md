@@ -1,5 +1,5 @@
 ---
-icon: 'circle-exclamation'
+icon: "circle-exclamation"
 ---
 
 # Syllabus

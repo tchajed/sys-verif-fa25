@@ -24,7 +24,9 @@ I would recommend aiming to finish parts 0 and 1 by Tuesday, Sep 17th to be on t
 The [assignment setup page](./setup) has instructions on getting the sys-verif-fa24-proofs repo and installing Coq. Follow those first.
 
 ::: warning
+
 You might run into unexpected difficulties with installing the software, so do it early and ask for help quickly if you get stuck. It isn't a goal of the class to teach you to install software, but it is necessary to make progress on anything else.
+
 :::
 
 ## Part 1: Software Foundations exercises
@@ -41,19 +43,18 @@ Most of these chapters is assigned, but there are a few optional parts:
 - Induction:
   - You can skip the last section, "Bin to Nat and Back to Bin" (but do the previous one, "Nat to Bin and Back to Nat").
 - Logic:
-  - You should read "Working with Decidable Properties" but don't need to do the
-    proofs. We'll use an approach slightly different from what the chapter
-    explains, and you won't need to do any related proofs.
+  - You should read "Working with Decidable Properties" but don't need to do the proofs. We'll use an approach slightly different from what the chapter explains, and you won't need to do any related proofs.
   - You can skip the last section, "The Logic of Coq". I omit this because it's not terribly relevant to this class but I personally think this part is fascinating.
 - Poly:
   - This is only assigned as optional reading, but don't let that stop you from doing the exercises.
   - The last section on Church Numerals is a theoretical topic that isn't relevant to this class.
 
 ::: important
+
 These chapters have a lot of small, easy exercises to get you practice. If you find anything difficult, come to office hours sooner rather than later to get it sorted out. If they're easy, note that proofs will become more difficult quickly after this.
+
 :::
 
 ## Part 2: verifying functional programs
 
-Finish the exercises in `src/sys_verif/coq/assignment1_part2.v`. You can view a
-rendering of [Assignment 1 part 2](./assignment1_part2.md) as a reference.
+Finish the exercises in `src/sys_verif/coq/assignment1_part2.v`. You can view a rendering of [Assignment 1 part 2](./assignment1_part2.md) as a reference.
