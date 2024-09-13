@@ -1,12 +1,8 @@
 {
-  "include": [
-    "docs/.vuepress/**/*.ts",
-  ],
-  "exclude": [
-    "node_modules",
-  ],
+  "include": ["docs/.vuepress/**/*.ts"],
+  "exclude": ["node_modules"],
   "compilerOptions": {
     "strict": true,
-    "skipLibCheck": true,
-  },
+    "skipLibCheck": true
+  }
 }

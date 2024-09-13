@@ -1,12 +1,10 @@
 # Systems verification Fall 2024 course website
 
-[![deploy](https://github.com/tchajed/sys-verif-fa24/actions/workflows/deploy.yml/badge.svg)](https://github.com/tchajed/sys-verif-fa24/actions/workflows/deploy.yml)
-[![website](https://img.shields.io/badge/website-blue?logo=web)](https://tchajed.github.io/sys-verif-fa24/)
+[![deploy](https://github.com/tchajed/sys-verif-fa24/actions/workflows/deploy.yml/badge.svg)](https://github.com/tchajed/sys-verif-fa24/actions/workflows/deploy.yml) [![website](https://img.shields.io/badge/website-blue?logo=web)](https://tchajed.github.io/sys-verif-fa24/)
 
 ## Developing
 
-You'll need Node.js and pnpm. You should probably use
-[corepack](https://pnpm.io/installation#using-corepack) to get pnpm.
+You'll need Node.js and pnpm. You should probably use [corepack](https://pnpm.io/installation#using-corepack) to get pnpm.
 
 Install the dependencies: `pnpm install`.
 
