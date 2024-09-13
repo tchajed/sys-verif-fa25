@@ -8,9 +8,11 @@ You'll need Node.js and pnpm. You should probably use [corepack](https://pnpm.io
 
 Install the dependencies: `pnpm install`.
 
-Run a dev server to preview changes: `pnpm docs:dev`
+Run a dev server to preview changes: `pnpm docs:dev`. The dev server auto-updates and hot-reloads page content, but not structure. Restart it if you make structural changes that affect the sidebar (e.g., add new files), or start it with `pnpm docs:dev --debug` to do a more expensive reload on every change.
 
-Build static site: `pnpm docs:build`
+Build static site: `pnpm docs:build`.
+
+Auto-format code (with [prettier](https://prettier.io/)): `pnpm fmt`.
 
 ## Tech stack
 
