@@ -7,6 +7,7 @@ order: -2
 
 ```coq
 From sys_verif Require Import options.
+From Perennial.Helpers Require Import ListLen.
 From stdpp Require Import gmap.
 
 ```
@@ -160,7 +161,16 @@ Qed.
 
 ```
 
-An automated proof using a solver.
+An automated proof using `intuition`.
+
+You'll almost always want to use `intuition auto` - `intuition` takes another
+tactic to use for solving side conditions but `auto` is a good choice.
+
+Note: the tactic name `intuition`, confusingly, does not refer to an obvious or
+instinctive proof, but to _intuitionistic logic_. This is a version of logic in
+which doesn't use _classical logic_'s "excluded middle", which says that `∀ P, P
+∨ ¬P` holds.  For the most part you can ignore this distinction, and Coq
+supports assuming the law of excluded middle and thus using classical logic.
 
 ```coq
 Lemma propositional_demo_3 (P Q R : Prop) :
@@ -188,14 +198,67 @@ Qed.
 
 ```
 
-You'll almost always want to use `intuition auto` - `intuition` takes another
-tactic to use for solving side conditions but `auto` is a good choice.
+## Miscellaneous
 
-Note: the tactic name `intuition`, confusingly, does not refer to an obvious or
-instinctive proof, but to _intuitionistic logic_. This is a version of logic in
-which doesn't use _classical logic_'s "excluded middle", which says that `∀ P, P
-∨ ¬P` holds.  For the most part you can ignore this distinction, and Coq
-supports assuming the law of excluded middle and thus using classical logic.
+### `subst`
+
+`subst` repeatedly finds an equality of the form `x = ...` and substitutes `x`
+for the right-hand side: it rewrites the lemma everywhere, then removes `x` from
+the context (since it is no longer used). Useful to clean up the context.
+
+## List tactics
+
+You'll mainly use list lemmas together with the general tactics `apply`, `apply ... in`,
+and `assert`.
+
+### `autorewrite with len`, `list_elem`
+
+We have two useful tactics: `autorewrite with len` simplifies `length (...)` for
+various list functions, and `list_elem` is best explaining by the demo below.
+
+
+```coq
+Lemma list_reasoning_demo (l1 l2: list Z) (i: nat) (x: Z) :
+  l1 `prefix_of` l2 →
+  l1 !! i = Some x →
+  l2 !! i = Some x.
+Proof.
+  intros Hpre Hget1.
+  rewrite /prefix in Hpre.
+  destruct Hpre as [l1' Heq]; subst.
+  (* [Search lookup app] would be a good way to find this lemma. If you don't
+  know what names to use for the notations, start with [Locate "!!"] (to find
+  `lookup`) and [Locate "++"] (to find `app`). It's enough to search for one
+  "token" (sequence of symbols) from the notation. *)
+  rewrite lookup_app_l.
+  { (* [apply ... in] applies the tactic to a premise, working forward from the
+       hypotheses. (In this case the result exactly matches the goal, but this
+       proof strategy is more general.) *)
+    apply lookup_lt_Some in Hget1.
+    lia. }
+  auto.
+Qed.
+
+```
+
+`list_elem l i as x` takes a list `l`, an index `i`, and produces a variable
+`x` and a hypothesis `Hx_lookup : l !! i = Some x`. As a side condition, you
+must prove `i < length l` (required for such an `x` to exist); some automation
+tries to prove this fact for you, though.
+
+```coq
+Lemma list_elem_demo (l1 l2: list Z) (i: nat) :
+  (i < length l1 + length l2)%nat →
+  ∃ x, (l1 ++ l2) !! i = Some x.
+Proof.
+  intros Hi.
+  list_elem (l1 ++ l2) i as x.
+  (* no side condition - `i < length l1` is proven automatically *)
+  exists x; auto.
+Qed.
+
+```
+
 ## Rewriting
 
 Rewriting is the act of using `a = b` to replace `a` with `b`. It's a powerful
@@ -466,7 +529,7 @@ End rewriting.
 
 ```
 
-### General automation tactics
+## Automation tactics
 
 `lia` solves goals involving arithmetic (with `nat` or `Z`).
 
@@ -474,6 +537,11 @@ End rewriting.
 `Hint Resolve`, for example. `auto` automatically tries to solve both sides of
 an `and`, introduces `forall`s, and tries to apply `P -> Q` in the context, but
 the programmed hints greatly affect what it can do. Solves the goal or does nothing.
+
+`set_solver` is a tactic from the [std++](https://gitlab.mpi-sws.org/iris/stdpp)
+library that automates solving many goals involving sets, with support for
+reasoning about `∈`, `∪` (union), `∩` (intersection), `s1 ∖ s2` (set
+subtraction), `⊆`, and equality between sets.
 
 `done` solves "simple" goals with limited automation. Fails or solves the goal.
 
