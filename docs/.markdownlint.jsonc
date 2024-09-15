@@ -1,6 +1,0 @@
-{
-  // allow inline HTML (used for Vue components)
-  "MD033": false,
-  // allow long lines (single-line paragraphs)
-  "MD013": false,
-}
