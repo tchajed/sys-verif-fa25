@@ -2,6 +2,7 @@
 category: lecture
 order: 10
 tags: [draft]
+index: false
 ---
 
 # Lecture 10: Verifying Go code
