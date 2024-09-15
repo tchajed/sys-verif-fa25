@@ -15,6 +15,8 @@ The [Coq reference manual](https://coq.inria.fr/doc/master/refman/index.html) ca
 
 The textbook [Certified Programming with Dependent Types (CPDT)](http://adam.chlipala.net/cpdt/cpdt.pdf) is excellent for many advanced topics.
 
+The textbook [Verified Functional Algorithms](https://softwarefoundations.cis.upenn.edu/vfa-current/index.html) (part of Software Foundations) gives detailed examples of data structure proofs using purely functional code.
+
 ## Go
 
 We will be working with Go code in this class. It will help to have at least reading familiarity with Go, which you can get by following [A Tour of Go](https://go.dev/tour/welcome/1) (you only really need the Basics and Methods chapters).
