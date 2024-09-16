@@ -9,7 +9,7 @@
     "docs:clean-dev": "vuepress dev docs --clean-cache",
     "docs:dev": "vuepress dev docs",
     "docs:update-package": "pnpm dlx vp-update",
-    "fmt": "prettier --write ."
+    "fmt": "prettier --write . --log-level error"
   },
   "devDependencies": {
     "@vuepress/bundler-vite": "2.0.0-rc.15",
