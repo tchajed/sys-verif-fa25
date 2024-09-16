@@ -11,6 +11,8 @@ A core resource is the course [lecture notes](./notes/), which include some expl
 
 If you want more practice I encourage you to read [Software Foundations](https://softwarefoundations.cis.upenn.edu/lf-current/toc.html) beyond the assigned chapters, and even to do additional exercises.
 
+This [Tactics Cheatsheet](https://www.cs.cornell.edu/courses/cs3110/2018sp/a5/coq-tactics-cheatsheet.html) is much more complete than the [Ltac reference](./notes/ltac.md) I wrote. As a reminder, you're allowed to use any tactic in Coq (unless specifically forbidden).
+
 The [Coq reference manual](https://coq.inria.fr/doc/master/refman/index.html) can be helpful, if you know what you're looking for. You should specifically use the [tactic reference](https://coq.inria.fr/doc/master/refman/coq-tacindex.html) if you're using a built-in Coq tactic.
 
 The textbook [Certified Programming with Dependent Types (CPDT)](http://adam.chlipala.net/cpdt/cpdt.pdf) is excellent for many advanced topics.
