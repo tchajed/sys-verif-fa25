@@ -13,7 +13,6 @@ order: 4
 By the end of this lecture, you should be able to
 
 1. State the correctness of a functional program using an abstract model
-2. Prove functional correctness for specs involving lists, sets, and maps
 
 In this lecture, we'll start getting into how to write specifications, beginning with functional programs.
 
