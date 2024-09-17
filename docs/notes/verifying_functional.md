@@ -200,12 +200,14 @@ Starting point: have some data structure or other object of type T (the _code_ o
 - Methods: for some `A: Type`, `op: T → A → T`
 - Getters ("eliminators"): of the form `f: T → A` for some `A: Type`.
 
-1. The first step is to pick a type `S` that will be the _abstract_ representation (or _model_) of the data of type `T`. (Note: in general, `S` will not efficient in the programming language, or might not even be representable).
-2. Invent an _abstraction function_ `rep : T → S` giving what abstract value the code is representing.
-3. Prove specs for each function:
-   - Write `init_spec : A → S`. Prove `∀ (v: A), rep (init v) = init_spec v`.
-   - Write `op_spec : S → A → S`. Prove `∀ (x: T) (v: A), rep (op x v) = op_spec (rep x) v`.
-   - Write `f_spec: S → A`. Prove `∀ (x: T), f x = f_spec (rep x)`.
+1. Come up with a model for the code.
+   - Pick a type `S` that will be the _abstract_ representation (or _model_) of the data of type `T`. (Note: in general, `S` will not efficient in the programming language, or might not even be representable).
+   - Write a version of each code function in terms of the abstract type `S` rather than `T`: `init_spec : A → S`, `op_spec : S → A → S`, and `f_spec : S → A`.
+2. To relate the code to the model, invent an _abstraction function_ `rep : T → S` giving what abstract value the code is representing.
+3. Prove the following obligations that relate the code to the model via the abstraction function:
+   - For `init_spec : A → S`, prove `∀ (v: A), rep (init v) = init_spec v`.
+   - For `op_spec : S → A → S`, prove `∀ (x: T) (v: A), rep (op x v) = op_spec (rep x) v`.
+   - For `f_spec: S → A`, prove `∀ (x: T), f x = f_spec (rep x)`.
 
 ::: important Model-based specifications
 
@@ -213,7 +215,7 @@ Make sure you can follow what the specifications above are actually saying. It m
 
 :::
 
-Why prove the above? These obligations show that any sequence of operations can be understood in terms of `_spec` variants, even though we run the concrete versions:
+Why prove the above? These obligations show that any sequence of operations can be understood in terms of model (the `_spec` variants of each function), even though we run the concrete versions. For example this code:
 
 ```
 let x := init c1;
@@ -223,7 +225,7 @@ let r := get_result z;
 r
 ```
 
-This whole process produces `get_result (do_op2 (do_op1 (init c1)))` when the code is run. But at an abstract level we could just as well have written:
+This whole process produces `get_result (do_op2 (do_op1 (init c1)))` when the code is run. We can instead view this as the following sequence, using the model:
 
 ```
 let x' := init_spec c1;
@@ -233,7 +235,19 @@ let r' := get_result_spec z';
 r'
 ```
 
-**Claim:** `r' = r` if the data structure satisfies the specs described above. (Check that you believe this!)
+**Claim:** `r' = r` if the data structure satisfies the specs described above.
+
+We can use the proofs above to prove this claim that `r' = r`, using simple equational reasoning; at each step we are applying one obligation from the above.
+
+```
+  r
+= get_result      (do_op2           (do_op1      (init c1)))
+= get_result_spec (abs (do_op2      (do_op1      (init c1))))
+= get_result_spec (do_op2_spec (abs (do_op1      (init c1))))
+= get_result_spec (do_op2_spec (do_op1_spec (abs (init c1))))
+= get_result_spec (do_op2_spec (do_op1_spec (init_spec c1)))
+= r'
+```
 
 :::: important Client-centric reasoning
 
@@ -243,9 +257,9 @@ The fact that proving a model-based specification _implies_ the sort of client r
 
 Sometimes described as a **commutative diagram** (though this term has a very specific meaning in category theory which is likely the more common usage of "commutative diagram").
 
-Notice that the claim does not depend on `rep`; it is a detail of the proof that explains _why_ the code is correct, but is not necessary to understand _what the code does_. On the other hand if you were verifying the code you would certainly care about what `rep` is, and if you were writing it you also might want to think about how each code state maps to the desired abstraction.
+Notice that the client reasoning does not depend on `rep`; it is a detail of the proof that explains _why_ the code is correct, but is not necessary to understand _what the code does_. On the other hand if you were verifying the code you would certainly care about what `rep` is since it directly shows up in all of the proof obligations, and if you were implementing this library you also might want to have a model in mind and think about how each code state maps to it.
 
-Also notice that `S` and all the spec variants were invented as part of the spec. You can even imagine two different specs for the same code.
+Also notice that the model - `S` and all the spec variants - were invented as part of the spec, but aren't inheret to the code. You can even imagine proving the same code relates to two different models.
 
 ## Extension 1: code invariants
 
@@ -269,20 +283,22 @@ The code isn't incorrect, though, because it actually maintains an _invariant_ o
 
 Make an attempt to write the proof obligations for a model-based specification that incorporates an invariant over the data, adapting the strategy above. Think about what would make your strategy _sound_ in justifying the reasoning above that converted the code functions to spec functions.
 
-:::: details Model-based specifications, with a code invariant
+## Lecture 5: model-based specifications, continued {#lec5}
 
-1. Same as above, pick `S`.
-2. Pick `rep` but also pick `inv : T → Prop`.
-3. Prove specs for each function:
-   - Write `init_spec : A → S`. Prove `∀ (v: A), rep (init v) = init_spec v` (as above) AND `∀ v, inv (init v)`.
-   - Write `op_spec : S → A → S`. Prove `∀ (x: T) (v: A), inv x → rep (op x v) = op_spec (rep x) v ∧ inv (op x v)`.
-   - Write `f_spec: S → A`. Prove `∀ (x: T), inv x → f x = f_spec (rep x)`.
+Adding invariants to the model-based specification above:
 
-Notice the strategy is _strictly_ more powerful; we can always pick `inv x = True` and then it's the same as above.
+1. Same as above: create a model with `S`, `init_spec`, `op_spec`, and `f_spec.
+2. Pick `rep : T → S` but also pick `inv : T → Prop`.
+3. Prove obligations for each function:
+   - For `init_spec : A → S`, prove `∀ (v: A), rep (init v) = init_spec v` (as above) AND `∀ v, inv (init v)`.
+   - For `op_spec : S → A → S`, prove `∀ (x: T) (v: A), inv x → rep (op x v) = op_spec (rep x) v ∧ inv (op x v)`.
+   - For `f_spec: S → A`, prove `∀ (x: T), inv x → f x = f_spec (rep x)`.
 
-Second, notice that we get to assume `inv x` as a premise, which is what makes this more powerful, but we're also on the hook to prove `inv x` is actually initially true and maintained (to justify assuming it). Invariants are tricky for this reason.
+Observe how these obligations prove that any value `y: T` produced from using this interface will satisfy `inv y`.
 
-::::
+Second, notice that we get to assume `inv x` as a premise, which is what makes this more powerful, but we're also on the hook to prove `inv x` is actually initially true and maintained (to justify assuming it). Invariants are tricky to come up with for this reason. However, without the ability to use an invariant, these obligations require reasoning about any value of type `T`, which may just be impossible
+
+Finally, a small observation: the strategy is _strictly_ more powerful than without invariants; we can always pick `inv x = True` and then it's the same as if we didn't have an invariant at all.
 
 ## Proven example: binary search tree
 
@@ -368,11 +384,70 @@ Proof.
   - simpl.
     set_solver.
   - simpl.
+    intros Hinv.
     destruct (decide (x < el)).
-    + simpl. set_solver.
+    + simpl.
+```
+
+:::: info Goal
+
+```txt title="goal 1"
+  el : Z
+  t1, t2 : search_tree
+  x : Z
+  IHt1 :
+    st_inv t1
+    → st_rep (st_insert t1 x) = st_rep t1 ∪ {[x]} ∧ st_inv (st_insert t1 x)
+  IHt2 :
+    st_inv t2
+    → st_rep (st_insert t2 x) = st_rep t2 ∪ {[x]} ∧ st_inv (st_insert t2 x)
+  Hinv :
+    (∀ x : Z, x ∈ st_rep t1 → x < el)
+    ∧ (∀ y : Z, y ∈ st_rep t2 → el < y) ∧ st_inv t1 ∧ st_inv t2
+  l : x < el
+  ============================
+  {[el]} ∪ st_rep (st_insert t1 x) ∪ st_rep t2 =
+  {[el]} ∪ st_rep t1 ∪ st_rep t2 ∪ {[x]}
+  ∧ (∀ x0 : Z, x0 ∈ st_rep (st_insert t1 x) → x0 < el)
+    ∧ (∀ y : Z, y ∈ st_rep t2 → el < y) ∧ st_inv (st_insert t1 x) ∧ st_inv t2
+```
+
+::::
+
+```coq
+      (* fairly powerful automation is used here *)
+      set_solver.
     + destruct (decide (el < x)).
       * simpl. set_solver.
       * simpl.
+```
+
+:::: info Goal
+
+```txt title="goal 1"
+  el : Z
+  t1, t2 : search_tree
+  x : Z
+  IHt1 :
+    st_inv t1
+    → st_rep (st_insert t1 x) = st_rep t1 ∪ {[x]} ∧ st_inv (st_insert t1 x)
+  IHt2 :
+    st_inv t2
+    → st_rep (st_insert t2 x) = st_rep t2 ∪ {[x]} ∧ st_inv (st_insert t2 x)
+  Hinv :
+    (∀ x : Z, x ∈ st_rep t1 → x < el)
+    ∧ (∀ y : Z, y ∈ st_rep t2 → el < y) ∧ st_inv t1 ∧ st_inv t2
+  n : ¬ x < el
+  n0 : ¬ el < x
+  ============================
+  {[el]} ∪ st_rep t1 ∪ st_rep t2 = {[el]} ∪ st_rep t1 ∪ st_rep t2 ∪ {[x]}
+  ∧ (∀ x0 : Z, x0 ∈ st_rep t1 → x0 < el)
+    ∧ (∀ y : Z, y ∈ st_rep t2 → el < y) ∧ st_inv t1 ∧ st_inv t2
+```
+
+::::
+
+```coq
         assert (x = el) by lia.
         set_solver.
 Qed.
@@ -381,17 +456,16 @@ Lemma find_spec t x :
   st_inv t →
   st_find t x = bool_decide (x ∈ st_rep t).
 Proof.
+  (* this follows directly from the definition of [bool_decide] *)
   replace (bool_decide (x ∈ st_rep t)) with
     (if decide (x ∈ st_rep t) then true else false)
     by reflexivity.
-  intros Hinv.
   induction t.
-  - simpl.
+  - simpl. intros Hinv.
     set_solver.
-  - simpl.
+  - simpl. intros Hinv.
     destruct (decide (x < el)).
-    + simpl.
-      simpl in Hinv. destruct Hinv as (Hlt & Hgt & Hinvt1 & Hinvt2).
+    + destruct Hinv as (Hlt & Hgt & Hinvt1 & Hinvt2).
       rewrite IHt1.
       { auto. }
       destruct (decide (x ∈ st_rep t1)).
@@ -407,11 +481,11 @@ Proof.
           apply Hgt in Hel.
           lia. }
         set_solver.
-    + simpl in Hinv. destruct Hinv as (Hlt & Hgt & Hinvt1 & Hinvt2).
+    + destruct Hinv as (Hlt & Hgt & Hinvt1 & Hinvt2).
       destruct (decide (el < x)).
       * rewrite -> IHt2 by auto.
-        (* NOTE: you could do the rest of this proof with the more basic
-        techniques, as above. This is a more automated version. *)
+        (* NOTE: you could do the rest of this proof with more basic techniques,
+        as above. This is a more automated version. *)
         clear IHt1. (* needed to make [destruct] pick the right instance *)
         destruct (decide _); destruct (decide _); set_solver by lia.
       * assert (x = el) by lia.

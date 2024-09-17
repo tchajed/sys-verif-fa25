@@ -58,6 +58,10 @@ export default defineUserConfig({
         mathjax: true,
         tasklist: true,
         include: true,
+        // allow {#custom-id} attributes
+        attrs: {
+          allowed: ["id"],
+        },
       },
       shiki: {
         langs: ["coq", "go", "bash"],
