@@ -251,8 +251,28 @@ Proof.
     rewrite map_filter_insert_True.
     { set_solver. }
     rewrite lookup_insert_ne //.
-    admit.
-Admitted.
+    (* The proof from here is complicated. We have to break it down into cases
+    where the map_lookup_fiter_* lemmas apply; some additional lemmas about the
+    interaction of lookup and filter would help, but we don't need them to do
+    the proof (and we could state and prove those lemmas). *)
+    destruct (decide (k' ∈ deletions m)).
+    {
+      rewrite map_lookup_filter_None_2.
+      { set_solver. }
+      rewrite map_lookup_filter_None_2.
+      { set_solver. }
+      auto.
+    }
+    destruct (elements m !! k') as [v0|] eqn:Heqk'.
+    + transitivity (Some v0).
+      { apply map_lookup_filter_Some. split; auto. set_solver. }
+      symmetry.
+      apply map_lookup_filter_Some. set_solver.
+    + rewrite -> map_lookup_filter_None_2 by set_solver.
+      rewrite -> map_lookup_filter_None_2 by set_solver.
+      auto.
+Qed.
+
 Lemma remove_spec k m : rep (remove_ k m) = delete k (rep m).
 Proof.
   rewrite /rep /=.
@@ -264,6 +284,7 @@ Proof.
   - rewrite lookup_delete_ne //.
     admit.
 Admitted.
+
 Lemma lookup_spec k m : lookup_ k m = (rep m) !! k.
 Proof.
   rewrite /rep /=.
@@ -498,76 +519,20 @@ Lemma insert_spec t x :
   st_inv (st_insert t x).
 Proof.
   induction t.
-  - simpl.
-    set_solver.
-  - simpl.
-    intros Hinv.
-    destruct (decide (x < el)).
+  - intros Hinv.
+    split.
     + simpl.
-```
-
-:::: info Goal
-
-```txt title="goal 1"
-  el : Z
-  t1, t2 : search_tree
-  x : Z
-  IHt1 :
-    st_inv t1
-    → st_rep (st_insert t1 x) = st_rep t1 ∪ {[x]} ∧ st_inv (st_insert t1 x)
-  IHt2 :
-    st_inv t2
-    → st_rep (st_insert t2 x) = st_rep t2 ∪ {[x]} ∧ st_inv (st_insert t2 x)
-  Hinv :
-    (∀ x : Z, x ∈ st_rep t1 → x < el)
-    ∧ (∀ y : Z, y ∈ st_rep t2 → el < y) ∧ st_inv t1 ∧ st_inv t2
-  l : x < el
-  ============================
-  {[el]} ∪ st_rep (st_insert t1 x) ∪ st_rep t2 =
-  {[el]} ∪ st_rep t1 ∪ st_rep t2 ∪ {[x]}
-  ∧ (∀ x0 : Z, x0 ∈ st_rep (st_insert t1 x) → x0 < el)
-    ∧ (∀ y : Z, y ∈ st_rep t2 → el < y) ∧ st_inv (st_insert t1 x) ∧ st_inv t2
-```
-
-::::
-
-```coq
-      (* fairly powerful automation is used here *)
       set_solver.
-    + destruct (decide (el < x)).
-      * simpl. set_solver.
-      * simpl.
-```
+    + simpl.
+      set_solver.
+  - intros Hinv.
 
-:::: info Goal
-
-```txt title="goal 1"
-  el : Z
-  t1, t2 : search_tree
-  x : Z
-  IHt1 :
-    st_inv t1
-    → st_rep (st_insert t1 x) = st_rep t1 ∪ {[x]} ∧ st_inv (st_insert t1 x)
-  IHt2 :
-    st_inv t2
-    → st_rep (st_insert t2 x) = st_rep t2 ∪ {[x]} ∧ st_inv (st_insert t2 x)
-  Hinv :
-    (∀ x : Z, x ∈ st_rep t1 → x < el)
-    ∧ (∀ y : Z, y ∈ st_rep t2 → el < y) ∧ st_inv t1 ∧ st_inv t2
-  n : ¬ x < el
-  n0 : ¬ el < x
-  ============================
-  {[el]} ∪ st_rep t1 ∪ st_rep t2 = {[el]} ∪ st_rep t1 ∪ st_rep t2 ∪ {[x]}
-  ∧ (∀ x0 : Z, x0 ∈ st_rep t1 → x0 < el)
-    ∧ (∀ y : Z, y ∈ st_rep t2 → el < y) ∧ st_inv t1 ∧ st_inv t2
-```
-
-::::
-
-```coq
-        assert (x = el) by lia.
-        set_solver.
-Qed.
+    split.
+    + simpl.
+      destruct (decide (x < el)).
+      ** simpl.
+         set_solver.
+Abort.
 
 Lemma find_spec t x :
   st_inv t →
