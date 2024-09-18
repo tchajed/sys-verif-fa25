@@ -190,15 +190,109 @@ These ought to be captured by proving that every abstract `database_model` that 
 
 ::::
 
+### Example 2: map with deletions
+
+```coq
+(* This Module just groups the definitions so we can use short names inside. *)
+Module deleteMap.
+
+(* the values in the map don't matter so we pick something arbitrary *)
+Notation V := nat.
+
+(* This type of inductive is common enough that we could replace this
+boilerplate with the [Record] feature. We use an inductive only to avoid
+introducing new syntax. *)
+Inductive map :=
+  | mkMap (elements: gmap Z V) (deletions: gset Z).
+Definition elements (m: map) : gmap Z V :=
+  match m with
+  | mkMap elements _ => elements
+  end.
+Definition deletions (m: map) : gset Z :=
+  match m with
+  | mkMap _ deletions => deletions
+  end.
+
+(* The underscore will distinguish these names from the std++ map definitions,
+which we'll use as the spec. *)
+Definition empty_ : map := mkMap ∅ ∅.
+Definition insert_ (k: Z) (v: V) (m: map) : map :=
+  mkMap (insert k v (elements m)) (deletions m ∖ {[k]}).
+Definition remove_ (k: Z) (m: map) : map :=
+  mkMap (elements m) (deletions m ∪ {[k]}).
+Definition lookup_ (k: Z) (m: map) : option V :=
+  if decide (k ∈ deletions m) then None
+  else (elements m) !! k.
+
+Definition rep (m: map) : gmap Z V :=
+  (* to remove all the deletions, we filter to the (k, v) pairs where k is _not_
+  deleted *)
+  filter (λ '(k, v), k ∉ deletions m) (elements m).
+
+Lemma empty_spec : rep empty_ = ∅.
+Proof.
+  rewrite /rep /=.
+  reflexivity.
+Qed.
+Lemma insert_spec k v m : rep (insert_ k v m) = insert k v (rep m).
+Proof.
+  rewrite /rep /=.
+  apply map_eq. intros k'.
+  destruct (decide (k' = k)).
+  - subst. rewrite lookup_insert.
+    apply map_lookup_filter_Some.
+    rewrite lookup_insert.
+    split.
+    + auto.
+    + set_solver.
+  - rewrite lookup_insert_ne //.
+    (* figured this out by trial and error (after finding the two relevant
+    lemmas) *)
+    rewrite map_filter_insert_True.
+    { set_solver. }
+    rewrite lookup_insert_ne //.
+    admit.
+Admitted.
+Lemma remove_spec k m : rep (remove_ k m) = delete k (rep m).
+Proof.
+  rewrite /rep /=.
+  apply map_eq. intros k'.
+  destruct (decide (k' = k)).
+  - subst. rewrite lookup_delete.
+    apply map_lookup_filter_None.
+    set_solver.
+  - rewrite lookup_delete_ne //.
+    admit.
+Admitted.
+Lemma lookup_spec k m : lookup_ k m = (rep m) !! k.
+Proof.
+  rewrite /rep /=.
+  rewrite /lookup_.
+  destruct (decide _).
+  - rewrite map_lookup_filter_None_2 //.
+    set_solver.
+  - destruct (elements m !! k) eqn:H.
+    + symmetry.
+      apply map_lookup_filter_Some_2; auto.
+    + rewrite map_lookup_filter_None_2 //.
+      set_solver.
+Qed.
+End deleteMap.
+
+```
+
 ## Model-based specification
 
 This is the generic form of the spec we saw above for big integers.
 
-Starting point: have some data structure or other object of type T (the _code_ or _concrete_ representation). It consists of:
+Starting point: want to verify an Abstract Data Type (ADT, not to be confused with _algebraic data type_). An ADT consists of:
 
+- A type `T` (the _code_ or _concrete_ representation) of the data type.
 - Initialization (constructors or "introduction"). For some `A: Type`, `init: A → T`
 - Methods: for some `A: Type`, `op: T → A → T`
 - Getters ("eliminators"): of the form `f: T → A` for some `A: Type`.
+
+A specification for an ADT is constructed similarly:
 
 1. Come up with a model for the code.
    - Pick a type `S` that will be the _abstract_ representation (or _model_) of the data of type `T`. (Note: in general, `S` will not efficient in the programming language, or might not even be representable).
@@ -211,7 +305,7 @@ Starting point: have some data structure or other object of type T (the _code_ o
 
 ::: important Model-based specifications
 
-Make sure you can follow what the specifications above are actually saying. It might not all make sense at this point but after seeing examples come back to this description. We'll revisit it a couple more times as the basis for specifying imperative and concurrent programs.
+Make sure you can follow what the specifications above are actually saying. It might not all make sense at this point but after seeing examples come back to this description. We'll revisit it a couple more times as the basis for specifying imperative and concurrent programs, where the code will be more sophisticated and we'll need to do more work to relate the code to the model, which will remain mathematical functions.
 
 :::
 
@@ -241,9 +335,9 @@ We can use the proofs above to prove this claim that `r' = r`, using simple equa
 
 ```
   r
-= get_result      (do_op2           (do_op1      (init c1)))
-= get_result_spec (abs (do_op2      (do_op1      (init c1))))
-= get_result_spec (do_op2_spec (abs (do_op1      (init c1))))
+= get_result      (do_op2      (do_op1      (init c1)))
+= get_result_spec (abs (do_op2 (do_op1      (init c1))))
+= get_result_spec (do_op2_spec (abs (do_op1 (init c1))))
 = get_result_spec (do_op2_spec (do_op1_spec (abs (init c1))))
 = get_result_spec (do_op2_spec (do_op1_spec (init_spec c1)))
 = r'
@@ -495,9 +589,92 @@ Qed.
 
 ```
 
+## Invariant vs non-invariant spec styles
+
+These are both specifications of the code. Depending on where you sit, a specification can be either your _obligation_ (the theorem you're trying to prove) or an _assumption_ (when you write your client code or prove the client code correct).
+
+Whether a model-based specification has an invariant or not, it supports the same client reasoning (we didn't show a proof of a client with the invariant reasoning, but you can see that the equations above are still true; the proof needs to also show the invariant is true at each intermediate step).
+
+The benefit of the invariant approach is that it allows us to prove _more ADTs correct_, and in fact many ADTs are only correct because they maintain some internal invariant.
+
 ## Beyond the above specification
 
-### Non-determinism: abstraction relations
+### Equational specifications
+
+A completely different style than the above is to give _equational_ or _algebraic_ specifications. An example where this makes a lot of sense is `encode`/`decode` functions. The main property we generally want of such functions (as a _client_ or user of such code) is a "round trip" theorem that says `∀ x, decode (encode x) = x`. There isn't even an obvious "model" to describe encoding or decoding.
+
+The danger of equational or algebraic specifications is that it's harder to think about whether the specification is good enough for client reasoning - in general need to give specs for any combination of functions. It has the advantage of not requiring an abstraction.
+
+### Equational spec for maps
+
+Here is an ADT implementing maps that we'll prove equational properties for, rather than relating it to `gmap`. Think of this as what you would do if _implementing_ `gmap`, except we'll discuss later how `gmap` has a more complicated implementation to make it easier to use.
+
+```coq
+Definition list_map (K: Type) {H: EqDecision K} (V: Type) :=
+  list (K * V).
+
+```
+
+Sections are a way of writing a bunch of definitions that need to take the same types, like the `K`, `H: EqDecision K`, and `V` parameters for `list_map`.
+
+```coq
+Section list_map.
+
+(* To understand the code below, all you need to know is that `K` and `V` are
+defined as arbitrary types by this `Context` command. When the section is
+closed, all of these will become arguments to the definitions in the section for
+any users of this code (and there are no users yet for this little example). *)
+Context {K: Type} {H: EqDecision K} {V: Type}.
+
+Definition empty_list_map : list_map K V := [].
+
+Fixpoint find (x: K) (m: list_map K V) : option V :=
+  match m with
+  | [] => None
+  | (x', v) :: m' => if decide (x = x') then Some v else find x m'
+  end.
+
+Definition update (x : K) (v: V) (m: list_map K V) : list_map K V :=
+  (x, v) :: m.
+
+```
+
+What equations might we want? One idea is that we should prove something about any combinations of `find` and `update` we can think of (that type check).
+
+```coq
+Lemma find_empty_list_map x :
+  find x empty_list_map = None.
+Proof. reflexivity. Qed.
+
+Lemma find_update_eq (m: list_map K V) x v :
+  find x (update x v m) = Some v.
+Proof.
+  rewrite /update. simpl.
+  rewrite -> decide_True by auto.
+  reflexivity.
+Qed.
+
+Lemma find_update_neq (m: list_map K V) x y o :
+  x ≠ y → find x (update y o m) = find x m.
+Proof.
+  intros Hne.
+  rewrite /update. simpl.
+  rewrite -> decide_False by auto.
+  reflexivity.
+Qed.
+
+```
+
+At this point, have we proven all the equations that might be needed? I believe so, but it's hard to be sure, and the situation is worse when we have many operations that can interact with each other.
+
+```coq
+End list_map.
+
+```
+
+## Extension 2: abstraction relations
+
+There's one more extension beyond invariants that allows us to
 
 There's one more extension that is natural to add at some point: non-determinism. Instead of `abs : T → S` (a function), we can instead have `abs_rel : T → S → Prop`, which you can think of as answering for each `T`, what are the possible values of `S` that could be the current abstract state? There might not be _any_ values of `S`, which corresponds to a `T` that doesn't satisfy the invariant, or there might be one unique one like we had before with the abstraction function.
 
@@ -505,8 +682,70 @@ One reason this comes up is that the most obvious specification or model has mor
 
 Another direction you might want to think about how we could add non-determinism to both the code operations and the spec operations, although this will take us away from functional programs so we won't consider it just yet.
 
-### Equational specifications
+```coq
+Module stat_db.
+  Unset Printing Records.
 
-A completely different style than the above is to give _equational_ or _algebraic_ specifications. An example where this makes a lot of sense is `encode`/`decode` functions. The main property we generally want of such functions (as a _client_ or user of such code) is a "round trip" theorem that says `∀ x, decode (encode x) = x`. There isn't even an obvious "model" to describe encoding or decoding.
 
-The danger of equational or algebraic specifications is that it's harder (and not systematic) to think about whether the specification is good enough for client reasoning. However, in the encode/decode example it's at some level it's necessary for the clients purposes to prove the round-trip property mentioned above.
+```
+
+We use `Record` here to create an inductive type, which defines a constructor `mkDb` as well as _projection functions_ `db_sum` and `db_num`.
+
+Records in Coq have some special associated syntax for constructors and projections, but we're not using it (and disable printing with that syntax as well).
+
+```coq
+Record database :=
+    mkDb { db_sum : Z; db_num : Z; }.
+
+  Definition empty_db : database := mkDb 0 0.
+  Definition insert_el (x: Z) (db: database) :=
+    mkDb (db_sum db + x) (db_num db + 1).
+  (* We're going to ignore division by zero. Coq makes [x / 0 = 0] which is how
+  this function will also work (this makes good mathematical sense which I'm
+  happy to explain, but it doesn't affect this example). *)
+  Definition mean (db: database) : Z :=
+    db_sum db / db_num db.
+
+  Definition failed_rep_function (db: database) : list Z := []. (* where do we get this from? *)
+
+  Definition listZ_sum (s: list Z) :=
+    foldl (λ s x, s + x) 0 s.
+
+  Definition absr (db: database) (s: list Z) :=
+    db_sum db = listZ_sum s ∧
+    db_num db = Z.of_nat (length s).
+
+  Lemma insert_el_spec x db s :
+    absr db s →
+    absr (insert_el x db) (s ++ [x]).
+  Proof.
+    rewrite /absr /=.
+    destruct db as [sum num]; simpl.
+    intros [Heq1 Heq2]. rewrite Heq1. rewrite Heq2.
+    split.
+    - rewrite /listZ_sum.
+      rewrite foldl_app /=.
+      reflexivity.
+    - rewrite length_app /=.
+      lia.
+  Qed.
+
+  (* this theorem follows pretty much immediately from the definitions of [absr]
+  and [mean]; the work is in maintaining [absr], not in this theorem *)
+  Lemma mean_spec db s :
+    absr db s →
+    mean db = listZ_sum s / (Z.of_nat (length s)).
+  Proof.
+    rewrite /absr /=.
+    destruct db as [sum num]; simpl.
+    (* instead of using [rewrite] we use [subst] because if `x = ...` and `x` is
+    a variable, we can replace it everywhere and then the equation is
+    redundant. *)
+    intros [? ?]; subst.
+    rewrite /mean /=.
+    reflexivity.
+  Qed.
+
+End stat_db.
+
+```
