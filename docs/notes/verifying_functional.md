@@ -379,6 +379,13 @@ Make an attempt to write the proof obligations for a model-based specification t
 
 ## Lecture 5: model-based specifications, continued {#lec5}
 
+### Learning outcomes
+
+1. State a model-based specification for an ADT that uses an invariant
+2. Compare equational specifications to model-based specifications
+
+### Review: invariant-based specification
+
 Adding invariants to the model-based specification above:
 
 1. Same as above: create a model with `S`, `init_spec`, `op_spec`, and `f_spec.
@@ -393,6 +400,22 @@ Observe how these obligations prove that any value `y: T` produced from using th
 Second, notice that we get to assume `inv x` as a premise, which is what makes this more powerful, but we're also on the hook to prove `inv x` is actually initially true and maintained (to justify assuming it). Invariants are tricky to come up with for this reason. However, without the ability to use an invariant, these obligations require reasoning about any value of type `T`, which may just be impossible
 
 Finally, a small observation: the strategy is _strictly_ more powerful than without invariants; we can always pick `inv x = True` and then it's the same as if we didn't have an invariant at all.
+
+### Exercise: re-do client-centric reasoning
+
+- $T : \mathrm{Type}$
+- $i : T$
+- $op_1 : T \to T$ and $op_2 : T \to T$
+- $f : T \to A$
+
+And the spec:
+
+- $S : \mathrm{Type}$, $rep : T \to S$, and $inv : T \to \mathrm{Prop}$
+- $i' : S$
+- $op_1' : S \to S$ and $op_2' : S \to S$
+- $f' : S \to A$
+
+Prove that $f' (op_2' (op_1'(i'))) = f (op_2 (op_1 (i)))$ using the theorems above. (Note we typically write $f(x)$ for blackboard/on-paper reasoning on the blackboard/paper while the same function application is written `f x` in Coq).
 
 ## Proven example: binary search tree
 
@@ -591,11 +614,11 @@ Qed.
 
 ## Invariant vs non-invariant spec styles
 
-These are both specifications of the code. Depending on where you sit, a specification can be either your _obligation_ (the theorem you're trying to prove) or an _assumption_ (when you write your client code or prove the client code correct).
+A specification has two sides: the perspective of the implementor proving it, in which case it's an _obligation_, and the perspective of the client using it, in which case it's an _assumption_. In general the implementor wants (a) true obligations (they can't prove something false) and (b) simple obligations (if possible, they want to prove something easier than something harder). The client wants (a) strong enough to reason about their own code, and (b) easy-to-use specifications are preferred to strong but hard-to-understand ones.
 
-Whether a model-based specification has an invariant or not, it supports the same client reasoning (we didn't show a proof of a client with the invariant reasoning, but you can see that the equations above are still true; the proof needs to also show the invariant is true at each intermediate step).
+There is a tension here that the abstract spec is trying to balance.
 
-The benefit of the invariant approach is that it allows us to prove _more ADTs correct_, and in fact many ADTs are only correct because they maintain some internal invariant.
+When we add invariants to the model-based specification, the benefit is that it allows us to prove _more ADTs correct_, and in fact many ADTs are only correct because they maintain some internal invariant (the implementor now has a hope of proving their code against this specification, like in the search tree example). There's no cost to the client, either, since essentially the same client reasoning works regardless of what the invariant is.
 
 ## Beyond the above specification
 
