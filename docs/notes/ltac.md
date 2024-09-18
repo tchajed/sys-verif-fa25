@@ -12,6 +12,92 @@ From stdpp Require Import gmap.
 
 ```
 
+## Forward and backward reasoning
+
+`intros`, `apply`, `assumption`
+
+There are two basic styles of reasoning: a **backward** proof uses `Q -> R` to move from proving `R` to proving `Q` (working _backward from the goal_, trying to reach the hypotheses), while a **forward** proof uses `P -> Q` and a hypothesis `P` to derive `Q` (working _forward_ from the known hypotheses to try to reach the goal).
+
+Both styles are valid and you should be aware of each; which you use in each case is a matter of intuition and convenience. A very brief demo of each is below, but there are more tactics related to each.
+
+A "backwards" proof, working from the goal to the premises.
+
+```coq
+Lemma propositional_demo_1 (P Q R : Prop) :
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros HPQ HQR HP.
+  apply HQR.
+```
+
+:::: info Goal diff
+
+```txt title="goal diff"
+  P, Q, R : Prop
+  HPQ : P → Q
+  HQR : Q → R
+  HP : P
+  ============================
+  R // [!code --]
+  Q // [!code ++]
+```
+
+::::
+
+```coq
+  apply HPQ.
+  apply HP.
+Qed.
+
+```
+
+A "forwards" proof, working from the premises to the goal.
+
+```coq
+Lemma propositional_demo_2 (P Q R : Prop) :
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros HPQ HQR HP.
+  apply HPQ in HP.
+```
+
+:::: info Goal diff
+
+```txt title="goal diff"
+  P, Q, R : Prop
+  HPQ : P → Q
+  HQR : Q → R
+  HP : P // [!code --]
+  HP : Q // [!code ++]
+  ============================
+  R
+```
+
+::::
+
+```coq
+  apply HQR in HP.
+  assumption.
+Qed.
+
+```
+
+`destruct` on a hypothesis of the form `A ∨ B` produces two goals, one for `A` and one for `B`. Below we also use `as [HP | HQ]` to name the hypothesis in each goal.
+
+```coq
+Lemma propositional_demo_or (P Q : Prop) :
+  (Q -> P) ->
+  (P ∨ Q) -> P.
+Proof.
+  intros H1 HPQ.
+  destruct HPQ as [HP | HQ].
+  - assumption.
+  - apply H1. assumption.
+Qed.
+
+
+```
+
 ## Computation: `simpl`, `reflexivity`
 
 ```coq
@@ -90,102 +176,6 @@ Proof.
   induction n as [ |n IHn]; simpl; [ reflexivity | ].
   (* note that we already ran `simpl` in this goal *)
   rewrite IHn. reflexivity.
-Qed.
-
-```
-
-## Propositional logic
-
-`intros`, `apply`, `assumption`, `intuition`.
-
-A "backwards" proof, working from the goal to the premises.
-
-```coq
-Lemma propositional_demo_1 (P Q R : Prop) :
-  (P -> Q) -> (Q -> R) -> P -> R.
-Proof.
-  intros HPQ HQR HP.
-  apply HQR.
-```
-
-:::: info Goal diff
-
-```txt title="goal diff"
-  P, Q, R : Prop
-  HPQ : P → Q
-  HQR : Q → R
-  HP : P
-  ============================
-  R // [!code --]
-  Q // [!code ++]
-```
-
-::::
-
-```coq
-  apply HPQ.
-  apply HP.
-Qed.
-
-```
-
-A "forwards" proof, working from the premises to the goal.
-
-```coq
-Lemma propositional_demo_2 (P Q R : Prop) :
-  (P -> Q) -> (Q -> R) -> P -> R.
-Proof.
-  intros HPQ HQR HP.
-  apply HPQ in HP.
-```
-
-:::: info Goal diff
-
-```txt title="goal diff"
-  P, Q, R : Prop
-  HPQ : P → Q
-  HQR : Q → R
-  HP : P // [!code --]
-  HP : Q // [!code ++]
-  ============================
-  R
-```
-
-::::
-
-```coq
-  apply HQR in HP.
-  assumption.
-Qed.
-
-```
-
-An automated proof using `intuition`.
-
-You'll almost always want to use `intuition auto` - `intuition` takes another tactic to use for solving side conditions but `auto` is a good choice.
-
-Note: the tactic name `intuition`, confusingly, does not refer to an obvious or instinctive proof, but to _intuitionistic logic_. This is a version of logic in which doesn't use _classical logic_'s "excluded middle", which says that `∀ P, P ∨ ¬P` holds. For the most part you can ignore this distinction, and Coq supports assuming the law of excluded middle and thus using classical logic.
-
-```coq
-Lemma propositional_demo_3 (P Q R : Prop) :
-  (P -> Q) -> (Q -> R) -> P -> R.
-Proof.
-  intuition auto.
-Qed.
-
-```
-
-`destruct` on a hypothesis of the form `A ∨ B` produces two goals, one for `A` and one for `B`. Below we also use `as [HP | HQ]` to name the hypothesis in each goal.
-
-```coq
-Lemma propositional_demo_or (P Q : Prop) :
-  (Q -> P) ->
-  (P ∨ Q) -> P.
-Proof.
-  intros H1 HPQ.
-  destruct HPQ as [HP | HQ].
-  - assumption.
-  - apply H1. assumption.
 Qed.
 
 ```
@@ -501,7 +491,30 @@ End rewriting.
 
 `lia` solves goals involving arithmetic (with `nat` or `Z`).
 
+```coq
+Lemma lia_example x y z :
+  x + y - 3 < z →
+  z - y <= 2 ->
+  x < 5.
+Proof. lia. Qed.
+
+```
+
 `auto` runs a proof search using hints that can be programmed with commands like `Hint Resolve`, for example. `auto` automatically tries to solve both sides of an `and`, introduces `forall`s, and tries to apply `P -> Q` in the context, but the programmed hints greatly affect what it can do. Solves the goal or does nothing.
+
+`intuition` destructs ∧ in the hypotheses, splits ∧ in the goals, destructs ∨ in the hypotheses, looks for `H1: P → Q` and derives `Q` if it can prove `P` with `auto`, and finally calls `auto` to try to prove the goal. This is essentially all of the forward propositional reasoning above, plus `auto`. This is all relatively simple reasoning individually but collectively can be very powerful, especially because it also incorporates the power of `auto`.
+
+**Note**: the tactic name `intuition`, confusingly, does not refer to an obvious or instinctive proof, but to _intuitionistic logic_. This is a version of logic in which doesn't use _classical logic_'s "excluded middle", which says that `∀ P, P ∨ ¬P` holds. For the most part you can ignore this distinction, and Coq supports assuming the law of excluded middle and thus using classical logic.
+
+```coq
+Lemma propositional_demo_3 (P Q R : Prop) :
+  (P -> Q) ∧ (Q -> R) -> P -> R.
+Proof.
+  intros H1 HP.
+  intuition.
+Qed.
+
+```
 
 `set_solver` is a tactic from the [std++](https://gitlab.mpi-sws.org/iris/stdpp) library that automates solving many goals involving sets, with support for reasoning about `∈`, `∪` (union), `∩` (intersection), `s1 ∖ s2` (set subtraction), `⊆`, and equality between sets.
 
