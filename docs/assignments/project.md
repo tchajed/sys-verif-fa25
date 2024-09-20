@@ -36,3 +36,9 @@ Verify a data structure that can efficiently map a (potentially large) range of 
 You can simplify the implementation by only supporting integer keys. A more sophisticated implementation would support strings; Goose does not (currently) support string comparison with `s1 < s2`, so you would need to implement this yourself.
 
 This requires some data structure design. A starting point would be to maintain a list of sorted ranges that you search with binary search.
+
+## Verify the Cloudflare trie-hard data structure
+
+Port [trie-hard](https://github.com/cloudflare/trie-hard) to Go and verify it. Specialize that implementation to u64.
+
+This is a trie (an efficient prefix-search data structure, especially for a fixed set of search strings), but with the twist of encoding the pointers into the bits of an integer for space efficiency (without this Cloudflare found it wasn't faster than a Rust `HashMap`).
