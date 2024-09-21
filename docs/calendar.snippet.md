@@ -6,8 +6,8 @@
 |  |  | **Part 1: functional programs** |
 | 2 | Mon Sep 9 | [Coq introduction](./notes/coq-intro.md) |
 | 3 | Wed Sep 11 | [Induction](./notes/induction.md) |
-| 4 | Mon Sep 16 | [Functional specifications](./notes/verifying_functional.md) |
-| 6 | Wed Sep 18 | [Functional specifications (part 2)](./notes/verifying_functional.md) |
+| 4 | Mon Sep 16 | [ADT specification](./notes/adt_specs.md) |
+| 6 | Wed Sep 18 | [ADTs with invariants](./notes/adt_invariants.md) |
 |  |  | **Part 2: Imperative programs** |
 | 7 | Mon Sep 23 | Hoare logic |
 | 8 | Wed Sep 25 | Separation logic |
