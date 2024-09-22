@@ -263,21 +263,31 @@ To read a rule read it **counter-clockwise starting at the bottom left**, starti
 
 $$\hoare{P(v)}{v}{\fun{w} P(w)} \eqnlabel{value}$$
 
-$$\dfrac{e_1 \to e_2 \quad \hoare{P}{e_2}{\fun{v} Q(v)}}{%
-\hoare{P}{e_1}{\fun{v} Q(v)}} \eqnlabel{pure-step}$$
+$$
+\dfrac{e_1 \to e_2 \quad \hoare{P}{e_2}{\fun{v} Q(v)}}{%
+\hoare{P}{e_1}{\fun{v} Q(v)}} \eqnlabel{pure-step}
+$$
 
-$$\dfrac{P' \entails P \quad (\forall v.\, Q(v) \entails Q'(v)) \quad \hoare{P}{e}{Q(v)}}{%
+$$
+\dfrac{P' \entails P \quad (\forall v.\, Q(v) \entails Q'(v)) \quad \hoare{P}{e}{Q(v)}}{%
 \hoare{P'}{e}{\fun{v} Q'(v)}
-}\eqnlabel{consequence}$$
+}\eqnlabel{consequence}
+$$
 
-$$\dfrac{\hoare{P}{e}{Q} \quad \forall v,\, \hoare{Q(v)}{K[v]}{\fun{w} R(w)}}{%
-\hoare{P}{K[e]}{\fun{w} R(w)}} \eqnlabel{bind}$$
+$$
+\dfrac{\hoare{P}{e}{Q} \quad \forall v,\, \hoare{Q(v)}{K[v]}{\fun{w} R(w)}}{%
+\hoare{P}{K[e]}{\fun{w} R(w)}} \eqnlabel{bind}
+$$
 
-$$\dfrac{P \entails \lift{\phi} \quad \phi \Rightarrow \hoare{P}{e}{\fun{v} Q(v)}}%
-{\hoare{P}{e}{\fun{v} Q(v)}} \eqnlabel{pure}$$
+$$
+\dfrac{P \entails \lift{\phi} \quad \phi \Rightarrow \hoare{P}{e}{\fun{v} Q(v)}}%
+{\hoare{P}{e}{\fun{v} Q(v)}} \eqnlabel{pure}
+$$
 
-$$\dfrac{\forall x.\, \hoare{P(x)}{e}{\fun{v} Q(v)}}{%
-\hoare{\exists x.\, P(x)}{e}{\fun{v} Q(v)}} \eqnlabel{exists}$$
+$$
+\dfrac{\forall x.\, \hoare{P(x)}{e}{\fun{v} Q(v)}}{%
+\hoare{\exists x.\, P(x)}{e}{\fun{v} Q(v)}} \eqnlabel{exists}
+$$
 
 You can think of $\Rightarrow$ as being Coq implication, as opposed to entailment between propositions.
 
@@ -342,22 +352,29 @@ $$
 \end{aligned}
 $$
 
-$$\hoare{\True}%
+$$
+\hoare{\True}%
 {\operatorname{and} \, b_1 \, b_2}%
-{\fun{v} v = \overline{b_1 \mathbin{\&} b_2}}$$
+{\fun{v} v = \overline{b_1 \mathbin{\&} b_2}}
+$$
 
-$$\hoare{n + m < 2^{64}}%
+$$
+\hoare{n + m < 2^{64}}%
 {\operatorname{add} \, \overline{n} \, \overline{m}}%
-{\fun{v} v = \overline{n + m}}$$
+{\fun{v} v = \overline{n + m}}
+$$
 
-$$\hoare{\True}%
+$$
+\hoare{\True}%
 {\operatorname{min} \, \overline{n} \, \overline{m}}%
 {\fun{v} \exists (p: \mathbb{Z}).\, v = \overline{p} \land p \leq n \land p \leq m }
 $$
 
-$$\hoare{n < 2^{64} - 1}%
+$$
+\hoare{n < 2^{64} - 1}%
 {\operatorname{f} \, \overline{n}}
-{\fun{v} \exists (p: \mathbb{Z}).\, v = \overline{p} \land 1 \leq p}$$
+{\fun{v} \exists (p: \mathbb{Z}).\, v = \overline{p} \land 1 \leq p}
+$$
 
 Example proof:
 
@@ -365,9 +382,11 @@ Let's prove the spec for $\operatorname{f}$ above, assuming the other specs. Thi
 
 First, unfolding $\operatorname{f}$ we see that we have a function application. Apply the pure-step rule and show a beta reduction (substituting $\overline{n}$ for $x$ in the body of $\operatorname{f}$), so that the goal is now
 
-$$\hoare{n < 2^{64}-1}%
+$$
+\hoare{n < 2^{64}-1}%
 {\operatorname{add} \, (\min \, 0 \, \overline{n}) \, 1}
-{\fun{v} Q_f(v)}$$
+{\fun{v} Q_f(v)}
+$$
 
 We have a function application. The "next thing to run" is the second argument; luckily it's already a value, so the first argument is next. This can be formally expressed by saying that the current expression we're verifying can be decomposed into an evaluation context $K = (\operatorname{add} \, \bullet) \, 1$ around the argument $\operatorname{min} \, 0 \, \overline{n}$. We want to apply the bind rule and produce two goals. The $P$ and $R$ in the rule are determined by matching up the rule's conclusion with our current goal, but $Q$ is a free choice in the below:
 
