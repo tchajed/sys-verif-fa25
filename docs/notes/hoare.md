@@ -357,10 +357,12 @@ Here are some examples of correct specifications.
 
 $$
 \begin{aligned}
-\operatorname{add} &= \lambda x, y.\, x + y \\
 \operatorname{and} &= \lambda b_1, b_2.\, \ife{b_1}{b_2}{\false} \\
+\operatorname{add} &= \lambda x, y.\, x + y \\
 \min &= \lambda x, y.\, \ife{x < y}{x}{y} \\
 \operatorname{f} &= \fun{x} \operatorname{add} \, (\min \, 0 \, x) \, 1 \\
+\operatorname{g} &= \fun{x} \ife{x = 1}{\true}{\\ %
+&\phantom{= \fun{x}} (\ife{x = 0}{\false}{2 + \false})}
 \end{aligned}
 $$
 
@@ -387,6 +389,16 @@ $$
 {\operatorname{f} \, \overline{n}}
 {\fun{v} \exists (p: \mathbb{Z}).\, v = \overline{p} \land 1 \leq p}
 $$
+
+$$
+\hoare{0 \leq n \leq 1}%
+{\operatorname{g} \, \overline{n}}
+{\fun{v} \True}
+$$
+
+The $\operatorname{and}$ spec is an example of giving a strong specification, $\operatorname{add}$ is an example of under-specification (in this case, it would work just as well without the precondition), $\min$ is an under-specification (we could say something stronger in the postcondition and still prove it), $\operatorname{f}$ is the best we can prove assuming the $\operatorname{add}$ and $\min$ specs, and $\operatorname{g}$ is an example where the precondition is necessary and we under-specify in the postcondition.
+
+Even the $\operatorname{and}$ spec is not the strongest possible - notice that the code does not actually require the second argument to be a boolean, and that it only needs to be safe if the first argument is $\true$.
 
 Example proof:
 
