@@ -21,9 +21,9 @@ We will now develop Hoare logic, a formal system for reasoning about program cor
 
 ::: important Reading these notes
 
-These lecture notes are written in a bottom-up style, each definition presented, then used later. This is intended to be a good reference but is not ideal for reading in order. It is not the order the live lecture is presented in.
+These lecture notes are written in a bottom-up style: each definition is presented in detail, then used later. This is intended to be a good reference but is not ideal for reading in order. It is not the order the live lecture is presented in.
 
-When reading the notes, I suggest reading the introduction in each sub-section, then moving forward. Then go back if you ever need to understand something in more detail or to see a specific rule or definition.
+When reading the notes, I suggest reading the introduction in each sub-section, then moving forward, until you get to the Hoare logic subsection. You can go back if you ever need to understand something in more detail or to see a specific rule or definition.
 
 :::
 
@@ -327,9 +327,9 @@ If-false: pure-step. Observe that the `if` construct takes a step even when the 
 
 What does it mean to prove $\hoare{P}{e}{\fun{v} Q(v)}$? We have a bunch of "rules" above, but where do they come from?
 
-The reason Hoare logic is useful and what it means to have a (proven) Hoare triple is given by a _soundness theorem_ for the rules above. An alternate viewpoint, perhaps simpler, is to think about the following statement as the _definition_ of a Hoare triple and then think of the rules above as theorems.
+The reason Hoare logic is useful and what it means to have a (proven) Hoare triple is that we can give a definition of _soundness_ of a Hoare triple that relates it the semantics of programs, and then all the rules given above can be proven as theorems.
 
-::: important Hoare logic soundness
+::: important Hoare triple definition/soundness
 
 $\hoare{P}{e}{\fun{v} Q(v)}$ means if $P$ holds and $e \to^* e'$, then either (a) $\exists e'', e' \to e''$ ($e'$ is not stuck), or (b) $e' = v'$ for some value $v'$ and $Q(v')$ holds.
 
@@ -338,6 +338,18 @@ $\hoare{P}{e}{\fun{v} Q(v)}$ means if $P$ holds and $e \to^* e'$, then either (a
 First, notice that Hoare logic connects back to the operational semantics of the programming language and $e$ in particular: we can precisely say how a Hoare triple relates to $e$'s behavior.
 
 Second, notice that we only learn anything about $Q$ if $e \to^* v'$. This is called _partial correctness_ because it only gives the postcondition for programs when the terminate; there is a variant of Hoare logic with so-called _total correctness triples_ that also prove the program terminates, but proving termination can be quite complicated. Do note that regardless of termination, if $P$ holds initially the program is at least _safe_ in that it never does something "bad" like trying to execute $1 + \true$.
+
+::: info Hoare logic as a logic
+
+We have taken the view that a Hoare triple means the soundness statement above, and the rules are proven under that definition. It is also possible to view Hoare logic _as a logic_ where the rules are purely formal axioms of a proof system, and then soundness is a theorem about that proof system.
+
+See [Programming Language Foundations](https://softwarefoundations.cis.upenn.edu/plf-current/HoareAsLogic.html) for a more details presentation of this view (note that there are some significant differences in that presentation of Hoare logic and you will likely need to read earlier chapters). An important consequence of formalizing Hoare logic with axioms is the proof of _completeness_ and not just soundness; informally, the rules of Hoare logic are enough to prove any true Hoare triples, and thus we aren't missing any important rules.
+
+:::
+
+### Exercise: soundness of rule of consequence
+
+Go back to the [Hoare rules](./hoare.md#hoare-rules) and look at the rule of consequence. Prove this rule, interpreting the Hoare triples with the definition above.
 
 ## Hoare logic verification examples
 
