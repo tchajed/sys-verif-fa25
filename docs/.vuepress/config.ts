@@ -51,11 +51,11 @@ export default defineUserConfig({
 
     plugins: {
       mdEnhance: {
-        // TODO: katex seems to not work
-        // katex: {
-        //   copy: true,
-        // },
-        mathjax: true,
+        // latex support
+        katex: {
+          copy: true,
+        },
+        // mathjax: true,
         tasklist: true,
         include: true,
         // allow {#custom-id} attributes
@@ -79,6 +79,8 @@ export default defineUserConfig({
     // see https://theme-hope.vuejs.press/guide/feature/meta.html
     contributors: false,
     editLink: false, // feedback is better than edits/PRs
+    // Could add "ReadingTime" (and reduce words/minute, default is 300) or
+    // "Word" to give length estimate.
     pageInfo: ["Date", "Category", "Tag"],
     toc: true, // usually desired, but disabled on home page
     print: false, // no need to offer print button
