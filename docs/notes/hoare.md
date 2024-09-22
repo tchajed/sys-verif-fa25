@@ -343,7 +343,7 @@ Second, notice that we only learn anything about $Q$ if $e \to^* v'$. This is ca
 
 We have taken the view that a Hoare triple means the soundness statement above, and the rules are proven under that definition. It is also possible to view Hoare logic _as a logic_ where the rules are purely formal axioms of a proof system, and then soundness is a theorem about that proof system.
 
-See [Programming Language Foundations](https://softwarefoundations.cis.upenn.edu/plf-current/HoareAsLogic.html) for a more details presentation of this view (note that there are some significant differences in that presentation of Hoare logic and you will likely need to read earlier chapters). An important consequence of formalizing Hoare logic with axioms is the proof of _completeness_ and not just soundness; informally, the rules of Hoare logic are enough to prove any true Hoare triples, and thus we aren't missing any important rules.
+See [Programming Language Foundations](https://softwarefoundations.cis.upenn.edu/plf-current/HoareAsLogic.html) for a more detailed presentation of this view (note that there are some significant differences in that presentation of Hoare logic and you will likely need to read earlier chapters). An important consequence of formalizing Hoare logic with axioms is the proof of _completeness_ and not just soundness; informally, the rules of Hoare logic are enough to prove any true Hoare triples, and thus we aren't missing any important rules.
 
 :::
 
