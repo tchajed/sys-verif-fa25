@@ -15,7 +15,7 @@ order: 5
 
 ---
 
-We have so far taken a view of program verification where the code is a functional program in Coq, the specification is a property about that function (we a style of writing these properties where an ADT is related to a model), and the proof uses any Coq-level reasoning required.
+We have so far taken a view of program verification where the code is a functional program in Coq, the specification is a property about that function, and the proof uses any Coq-level reasoning required; we specifically developed a style where the code is an ADT and the specification relates it to a model.
 
 We will now develop Hoare logic, a formal system for reasoning about program correctness. At first, the code will still be functional programs. The specifications will use a new style of pre- and post-conditions, attached to each function. Proofs will use the rules of Hoare logic to handle each programming feature and to compose existing specifications together. Hoare logic will provide a smooth path to separation logic and concurrent separation logic, which add extensions for reasoning about more interesting programs while retaining much of the basic structure of this simple version.
 
