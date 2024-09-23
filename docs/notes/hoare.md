@@ -48,8 +48,8 @@ subsequent math blocks.
 -->
 
 $$
-\gdef\ife#1#2#3{\operatorname{if} #1 \operatorname{then} #2 \operatorname{else} #3}
-\gdef\lete#1#2#3{\operatorname{let} #1 := #2 \operatorname{in} #3}
+\gdef\ife#1#2#3{\text{if } #1 \text{ then } #2 \text{ else } #3}
+\gdef\lete#1#2#3{\text{let } #1 := #2 \text{ in } #3}
 \gdef\true{\mathrm{true}}
 \gdef\True{\mathrm{True}}
 \gdef\false{\mathrm{false}}
@@ -59,15 +59,12 @@ $$
 \gdef\app#1#2{#1 \, #2}
 \gdef\entails{\vdash}
 \gdef\eqnlabel#1{\:\:\text{#1}}
-$$
 
-$$
-\newcommand{\linecontinue}{\phantom{::=}}
 \begin{aligned}
 &\mathrm{Expressions} &e &::= x \mid v \mid \fun{x} e \mid \app{e_1}{e_2} \\
-&&&\linecontinue \mid \ife{e}{e_1}{e_2} \\
-&&&\linecontinue \mid e_1 + e_2 \mid e_1 == e_2 \mid e_1 < e_2 \\
-&&&\linecontinue \mid (e_1, e_2) \mid \pi_1 \, e \mid \pi_2 \, e \\
+&&&\phantom{::=} \mid \ife{e}{e_1}{e_2} \\
+&&&\phantom{::=} \mid e_1 + e_2 \mid e_1 == e_2 \mid e_1 < e_2 \\
+&&&\phantom{::=} \mid (e_1, e_2) \mid \pi_1 \, e \mid \pi_2 \, e \\
 &\mathrm{Values} &v &::= \lambda x.\, e \mid \overline{n} \mid \mathrm{true} \mid \mathrm{false} \mid (v_1, v_2)
 \end{aligned}
 $$
@@ -78,11 +75,11 @@ $$
 \begin{aligned}
 \fun{x, y} e &::= \fun{x} \fun{y} e \\
 \lete{x}{e_1}{e_2} &::= (\fun{x} e_2) \, e_1 \\
-\app{\app{e_1}{e_2}}{e_3} &::= \app{(\app{e_1 \, e_2})}{e_3}
+e_1 \, e_2 \, e_3 &::= (\app{e_1}{e_2}) \, e_3
 \end{aligned}
 $$
 
-Some notation is worth explaining here. The production $e ::= x$ says that a variable like $x$ or $y$ is an expression ($e$ in the grammar). $e ::= v$ says that any value (defined above) can also be used as an expression. $v ::= \overline{n}$ says that an integer constant $\overline{n}$ is a value; the overline is used to distinguish numbers in the syntax $n$ vs numbers in the meta language $\overline{n}$.
+Some notation is worth explaining here. The production $e ::= x$ says that a variable like $x$ or $y$ is an expression ($e$ in the grammar). $e ::= v$ says that any value (defined above) can also be used as an expression. $v ::= \overline{n}$ says that an integer constant $\overline{n}$ is a value; the overline is used to distinguish between a meta-level number $n : \mathbb{Z}$ and the literal $\overline{n}$ which is a value in the language.
 
 ::: warning If you've seen the λ-calculus before...
 
