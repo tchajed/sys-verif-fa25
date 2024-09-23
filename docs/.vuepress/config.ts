@@ -53,7 +53,8 @@ export default defineUserConfig({
       mdEnhance: {
         // latex support
         katex: {
-          copy: true,
+          // copy math as text (set to true to copy as LaTeX source)
+          copy: false,
         },
         // mathjax: true,
         tasklist: true,
