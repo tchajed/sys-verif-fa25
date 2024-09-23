@@ -9,7 +9,7 @@
 |   4 | Mon Sep 16 | [ADT specification](./notes/adt_specs.md)         |
 |   6 | Wed Sep 18 | [ADTs with invariants](./notes/adt_invariants.md) |
 |     |            | **Part 2: Imperative programs**                   |
-|   7 | Mon Sep 23 | Hoare logic                                       |
+|   7 | Mon Sep 23 | [Hoare logic](./notes/hoare.md)                   |
 |   8 | Wed Sep 25 | Separation logic                                  |
 |     | Tue Oct 1  | _Assignment 1 due (11pm)_                         |
 |   9 | Mon Sep 30 | Modeling Go programs                              |

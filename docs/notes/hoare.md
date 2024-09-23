@@ -27,6 +27,13 @@ When reading the notes, I suggest reading the introduction in each sub-section, 
 
 :::
 
+Hoare logic and its extensions are the basis of a good deal of program reasoning, including more semi-automated verification tools like Dafny and F\*, as well as the Iris framework we will use in this class. The general setup is that the user writes pre- and post-conditions in the source code and then some form of automation kicks in to prove that those annotations are correct. The purpose of learning Hoare logic itself rather than starting with verifying programs is to understand more deeply two things:
+
+1. What does it mean to have a "verified" program annotated with pre- and post-conditions when the verification succeeds?
+2. When a proof fails, what reasoning are tools following?
+
+The second question is especially important since you will face failed proofs in verification (either because of incorrect code, incorrect specifications, or because the proof isn't done), and it is extremely helpful to have a good mental model of what's going on when debugging them.
+
 ## Programming language
 
 We'll start by defining a programming language and its semantics. The goal right now is to have just enough features to understand the rules of Hoare logic; eventually we'll add features to enable writing useful programs, without changing the structure of the verification features.
@@ -109,16 +116,34 @@ $$
 
 The semantics answers precisely what it means to run some expression $e$. We need such a definition to be able to ground any verification that $e$ meets some specification; the correctness theorem will need to talk about what $e$ does (when run) in order to say whether that behavior is correct or not.
 
-We will give a small-step operational semantics for this language and work from there; you can look to a programming language theory class to get a broader perspective on other approaches to semantics of a programming language.
+We will give a small-step operational semantics for this language; you can look to a programming language theory class to get a broader perspective on other approaches to semantics of a programming language.
 
-The semantics is based on a "step" relation $e_1 \to e_2$, which intuitively means $e_1$ can simplify to $e_2$ in one step. We will then generally talk about $e_1 \to^* e_2$, the reflexive and transitive closure of $\to$ (basically, zero or more $\to$ steps between $e_1$ and $e_2$):
+The semantics is based is based on a step relation $e_1 \to e_2$, which intuitively means $e_1$ executes to $e_2$ in one step. We will then generally talk about $e_1 \to^* e_2$, the reflexive and transitive closure of $\to$ (basically, zero or more $\to$ steps between $e_1$ and $e_2$).
 
 $$
-e \to^* e \\
-e \to^* e'' \operatorname{if} e \to e' \operatorname{and} e' \to^* e''
+e \to^* e \text{ always} \\
+e \to^* e'' \text{ if } e \to e' \text{ and } e' \to^* e''
 $$
 
-If we have $e_1 \to^* v$ (that is, if $e_1$ can step to a value specifically), then we will consider this to be termination. The step relation is defined so that $v \not\to e'$; that is, for any value, it will never step to anything. If we have $e$ and $\forall e', e \not\to e'$ (that is, $e$ is not a value and cannot step to anything), we will say $e$ is "stuck", which is how the semantics encodes $e$ "going wrong" - for example, $1 + \true$ is stuck.
+When $e_1 \to^* e_2$, we often say $e_1$ _reduces to_ $e_2$. Reduction is computation in the $\lambda$-calculus. If you were to run a term, it would mean reducing it as much as possible.
+
+If we have $e_1 \to^* v$ (that is, if $e_1$ can reduce to a value specifically), then this is considered a terminating execution. The step relation is defined so that $v \not\to e'$; that is, for any value, it will never step to anything (values are _irreducible_). If we have $e$ and $\forall e', e \not\to e'$ (that is, $e$ is not a value and cannot step to anything), we will say $e$ is "stuck", which is how the semantics encodes $e$ "going wrong" - for example, $1 + \true$ is stuck.
+
+:::: info Exercise
+
+Let $\omega = \fun{x} x \, x$ and $\Omega = \omega \, \omega$. What does $\Omega$ reduce to?
+
+::: details Solution
+
+$\Omega = \omega \, \omega = (\fun{x} x \, x) \, \omega \to (x \, x)[\omega / x] = \omega \, \omega = \Omega$
+
+$\Omega$ reduces to itself! Hence we have a _non-terminating_ expression, also called _diverging_. Note that $\Omega$ is not a value and is not stuck.
+
+Eventually we'll add recursion to the language and then we'll have much more ordinary examples of non-termination.
+
+:::
+
+::::
 
 #### Reduction rules
 
@@ -331,7 +356,7 @@ The reason Hoare logic is useful and what it means to have a (proven) Hoare trip
 
 ::: important Hoare triple definition/soundness
 
-$\hoare{P}{e}{\fun{v} Q(v)}$ means if $P$ holds and $e \to^* e'$, then either (a) $\exists e'', e' \to e''$ ($e'$ is not stuck), or (b) $e' = v'$ for some value $v'$ and $Q(v')$ holds.
+$\hoare{P}{e}{\fun{v} Q(v)}$ means if $P$ holds and $e \to^* e'$, then either (a) $\exists e''.\, e' \to e''$ ($e'$ is not stuck), or (b) there exists a value $v'$ such that $e' = v'$ and $Q(v')$ holds.
 
 :::
 
