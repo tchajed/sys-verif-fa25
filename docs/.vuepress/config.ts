@@ -51,18 +51,19 @@ export default defineUserConfig({
 
     plugins: {
       mdEnhance: {
-        // latex support
-        katex: {
-          // copy math as text (set to true to copy as LaTeX source)
-          copy: false,
-        },
-        // mathjax: true,
         tasklist: true,
         include: true,
         // allow {#custom-id} attributes
         attrs: {
           allowed: ["id"],
         },
+      },
+      markdownMath: {
+        type: "katex",
+        // copy as text (change to true to copy as LaTeX source)
+        copy: false,
+        // NOTE: this is needed for \gdef and \global to work
+        macros: {},
       },
       shiki: {
         langs: ["coq", "go", "bash"],
