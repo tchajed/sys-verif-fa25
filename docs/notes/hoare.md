@@ -184,7 +184,6 @@ The Coq formalism we will eventually use based on Iris does not solve this probl
 
 :::
 
-
 #### Evaluation contexts
 
 Next, we need to give so-called _structural rules_. The attentive reader will notice that there is no rule for something like $(\lambda x.\, x + 2) (3 + 4)$ - strictly speaking, $3 + 4$ is not a value and the rule for applications does not apply. We'll now fix that.
