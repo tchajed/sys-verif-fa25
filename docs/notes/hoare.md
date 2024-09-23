@@ -1,9 +1,10 @@
 ---
 category: lecture
 order: 5
+shortTitle: "Lecture 6+7: Hoare Logic"
 ---
 
-# Lecture 6: Hoare Logic
+# Lectures 6 and 7: Hoare Logic
 
 ## Introduction
 
