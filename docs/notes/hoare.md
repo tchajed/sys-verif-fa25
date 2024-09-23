@@ -1,6 +1,6 @@
 ---
 category: lecture
-order: 5
+order: 6
 shortTitle: "Lecture 6+7: Hoare Logic"
 ---
 
