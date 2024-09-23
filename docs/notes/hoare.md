@@ -118,7 +118,7 @@ The semantics answers precisely what it means to run some expression $e$. We nee
 
 We will give a small-step operational semantics for this language; you can look to a programming language theory class to get a broader perspective on other approaches to semantics of a programming language.
 
-The semantics is based is based on a step relation $e_1 \to e_2$, which intuitively means $e_1$ executes to $e_2$ in one step. We will then generally talk about $e_1 \to^* e_2$, the reflexive and transitive closure of $\to$ (basically, zero or more $\to$ steps between $e_1$ and $e_2$).
+The semantics is based is based on a step relation (to be defined below in the [Reduction rules](./hoare.md#reduction-rules) subsection) $e_1 \to e_2$, which intuitively means $e_1$ executes to $e_2$ in one step. We will then generally talk about $e_1 \to^* e_2$, the reflexive and transitive closure of $\to$ (basically, zero or more $\to$ steps between $e_1$ and $e_2$).
 
 $$
 e \to^* e \text{ always} \\
@@ -145,29 +145,13 @@ Eventually we'll add recursion to the language and then we'll have much more ord
 
 ::::
 
-#### Reduction rules
+#### Reduction rules {#reduction-rules}
 
-Here are some rules to define $e \to e'$:
-
-$$
-(\lambda x.\, e)\, v \to e[v / x]
-$$
-
-This is called a _beta reduction_ (this is so common that it's worth remembering that name). The notation for _substitution_ $e[v / x]$ means to substitute in $e$ the expression $v$ for each occurrence of the variable $x$. The way to remember the order here (which is [rather standard](https://youtu.be/7HKbjYqqPPQ?t=1925)) is to think of it as $v$ "sits over" $x$. We will not give a formal definition of substitution.
-
-::: warning Capture-avoiding substitution
-
-For the curious, substitution is not entirely straightforward.
-
-There is a generally tricky issue of _variable capture_ when defining substitution. The issue is that if we have an expression like $\lambda y.\, \lambda x.\, x + y$ and try to apply it to the free variable $x$, a naive definition of substitution will reduce to $(\lambda x.\, x + y)[x / y] = \lambda x.\ x + x$. Notice that what was a free variable is now a reference to the lambda abstraction's bound variable; we call this "variable capture" and it's generally considered a bug in substitution. Instead, _capture-avoiding substitution_ will rename bound variables and produce $(\lambda x.\, x + y)[x / y] = \lambda z.\ z + x$, preserving the meaning of the original expression.
-
-The Coq formalism we will eventually use based on Iris does not solve this problem (using a slightly wrong definition of substitution), but we will always substitute closed terms $v$ and in that situation variable capture is not possible.
-
-:::
+Rules defining $e_1 \to e_2$ (step relation):
 
 $$
 \begin{aligned}
-(\lambda x.\, e) v &\to e[v / x] \\
+(\lambda x.\, e) v &\to e[v / x] \eqnlabel{(beta reduction)} \\
 \ife{\mathrm{true}}{e_1}{e_2} &\to e_1 \\
 \ife{\mathrm{false}}{e_1}{e_2} &\to e_2 \\
 \pi_1 (v_1, v_2) &\to v_1 \\
@@ -188,6 +172,19 @@ $$
 \dfrac{n_1 \geq n_2}{\overline{n_1} < \overline{n_2} \to \false}
 $$
 
+The first rule, $(\lambda x.\, e)\, v \to e[v / x]$, is called a _beta reduction_. It's important enough to get special attention, and the name is worth remembering. The notation for _substitution_ $e[v / x]$ means to substitute in $e$ the expression $v$ for each occurrence of the variable $x$. The way to remember the order here (which is [rather standard](https://youtu.be/7HKbjYqqPPQ?t=1925)) is to think of it as $v$ "sits over" $x$. We will not give a formal definition of substitution.
+
+::: warning Capture-avoiding substitution
+
+For the curious, substitution is not entirely straightforward.
+
+There is a generally tricky issue of _variable capture_ when defining substitution. The issue is that if we have an expression like $\lambda y.\, \lambda x.\, x + y$ and try to apply it to the free variable $x$, a naive definition of substitution will reduce to $(\lambda x.\, x + y)[x / y] = \lambda x.\ x + x$. Notice that what was a free variable is now a reference to the lambda abstraction's bound variable; we call this "variable capture" and it's generally considered a bug in substitution. Instead, _capture-avoiding substitution_ will rename bound variables and produce $(\lambda x.\, x + y)[x / y] = \lambda z.\ z + x$, preserving the meaning of the original expression.
+
+The Coq formalism we will eventually use based on Iris does not solve this problem (using a slightly wrong definition of substitution), but we will always substitute closed terms $v$ and in that situation variable capture is not possible.
+
+:::
+
+
 #### Evaluation contexts
 
 Next, we need to give so-called _structural rules_. The attentive reader will notice that there is no rule for something like $(\lambda x.\, x + 2) (3 + 4)$ - strictly speaking, $3 + 4$ is not a value and the rule for applications does not apply. We'll now fix that.
@@ -204,23 +201,46 @@ $$
 \end{aligned}
 $$
 
-An evaluation context is an expression with a hole in it (where the $\bullet$ is). Define $K[e]$ to mean "fill in" the hole with the expression $e$, producing an expression (defining this is left as an exercise to the reader).
+An evaluation context is an expression with a hole in it (where the $\bullet$ is). Define $K[e']$ to mean "fill in" the hole with the expression $e'$, producing an expression. For example, $\bullet[e'] ::= e'$ and $(K \, v)[e'] ::= K[e'] \, v$.
+
+::: details Full definition of K[e']
+
+$$
+\begin{aligned}
+\bullet[e'] &::= e' \\
+(K \, v)[e'] &::= K[e'] \, v \\
+(e \, K)[e'] &::= e \, K[e'] \\
+\left(\ife{K}{e_1}{e_2}\right)[e'] &::= \ife{K[e]}{e_1}{e_2} \\
+(K + v)[e'] &::= K[e'] + v \\
+(e + K)[e'] &::= e + K[e'] \\
+(K < v)[e'] &::= K[e'] < v \\
+(e < K)[e'] &::= e < K[e'] \\
+(K, v)[e'] &::= \left( K[e'], \, v \right) \\
+(e, K)[e'] &::= \left( e, \, K[e'] \right) \\
+(\pi_1 \, K)[e'] &::= \pi_1 \, K[e'] \\
+(\pi_2 \, K)[e'] &::= \pi_2 \, K[e'] \\
+\end{aligned}
+$$
+
+:::
 
 Now we add one more rule to define the step relation:
 
 $$
-\dfrac{e \to e'}{K[e] \to K[e']}
+\dfrac{e \to e'}{K[e] \to K[e']} \eqnlabel{step-context}
 $$
 
 **Stop and think:** in $e = (\lambda x, y.\, x + y) \, a \, b$ where $a$ and $b$ are expressions and not values, what order are $a$ and $b$ evaluated in? Try to answer this based only on the rules.
 
 ::: details Solution
 
-First, let's expand this to $e = ((\lambda x.\, \lambda y.\, x + y) \, a) \, b$. We need to decompose this into something of the form $e = K_0[e']$ for some $K_0$. The only rule for forming evaluation contexts is the one written $e K$, which we instantiate to get $K_0 = ((\lambda x.\, \lambda y.\, x + y) \, a) \, \bullet$; $b$ is at the position of the "hole" $\bullet$ and that's what runs first.
+First, let's expand this to $e = ((\lambda x.\, \lambda y.\, x + y) \, a) \, b$. We need to decompose this into something of the form $e = K_0[e']$ for some $K_0$. The only rule for forming evaluation contexts is the one written $e \, K$, which we instantiate to get $K_0 = ((\lambda x.\, \lambda y.\, x + y) \, a) \, \bullet$; $b$ is at the position of the "hole" $\bullet$ and that's what runs first.
 
 This means under this semantics a function with multiple arguments (via currying) has its arguments evaluated _right-to-left_.
 
 :::
+
+**Exercise:** what would you change so that addition $e_1 + e_2$ is evaluated left-to-right? What would you change so tuples $(e_1, e_2)$ could be evaluated in either order?
 
 #### Intuition behind the semantics
 
@@ -234,6 +254,18 @@ The two relevant contexts are $K + v$ and $e + K$. The first does not apply here
 Similarly, the beta rule requires that the argument be a value before we perform substitution (this is called a "call-by-value" semantics). Look at how the contexts $K\, v$ and $e\, K$ further tell us that the argument is reduced to a value before reducing the function to a lambda expression.
 
 This semantics is deterministic (you could prove this). A different definition of evaluation contexts could make it non-deterministic, and yet another definition would be deterministic but with everything evaluated left-to-right.
+
+#### Structural evaluation rules
+
+The following _lemmas_ about the step relation can be derived from the step-context rule; they formalize the intuition above that comes from inspecting the semantics.
+
+$$\dfrac{e_2 \to e_2'}{e_1 \, e_2 \to e_1 \, e_2'}$$
+
+$$\dfrac{e_1 \to e_1'}{e_1 \, v_2 \to e_1' \, v_2}$$
+
+$$\dfrac{e_2 \to e_2'}{e_1 + e_2 \to e_1 + e_2'}$$
+
+$$\dfrac{e_1 \to e_1'}{e_1 + v_2 \to e_1' + v_2}$$
 
 ## Hoare logic
 
@@ -274,7 +306,7 @@ $$
 \dfrac{\forall x.\, (P(x) \entails Q)}{\exists x.\, P(x) \entails Q} \eqnlabel{exists-elim}
 $$
 
-### Hoare Rules
+### Hoare Rules {#hoare-rules}
 
 ::: important Reading these rules
 
