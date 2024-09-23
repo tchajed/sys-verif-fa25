@@ -352,7 +352,7 @@ If-false: pure-step. Observe that the `if` construct takes a step even when the 
 
 What does it mean to prove $\hoare{P}{e}{\fun{v} Q(v)}$? We have a bunch of "rules" above, but where do they come from?
 
-The reason Hoare logic is useful and what it means to have a (proven) Hoare triple is that we can give a definition of _soundness_ of a Hoare triple that relates it the semantics of programs, and then all the rules given above can be proven as theorems.
+The reason Hoare logic is useful and what it means to have a (proven) Hoare triple is that we can give a definition of _soundness_ of a Hoare triple that relates it the semantics of programs, and then all the rules given above can be proven as theorems. The soundness definition requires that we interpret propositions, and you can think of that interpretation as being Coq propositions here.
 
 ::: important Hoare triple definition/soundness
 
@@ -371,6 +371,12 @@ We have taken the view that a Hoare triple means the soundness statement above, 
 See [Programming Language Foundations](https://softwarefoundations.cis.upenn.edu/plf-current/HoareAsLogic.html) for a more detailed presentation of this view (note that there are some significant differences in that presentation of Hoare logic and you will likely need to read earlier chapters). An important consequence of formalizing Hoare logic with axioms is the proof of _completeness_ and not just soundness; informally, the rules of Hoare logic are enough to prove any true Hoare triples, and thus we aren't missing any important rules.
 
 :::
+
+### Example: soundness of exists rule
+
+At a high level, this rule can be proven by unfolding the definition of soundness and following rules of propositional logic.
+
+Our goal is a Hoare triple; expanding the definition of soundness for that triple, we have assumptions $\exists x. \, P(x)$ and $e \to^* e'$. We can eliminate the existential to get a specific $x_0$ such that $P(x_0)$ holds. From the premise of this rule, we know $\hoare{P(x_0)}{e}{\fun{v} Q(v)}$ holds. Unfolding the soundness definition in that assumption, we get an implication with two premises: the first is to prove the precondition $P(x_0)$ (which we already have), and the second is to prove $e \to^* e'$ (which we also have). Thus from that Hoare triple we conclude that either $e'$ is reducible or it's a value $v'$ where $Q(v')$ holds, which exactly matches the goal.
 
 ### Exercise: soundness of rule of consequence
 
