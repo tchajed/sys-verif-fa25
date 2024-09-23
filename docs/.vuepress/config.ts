@@ -62,6 +62,8 @@ export default defineUserConfig({
         type: "katex",
         // copy as text (change to true to copy as LaTeX source)
         copy: false,
+        // NOTE: this is needed for \gdef and \global to work
+        macros: {},
       },
       shiki: {
         langs: ["coq", "go", "bash"],
