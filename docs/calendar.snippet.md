@@ -11,8 +11,8 @@
 |     |            | **Part 2: Imperative programs**                   |
 |   6 | Mon Sep 23 | [Hoare logic](./notes/hoare.md)                   |
 |   7 | Wed Sep 25 | [Hoare logic, continued](./notes/hoare.md)        |
-|     | Tue Oct 1  | _Assignment 1 due (11pm)_                         |
 |   8 | Mon Sep 30 | Separation logic                                  |
+|     | Tue Oct 1  | _Assignment 1 due (11pm)_                         |
 |   9 | Wed Oct 2  | Modeling Go programs                              |
 |  10 | Mon Oct 7  | Iris Proof Mode                                   |
 |  11 | Wed Oct 9  | Reasoning about Go                                |
