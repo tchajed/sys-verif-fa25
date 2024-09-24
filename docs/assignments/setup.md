@@ -31,7 +31,7 @@ git push --set-upstream origin main
 git submodule update --init --recursive
 ```
 
-You now have a copy of the repo, with the `main` branch tracking your private repo, and with a remote `upstream` pointing to the class repo. You can now do something like `git fetch upstream` and `git merge upstream/main` to pull in new changes.
+You now have a copy of the repo, with the `main` branch tracking your private repo (using a remote called origin, as is typical in git), and with a second remote `upstream` pointing to the class repo. You can now do run `git fetch upstream` to get new commits from the `tchajed/sys-verif-fa24-proofs` repo, then `git merge upstream/main` to pull in new changes into your own repo.
 
 You don't actually have to call your repo sys-verif-fa24-proofs, but that's how I'll refer to it. If you accidentally forked the course repo, don't panic; you can just delete the fork and re-create it.
 
