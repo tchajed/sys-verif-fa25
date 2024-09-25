@@ -494,7 +494,7 @@ The $\operatorname{and}$ spec is an example of giving a strong specification, $\
 
 Even the $\operatorname{and}$ spec is not the strongest possible - notice that the code does not actually require the second argument to be a boolean, and that it only needs to be safe if the first argument is $\true$.
 
-Example proof:
+### Example proof: specification for f
 
 Let's prove the spec for $\operatorname{f}$ above, assuming the other specs. This proof demonstrates using the rules as well as _compositionality_: notice how we end up using the specifications for $\operatorname{min}$ and $\operatorname{add}$ without having to know anything about else about those functions. To conveniently state these intermediate steps, we'll abbreviate the postcondition above as $Q_f(v)$.
 
@@ -525,6 +525,8 @@ This completes the proof! Taking a step back, notice how we basically broken dow
 ### Exercise: prove the triples
 
 Prove the Hoare triples above. Do the proofs as carefully as you can, annotating the rules you use. This is good practice for understanding the rules, and will also help you appreciate when we switch to Coq and it automates the book-keeping for you.
+
+You may want to start by reading the next section on Hoare outlines and writing an outline-based proof sketch, and only then trying to do a detailed proof.
 
 ## Hoare outlines
 
