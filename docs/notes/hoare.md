@@ -88,8 +88,7 @@ $$
 
 Some notation is worth explaining here. The notation uses _metavariables_ to indicate what is being defined; $e$ always refers to an expression, $v$ to a value, $x$ to a variable, and $n$ to a number. When we write $v ::= \true \mid \false$, this defines variables $v$ to be either the constant $\true$ or $\false$ (the vertical bar separates alternatives, just like a Coq `Inductive`). The grammar for expressions includes one alternative $e ::= v$, which says that any value (defined above) can also be used as an expression. The grammar defines a recursive inductive datatype for expressions and for values; the definitions refer to each other ($e ::= v$ refers to values when defining expressions, but also $v ::= \fun{x} e$ says anonymous functions are values and the body is an expression), so we have _mutually recursive inductives_.
 
-The grammar rule $e ::= x$ says that a variable like $x$ or $y$ is an expression ($e$ in the grammar).
-$v ::= \overline{n}$ says that an integer constant $\overline{n}$ is a value; the overline is used to distinguish between a meta-level number $n : \mathbb{Z}$ and the literal $\overline{n}$ which is a value in the language. $\pi_1 \, e$ and $pi_2 \, e$ are "projection functions" (often denoted using $\pi$) that get the first and second element of a tuple, respectively.
+The grammar rule $e ::= x$ says that a variable like $x$ or $y$ is an expression ($e$ in the grammar). $v ::= \overline{n}$ says that an integer constant $\overline{n}$ is a value; the overline is used to distinguish between a meta-level number $n : \mathbb{Z}$ and the literal $\overline{n}$ which is a value in the language. $\pi_1 \, e$ and $pi_2 \, e$ are "projection functions" (often denoted using $\pi$) that get the first and second element of a tuple, respectively.
 
 ::: warning If you've seen the λ-calculus before...
 
@@ -333,8 +332,6 @@ It's best for the purpose of this class to think about $\hoare{P}{e}{\fun{v} Q(v
 - The specifications we write will quantify over Coq-level variables (implicitly in the notes, but in Coq we will have to be explicit about this). For example, $\hoare{\True}{\operatorname{add}  \, \overline{n} \, \overline{m}}{\fun{v} v = \overline{n + m}}$ should be viewed as being for all values of the Coq variables $n : \mathbb{Z}$ and $m : \mathbb{Z}$.
 - In addition to using the rules of Hoare logic, we can also use Coq reasoning principles, like `destruct` and arithmetic reasoning about $n$ and $m$. The rules will handle anything specific to programs.
 
-
-
 $$\hoare{P(v)}{v}{\fun{w} P(w)} \eqnlabel{value}$$
 
 $$
@@ -485,7 +482,8 @@ $$
 {\fun{v} \True}
 $$
 
-$$\hoare{\True}%
+$$
+\hoare{\True}%
 {\operatorname{h} \, \overline{n}}
 {\fun{v} v = \overline{2}}
 $$
@@ -534,7 +532,8 @@ Writing an on-paper proof referencing these rules is quite tedious and obscures 
 
 Here's a specification for a function written in this style, with let bindings. The specification is written vertically to fit a big program; it means exactly the same thing as the horizontal version.
 
-$$\hoareV{n < 2^{64} - 1}%
+$$
+\hoareV{n < 2^{64} - 1}%
 {\begin{aligned}
 \letV{m}{\min \, 0 \, \overline{n}} \\
 \letV{y}{\operatorname{add} \, m \, 1} \\
@@ -559,7 +558,6 @@ Something that you probably take for granted if you have even just a little prog
 Hoare logic supports _modular reasoning_ that exactly reflects this split into helper functions: we prove a specification about `h1` and `h2`, then prove `f` by referring to those specifications without needing to know how they're implemented. Modularity is important to scale up a proof to a big piece of code, and in this case it's elegant that the way the proof is modular (by writing specifications for functions) matches how the code is modular.
 
 Modularity is also beneficial when a helper function is reused, since then the proof of `h1` can be done just once and used multiple times. However, it has benefits even if a function is used only once since it breaks down a big task into smaller, more manageable tasks. In a larger team modularity even permits you to split and parallelize the work: if you can decide what `h1` does (its _specification_), then one person can implement `h1` and another can use it in `f` at the same time.
-
 
 :::
 
