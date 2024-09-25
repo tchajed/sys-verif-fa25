@@ -152,10 +152,10 @@ Rules defining $e_1 \to e_2$ (step relation):
 $$
 \begin{aligned}
 (\lambda x.\, e) v &\to e[v / x] \eqnlabel{(beta reduction)} \\
-\ife{\mathrm{true}}{e_1}{e_2} &\to e_1 \\
-\ife{\mathrm{false}}{e_1}{e_2} &\to e_2 \\
-\pi_1 (v_1, v_2) &\to v_1 \\
-\pi_2 (v_1, v_2) &\to v_2 \\
+\ife{\mathrm{true}}{e_1}{e_2} &\to e_1 \eqnlabel{(if-true)} \\
+\ife{\mathrm{false}}{e_1}{e_2} &\to e_2 \eqnlabel{(if-false)} \\
+\pi_1 \, (v_1, v_2) &\to v_1 \eqnlabel{(proj-fst)} \\
+\pi_2 \, (v_1, v_2) &\to v_2 \eqnlabel{(proj-snd)} \\
 \overline{n_1} + \overline{n_2} &\to \overline{n_1 + n_2} \\
 \end{aligned}
 $$
@@ -389,7 +389,7 @@ $$
 \end{array}
 }{
 \hoare{P}{\ife{e}{e_1}{e_2}}{R}
-}
+} \eqnlabel{hoare-if}
 $$
 
 This chooses a particular specification for the intermediate condition, but a very general one: we need $e$ to produce a boolean since `if` only works on booleans, and other than that this rule allows one proof where $e$ returns true and has postcondition $Q_t$ and another for false with postcondition $Q_f$. The `if` subsequently becomes one of the branches, and the premises require a proof about each branch.
@@ -401,26 +401,26 @@ Many presentations of Hoare logic don't use the pure-step rule but following an 
 Prove the following structural rules.
 
 $$
-\hoare{True}{\overline{n} + \overline{m}}{\fun{v} \overline{n + m}} \eqnlabel{Add}
+\hoare{True}{\overline{n} + \overline{m}}{\fun{v} \overline{n + m}} \eqnlabel{hoare-add}
 $$
 
 $$
-\hoare{n \neq m}{\overline{n} == \overline{m}}{\fun{v} v = \false} \eqnlabel{IsNeq}
+\hoare{n \neq m}{\overline{n} == \overline{m}}{\fun{v} v = \false} \eqnlabel{hoare-neq}
 $$
 
 $$
 \dfrac{\hoare{P}{e_2}{Q}}{%
 \hoare{P}{\ife{\false}{e_1}{e_2}}{Q}
-} \eqnlabel{If-false}
+} \eqnlabel{hoare-if-false}
 $$
 
 ::: details Solution
 
-Add: pure-step + value
+hoare-add: pure-step + value
 
-IsNeq: pure-step + value
+hoare-neq: pure-step + value
 
-If-false: pure-step. Observe that the `if` construct takes a step even when the branches are expressions; this is necessary for this rule to even be sound.
+hoare-if-false: pure-step. Observe that the `if` construct takes a step even when the branches are expressions; this is necessary for this rule to even be sound.
 
 :::
 
@@ -429,13 +429,15 @@ If-false: pure-step. Observe that the `if` construct takes a step even when the 
 Here are some examples of correct specifications.
 
 $$
+\gdef\and{\operatorname{and}}
 \begin{aligned}
-\operatorname{and} &= \lambda b_1, b_2.\, \ife{b_1}{b_2}{\false} \\
+\and &= \lambda b_1, b_2.\, \ife{b_1}{b_2}{\false} \\
 \operatorname{add} &= \lambda x, y.\, x + y \\
 \min &= \lambda x, y.\, \ife{x < y}{x}{y} \\
 \operatorname{f} &= \fun{x} \operatorname{add} \, (\min \, 0 \, x) \, 1 \\
 \operatorname{g} &= \fun{x} \ife{x = 1}{\true}{\\ %
-&\phantom{= \fun{x}} (\ife{x = 0}{\false}{2 + \false})}
+&\phantom{= \fun{x}} (\ife{x = 0}{\false}{\overline{2} + \false})} \\
+\operatorname{h} &= \fun{x} \ife{\and \, (0 < x) \, (x < 0)}{\overline{1} + \true}{\overline{2}} \\
 \end{aligned}
 $$
 
