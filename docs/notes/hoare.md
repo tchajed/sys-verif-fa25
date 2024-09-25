@@ -22,7 +22,7 @@ We will now develop Hoare logic, a formal system for reasoning about program cor
 
 ::: important Reading these notes
 
-These lecture notes are written in a bottom-up style: each definition is presented in detail, then used later. This is intended to be a good reference but is not ideal for reading in order. It is not the order the live lecture is presented in.
+These lecture notes are written in a bottom-up style: each definition is presented in detail, then used later. This is intended to be a good reference but you will not need to understand every detail before moving on.
 
 When reading the notes, I suggest reading the introduction in each sub-section, then moving forward, until you get to the Hoare logic subsection. You can go back if you ever need to understand something in more detail or to see a specific rule or definition.
 
@@ -52,11 +52,15 @@ subsequent math blocks.
 
 $$
 \gdef\ife#1#2#3{\text{\textbf{if} } #1 \text{ \textbf{then} } #2 \text{ \textbf{else} } #3}
-\gdef\lete#1#2#3{\text{\textbf{let} } #1 := #2 \text{ \textbf{in} } #3}
+\gdef\lete#1#2{\text{\textbf{let} } #1 := #2 \text{ \textbf{in} }}
+\gdef\letV#1#2{&\text{\textbf{let} } #1 := #2 \text{ \textbf{in} }}
 \gdef\true{\mathrm{true}}
 \gdef\True{\mathrm{True}}
 \gdef\false{\mathrm{false}}
-\gdef\hoare#1#2#3{\{#1\} \, #2 \, \{#3\}}
+\gdef\hoare#1#2#3{\left\{#1\right\} \, #2 \, \left\{#3\right\}}
+\gdef\hoareV#1#2#3{\begin{aligned}%
+&\left\{#1\right\} \\ &\quad #2 \\ &\left\{#3\right\}%
+\end{aligned}}
 \gdef\fun#1{\lambda #1.\,}
 \gdef\app#1#2{#1 \, #2}
 \gdef\app#1#2{#1 \, #2}
@@ -77,12 +81,15 @@ Common syntactic sugar:
 $$
 \begin{aligned}
 \fun{x, y} e &::= \fun{x} \fun{y} e \\
-\lete{x}{e_1}{e_2} &::= (\fun{x} e_2) \, e_1 \\
+\lete{x}{e_1} e_2 &::= (\fun{x} e_2) \, e_1 \\
 e_1 \, e_2 \, e_3 &::= (\app{e_1}{e_2}) \, e_3
 \end{aligned}
 $$
 
-Some notation is worth explaining here. The production $e ::= x$ says that a variable like $x$ or $y$ is an expression ($e$ in the grammar). $e ::= v$ says that any value (defined above) can also be used as an expression. $v ::= \overline{n}$ says that an integer constant $\overline{n}$ is a value; the overline is used to distinguish between a meta-level number $n : \mathbb{Z}$ and the literal $\overline{n}$ which is a value in the language. $\pi_1 \, e$ and $pi_2 \, e$ are "projection functions" (often denoted using $\pi$) that get the first and second element of a tuple, respectively.
+Some notation is worth explaining here. The notation uses _metavariables_ to indicate what is being defined; $e$ always refers to an expression, $v$ to a value, $x$ to a variable, and $n$ to a number. When we write $v ::= \true \mid \false$, this defines variables $v$ to be either the constant $\true$ or $\false$ (the vertical bar separates alternatives, just like a Coq `Inductive`). The grammar for expressions includes one alternative $e ::= v$, which says that any value (defined above) can also be used as an expression. The grammar defines a recursive inductive datatype for expressions and for values; the definitions refer to each other ($e ::= v$ refers to values when defining expressions, but also $v ::= \fun{x} e$ says anonymous functions are values and the body is an expression), so we have _mutually recursive inductives_.
+
+The grammar rule $e ::= x$ says that a variable like $x$ or $y$ is an expression ($e$ in the grammar).
+$v ::= \overline{n}$ says that an integer constant $\overline{n}$ is a value; the overline is used to distinguish between a meta-level number $n : \mathbb{Z}$ and the literal $\overline{n}$ which is a value in the language. $\pi_1 \, e$ and $pi_2 \, e$ are "projection functions" (often denoted using $\pi$) that get the first and second element of a tuple, respectively.
 
 ::: warning If you've seen the λ-calculus before...
 
@@ -104,11 +111,11 @@ $$
 \max &= \lambda x, y.\, \ife{x < y}{y}{x} \\
 \operatorname{intersect} &= \lambda i_1, i_2.\,\\
 &\phantom{::= \lambda}
-  \lete{l}{\max \, (\pi_1\, i_1) \, (\pi_1\, i_2)}{\\
+  \lete{l}{\max \, (\pi_1\, i_1) \, (\pi_1\, i_2)}\\
   &\phantom{::= \lambda}
-  \lete{h}{\min \, (\pi_2\, i_1) \, (\pi_2\, i_2)}{\\
+  \lete{h}{\min \, (\pi_2\, i_1) \, (\pi_2\, i_2)}\\
   &\phantom{::= \lambda}
-  (l, h)}}
+  (l, h)
 \end{aligned}
 $$
 
@@ -118,7 +125,7 @@ The semantics answers precisely what it means to run some expression $e$. We nee
 
 We will give what is called a _small-step operational semantics_ for this language; you can look to a programming language theory class to get a broader perspective on other approaches to semantics of a programming language.
 
-The semantics is based is based on a step relation (to be defined below in the [Reduction rules](./hoare.md#reduction-rules) subsection) $e_1 \to e_2$, which intuitively means $e_1$ executes to $e_2$ in one step. We will then generally talk about $e_1 \to^* e_2$, the reflexive and transitive closure of $\to$ (basically, zero or more $\to$ steps between $e_1$ and $e_2$).
+The semantics is based is based on a step relation (to be defined below in the [Reduction rules](./hoare.md#reduction-rules) subsection) $e_1 \to e_2$. This is just a relation that we use special notation for; it's not implication. Intuitively, $e_1 \to e_2$ is defined in such a way that it means $e_1$ executes to $e_2$ in one execution step. We will then generally talk about $e_1 \to^* e_2$, which allows zero or more $\to$ steps between $e_1$ and $e_2$; formally it would be defined by these rules:
 
 $$
 e \to^* e \text{ always} \\
@@ -268,7 +275,7 @@ $$\dfrac{e_1 \to e_1'}{e_1 + v_2 \to e_1' + v_2}$$
 
 ## Hoare logic
 
-Hoare logic is based on the _Hoare triples_ $\hoare{P}{e}{\fun{v} Q(v)}$. The intuitive reading of this statement is that "if $P$ holds initially and $e$ terminates in a value $v$, then $Q(v)$ holds". The proposition $P$ is called the pre-condition and $Q$ is the post-condition. Note that $Q$ is a _function of a value_, which is the value that $e$ reduces to (if it loops forever and doesn't reduce to a value, the Hoare triple doesn't say anything). To give a reminder that the postcondition is a function, these notes will write $\lambda v,\, Q(v)$. On the board we will also write $\hoare{P}{e}{v.\, Q(v)}$ to give a name $v$ to the return value with very concise notation.
+Hoare logic is based on the _Hoare triples_ $\hoare{P}{e}{\fun{v} Q(v)}$. The intuitive reading of this statement is that "if $P$ holds initially and $e$ terminates in a value $v$, then $Q(v)$ holds". The proposition $P$ is called the pre-condition and $Q$ is the post-condition. Note that $Q$ is a _function of a value_, which is the value that $e$ reduces to (if it loops forever and doesn't reduce to a value, the Hoare triple doesn't say anything). To give a reminder that the postcondition is a function, these notes will write $\lambda v,\, Q(v)$. On the board we will also write $\hoare{P}{e}{v.\, Q(v)}$ to give a name $v$ to the return value, omitting the $\lambda$ to save some space.
 
 The rules of Hoare logic explain how to prove a triple by breaking it down into simpler verification tasks, based on the structure of $e$. Working bottom-up instead, if we prove a Hoare triple about a helper function $\operatorname{bar}$, this can be used in the proof of a larger function $\operatorname{foo}$ at the point where it calls $\operatorname{bar}$, without having to repeat the reasoning about $\operatorname{bar}$.
 
@@ -321,6 +328,13 @@ For Hoare logic more specifically, read rules **counter-clockwise starting at th
 
 :::
 
+It's best for the purpose of this class to think about $\hoare{P}{e}{\fun{v} Q(v)}$ as a Coq `Prop` that says $e$ has a particular specification, with a definition that we haven't yet given. The rules below are then theorems proven with that definition. There are two consequences to this view:
+
+- The specifications we write will quantify over Coq-level variables (implicitly in the notes, but in Coq we will have to be explicit about this). For example, $\hoare{\True}{\operatorname{add}  \, \overline{n} \, \overline{m}}{\fun{v} v = \overline{n + m}}$ should be viewed as being for all values of the Coq variables $n : \mathbb{Z}$ and $m : \mathbb{Z}$.
+- In addition to using the rules of Hoare logic, we can also use Coq reasoning principles, like `destruct` and arithmetic reasoning about $n$ and $m$. The rules will handle anything specific to programs.
+
+
+
 $$\hoare{P(v)}{v}{\fun{w} P(w)} \eqnlabel{value}$$
 
 $$
@@ -363,14 +377,14 @@ The following examples are something you could construct yourself while reading 
 
 :::
 
-Remember that $\lete{x}{e_1}{e_2}$ is just $(\fun{x} e_2) \, e_1$.
+Remember that $\lete{x}{e_1} e_2$ is just $(\fun{x} e_2) \, e_1$.
 
 $$
 \dfrac{
 \hoare{P}{e_1}{\fun{v} Q(v)} \quad
 \forall v.\, \hoare{Q(v)}{e_2[v / x]}{R}
 }{%
-\hoare{P}{\lete{x}{e_1}{e_2}}{R}
+\hoare{P}{\lete{x}{e_1} e_2}{R}
 } \eqnlabel{hoare-let}
 $$
 
@@ -462,13 +476,18 @@ $$
 $$
 \hoare{n < 2^{64} - 1}%
 {\operatorname{f} \, \overline{n}}
-{\fun{v} \exists (p: \mathbb{Z}).\, v = \overline{p} \land 1 \leq p}
+{\fun{v} \exists (p: \mathbb{Z}).\, v = \overline{p} \land p \leq 1}
 $$
 
 $$
 \hoare{0 \leq n \leq 1}%
 {\operatorname{g} \, \overline{n}}
 {\fun{v} \True}
+$$
+
+$$\hoare{\True}%
+{\operatorname{h} \, \overline{n}}
+{\fun{v} v = \overline{2}}
 $$
 
 The $\operatorname{and}$ spec is an example of giving a strong specification, $\operatorname{add}$ is an example of under-specification (in this case, it would work just as well without the precondition), $\min$ is an under-specification (we could say something stronger in the postcondition and still prove it), $\operatorname{f}$ is the best we can prove assuming the $\operatorname{add}$ and $\min$ specs, and $\operatorname{g}$ is an example where the precondition is necessary and we under-specify in the postcondition.
@@ -506,6 +525,41 @@ This completes the proof! Taking a step back, notice how we basically broken dow
 ### Exercise: prove the triples
 
 Prove the Hoare triples above. Do the proofs as carefully as you can, annotating the rules you use. This is good practice for understanding the rules, and will also help you appreciate when we switch to Coq and it automates the book-keeping for you.
+
+## Hoare outlines
+
+Writing an on-paper proof referencing these rules is quite tedious and obscures some important aspects of the proofs. There's another commonly used format for expressing a proof in Hoare logic that captures the essence of the reasoning: the _Hoare outline_. To use the outline, we will need programs to be primarily written with let-bindings; this names all the subexpressions and makes obvious what order computations happen in, as opposed to it coming from the language semantics and implicit in the program. Observe how in $\lete{x}{f \, 1} \lete{y}{g \, 2} x + y$ it's clear that $f$ runs first and then $g$, while $(f \, 1) + (g \, 2)$ is ambiguous from just the syntax, and in fact evaluates $g \, 2$ first based on the language semantics above.
+
+Here's a specification for a function written in this style, with let bindings. The specification is written vertically to fit a big program; it means exactly the same thing as the horizontal version.
+
+$$\hoareV{n < 2^{64} - 1}%
+{\begin{aligned}
+\letV{m}{\min \, 0 \, \overline{n}} \\
+\letV{y}{\operatorname{add} \, m \, 1} \\
+&y
+\end{aligned}
+}%
+{\exists (p: \mathbb{Z}.\, y = p \land p \leq 1)}
+$$
+
+And here is a Hoare outline for the above specification, which you can think of as a "proof sketch" for the Hoare triple but not all the individual details.
+
+::: caution TODO
+
+This is still under construction, sorry!
+
+:::
+
+::: important Hoare logic supports modular proofs
+
+Something that you probably take for granted if you have even just a little programming experience is that if you're working on a big function `f`, you'll split into some helper functions `h1` and `h2` that `f` then calls. This is a more modular implementation. Ideally (if the split is a good one) when you're working on `f` you don't have to think about the complete code of `h1` and `h2`, because you just have some abstract "specification" in mind of what they do.
+
+Hoare logic supports _modular reasoning_ that exactly reflects this split into helper functions: we prove a specification about `h1` and `h2`, then prove `f` by referring to those specifications without needing to know how they're implemented. Modularity is important to scale up a proof to a big piece of code, and in this case it's elegant that the way the proof is modular (by writing specifications for functions) matches how the code is modular.
+
+Modularity is also beneficial when a helper function is reused, since then the proof of `h1` can be done just once and used multiple times. However, it has benefits even if a function is used only once since it breaks down a big task into smaller, more manageable tasks. In a larger team modularity even permits you to split and parallelize the work: if you can decide what `h1` does (its _specification_), then one person can implement `h1` and another can use it in `f` at the same time.
+
+
+:::
 
 ## Soundness
 
