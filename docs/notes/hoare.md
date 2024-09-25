@@ -545,11 +545,23 @@ $$
 
 And here is a Hoare outline for the above specification, which you can think of as a "proof sketch" for the Hoare triple but not all the individual details.
 
-::: caution TODO
+$$
+\gdef\outlineSpec#1{\left\{#1\right\}}
+\begin{aligned}
+&\outlineSpec{n < 2^{64} - 1} \\
+&\outlineSpec{\True} \\
+&\quad \lete{m}{\min \, 0 \, \overline{n}} \\
+&\outlineSpec{\exists p_m.\, m = \overline{p_m} \land p_m \leq 0 \land p_m \leq n} \\
+&\quad \lete{y}{\operatorname{add} \, m \, 1} \\
+&\outlineSpec{y = \overline{p_m + 1}} \\
+&\quad y \\
+&\outlineSpec{\exists (p: \mathbb{Z}).\, y = \overline{p} \land p \leq 1)}
+\end{aligned}
+$$
 
-This is still under construction, sorry!
+The Hoare outline gives a statement true at that point in the code, starting with the precondition and ending at the postcondition. We re-use the program variables as variables in the outline's propositions. Whenever a line has $\lete{x}{f \, x \, y} \dots$, we'll apply a specification for $f$. For the Hoare outline to be a valid proof, the condition above should imply $f$'s precondition, and the line below should be the postcondition (in both cases we may need to instantiate the specification's variables appropriately). We can also write two statements in a row if the first implies the second, which helps adapt pre- and post-conditions. Note how these rules about what makes a Hoare outline work are implicitly justified by the rule of consequence (do you see why?).
 
-:::
+In this language all variables are immutable and there's no state other than the variables (the language is purely functional), so any line of the outline as statements that remain true forever afterward; this will no longer be true once the program has mutable state.
 
 ::: important Hoare logic supports modular proofs
 
