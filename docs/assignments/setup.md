@@ -7,7 +7,7 @@ order: 1
 
 ## Assignment repo
 
-The programming assignments will be distributed in [sys-verif-fa24-proofs](https://github.com/tchajed/sys-verif-fa24-proofs). You'll need it as a git repository so you can get updates with `git pull`. (I assume you're somewhat familiar with git, but please ask for help if this assumption proves wrong.)
+The programming assignments will be distributed in [sys-verif-fa24-proofs](https://github.com/tchajed/sys-verif-fa24-proofs). You'll need it as a git repository so you can get updates with `git pull`, since this is how assignments and demos in lecture will be released. (If you have trouble getting updates, please let me know.)
 
 ::: danger Clone, don't fork
 
@@ -31,7 +31,7 @@ git push --set-upstream origin main
 git submodule update --init --recursive
 ```
 
-You now have a copy of the repo, with the `main` branch tracking your private repo (using a remote called origin, as is typical in git), and with a second remote `upstream` pointing to the class repo. You can now do run `git fetch upstream` to get new commits from the `tchajed/sys-verif-fa24-proofs` repo, then `git merge upstream/main` to pull in new changes into your own repo.
+You now have a copy of the repo, with the `main` branch tracking your private repo (using a remote called origin, as is typical in git), and with a second remote `upstream` pointing to the class repo. To get updates: run `git fetch upstream` to get new commits from the `tchajed/sys-verif-fa24-proofs` repo, then `git merge upstream/main` to pull in new changes into your own repo.
 
 You don't actually have to call your repo sys-verif-fa24-proofs, but that's how I'll refer to it. If you accidentally forked the course repo, don't panic; you can just delete the fork and re-create it.
 
