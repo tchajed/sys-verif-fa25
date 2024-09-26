@@ -17,6 +17,8 @@ This is a graduate-level class on _systems verification_: how to mathematically 
 
 :::
 
+We'll use [Canvas](https://canvas.wisc.edu/courses/425519) for submitting assignments and [Piazza](https://piazza.com/wisc/fall2024/cs839007) for asking questions (or email me).
+
 ## Resources
 
 See the course [lecture notes](./notes/) and the [resources](./resources.md) page.
