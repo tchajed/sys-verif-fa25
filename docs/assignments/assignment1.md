@@ -35,7 +35,7 @@ We'll use the free online textbook Software Foundations to learn the basics of u
 
 Software Foundations is written as a Coq file per chapter, with places for you to fill in your answers. You should do the exercises in the sys-verif-fa24-proofs repo by filling out the missing definitions and proofs in the three chapter files in `src/software_foundations/`, `Basics.v`, `Induction.v`, and `Logic.v`. You should also read the chapters, either online or within VS Code (the HTML version is a nice rendering of the Coq sources).
 
-Most of these chapters is assigned, but there are a few optional parts:
+Most of these chapters is assigned (including the exercises marked "optional" in the text), but there are a few optional parts:
 
 - Basics:
   - You can skip the "Fixpoints and Structural Recursion" section.
@@ -44,7 +44,7 @@ Most of these chapters is assigned, but there are a few optional parts:
   - You can skip the last section, "Bin to Nat and Back to Bin" (but do the previous one, "Nat to Bin and Back to Nat").
 - Logic:
   - You should read "Working with Decidable Properties" but don't need to do the proofs. We'll use an approach slightly different from what the chapter explains, and you won't need to do any related proofs.
-  - You can skip the last section, "The Logic of Coq". I omit this because it's not terribly relevant to this class but I personally think this part is fascinating.
+  - You can skip the last section, "The Logic of Coq" (though that material is interesting if you care about theoretical issues)
 - Poly:
   - This is only assigned as optional reading, but don't let that stop you from doing the exercises.
   - The last section on Church Numerals is a theoretical topic that isn't relevant to this class.
