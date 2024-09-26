@@ -6,15 +6,15 @@ shortTitle: "Lecture 6+7: Hoare Logic"
 
 # Lectures 6 and 7: Hoare Logic
 
-## Introduction
-
-### Learning outcomes
+## Learning outcomes
 
 1. Understand how a small-step operational semantics explains what a program does.
 2. Explain what a Hoare triple means.
 3. Use Hoare logic rules to prove (simple) programs on paper.
 
 ---
+
+## Introduction
 
 We have so far taken a view of program verification where the code is a functional program in Coq, the specification is a property about that function, and the proof uses any Coq-level reasoning required; we specifically developed a style where the code is an ADT and the specification relates it to a model.
 
@@ -63,9 +63,9 @@ $$
 \end{aligned}}
 \gdef\fun#1{\lambda #1.\,}
 \gdef\app#1#2{#1 \, #2}
-\gdef\app#1#2{#1 \, #2}
 \gdef\entails{\vdash}
 \gdef\eqnlabel#1{\:\:\text{#1}}
+\gdef\lift#1{\lceil #1 \rceil}
 
 \begin{aligned}
 &\mathrm{Expressions} &e &::= x \mid v \mid \fun{x} e \mid \app{e_1}{e_2} \\
@@ -285,7 +285,6 @@ The Hoare triple has "propositions" $P$ and $Q$. You can proceed to the next sub
 Let's start with the following grammar for propositions:
 
 $$
-\gdef\lift#1{\lceil #1 \rceil}
 \mathrm{Propositions}\quad P ::= \lift{\phi} \mid \exists x.\, P(x) \mid \forall x.\, Q(x) \mid P \land Q \mid P \lor Q
 $$
 
@@ -296,7 +295,8 @@ For now, a Hoare logic proposition $P$ appears no better than Coq propositions. 
 The rules for proving entailments between propositions are mostly intuitive, and we will come back to them and be more precise with separation logic. However, to give you a flavor here are a few rules:
 
 $$
-\dfrac{\lift{\phi}}{P \entails \lift{\phi}}
+\dfrac{\lift{\phi}}{P \entails \lift{\phi}} \eqnlabel{prop-pure} \quad
+\dfrac{P \entails \phi \quad \phi \Rightarrow (P \entails Q)}{P \entails Q} \eqnlabel{prop-from-pure}
 $$
 
 $$
@@ -441,11 +441,12 @@ Here are some examples of correct specifications.
 
 $$
 \gdef\and{\operatorname{and}}
+\gdef\add{\operatorname{add}}
 \begin{aligned}
 \and &= \lambda b_1, b_2.\, \ife{b_1}{b_2}{\false} \\
-\operatorname{add} &= \lambda x, y.\, x + y \\
+\add &= \lambda x, y.\, x + y \\
 \min &= \lambda x, y.\, \ife{x < y}{x}{y} \\
-\operatorname{f} &= \fun{x} \operatorname{add} \, (\min \, 0 \, x) \, 1 \\
+\operatorname{f} &= \fun{x} \add \, (\min \, 0 \, x) \, 1 \\
 \operatorname{g} &= \fun{x} \ife{x = 1}{\true}{\\ %
 &\phantom{= \fun{x}} (\ife{x = 0}{\false}{\overline{2} + \false})} \\
 \operatorname{h} &= \fun{x} \ife{\and \, (0 < x) \, (x < 0)}{\overline{1} + \true}{\overline{2}} \\
@@ -454,19 +455,19 @@ $$
 
 $$
 \hoare{\True}%
-{\operatorname{and} \, b_1 \, b_2}%
+{\and \, b_1 \, b_2}%
 {\fun{v} v = \overline{b_1 \mathbin{\&} b_2}}
 $$
 
 $$
 \hoare{n + m < 2^{64}}%
-{\operatorname{add} \, \overline{n} \, \overline{m}}%
+{\add \, \overline{n} \, \overline{m}}%
 {\fun{v} v = \overline{n + m}}
 $$
 
 $$
 \hoare{\True}%
-{\operatorname{min} \, \overline{n} \, \overline{m}}%
+{\min \, \overline{n} \, \overline{m}}%
 {\fun{v} \exists (p: \mathbb{Z}).\, v = \overline{p} \land p \leq n \land p \leq m }
 $$
 
