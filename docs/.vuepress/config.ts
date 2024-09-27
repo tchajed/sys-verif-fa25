@@ -45,7 +45,7 @@ export default defineUserConfig({
 
   theme: hopeTheme({
     navbar: navbarConfig,
-    repo: "https://github.com/tchajed/sys-verif-fa24-proofs",
+    repo: "https://github.com/tchajed/sys-verif-fa24",
     headerDepth: 2,
     sidebar: sidebarConfig,
 

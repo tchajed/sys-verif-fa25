@@ -17,7 +17,9 @@ This is a graduate-level class on _systems verification_: how to mathematically 
 
 :::
 
-We'll use [Canvas](https://canvas.wisc.edu/courses/425519) for submitting assignments and [Piazza](https://piazza.com/wisc/fall2024/cs839007) for asking questions (or email me).
+We'll use [Canvas](https://canvas.wisc.edu/courses/425519) for submitting assignments and [Piazza](https://piazza.com/wisc/fall2024/cs839007) for questions (or email me).
+
+The source of this website is on GitHub at [tchajed/sys-verif-fa24](https://github.com/tchajed/sys-verif-fa24). You can open an Issue or use Discussions if anything is confusing about the lecture notes, or post on Piazza. Your fellow students as well as students in future iterations of this class will thank you!
 
 ## Resources
 
