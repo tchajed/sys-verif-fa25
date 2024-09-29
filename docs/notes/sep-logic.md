@@ -40,6 +40,7 @@ $$
 \gdef\outlineSpec#1{\left\{#1\right\}}
 \gdef\fun#1{\lambda #1.\,}
 \gdef\app#1#2{#1 \, #2}
+\gdef\then{;\;}
 \gdef\entails{\vdash}
 \gdef\eqnlabel#1{\:\:\text{#1}}
 \gdef\lift#1{\lceil #1 \rceil}
@@ -165,15 +166,16 @@ $$
 &e_{\text{own}} ::= \\
 &\quad \lete{x}{\alloc{\overline{0}}} \\ %
 &\quad \lete{y}{\alloc{\overline{42}}} \\ %
-&\quad f \, (x, y);\; \\ %
+&\quad f \, (x, y)\then \\ %
 &\quad \assert{(\load{x} == \load{y})}
-\end{aligned}$$
+\end{aligned}
+$$
 
 ::: details Definition of e1; e2 and assert
 
-If it bothers you that we are using $e_1;\; e_2$ in a program and $\assert{e}$ without defining them, here are appropriate definitions:
+If it bothers you that we are using $e_1\then e_2$ in a program and $\assert{e}$ without defining them, here are appropriate definitions:
 
-$e_1 ;\; e_2 ::= \lete{\_}{e_1} e_2$ (equivalently, a let binding with any variable unused in $e_2$)
+$e_1 \then e_2 ::= \lete{\_}{e_1} e_2$ (equivalently, a let binding with any variable unused in $e_2$)
 
 $\assert{e} ::= \ife{e}{()}{\overline{1} == \true}$ (evaluates to $()$ if $e$ is true, otherwise is an error)
 
@@ -208,3 +210,19 @@ $$
 &\outlineSpec{\True} \\
 \end{aligned}
 $$
+
+## Exercise: prove swap correct
+
+$$
+\operatorname{swap} \, \ell_1 \, \ell_2 ::=
+\lete{t}{\load{\ell_1}} %
+\store{\ell_1}{\load{\ell_2}}\then \store{\ell_2}{t}
+$$
+
+$$
+\hoareV{x \pointsto a \sep y \pointsto b}%
+{\operatorname{swap} \, x \, y}%
+{\fun{\_} x \pointsto b \sep y \pointsto a}
+$$
+
+You should write out swap as three lines of code for this outline. Identify what the frame $F$ is each time your outline (implicitly) uses the frame rule. Note: from one assertion to the next is supposed to use a known specification for the function in between (for the outline to be valid); when you have more facts in the precondition than the known specification, you need to use the frame rule.
