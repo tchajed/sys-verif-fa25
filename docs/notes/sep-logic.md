@@ -113,11 +113,13 @@ The assertion $\ell \pointsto v$ (read "$\ell$ points to $v$") says that the hea
 
 Remembering that propositions are interpreted as heap predicates, we can formally define them as follow:
 
-$(\ell \pointsto v)(h) ::= h(\ell) = v$
+_Points-to:_ The points-to connective $\ell \pointsto v$ is true for exactly one heap, which maps $\ell$ to $v$ and nothing else.
 
-For separating conjuction we need to say two heaps are disjoint. We could say $\dom(h) \intersect \dom(h') = \emptyset$, but it's convenient to have a shorter notation and we'll use $h \disjoint h'$.
+$$(\ell \pointsto v)(h) ::= h(\ell) = v \land \dom(h) = \{\ell\}$$
 
-$(P \sep Q)(h) ::= \exists h_1, h_2.\, (h = h_1 \union h_2) \land (h_1 \disjoint h_2) \land P(h_1) \land Q(h_2)$
+_Separating conjunction:_ For separating conjuction we need to say two heaps are disjoint. We could say $\dom(h) \intersect \dom(h') = \emptyset$, but it's convenient to have a shorter notation and we'll use $h \disjoint h'$:
+
+$$(P \sep Q)(h) ::= \exists h_1, h_2.\, (h = h_1 \union h_2) \land (h_1 \disjoint h_2) \land P(h_1) \land Q(h_2)$$
 
 ::: important Understand separating conjunction
 
@@ -144,7 +146,7 @@ $P \entails Q ::= \forall h.\, P(h) \to \exists h_1, h_2.\, (h = h_1 \union h_2)
 
 What this says is that $P \entails Q$ can be true if $P(h)$ implies that $Q$ holds not on the whole heap but just a _sub-heap_ $h_1$. This definition is chosen precisely so that the sep-weaken rule is true, and it permits us to prove implications in separation logic that "forget" conjuncts. This is actually similar to how normal conjunction works (the fact that $P \land Q \entails P$ doesn't surprise anyone).
 
-For $P \entails P \sep \True$, we'll come back to the syntax $\lift{\varphi}$ we saw earlier. This "lifts" a pure proposition $\varphi : \mathrm{Prop}$ to the propositions in our logic. Before those were also $\mathrm{Prop}$ and this didn't do anything, but now we want heap predicates. The definition we'll choose is $(\lift{\varphi})(h) = \varphi$ - a lifted proposition is true for any heap, as long as $\varphi$ holds in general. Then $\True = \lift{\True}$ (we are overloading the syntax, sorry), and then the rule $P \entails P \sep \True$ is more obviously true. Note that in the notes and especially the board we sometimes omit the syntax $\lift{\varphi}$ and just write $\varphi$ to reduce clutter, but in the Coq formalization the brackets are always needed.
+For $P \entails P \sep \True$, we'll come back to the syntax $\lift{\varphi}$ we saw earlier. This "lifts" a pure proposition $\varphi : \mathrm{Prop}$ to the propositions in our logic. Before those were also $\mathrm{Prop}$ and this didn't do anything, but now we want heap predicates. The definition we'll choose is $(\lift{\varphi})(h) = \varphi$ - a lifted proposition is true for any heap, as long as $\varphi$ holds in general. Now we define $\True = \lift{\True}$ (we are overloading the syntax, sorry); this makes $P \entails P \sep \True$ true, as you'll prove.
 
 ### Exercise: prove sep-true
 
@@ -239,4 +241,10 @@ $$
 {\fun{\_} x \pointsto b \sep y \pointsto a}
 $$
 
-You should write out swap as three lines of code for this outline. Identify what the frame $F$ is each time your outline (implicitly) uses the frame rule. Note: from one assertion to the next is supposed to use a known specification for the function in between (for the outline to be valid); when you have more facts in the precondition than the known specification, you need to use the frame rule.
+You should write out swap as three lines of code for this outline. Identify what the frame $F$ is each time your outline (implicitly) uses the frame rule.
+
+::: info Hint
+
+Recall that from one assertion to the next is supposed to use a known specification for the function in between (for the outline to be valid). When you have more facts in the precondition than the known specification, you need to use the frame rule.
+
+:::
