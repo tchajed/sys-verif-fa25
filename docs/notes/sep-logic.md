@@ -227,7 +227,7 @@ $$
 \end{aligned}
 $$
 
-## Exercise: prove swap correct
+### Exercise: prove swap correct
 
 $$
 \operatorname{swap} \, \ell_1 \, \ell_2 ::=
