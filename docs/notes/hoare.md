@@ -279,7 +279,7 @@ Hoare logic is based on the _Hoare triples_ $\hoare{P}{e}{\fun{v} Q(v)}$. The in
 
 The rules of Hoare logic explain how to prove a triple by breaking it down into simpler verification tasks, based on the structure of $e$. Working bottom-up instead, if we prove a Hoare triple about a helper function $\operatorname{bar}$, this can be used in the proof of a larger function $\operatorname{foo}$ at the point where it calls $\operatorname{bar}$, without having to repeat the reasoning about $\operatorname{bar}$.
 
-### Propositions
+### Propositions {#propositions}
 
 The Hoare triple has "propositions" $P$ and $Q$. You can proceed to the next sub-section with an intuition that a proposition is a Coq proposition, but eventually (when we upgrade to separation logic) it will be more like a _predicate over the program state_. The main thing to note is that in the Hoare logic rules we use a statement $P \entails Q$ (pronounced "$P$ entails $Q$"), which says "whenever $P$ is true, $Q$ is true".
 

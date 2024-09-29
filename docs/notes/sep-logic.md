@@ -95,6 +95,16 @@ $\gdef\Heap{\mathrm{Heap}}$ $\gdef\Loc{\mathrm{loc}}$ $\gdef\val{\mathrm{val}}$ 
 
 In separation logic, when we write $\hoare{P}{e}{\fun{v} Q(v)}$, the propositions $P$ and $Q(v)$ will no longer be regular Coq `Prop`s but instead _heap predicates_ `hProp := heap → Prop`. The meaning of the Hoare triple is that if we start in an _initial heap_ where $P(h)$ is true, run $e$ till it terminates in a value $v$ and _final heap_ $h'$, then $Q(v)(h')$ holds (notice how $Q$ is a heap predicate which is a function of a value, thus it needs two arguments).
 
+::: info Aside on logic
+
+The view that propositions of separation logic are heap predicates is not actually necessary, and goes against traditional presentations of logic. The alternative is that propositions are _defined_ by the syntax and the rules below (plus several more rules, like the ones from the [Hoare logic section on propositions](./hoare.md#propositions)). We could then use heap predicates to give a particular "model" or semantics for what separation logic propositions mean.
+
+As with Hoare logic, I am instead giving what's called a _model-theoretic_ view, where everything is done in the context of a specific model and all the rules are lemmas. I think this helps make things more concrete since you can think about one model rather than trying to juggle all the rules.
+
+The logic view is still very useful. One thing it enables is that if we do proofs assuming just the rules, then we can switch to a different model where the rules are still true; while heap predicates are the standard model, there are extremely useful non-standard ones as well. Later on, when we get to concurrency, it will be practically necessary to work with the rules since the model is just too difficult to wrap your head around - someone still needs to prove the rules in that model once, but you'll be glad you're not doing it.
+
+:::
+
 ## Separation logic propositions
 
 $\text{Propositions}\quad P ::= \dots \mid \ell \pointsto v \mid P \sep Q$
@@ -128,13 +138,17 @@ P \sep (Q \sep R) &\entails (P \sep Q) \sep R &\text{sep-assoc} \\
 \end{aligned}
 $$
 
-The two surprising rules are $P \sep Q \entails P$ and $P \entails P \sep \True$. These are desirable rules but to make them true we have to define entailment in a non-obvious way:
+The two surprising rules are $P \sep Q \entails P$ and $P \entails P \sep \True$. These are desirable rules, but we have to be careful for them to be true. For the first, $P \sep Q \entails P$, we define entailment in a non-obvious way:
 
 $P \entails Q ::= \forall h.\, P(h) \to \exists h_1, h_2.\, (h = h_1 \union h_2) \land Q(h_1)$
 
 What this says is that $P \entails Q$ can be true if $P(h)$ implies that $Q$ holds not on the whole heap but just a _sub-heap_ $h_1$. This definition is chosen precisely so that the sep-weaken rule is true, and it permits us to prove implications in separation logic that "forget" conjuncts. This is actually similar to how normal conjunction works (the fact that $P \land Q \entails P$ doesn't surprise anyone).
 
-One more definition deserves mention: you may remember that we had notation $\lift{\varphi}$ to "lift" a pure proposition $\varphi : \mathrm{Prop}$. For heap predicates we will define $(\lift{\varphi})(h) = \varphi$ - this is true for any heap, as long as $\varphi$ holds. Note that we sometimes omit the syntax $\lift{\varphi}$ and just write $\varphi$ to reduce clutter, but in the Coq formalization the brackets are always needed.
+For $P \entails P \sep \True$, we'll come back to the syntax $\lift{\varphi}$ we saw earlier. This "lifts" a pure proposition $\varphi : \mathrm{Prop}$ to the propositions in our logic. Before those were also $\mathrm{Prop}$ and this didn't do anything, but now we want heap predicates. The definition we'll choose is $(\lift{\varphi})(h) = \varphi$ - a lifted proposition is true for any heap, as long as $\varphi$ holds in general. Then $\True = \lift{\True}$ (we are overloading the syntax, sorry), and then the rule $P \entails P \sep \True$ is more obviously true. Note that in the notes and especially the board we sometimes omit the syntax $\lift{\varphi}$ and just write $\varphi$ to reduce clutter, but in the Coq formalization the brackets are always needed.
+
+### Exercise: prove sep-true
+
+Prove $P \entails P \sep \True$, using the definitions above. (What definitions do you need?)
 
 ## Separation logic proof rules
 
