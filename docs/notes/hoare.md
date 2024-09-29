@@ -61,6 +61,7 @@ $$
 \gdef\hoareV#1#2#3{\begin{aligned}%
 &\left\{#1\right\} \\ &\quad #2 \\ &\left\{#3\right\}%
 \end{aligned}}
+\gdef\outlineSpec#1{\left\{#1\right\}}
 \gdef\fun#1{\lambda #1.\,}
 \gdef\app#1#2{#1 \, #2}
 \gdef\entails{\vdash}
@@ -547,7 +548,6 @@ $$
 And here is a Hoare outline for the above specification, which you can think of as a "proof sketch" for the Hoare triple but not all the individual details.
 
 $$
-\gdef\outlineSpec#1{\left\{#1\right\}}
 \begin{aligned}
 &\outlineSpec{n < 2^{64} - 1} \\
 &\outlineSpec{\True} \\

@@ -23,7 +23,7 @@ After this lecture you should be able to
 
 ## Overview
 
-After much time spent on functional programs, we will now finally start talking about _imperative programs_. Specifically we will add (1) mutable variables allocated on the heap and (2) while loops. Separation logic will be the new idea that will allow reasoning about pointers.
+After much time spent on functional programs, we will now finally start talking about _imperative programs_. Specifically we will add mutable variables allocated on the heap and pointers. Separation logic will be the new idea that will allow reasoning about pointers, especially the problem of aliasing: two pointers might have the same value, so storing a value in one affects the other.
 
 $$
 \gdef\ife#1#2#3{\text{\textbf{if} } #1 \text{ \textbf{then} } #2 \text{ \textbf{else} } #3}
@@ -37,6 +37,7 @@ $$
 \gdef\hoareV#1#2#3{\begin{aligned}%
 &\left\{#1\right\} \\ &\quad #2 \\ &\left\{#3\right\}%
 \end{aligned}}
+\gdef\outlineSpec#1{\left\{#1\right\}}
 \gdef\fun#1{\lambda #1.\,}
 \gdef\app#1#2{#1 \, #2}
 \gdef\entails{\vdash}
@@ -49,6 +50,7 @@ $$
 \gdef\load#1{{!}\,#1}
 \gdef\store#1#2{#1 \mathbin{:=} #2}
 \gdef\alloc#1{\operatorname{alloc} \, #1}
+\gdef\assert#1{\operatorname{assert} \, #1}
 \gdef\purestep{\xrightarrow{\text{pure}}}
 \gdef\intersect{\cap}
 \gdef\union{\cup}
@@ -68,11 +70,11 @@ Separation logic is an extension of Hoare logic. We'll still have a specificatio
 
 We only need a few new constructs to have something interesting:
 
-$\text{Values}\quad v ::= \dots \mid \ell$ (values can now be locations, our model of memory addresses)
+$\text{Values}\quad v ::= \dots \mid () \mid \ell$
 
 $\text{Expressions}\quad e ::= \dots \mid \alloc{e_1} \mid \load{e_1} \mid \store{e_1}{e_2}$
 
-Memory addresses are modeled using _locations_, which use the metavariable $\ell$. Locations are a new variant of the value type, as denoted by $v$. The type of locations will simply be `loc := Z` (unbounded mathematical integers), and we won't have a way to do pointer-integer or integer-pointer casts. A location is like the value of a pointer; it doesn't carry data, but can be dereferenced to access data.
+We add a value $()$ which is often called a "unit value" - you can think of it like an empty tuple, which carries no information, which will be used when a function has nothing interesting to return. Memory addresses are modeled using _locations_, which use the metavariable $\ell$. Locations are a new variant of the value type, as denoted by $v$. The type of locations will simply be `loc := Z` (unbounded mathematical integers), and we won't have a way to do pointer-integer or integer-pointer casts. A location is like the value of a pointer; it doesn't carry data, but can be dereferenced to access data.
 
 The expression $\alloc{v}$ allocates a new location $\ell$ and gives it the initial value $v$, then reduces to $\ell$. The syntax $\load{\ell}$ is a load from the address $\ell$ while $\store{\ell}{v}$ stores $v$ in the address given by $\ell$. In all cases when these operations are used on expressions, they must first be reduced to values; loading and storing to a non-location fails (is stuck). You can think of $\load{e_1}$ as being like the C or Go code `*e1` and $\store{e_1}{e_2}$ as being like `*e1 = e2`.
 
@@ -143,13 +145,66 @@ $\hoare{True}{\alloc{v}}{\fun{w} \exists \ell.\, \lift{w = \ell} \sep \ell \poin
 $\hoare{\ell \pointsto v}{\load{\ell}}{\fun{w} \lift{w = v} \sep \ell \pointsto v}%
 \eqnlabel{load-spec}$
 
-$\hoare{\ell \pointsto v_0}{\store{\ell}{v}}{\fun{w} \ell \pointsto v}%
+$\hoare{\ell \pointsto v_0}{\store{\ell}{v}}{\fun{\_} \ell \pointsto v}%
 \eqnlabel{store-spec}$
 
-These are not that surprising. These rules are sometimes called the "small footprint axioms" because they only talk about the smallest part of the heap that is relevant to the operation.
+These are not that surprising. These rules are sometimes called the "small footprint axioms" because they only talk about the smallest part of the heap that is relevant to the operation. We add a bit of notation here: $\fun{\_}$ is used for a postcondition that ignores the return value.
 
 The heart of separation logic is the celebrated **frame rule**:
 
 $\dfrac{\hoare{P}{e}{\fun{v} Q(v)}}%
 {\hoare{P \sep F}{e}{\fun{v} Q(v) \sep F}} \eqnlabel{frame}%
 $
+
+The frame rule supports separation logic's _ownership reasoning_. The idea is that having an assertion in the precondition expresses "ownership", for example $\ell \pointsto v$ means the function starts out owning the location $\ell$. Owning a location means no other part of the program can read or write it. For example, in the triple $\hoare{\ell \mapsto \overline{0}}{f \, (\ell, \ell')}{\fun{\_} \ell \mapsto \overline{42}}$, the function $f$ owns $\ell$ for the duration of its execution and during the proof of this triple we can be sure no other function will interfere with $\ell$. Furthermore because the triple does not mention $\ell'$ in its precondition, we know it does not need to access that location; this is what the frame rule captures.
+
+As an example, consider proving a specification for the following program:
+
+$$
+\begin{aligned}
+&e_{\text{own}} ::= \\
+&\quad \lete{x}{\alloc{\overline{0}}} \\ %
+&\quad \lete{y}{\alloc{\overline{42}}} \\ %
+&\quad f \, (x, y);\; \\ %
+&\quad \assert{(\load{x} == \load{y})}
+\end{aligned}$$
+
+::: details Definition of e1; e2 and assert
+
+If it bothers you that we are using $e_1;\; e_2$ in a program and $\assert{e}$ without defining them, here are appropriate definitions:
+
+$e_1 ;\; e_2 ::= \lete{\_}{e_1} e_2$ (equivalently, a let binding with any variable unused in $e_2$)
+
+$\assert{e} ::= \ife{e}{()}{\overline{1} == \true}$ (evaluates to $()$ if $e$ is true, otherwise is an error)
+
+What you need to know about $\operatorname{assert}$ is really just that it has the following specification:
+
+$$\hoare{\True}{\assert{\true}}{\fun{v} \lift{v = ()}}$$.
+
+:::
+
+For now, we merely wish to prove that this program is safe, which means showing the assertion is always true, which is captured by the following specification:
+
+$$\hoare{\True}{e_{\text{own}}}{\fun{\_} \True}$$
+
+We can give a proof outline in separation logic for this function, in the same style as we did for Hoare logic:
+
+$$
+\begin{aligned}
+&\outlineSpec{\True} \\
+&\quad \lete{x}{\alloc{\overline{0}}} \\
+&\outlineSpec{x \pointsto \overline{0}} \\
+&\quad \lete{y}{\alloc{\overline{42}}} \\
+&\outlineSpec{x \pointsto \overline{0} \sep y \pointsto \overline{42}} \\
+&\quad f \, (x, y) \\
+&\outlineSpec{x \pointsto \overline{42} \sep y \pointsto \overline{42}} \\
+&\quad \assert{(\load{x} == \load{y})} \\
+&\outlineSpec{x \pointsto \overline{42} \sep y \pointsto \overline{42}} \\
+&\quad \assert{(\overline{42} == \load{y})} \\
+&\outlineSpec{x \pointsto \overline{42} \sep y \pointsto \overline{42}} \\
+&\quad \assert{(\overline{42} == \overline{42})} \\
+&\outlineSpec{x \pointsto \overline{42} \sep y \pointsto \overline{42}} \\
+&\quad () \\
+&\outlineSpec{\True} \\
+\end{aligned}
+$$
