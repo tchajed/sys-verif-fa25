@@ -92,7 +92,6 @@ You can use notation like $h_0 = \{\ell_1 \mapsto a, \ell_2 \mapsto b\}$ to writ
 
 ## Heap predicates
 
-
 In separation logic, when we write $\hoare{P}{e}{\fun{v} Q(v)}$, the propositions $P$ and $Q(v)$ will no longer be regular Coq `Prop`s but instead _heap predicates_ `hProp := heap → Prop`. The meaning of the Hoare triple is that if we start in an _initial heap_ where $P(h)$ is true, run $e$ till it terminates in a value $v$ and _final heap_ $h'$, then $Q(v)(h')$ holds (notice how $Q$ is a heap predicate which is a function of a value, thus it needs two arguments).
 
 ::: info Aside on logic
