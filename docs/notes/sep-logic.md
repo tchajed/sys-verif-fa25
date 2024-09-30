@@ -5,12 +5,6 @@ order: 8
 
 # Lecture 8: Separation logic
 
-::: warning Draft
-
-These notes are a work in progress.
-
-:::
-
 ## Learning outcomes
 
 After this lecture you should be able to
@@ -39,6 +33,7 @@ $$
 \end{aligned}}
 \gdef\outlineSpec#1{\left\{#1\right\}}
 \gdef\fun#1{\lambda #1.\,}
+\gdef\funblank{\fun{\_}}
 \gdef\app#1#2{#1 \, #2}
 \gdef\then{;\;}
 \gdef\entails{\vdash}
@@ -49,7 +44,7 @@ $$
 %\gdef\load#1{\operatorname{Load}(#1)}
 %\gdef\store#1#2{\operatorname{Store}(#1, #2)}
 \gdef\load#1{{!}\,#1}
-\gdef\store#1#2{#1 \mathbin{:=} #2}
+\gdef\store#1#2{#1 \mathbin{\gets} #2}
 \gdef\alloc#1{\operatorname{alloc} \, #1}
 \gdef\assert#1{\operatorname{assert} \, #1}
 \gdef\purestep{\xrightarrow{\text{pure}}}
@@ -162,10 +157,10 @@ $\hoare{True}{\alloc{v}}{\fun{w} \exists \ell.\, \lift{w = \ell} \sep \ell \poin
 $\hoare{\ell \pointsto v}{\load{\ell}}{\fun{w} \lift{w = v} \sep \ell \pointsto v}%
 \eqnlabel{load-spec}$
 
-$\hoare{\ell \pointsto v_0}{\store{\ell}{v}}{\fun{\_} \ell \pointsto v}%
+$\hoare{\ell \pointsto v_0}{\store{\ell}{v}}{\funblank \ell \pointsto v}%
 \eqnlabel{store-spec}$
 
-These are not that surprising. These rules are sometimes called the "small footprint axioms" because they only talk about the smallest part of the heap that is relevant to the operation. We add a bit of notation here: $\fun{\_}$ is used for a postcondition that ignores the return value.
+These are not that surprising. These rules are sometimes called the "small footprint axioms" because they only talk about the smallest part of the heap that is relevant to the operation. We add a bit of notation here: $\funblank$ is used for a postcondition that ignores the return value.
 
 The heart of separation logic is the celebrated **frame rule**:
 
@@ -173,7 +168,7 @@ $\dfrac{\hoare{P}{e}{\fun{v} Q(v)}}%
 {\hoare{P \sep F}{e}{\fun{v} Q(v) \sep F}} \eqnlabel{frame}%
 $
 
-The frame rule supports separation logic's _ownership reasoning_. The idea is that having an assertion in the precondition expresses "ownership", for example $\ell \pointsto v$ means the function starts out owning the location $\ell$. Owning a location means no other part of the program can read or write it. For example, in the triple $\hoare{\ell \mapsto \overline{0}}{f \, (\ell, \ell')}{\fun{\_} \ell \mapsto \overline{42}}$, the function $f$ owns $\ell$ for the duration of its execution and during the proof of this triple we can be sure no other function will interfere with $\ell$. Furthermore because the triple does not mention $\ell'$ in its precondition, we know it does not need to access that location; this is what the frame rule captures.
+The frame rule supports separation logic's _ownership reasoning_. The idea is that having an assertion in the precondition expresses "ownership", for example $\ell \pointsto v$ means the function starts out owning the location $\ell$. Owning a location means no other part of the program can read or write it. For example, in the triple $\hoare{\ell \mapsto \overline{0}}{f \, (\ell, \ell')}{\funblank \ell \mapsto \overline{42}}$, the function $f$ owns $\ell$ for the duration of its execution and during the proof of this triple we can be sure no other function will interfere with $\ell$. Furthermore because the triple does not mention $\ell'$ in its precondition, we know it does not need to access that location; this is what the frame rule captures.
 
 As an example, consider proving a specification for the following program:
 
@@ -203,7 +198,7 @@ $$\hoare{\True}{\assert{\true}}{\fun{v} \lift{v = ()}}$$.
 
 For now, we merely wish to prove that this program is safe, which means showing the assertion is always true, which is captured by the following specification:
 
-$$\hoare{\True}{e_{\text{own}}}{\fun{\_} \True}$$
+$$\hoare{\True}{e_{\text{own}}}{\funblank \True}$$
 
 We can give a proof outline in separation logic for this function, in the same style as we did for Hoare logic:
 
@@ -238,7 +233,7 @@ $$
 $$
 \hoareV{x \pointsto a \sep y \pointsto b}%
 {\operatorname{swap} \, x \, y}%
-{\fun{\_} x \pointsto b \sep y \pointsto a}
+{\funblank x \pointsto b \sep y \pointsto a}
 $$
 
 You should write out swap as three lines of code for this outline. Identify what the frame $F$ is each time your outline (implicitly) uses the frame rule.
