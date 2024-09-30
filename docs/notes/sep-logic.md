@@ -3,7 +3,7 @@ category: lecture
 order: 8
 ---
 
-# Lecture 8: Separation logic
+# Lecture 8+9: Separation logic
 
 ## Learning outcomes
 
