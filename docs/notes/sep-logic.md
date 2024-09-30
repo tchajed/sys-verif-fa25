@@ -186,6 +186,12 @@ $$
 \end{aligned}
 $$
 
+Assume the specification above for $f$:
+
+$$
+\hoareV{\ell \mapsto \overline{0}}{f \, (\ell, \ell')}{\funblank \ell \mapsto \overline{42}}
+$$
+
 ::: details Definition of e1; e2 and assert
 
 If it bothers you that we are using $e_1\then e_2$ in a program and $\assert{e}$ without defining them, here are appropriate definitions:
