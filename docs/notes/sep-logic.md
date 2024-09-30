@@ -34,6 +34,7 @@ $$
 \gdef\outlineSpec#1{\left\{#1\right\}}
 \gdef\fun#1{\lambda #1.\,}
 \gdef\funblank{\fun{\_}}
+\gdef\rec#1#2{\text{\textbf{rec} } #1 \, #2.\;}
 \gdef\app#1#2{#1 \, #2}
 \gdef\then{;\;}
 \gdef\entails{\vdash}
@@ -243,3 +244,25 @@ You should write out swap as three lines of code for this outline. Identify what
 Recall that from one assertion to the next is supposed to use a known specification for the function in between (for the outline to be valid). When you have more facts in the precondition than the known specification, you need to use the frame rule.
 
 :::
+
+## Recursion
+
+::: warning Draft
+
+From this point forward these notes are still a draft.
+
+:::
+
+Imperative programs typically have loops, and we haven't yet shown a way to reason about them. As you'll see later, the ultimate goal will be to use the simple programs we have above to _model_ the behavior of an imperative program. In this process we can translate a complex feature like `for` loops into something more primitive. For all types of loops, it's sufficient to add recursion to our programming language, and a way to reason about recursive functions.
+
+When you write a recursive function, you typically refer to the definition of the function in its body. Our language doesn't have definitions, so we instead add _recursive lambdas_ or _anonymous recursive functions_:
+
+$$e ::= \dots \mid \rec{f}{x} e$$
+
+The expression $\rec{f}{x} e$ is like $\fun{x} e$, except that it can call itself via the name $f$. In fact we don't need the non-recursive functions anymore; they can be replaced with notation $\fun{x} e ::= \rec{\_}{x} e$, where we just never refer to the function recursively.
+
+## Weakest preconditions
+
+What we've seen so far as separation logic rules that can form a full proof, but they were cumbersome to use, so we've instead been verifying programs with proof outlines. The proof outlines are a useful way to think about the proof, but hard to formalize in a way that captures all the obligations (and they don't handle capture uses of the bind rule).
+
+Weakest preconditions will solve both of these problems: we'll have a fully formal way of using the logic's rules while also being able to manage a proof in practice (and in particular in Coq).
