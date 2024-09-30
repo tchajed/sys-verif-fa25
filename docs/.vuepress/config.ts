@@ -74,6 +74,7 @@ export default defineUserConfig({
         highlightLines: true,
         notationDiff: true,
         // notationHighlight: true,
+        lineNumbers: "disable",
       },
     },
 
