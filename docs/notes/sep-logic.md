@@ -139,6 +139,10 @@ P \sep (Q \sep R) &\entails (P \sep Q) \sep R &\text{sep-assoc} \\
 \end{aligned}
 $$
 
+$$
+\dfrac{Q \entails Q'}{P \sep Q \entails P \sep Q'} \eqnlabel{sep-monotone}
+$$
+
 The two surprising rules are $P \sep Q \entails P$ and $P \entails P \sep \True$. These are desirable rules, but we have to be careful for them to be true. For the first, $P \sep Q \entails P$, we define entailment in a non-obvious way:
 
 $P \entails Q ::= \forall h.\, P(h) \to \exists h_1, h_2.\, (h = h_1 \union h_2) \land Q(h_1)$
