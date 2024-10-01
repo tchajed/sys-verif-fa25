@@ -65,8 +65,8 @@ Separation logic is an extension of Hoare logic. We'll still have a specificatio
 
 - Our programs (the expressions $e$) will now have constructs for allocating, reading, and writing to heap memory.
 - Propositions will no longer be pure and equivalent to a Coq `Prop`. Instead, they'll be predicates over the heap, of type `hProp := heap → Prop` (`heap` is our representation of the state of these imperative programs, which we'll get to later). The precondition and postcondition will be these heap predicates, so they'll say something about both program variables and the initial and final states of the program.
-- In addition to the usual connectives over propositions ($P \land Q$, $P \lor Q$, $\exists x.\, P(x)$), we'll add a new _separating conjunction_ $P \sep Q$. We'll start using the notation $\lift{\phi}$ ("lift phi"), which takes an ordinary `Prop` and turns it into an `hProp`. It'll be more important to distinguish these pure propositions because once true, they remain true, whereas a statement about the state of the program can become false as the state evolves.
-- We'll add some new rules for proving separation logic triples (and keep all the old rules).
+- In addition to the usual connectives over propositions ($P \land Q$, $P \lor Q$, $\exists x.\, P(x)$), we'll add a new _points-to assertion_ $\ell \pointsto v$ that says what the value of one heap address is, and a new _separating conjunction_ $P \sep Q$, pronounced "$P$ and separately $Q$". $P \sep Q$ says that $P$ and $Q$ both hold _separately_: they must be true over disjoint sub-parts of the heap.
+- We'll add some new rules for proving separation logic triples (and keep all the old rules). A crucial rule is the _frame rule_ which permits us to write a specification for a function that talks only about the memory addresses that a program needs, while still capturing that other addresses are unchanged when we use that function's specification in a bigger context.
 
 ## Programming language
 
@@ -89,6 +89,22 @@ The semantics of a program will now be given by a new small-step operational sem
 Suppose we have a heap $h$. The locations $\ell_1$, $\ell_2$, and $\ell_3$ are allocated in $h$. Starting in $h$, the expression $\load{\ell_1}$ evalutes to $\ell_3$, $\load{\ell_2}$ evalutes to $\overline{7}$, and $\load{\ell_3}$ evaluates to $\true$. We then fully evaluate the expression $\store{\load{\ell_1}}{\load{\ell_2}}$ and finish in heap $h'$. What are $h$ and $h'$?
 
 You can use notation like $h_0 = \{\ell_1 \mapsto a, \ell_2 \mapsto b\}$ to write out a heap where $h_0(\ell_1) = a$ and $h_0(\ell_2) = b$ (and nothing else is allocated). You can also ignore any locations not mentioned.
+
+::: details Solution
+
+From the provided expressions, we can work out:
+
+$$
+h = \{\ell_1 \mapsto \ell_3, \ell_2 \mapsto \overline{7}, \ell_3 \mapsto \true \}
+$$
+
+The three locations have different values so we can confirm they are distinct. (Did you think about that?)
+
+The expression $\store{\load{\ell_1}}{\load{\ell_2}}$ takes several steps in $h$. It first reduces to $\store{\ell_3}{\overline{7}}$, without changing the heap (though we did not say in what order those loads happen, it doesn't affect the answer). This store then results in a heap $h' = \{\ell_1 \mapsto \ell_3, \ell_2 \mapsto \overline{7}, \ell_3 \mapsto \overline{7}\}$.
+
+If we choose not to ignore other locations, we can say more generally that $h = \{\ell_1 \mapsto \ell_3, \ell_2 \mapsto \overline{7}, \ell_3 \mapsto \true \} \union h_f$ for some $h_f$ that does not contain $\ell_1$, $\ell_2$, or $\ell_3$, and the final heap will be $h' = \{\ell_1 \mapsto \ell_3, \ell_2 \mapsto \overline{7}, \ell_3 \mapsto \overline{7}\} \union h_f$ with the same $h_f$. This statement captures all the possibilities for how this example expression executes, not just the smallest heap. However, writing doesn the general statement took much more work, and this is only a one-line program; separation logic will help with that.
+
+:::
 
 ## Heap predicates
 
