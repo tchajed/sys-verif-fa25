@@ -44,7 +44,7 @@ $$
 
 \gdef\sep{\mathbin{\raisebox{1pt}{$\star$}}}
 \gdef\bigsep{\mathop{\vcenter{\LARGE\hbox{$\star$}}}}
-\gdef\wand{\mathbin{\raisebox{1pt}{$-\hspace{-1mu}\star$}}}
+\gdef\wand{\mathbin{\raisebox{1pt}{$-\hspace{-0.06em}\star$}}}
 %\gdef\load#1{\operatorname{Load}(#1)}
 %\gdef\store#1#2{\operatorname{Store}(#1, #2)}
 \gdef\load#1{{!}\,#1}
