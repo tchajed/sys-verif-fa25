@@ -51,6 +51,7 @@ $$
 \gdef\purestep{\xrightarrow{\text{pure}}}
 \gdef\intersect{\cap}
 \gdef\union{\cup}
+\gdef\emp{\mathrm{emp}}
 
 \gdef\pointsto{\mapsto}
 \gdef\disjoint{\mathrel{\bot}}
@@ -122,9 +123,11 @@ The logic view is still very useful. One thing it enables is that if we do proof
 
 ## Separation logic propositions
 
-$\text{Propositions}\quad P ::= \dots \mid \ell \pointsto v \mid P \sep Q$
+$\text{Propositions}\quad P ::= \dots \mid \ell \pointsto v \mid P \sep Q \mid \emp$
 
 The assertion $\ell \pointsto v$ (read "$\ell$ points to $v$") says that the heap maps location $\ell$ to value $v$. The proposition $P \sep Q$ (read "$P$ and separately $Q$", or simply "$P$ star $Q$") is called the _separating conjunction_. Like a regular conjunction, it asserts that both $P$ and $Q$ are true. What makes it special (and this is the key feature of separation logic) is that it also asserts $P$ and $Q$ hold in _disjoint_ parts of the heap. For example, $\ell \pointsto v \sep \ell \pointsto v$ is false, because $\ell$ cannot be allocated in two disjoint parts of the heap.
+
+We also add a new proposition $\emp$ which says the heap is empty. It'll be useful later.
 
 Remembering that propositions are interpreted as heap predicates, we can formally define them as follow:
 
@@ -142,30 +145,37 @@ Separating conjunction is quite key to separation logic. You should make sure yo
 
 :::
 
-The rules for working with separating conjunction have parts that are quite intuitive and some that are surprising:
+_emp:_ This is pretty straightforward: $\emp(h) ::= h = \emptyset$ (that's the empty map). Equivalently, $\dom(h) = \emptyset$ (that's the empty set).
+
+Here are a few rules for working with separating conjunction (the standard rules for propositions also largely apply here):
 
 $$
 \begin{aligned}
-P \sep Q &\entails P &\text{sep-weaken}\\
-P &\entails P \sep \True &\text{sep-true} \\
 P \sep Q &\entails Q \sep P &\text{sep-comm} \\
 P \sep (Q \sep R) &\entails (P \sep Q) \sep R &\text{sep-assoc} \\
 (\exists x.\, P(x)) \sep Q &\entails (\exists x. \, P(x) \sep Q) &\text{sep-exists} \\
 \ell \mapsto v \sep \ell \mapsto w &\entails \False &\text{pointsto-sep} \\
+P &\entails P \sep \emp &\text{sep-id} \\
 \end{aligned}
+$$
+
+$$
+\dfrac{\lift{\phi}}{P \entails P \sep \lift{\phi}} \eqnlabel{sep-pure}
 $$
 
 $$
 \dfrac{Q \entails Q'}{P \sep Q \entails P \sep Q'} \eqnlabel{sep-monotone}
 $$
 
-The two surprising rules are $P \sep Q \entails P$ and $P \entails P \sep \True$. These are desirable rules, but we have to be careful for them to be true. For the first, $P \sep Q \entails P$, we define entailment in a non-obvious way:
+Entailment between heap predicates is straightforward to define:
 
-$P \entails Q ::= \forall h.\, P(h) \to \exists h_1, h_2.\, (h = h_1 \union h_2) \land Q(h_1)$
+$P \entails Q ::= \forall (h: \Heap).\, P(h) \to Q(h)$
 
-What this says is that $P \entails Q$ can be true if $P(h)$ implies that $Q$ holds not on the whole heap but just a _sub-heap_ $h_1$. This definition is chosen precisely so that the sep-weaken rule is true, and it permits us to prove implications in separation logic that "forget" conjuncts. This is actually similar to how normal conjunction works (the fact that $P \land Q \entails P$ doesn't surprise anyone).
+Remember that $P$ and $Q$ are predicates over heaps, so we cannot say one "implies" the other directly, but $P(h)$ (for some heap $h$) on the other hand is a $\mathrm{Prop}$ and we can use regular Coq implication $\to$ over it.
 
-For $P \entails P \sep \True$, we'll come back to the syntax $\lift{\varphi}$ we saw earlier. This "lifts" a pure proposition $\varphi : \mathrm{Prop}$ to the propositions in our logic. Before those were also $\mathrm{Prop}$ and this didn't do anything, but now we want heap predicates. The definition we'll choose is $(\lift{\varphi})(h) = \varphi$ - a lifted proposition is true for any heap, as long as $\varphi$ holds in general. Now we define $\True = \lift{\True}$ (we are overloading the syntax, sorry); this makes $P \entails P \sep \True$ true, as you'll prove.
+Remember the syntax $\lift{\varphi}$ from earlier. This "lifts" a pure proposition $\varphi : \mathrm{Prop}$ to the propositions in our logic. Before those were also $\mathrm{Prop}$ and lifting didn't do anything, but now we want heap predicates. The definition we'll choose is $(\lift{\varphi})(h) = \varphi \land h = \empty$; this requires $\varphi$ to be true and also meanwhile asserts $\varphi$ is true.
+
+We'll also define $\True(h)$ to always be true, regardless of the heap. Observe that $\lift{\True}$ (where this True is now a pure proposition) is actually $\emp$.
 
 ### Exercise: prove sep-true
 
@@ -274,13 +284,33 @@ Recall that from one assertion to the next is supposed to use a known specificat
 
 :::
 
+## Soundness
+
+Remember that with Hoare logic, we defined what a triple means, which we called the _soundness theorem_ for Hoare logic. We also said we'll instead take it as the definition of a Hoare triple, and all the rules will be theorems proven from the definition. We can do something similar with separation logic.
+
+At this point we should start thinking more abstractly about the logic, so we'll see three definitions of soundness, which differ in how much detail of the model (heap predicates) they rely on.
+
+_Pure Soundness_: If $\hoare{\True}{e}{\fun{v} \phi(v)}$ and $(e, h) \leadsto (e', h')$, then $(e', h')$ is not stuck, or $e' = v'$ for some value $v'$ and $\phi(v')$ holds.
+
+This definition requires a pretty specific triple: it cannot involve anything about the heap, only a trivial precondition and a pure postcondition about the return value. However, notice that in this case it doesn't matter if we're using heap predicates or anything else.
+
+$$
+\gdef\bigsep{\mathop{\vcenter{\LARGE\hbox{$\star$}}}}
+$$
+
+_Sequential Separation Logic Soundness_: If
+
+$$\hoare{\bigsep_{(\ell, v) \in h_{in}} \ell \mapsto v}{e}{\fun{v} \exists h_{out}.\, \left(\bigsep_{(\ell, w) \in h_{out}} \ell \pointsto w\right) \sep \phi(v, h_{out})}$$
+
+and $h_{in} \subseteq h$ and $(e, h) \leadsto (e', h')$, then $(e', h')$ is not stuck or $e' = v'$ for some value $v'$ and there is an $h_{out} \subseteq h'$ such that $\phi(v, h_{out})$.
+
+This definition uses only the new separation logic propositions we've seen, points-to and separating conjunction, and also doesn't reference the fact that they are heap predicates. Notice that it does talk about framing out any extra parts of the heap not used by the precondition.
+
+_Heap predicate soundness:_ If $\hoare{P}{e}{\fun{v} Q}$ holds, if we have $P(h)$ and $(e, h) \leadsto (e', h')$, then either $(e', h')$ is not stuck, or $e' = v'$ for some value $v'$ and $Q(v')(h')$ holds.
+
+This definition is directly given in the model with $P$ and $Q(v)$ interpreted as heap predicates.
+
 ## Recursion
-
-::: warning Draft
-
-From this point forward these notes are still a draft.
-
-:::
 
 Imperative programs typically have loops, and we haven't yet shown a way to reason about them. As you'll see later, the ultimate goal will be to use the simple programs we have above to _model_ the behavior of an imperative program. In this process we can translate a complex feature like `for` loops into something more primitive. For all types of loops, it's sufficient to add recursion to our programming language, and a way to reason about recursive functions.
 
@@ -288,7 +318,7 @@ When you write a recursive function, you typically refer to the definition of th
 
 $$e ::= \dots \mid \rec{f}{x} e$$
 
-The expression $\rec{f}{x} e$ is like $\fun{x} e$, except that it can call itself via the name $f$. In fact we don't need the non-recursive functions anymore; they can be replaced with notation $\fun{x} e ::= \rec{\_}{x} e$, where we just never refer to the function recursively.
+The expression $\rec{f}{x} e$ is like $\fun{x} e$, except that it can call itself via the name $f$. In fact we don't need the non-recursive functions anymore; they can be replaced with new notation $\fun{x} e ::= \rec{\_}{x} e$, where we just never refer to the function recursively.
 
 ## Weakest preconditions
 
