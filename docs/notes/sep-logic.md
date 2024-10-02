@@ -449,8 +449,18 @@ $$
 \wp(e, Q) \sep F \entails \wp(e, Q \sep F) \eqnlabel{wp-frame}
 $$
 
+One reason to introduce wand is that we can combine the frame rule and the rule of consequence into the _ramified frame rule_:
+
+$$
+\wp(e, Q) \sep (\forall v.\, Q(v) \wand Q'(v)) \entails \wp(e, Q') \eqnlabel{wp-ramified-frame}
+$$
+
+Weakest preconditions also make for more concise rules about sequencing and bind:
+
 $$
 \wp(e_1, (\fun{v} \wp(e_2, Q))) \entails \wp((e_1\then e_2), Q) \eqnlabel{wp-seq}
 $$
 
-This last rule is a special case of bind. Exercise: extend it to an arbitrary evaluation context, following the template of the Hoare bind rule.
+This is a special case of bind. Exercise: extend it to an arbitrary evaluation context, following the template of the Hoare bind rule.
+
+Notice how unlike the hoare-seq rule, we don't have to invent an intermediate condition that is true after $e_1$; it's implicit that we can prove any postcondition that implies $\wp(e_2, Q)$ - this is the power of using a definition of _weakest_ precondition.
