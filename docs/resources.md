@@ -42,6 +42,7 @@ The [Iris lecture notes](https://iris-project.org/tutorial-material.html) from A
 These papers are directly relevant to the class:
 
 - [Separation Logic (CACM 2019)](https://dl.acm.org/doi/pdf/10.1145/3211968)
+- [Separation Logic for Sequential Programs (ICFP 2020)](https://www.chargueraud.org/research/2020/seq_seplogic/seq_seplogic.pdf)
 - [A beginner's guide to Iris, Coq and separation logic (Indiana University Bachelor's Thesis, 2021)](https://arxiv.org/pdf/2105.12077)
 - [Interactive Proofs in Higher-Order Concurrent Separation Logic](https://iris-project.org/pdfs/2017-popl-proofmode-final.pdf)
 
