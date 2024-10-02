@@ -29,12 +29,13 @@ $$
 \gdef\false{\mathrm{false}}
 \gdef\hoare#1#2#3{\left\{#1\right\} \, #2 \, \left\{#3\right\}}
 \gdef\hoareV#1#2#3{\begin{aligned}%
-&\left\{#1\right\} \\ &\quad #2 \\ &\left\{#3\right\}%
-\end{aligned}}
+  &\left\{#1\right\} \\ &\quad #2 \\ &\left\{#3\right\}%
+  \end{aligned}}
+\gdef\wp{\operatorname{wp}}
 \gdef\outlineSpec#1{\left\{#1\right\}}
 \gdef\fun#1{\lambda #1.\,}
 \gdef\funblank{\fun{\_}}
-\gdef\rec#1#2{\text{\textbf{rec} } #1 \, #2.\;}
+\gdef\rec#1#2{\text{\textbf{rec} } #1 \; #2.\;\;}
 \gdef\app#1#2{#1 \, #2}
 \gdef\then{;\;}
 \gdef\entails{\vdash}
@@ -42,6 +43,8 @@ $$
 \gdef\lift#1{\lceil #1 \rceil}
 
 \gdef\sep{\mathbin{\raisebox{1pt}{$\star$}}}
+\gdef\bigsep{\mathop{\vcenter{\LARGE\hbox{$\star$}}}}
+\gdef\wand{\mathbin{\raisebox{1pt}{$-\hspace{-1mu}\star$}}}
 %\gdef\load#1{\operatorname{Load}(#1)}
 %\gdef\store#1#2{\operatorname{Store}(#1, #2)}
 \gdef\load#1{{!}\,#1}
@@ -294,10 +297,6 @@ _Pure Soundness_: If $\hoare{\True}{e}{\fun{v} \phi(v)}$ and $(e, h) \leadsto (e
 
 This definition requires a pretty specific triple: it cannot involve anything about the heap, only a trivial precondition and a pure postcondition about the return value. However, notice that in this case it doesn't matter if we're using heap predicates or anything else.
 
-$$
-\gdef\bigsep{\mathop{\vcenter{\LARGE\hbox{$\star$}}}}
-$$
-
 _Sequential Separation Logic Soundness_: If
 
 $$\hoare{\bigsep_{(\ell, v) \in h_{in}} \ell \mapsto v}{e}{\fun{v} \exists h_{out}.\, \left(\bigsep_{(\ell, w) \in h_{out}} \ell \pointsto w\right) \sep \phi(v, h_{out})}$$
@@ -310,7 +309,7 @@ _Heap predicate soundness:_ If $\hoare{P}{e}{\fun{v} Q}$ holds, if we have $P(h)
 
 This definition is directly given in the model with $P$ and $Q(v)$ interpreted as heap predicates.
 
-## Recursion
+## Recursion & loops
 
 Imperative programs typically have loops, and we haven't yet shown a way to reason about them. As you'll see later, the ultimate goal will be to use the simple programs we have above to _model_ the behavior of an imperative program. In this process we can translate a complex feature like `for` loops into something more primitive. For all types of loops, it's sufficient to add recursion to our programming language, and a way to reason about recursive functions.
 
@@ -320,8 +319,138 @@ $$e ::= \dots \mid \rec{f}{x} e$$
 
 The expression $\rec{f}{x} e$ is like $\fun{x} e$, except that it can call itself via the name $f$. In fact we don't need the non-recursive functions anymore; they can be replaced with new notation $\fun{x} e ::= \rec{\_}{x} e$, where we just never refer to the function recursively.
 
+The semantics of recursive functions are given by a new and improved beta rule:
+
+$$(\rec{f}{x} e) \, v \to e[(\rec{f}{x} e) / f][v / x]$$
+
+We do two substitutions in a row: first, we substitute the entire original function $e$ (that's the recursion part) over the name $f$ chosen by the user, then substitute $v$ over the regular argument $x$.
+
+We can't really use the Hoare pure-step rule to reason about this function. After using that rule, we'd come back to some recursive subcall, and we'd be in an infinite loop in the proof. The situation is much like how `destruct` isn't enough to reason about interesting theorems about `nat`; we need `induction`. The analogous reasoning here is the following rule (I've written just $Q$ as the postcondition instead of $\fun{v} Q(v)$ for concision):
+
+$$
+\dfrac{%
+\hoare{P}{(\rec{f}{x} e) \, v}{Q} \entails
+\hoare{P}{e[(\rec{f}{x} e) / f][v / x]}{Q}
+}{%
+\hoare{P}{(\rec{f}{x} e) \, v}{Q}
+}
+$$
+
+If you take a moment to parse this rule, it will seem magical. In reasoning about this function, we get to assume the same triple we originally set out to prove! There are two explanations for why this works:
+
+First, separation logic, like Hoare logic, is only giving _partial correctness_. We don't prove the function terminates, only that if it does terminate, the postcondition will be true.
+
+Second, we get to assume the original specification only for _recursive_ occurrences; the premise has an entailment where the goal already has one step of beta reduction. In general assuming what you're about to prove is bad form (that is, allows you to prove false things), but that's not what's going on here.
+
+We'll set aside recursion for a moment and start reasoning about loops. Let's say we want to write a function that sums the first $n$ natural numbers. We'd probably want to write it with a `for` loop. Here's one way to write it:
+
+$$
+\gdef\for{\mathrm{for}}
+\gdef\num#1{\overline{#1}}
+\begin{aligned}
+&sumN ::= \\
+&\quad \lete{x}{\alloc{\num{0}}} \\
+&\quad \for \; \num{n} \; (\fun{i} \\
+&\quad\quad \store{x}{\load{x} + i} \\
+&\quad ); \\
+&\quad !x
+\end{aligned}
+$$
+
+The new construct $\for \; \num{n} \; f$ is equivalent to $f \, \num{0}\then f \, \num{1}\then \dots\then f \, \num{n-1}$. You can either take this as a new language feature, or expand the details block to see a definition using recursion.
+
+::: details Defining for
+
+On a first read it's probably useful to take for granted that $\for$ is a language construct with the expected meaning. Here's how we can put it into the language we already have (and therefore prove theorems about for loops using the recursion rule we already have):
+
+$$
+\begin{aligned}
+&\for ::= \\
+&\quad \fun{n, f} \\
+&\quad \lete{g}{\\
+&\quad\quad\begin{aligned}
+&\rec{loop}{i} \\
+&\quad\ife{(i = n)}{()}{f \, i\then loop \, (i + 1)} \\
+\end{aligned}
+} \\
+&\quad g
+\end{aligned}
+$$
+
+(Apologies for the formatting, still working on it.)
+
+:::
+
+We can prove the following rule for reasoning about for loops using a _loop invariant_ $I$ that is true when the loop starts, and is preserved by each iteration of the loop. Since the for loop always has a loop index $i$, we'll make $I$ a function of that index variable.
+
+$$
+\dfrac{
+\forall (i: \mathbb{Z}).\, 0 \leq i < n \to \hoare{I(i)}{body}{I(i+1)}
+}{
+\hoare{I(0)}{\for \; \num{n} \; body}{I(n)}
+}
+$$
+
+Using this rule, we can prove that $sumN$ returns $\num{n(n+1)/2}$. The key is to use a loop invariant $I(i) ::= x \pointsto \num{i(i+1)/2)}$.
+
+## Magic wand (separating implication)
+
+There is one more operator for separation logic assertions: $P \wand Q$, typically pronounced "$P$ wand $Q$". It is often affectionally called "magic wand". $P \wand Q$ is a _heap predicate_ that is true in a (sub)heap if when you add some disjoint heap satisfying $P$, the whole heap would satisfy $Q$. The wand operator is the implication of separation logic; if you remember only one thing, remember $P \sep (P \wand Q) \entails Q$. Notice the similarity to $P \land (P \to Q) \entails Q$, if we had mere $\mathrm{Prop}$s.
+
+Formally we can define wand as
+
+$$(P \wand Q)(h) ::= \forall h', h \disjoint h' \to P(h) \to Q(h \union h')$$
+
+One characterization of wand is:
+
+$$P \entails (Q \wand R) \iff P \sep Q \entails R$$
+
+Again, read the same thing but for propositional logic:
+
+$$P \entails (Q \to R) \iff P \land Q \entails R$$
+
+If you read (either of these rules) left to right, you can think of them as moving $Q$ into the hypotheses, if this were a Coq tactic. Reading right to left, we can move a hypotheses back into the goal (you haven't really needed to do that in Coq but you should certainly imagine it's sound).
+
+There's more to say about magic wand. Some practice is needed before you become comfortable with it, which I think will be easier with the Coq development than just seeing rules on paper.
+
 ## Weakest preconditions
 
-What we've seen so far as separation logic rules that can form a full proof, but they were cumbersome to use, so we've instead been verifying programs with proof outlines. The proof outlines are a useful way to think about the proof, but hard to formalize in a way that captures all the obligations (and they don't handle capture uses of the bind rule).
+(The presentation here owes much to the [Separation Logic](https://softwarefoundations.cis.upenn.edu/slf-current/WPsem.html) volume of Software Foundations, written by Arthur Charguéraud)
 
-Weakest preconditions will solve both of these problems: we'll have a fully formal way of using the logic's rules while also being able to manage a proof in practice (and in particular in Coq).
+We will now introduce weakest preconditions. The high-level view is that weakest preconditions are an alternate view on triples which have practical benefits for formalizing and automating proofs in separation logic. There's also a broader motivation to learn weakest preconditions, which is that even more automated tools for program verification like Dafny use weakest preconditions to turn the user's program, specification, and proof into a query for an SMT solver like Z3, which knows nothing about pre or postconditions.
+
+The weakest precondition $\wp(e, Q)$, where $e$ is an expression and $Q : val \to hProp$, is a heap predicate such that $P \entails \wp(e, Q) \iff \hoare{P}{e}{Q}$, for any $P$. That is to say, $\wp(e, Q)$ is a precondition that if satisfied would make $Q$ a valid postcondition for $e$, and also it is the _weakest_ such precondition, more general or "better" than any other valid precondition $P$.
+
+We can define weakest preconditions in terms of the semantics, as a heap predicate. $\wp(e, Q)(h)$ is true if for any $e'$, $h'$ such that $(e, h) \leadsto (e', h')$, either (a) $e'$ is not stuck, or (b) $e'$ is a value $v'$ and $Q(v')(h')$.
+
+Notice how very similar this definition is to the heap predicate soundness definition above. In fact, it is chosen so that the characterization above is trivial:
+
+$$
+P \entails \wp(e, Q) \iff \hoare{P}{e}{Q}
+$$
+
+We can reformulate this as:
+
+$$
+\left( \hoare{wp(e, Q)}{e}{Q} \right) \land %
+\left( \forall P.\, \hoare{P}{e}{Q} \to P \entails \wp(e, Q) \right)
+$$
+
+The left conjunct is useful to remember: the weakest precondition is a precondition that makes $Q$ true. The right conjunct expresses the "weakest" part.
+
+Weakest preconditions let us write more concise rules that are also better suited to automation:
+
+$$
+\dfrac{\forall v.\, Q(v) \entails Q'(v)}
+{\wp(e, Q) \entails \wp(e, Q')} \eqnlabel{wp-consequence}
+$$
+
+$$
+\wp(e, Q) \sep F \entails \wp(e, Q \sep F) \eqnlabel{wp-frame}
+$$
+
+$$
+\wp(e_1, (\fun{v} \wp(e_2, Q))) \entails \wp((e_1\then e_2), Q) \eqnlabel{wp-seq}
+$$
+
+This last rule is a special case of bind. Exercise: extend it to an arbitrary evaluation context, following the template of the Hoare bind rule.
