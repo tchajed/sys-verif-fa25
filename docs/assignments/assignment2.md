@@ -6,13 +6,19 @@ icon: pen-fancy
 
 # Assignment 2: Separation Logic theory
 
+::: warning
+
+This assignment hasn't been checked carefully yet. I would still recommend you get started, but I will add some details that might be helpful for exercise 5 to the lecture notes. I also intend to give you a LaTeX template with macros to help you typeset your solutions.
+
+:::
+
 ::: info
 
 This is a theory assignment: you'll submit written responses rather than doing proofs in a computer.
 
 :::
 
-In this assignment, you'll answer some questions about Hoare logic and separation logic on paper rather than submitting mechanized proofs. The goal is to build and exercise your mental model for the specifications, proof rules, and program proofs, without having to work out all the details or translate your argument to something Coq understands. The two downsides are that you have to do all the calculations yourself, and there's no computer patiently checking your work and confirming when you're done; you'll have to think about it and wait for (much slower) feedback from me.
+In this assignment, you'll answer some questions about Hoare logic and separation logic on paper rather than submitting mechanized proofs. The goal is to build and exercise your mental model for the specifications, proof rules, and program proofs, without having to work out all the details or translate your argument to something Coq understands.
 
 $$
 \gdef\hoare#1#2#3{\left\{#1\right\} \, #2 \, \left\{#3\right\}}
@@ -60,7 +66,7 @@ Our language did not have a way of doing pattern matching, which makes it awkwar
 
 ```coq title="expr"
 llist A :=
-| lnil 
+| lnil
 | lcons (hd: A) (tl: ref (llist A))
 ```
 
