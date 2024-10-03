@@ -51,6 +51,7 @@ $$
 %\gdef\store#1#2{\operatorname{Store}(#1, #2)}
 \gdef\load#1{{!}\,#1}
 \gdef\store#1#2{#1 \mathbin{\gets} #2}
+\gdef\free#1{\operatorname{free} \, #1}
 \gdef\alloc#1{\operatorname{alloc} \, #1}
 \gdef\assert#1{\operatorname{assert} \, #1}
 \gdef\purestep{\xrightarrow{\text{pure}}}
@@ -132,7 +133,7 @@ $\text{Propositions}\quad P ::= \dots \mid \ell \pointsto v \mid P \sep Q \mid \
 
 The assertion $\ell \pointsto v$ (read "$\ell$ points to $v$") says that the heap maps location $\ell$ to value $v$. The proposition $P \sep Q$ (read "$P$ and separately $Q$", or simply "$P$ star $Q$") is called the _separating conjunction_. Like a regular conjunction, it asserts that both $P$ and $Q$ are true. What makes it special (and this is the key feature of separation logic) is that it also asserts $P$ and $Q$ hold in _disjoint_ parts of the heap. For example, $\ell \pointsto v \sep \ell \pointsto v$ is false, because $\ell$ cannot be allocated in two disjoint parts of the heap.
 
-We also add a new proposition $\emp$ which says the heap is empty. It'll be useful later.
+We also add a new proposition $\emp$ which says the heap is empty.
 
 Remembering that propositions are interpreted as heap predicates, we can formally define them as follow:
 
@@ -169,6 +170,10 @@ $$
 $$
 
 $$
+P \sep \lift{\phi} \entails P \eqnlabel{sep-pure-weaken}
+$$
+
+$$
 \dfrac{Q \entails Q'}{P \sep Q \entails P \sep Q'} \eqnlabel{sep-monotone}
 $$
 
@@ -186,11 +191,30 @@ We'll also define $\True(h)$ to always be true, regardless of the heap. Observe 
 
 Prove $P \entails P \sep \True$, using the definitions above. (What definitions do you need?)
 
-## Separation logic proof rules
+## Linear vs Affine separation logic
 
-Separation logic adds very few rules. First, some simple ones for the new operations:
+There are actually two variations on separation logic: linear and affine. What is presented above is a linear separation logic. A linear logic requires every proposition or "resource" to be used exactly once in a proof $P \entails Q$. An affine separation logic is similar, but allows propositions to be used _zero or one time_. Concretely this is due to an additional rule, a _weaken_ or _discard_ rule:
 
-$\hoare{True}{\alloc{v}}{\fun{w} \exists \ell.\, \lift{w = \ell} \sep \ell \pointsto v}%
+$$P \sep Q \entails P \eqnlabel{sep-weaken}$$
+
+Typically the divide between linear and affine separation logic is that a linear logic is used for a language with manual memory management while an affine logic is used for a garbage collected language. In the linear setting we would want an operation in the language $\free{\ell}$ that deallocates the location $\ell$, which has the spec $\hoare{\ell \pointsto v}{\free{\ell}}{\emp}$. Notice that we need actual code to drop a memory address, whereas sep-weaken is a logical operation that "forgets" about memory without disposing of it in the program; in a garbage collected language this is perfectly fine, since we cannot manually dispose of memory anyway.
+
+We will eventually want to use an affine separation logic, for two reasons:
+
+1. We will be reasoning about Go, which is a garbage collected language.
+2. In sequential linear separation logic, we can prove that if a program satisfies $\hoare{\emp}{e}{\emp}$ really deallocates all memory it uses. In concurrent separation logic, linearity does not give us this property (there are ways to leak memory while still proving the rule above). Thus there is no benefit to having linearity, while being able to discard propositions is useful.
+
+Affine separation logic has one wrinkle, though, which is why it isn't presented as the default above. The sep-weaken rule is not compatible with the model of heap predicates above: $\ell_1 \pointsto v_1 \sep \ell_2 \pointsto v_2$ is true for a two-element heap, and $\ell_1 \pointsto v_1$ is not true in that heap (since it has too large a domain).
+
+There are a few ways to deal with this, but the simplest to explain is also the approach taken by Iris, the implementation of (concurrent) separation logic we'll be using shortly. Instead of allowing a heap predicate to be an arbitrary function $\Heap \to \mathrm{Prop}$, we require it to be a _monotonic_ predicate $P$ where $\forall h, h'.\, P(h) \land h \disjoint h' \to P(h \union h')$. Observe that if $P$ has this property, then $P \sep Q \entails P$; we can extend the "footprint" of $P$ to include whatever memory $Q$ held over.
+
+If you want to see a different (and more sophisticated) approach, the Software Foundations volume on Separation Logic has a [chapter on affine separation logic](https://softwarefoundations.cis.upenn.edu/slf-current/Affine.html). It makes dropping a predicate a feature of the program logic rather than the assertions themselves, and also considers that only _some_ propositions can be dropped; this allows us to, say, leak memory, but still be forced to explicitly close resources like file handles.
+
+## Separation logic program logic rules
+
+Now we move to the _program logic_ part of separation logic, for reasoning about programs. Separation logic adds very few rules on top of Hoare logic. First, some simple ones for the new operations:
+
+$\hoare{\emp}{\alloc{v}}{\fun{w} \exists \ell.\, \lift{w = \ell} \sep \ell \pointsto v}%
 \eqnlabel{alloc-spec}$
 
 $\hoare{\ell \pointsto v}{\load{\ell}}{\fun{w} \lift{w = v} \sep \ell \pointsto v}%
