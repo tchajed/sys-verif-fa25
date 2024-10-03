@@ -62,19 +62,24 @@ export default defineUserConfig({
         type: "katex",
         // copy as text (change to true to copy as LaTeX source)
         copy: false,
-        // NOTE: this is needed for \gdef and \global to work
-        macros: {},
+        // the rest of the config is passed to KaTeX, see
+        // https://katex.org/docs/options.html
       },
+      // see https://ecosystem.vuejs.press/plugins/markdown/shiki.html for the below config
       shiki: {
         langs: ["coq", "go", "bash"],
         themes: {
           light: "one-light",
           dark: "one-dark-pro",
         },
+        // add something like {1,7-9} to the ```lang line
         highlightLines: true,
+        // add // [!code ++] or // [!code --] to the end of a code line (emitted from template compiler for Coq output diffs)
         notationDiff: true,
-        // notationHighlight: true,
-        lineNumbers: "disable",
+        // add // [!code highlight] to the end of a line
+        notationHighlight: true,
+        // add :line-numbers to ```lang line
+        lineNumbers: false,
       },
     },
 
