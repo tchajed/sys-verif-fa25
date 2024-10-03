@@ -110,26 +110,35 @@ The program verification notes include many examples of proof outlines, especial
 We will use the following _representation invariant_ for linked lists (this is a Coq definition for a separation logic proposition, except that `v` would just be a `val`; we give here its type in the expr language for clarity):
 
 ```coq
-Fixpoint is_list (v: llist A) (xs: list A): hProp :=
+Fixpoint list_rep (v: llist A) (xs: list A): hProp :=
   match x with
   | [] => v = lnil
   | hd :: x2 => ∃ tl l',
      (l = lcons hd tl) ∗
      (tl ↦ l') ∗
-     is_list l' xs'
+     list_rep l' xs'
    end.
 ```
 
-This definition says that `v` is the value of a linked list that holds abstract values `xs`. It relates a programming value `v`, which has references, to a purely mathematical `list`. Importantly, `is_list` is a separation logic proposition `hProp`; it only makes sense to have a linked list in some heap, since the representation involves pointers. However the mathematical part does _not_ involve pointers.
+This definition says that `v` is the value of a linked list that holds abstract values `xs` in the current heap. It relates a programming value `v`, which has references, to a purely mathematical `list`. Importantly, `list_rep` is a separation logic proposition `hProp`; it only makes sense to have a linked list in some heap, since the code representation involves pointers. However the mathematical part does _not_ involve pointers.
 
-This shorthand is also useful for a reference to a linked list:
+
+::: info Where does "xs" come from?
+
+The name `xs` is meant to evoke `x`s, the plural of `x`. It's a common variable name for a list of values (similarly you'll see `ys`) in functional languages like OCaml or Haskell.
+
+:::
+
+This shorthand is also useful for a reference to a linked list, since that is how the tail is stored in an `llist A`:
 
 ```coq
-Definition is_ref_list (v: ref (llist A)) (xs: list A): hProp :=
-  ∃ (p: loc) (l: llist A), (v = p) * (p ↦ l) * is_list l xs.
+Definition list_ref_rep (v: ref (llist A)) (xs: list A): hProp :=
+  ∃ (p: loc) (l: llist A), (v = p) * (p ↦ l) * list_rep l xs.
 ```
 
-In this exercise, you'll verify this append function on linked lists. It's your job to figure out exactly how it works, in order to give a specification.
+### Exercise 5b
+
+Consider the following function for appending two linked lists. It's your job to figure out exactly how it works (that is, how does it manage the memory of the two lists?).
 
 ```coq title="expr"
 Fixpoint app_list (l1: ref (llist A)) (l2: ref (llist A)) :=
@@ -139,13 +148,33 @@ Fixpoint app_list (l1: ref (llist A)) (l2: ref (llist A)) :=
   end
 ```
 
-### Exercise 5b
 
-Write a specification for `app_list l1 l2`.
+Write a specification for `app_list l1 l2`. **You may assume an affine separation logic**, so the postcondition can drop any facts you don't think are relevant.
 
 ### Exercise 5c
 
-Write a proof outline that shows `app_list l1 l2` meets your specification.
+Write a proof outline that shows `app_list l1 l2` meets your specification. You may assume an affine separation logic.
+
+## Exercise 5d
+
+Let us now implement a function to get the tail of a list:
+
+```coq title="expr"
+Definition tail (l: llist A) : llist A :=
+match x with
+| lnil => ()
+| lcons hd tl => !tl
+```
+
+Consider the following specification for `tail`:
+
+```txt
+[ list_rep l (x :: xs) ]
+  tail l
+[ v. list_rep l (x :: xs) * list_rep v xs ]
+```
+
+Is this specification true? If yes, prove this specification. If not, explain why, find another valid specification, and prove it.
 
 ## Bonus exercise (optional)
 
