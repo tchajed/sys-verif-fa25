@@ -291,13 +291,13 @@ Recall that from one assertion to the next is supposed to use a known specificat
 
 Remember that with Hoare logic, we defined what a triple means, which we called the _soundness theorem_ for Hoare logic. We also said we'll instead take it as the definition of a Hoare triple, and all the rules will be theorems proven from the definition. We can do something similar with separation logic.
 
-At this point we should start thinking more abstractly about the logic, so we'll see three definitions of soundness, which differ in how much detail of the model (heap predicates) they rely on.
+At this point we should start thinking more abstractly about the logic, so we'll see four definitions of soundness, which differ in how much detail of the model (heap predicates) they rely on.
 
-_Pure Soundness_: If $\hoare{\True}{e}{\fun{v} \phi(v)}$ and $(e, h) \leadsto (e', h')$, then $(e', h')$ is not stuck, or $e' = v'$ for some value $v'$ and $\phi(v')$ holds.
+**Definition 1** _Pure Soundness_: If $\hoare{\True}{e}{\fun{v} \phi(v)}$ and $(e, h) \leadsto (e', h')$, then $(e', h')$ is not stuck, or $e' = v'$ for some value $v'$ and $\phi(v')$ holds.
 
 This definition requires a pretty specific triple: it cannot involve anything about the heap, only a trivial precondition and a pure postcondition about the return value. However, notice that in this case it doesn't matter if we're using heap predicates or anything else.
 
-_Sequential Separation Logic Soundness_: If
+**Definition 2** _Sequential Separation Logic Soundness_: If
 
 $$\hoare{\bigsep_{(\ell, v) \in h_{in}} \ell \mapsto v}{e}{\fun{v} \exists h_{out}.\, \left(\bigsep_{(\ell, w) \in h_{out}} \ell \pointsto w\right) \sep \phi(v, h_{out})}$$
 
@@ -305,9 +305,21 @@ and $h_{in} \subseteq h$ and $(e, h) \leadsto (e', h')$, then $(e', h')$ is not 
 
 This definition uses only the new separation logic propositions we've seen, points-to and separating conjunction, and also doesn't reference the fact that they are heap predicates. Notice that it does talk about framing out any extra parts of the heap not used by the precondition.
 
-_Heap predicate soundness:_ If $\hoare{P}{e}{\fun{v} Q}$ holds, if we have $P(h)$ and $(e, h) \leadsto (e', h')$, then either $(e', h')$ is not stuck, or $e' = v'$ for some value $v'$ and $Q(v')(h')$ holds.
+**Definition 3** _Heap predicate soundness:_ If $\hoare{P}{e}{\fun{v} Q}$ holds, if we have $P(h)$ and $(e, h) \leadsto (e', h')$, then either $(e', h')$ is not stuck, or $e' = v'$ for some value $v'$ and $Q(v')(h')$ holds.
 
 This definition is directly given in the model with $P$ and $Q(v)$ interpreted as heap predicates.
+
+There's a fourth definition which turns out to be especially useful:
+
+::: info Heap predicate soundness with framing
+
+It is convenient to define a separation logic triple to always include framing, especially if you wanted to prove the frame rule. This is one of the more useful definition of soundness. This is what that definition looks like:
+
+**Definition 4** _Soundness with framing_: If $\hoare{P}{e}{\fun{v} Q}$ holds, if we have $P(h_1)$, some frame heap $h_f$ such that $h_1 \disjoint h_f$, and $(e, h_1 \union h_f) \leadsto (e', h')$, then $h' = h_2 \union h_f$ for some $h_2 \disjoint h_f$ and either $(e', h')$ is not stuck, or $e' = v'$ for some value $v'$ and $Q(v')(h_2)$ holds.
+
+In this definition $h_1 \union h_f$ plays the role of $h$ and $h_2 \union h_f$ plays the role of $h'$, compared to the definitions above.
+
+:::
 
 ## Recursion & loops {#recursion}
 
