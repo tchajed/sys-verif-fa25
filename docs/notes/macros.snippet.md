@@ -1,6 +1,10 @@
 <!-- This snippet has the side effect of creating an empty equation block, which
 takes vertical space, so include it somewhere where that space is innocuous
-(e.g., after an intro paragraph.) -->
+(e.g., after an intro paragraph.)
+
+We don't want to include multiple such snippets (nor would it be good to have
+conflicting macros), so all macros are in one place.
+-->
 
 $$
 %% basic math

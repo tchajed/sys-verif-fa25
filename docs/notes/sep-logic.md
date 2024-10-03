@@ -234,14 +234,16 @@ $$
 &\outlineSpec{x \pointsto \num{0} \sep y \pointsto \num{42}} \\
 &\quad f \, (x, y) \\
 &\outlineSpec{x \pointsto \num{42} \sep y \pointsto \num{42}} \\
-&\quad \assert{(\load{x} == \load{y})} \\
-&\quad \assert{(\load{x} == \num{42})} \\
+&\quad \assert{(\load{x} == \load{y})} \leadsto \\
+&\quad \assert{(\load{x} == \num{42})} \leadsto \\
 &\quad \assert{(\num{42} == \num{42})} \\
 &\outlineSpec{x \pointsto \num{42} \sep y \pointsto \num{42}} \\
 &\quad () \\
 &\outlineSpec{\True} \\
 \end{aligned}
 $$
+
+Some of the proof steps involve multiple operations on the same line, so I've annotated those with $\leadsto$ to indicate that we're showing how the program executes rather than a new line of code. (This is a somewhat ad-hoc notation; these proof outlines are only meant to communicate the idea of the proof to other people, so we don't need to be completely precise in what they mean.)
 
 ### Exercise: prove swap correct
 
@@ -262,6 +264,29 @@ You should write out swap as three lines of code for this outline. Identify what
 ::: info Hint
 
 Recall that from one assertion to the next is supposed to use a known specification for the function in between (for the outline to be valid). When you have more facts in the precondition than the known specification, you need to use the frame rule.
+
+:::
+
+::: details Solution
+
+$$
+\begin{aligned}
+&\outlineSpec{x \mapsto a \sep y \mapsto b} \\
+&\quad \lete{t}{\load{x}} \\
+&\outlineSpec{\lift{t = a} \sep x \mapsto a \sep y \mapsto b} \\
+&\quad \store{x}{\load{y}} \leadsto \\
+&\outlineSpec{\lift{t = a} \sep x \mapsto a \sep y \mapsto b} \\
+&\quad \store{x}{b} \\
+&\outlineSpec{\lift{t = a} \sep x \mapsto b \sep y \mapsto b} \\
+&\quad \store{y}{t} \\
+&\outlineSpec{\lift{t = a} \sep x \mapsto b \sep y \mapsto t} \\
+&\outlineSpec{x \mapsto b \sep y \mapsto a} \\
+\end{aligned}
+$$
+
+There's a frame in pretty much every step, since each line interacts with either $x$ or $y$ and the other is framed out. Technically the pure assertion $\lift{t = a}$ is also framed once it appears.
+
+Note that at the end we can drop `\lift{t = a}` even in a linear logic; it "takes up no space" in the heap since the part where it holds also satisfies $\emp$.
 
 :::
 
