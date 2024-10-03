@@ -15,6 +15,7 @@ const navbarConfig = navbar([
   "/notes/",
   {
     text: "Other",
+    icon: "circle-question",
     children: [
       {
         text: "Calendar",
