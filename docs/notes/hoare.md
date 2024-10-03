@@ -598,12 +598,12 @@ See [Programming Language Foundations](https://softwarefoundations.cis.upenn.edu
 
 :::
 
-### Example: soundness of exists rule
+### Example: soundness of exists rule {#ex-soundness-exists}
 
 At a high level, this rule can be proven by unfolding the definition of soundness and following rules of propositional logic.
 
 Our goal is a Hoare triple; expanding the definition of soundness for that triple, we have assumptions $\exists x. \, P(x)$ and $e \to^* e'$. We can eliminate the existential to get a specific $x_0$ such that $P(x_0)$ holds. From the premise of this rule, we know $\hoare{P(x_0)}{e}{\fun{v} Q(v)}$ holds. Unfolding the soundness definition in that assumption, we get an implication with two premises: the first is to prove the precondition $P(x_0)$ (which we already have), and the second is to prove $e \to^* e'$ (which we also have). Thus from that Hoare triple we conclude that either $e'$ is reducible or it's a value $v'$ where $Q(v')$ holds, which exactly matches the goal.
 
-### Exercise: soundness of rule of consequence
+### Exercise: soundness of rule of consequence {#ex-soundness-consequence}
 
 Go back to the [proof rules](./hoare.md#hoare-rules) and look at the rule of consequence. Prove this rule, interpreting the Hoare triples with the definition above.

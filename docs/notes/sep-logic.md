@@ -1,9 +1,10 @@
 ---
 category: lecture
 order: 8
+shortTitle: "Lecture 8+9: Separation Logic"
 ---
 
-# Lecture 8+9: Separation logic
+# Lectures 8 and 9: Separation Logic
 
 ## Learning outcomes
 
@@ -23,6 +24,7 @@ $$
 \gdef\ife#1#2#3{\text{\textbf{if} } #1 \text{ \textbf{then} } #2 \text{ \textbf{else} } #3}
 \gdef\lete#1#2{\text{\textbf{let} } #1 := #2 \text{ \textbf{in} }}
 \gdef\letV#1#2{&\text{\textbf{let} } #1 := #2 \text{ \textbf{in} }}
+\gdef\num#1{\overline{#1}}
 \gdef\true{\mathrm{true}}
 \gdef\True{\mathrm{True}}
 \gdef\False{\mathrm{False}}
@@ -35,7 +37,7 @@ $$
 \gdef\outlineSpec#1{\left\{#1\right\}}
 \gdef\fun#1{\lambda #1.\,}
 \gdef\funblank{\fun{\_}}
-\gdef\rec#1#2{\text{\textbf{rec} } #1 \; #2.\;\;}
+\gdef\rec#1#2{\text{\textbf{rec} } #1 \; #2.\;\,}
 \gdef\app#1#2{#1 \, #2}
 \gdef\then{;\;}
 \gdef\entails{\vdash}
@@ -90,7 +92,7 @@ The semantics of a program will now be given by a new small-step operational sem
 
 ### Exercise: simulate heap operations
 
-Suppose we have a heap $h$. The locations $\ell_1$, $\ell_2$, and $\ell_3$ are allocated in $h$. Starting in $h$, the expression $\load{\ell_1}$ evalutes to $\ell_3$, $\load{\ell_2}$ evalutes to $\overline{7}$, and $\load{\ell_3}$ evaluates to $\true$. We then fully evaluate the expression $\store{\load{\ell_1}}{\load{\ell_2}}$ and finish in heap $h'$. What are $h$ and $h'$?
+Suppose we have a heap $h$. The locations $\ell_1$, $\ell_2$, and $\ell_3$ are allocated in $h$. Starting in $h$, the expression $\load{\ell_1}$ evalutes to $\ell_3$, $\load{\ell_2}$ evalutes to $\num{7}$, and $\load{\ell_3}$ evaluates to $\true$. We then fully evaluate the expression $\store{\load{\ell_1}}{\load{\ell_2}}$ and finish in heap $h'$. What are $h$ and $h'$?
 
 You can use notation like $h_0 = \{\ell_1 \mapsto a, \ell_2 \mapsto b\}$ to write out a heap where $h_0(\ell_1) = a$ and $h_0(\ell_2) = b$ (and nothing else is allocated). You can also ignore any locations not mentioned.
 
@@ -99,14 +101,14 @@ You can use notation like $h_0 = \{\ell_1 \mapsto a, \ell_2 \mapsto b\}$ to writ
 From the provided expressions, we can work out:
 
 $$
-h = \{\ell_1 \mapsto \ell_3, \ell_2 \mapsto \overline{7}, \ell_3 \mapsto \true \}
+h = \{\ell_1 \mapsto \ell_3, \ell_2 \mapsto \num{7}, \ell_3 \mapsto \true \}
 $$
 
 The three locations have different values so we can confirm they are distinct. (Did you think about that?)
 
-The expression $\store{\load{\ell_1}}{\load{\ell_2}}$ takes several steps in $h$. It first reduces to $\store{\ell_3}{\overline{7}}$, without changing the heap (though we did not say in what order those loads happen, it doesn't affect the answer). This store then results in a heap $h' = \{\ell_1 \mapsto \ell_3, \ell_2 \mapsto \overline{7}, \ell_3 \mapsto \overline{7}\}$.
+The expression $\store{\load{\ell_1}}{\load{\ell_2}}$ takes several steps in $h$. It first reduces to $\store{\ell_3}{\num{7}}$, without changing the heap (though we did not say in what order those loads happen, it doesn't affect the answer). This store then results in a heap $h' = \{\ell_1 \mapsto \ell_3, \ell_2 \mapsto \num{7}, \ell_3 \mapsto \num{7}\}$.
 
-If we choose not to ignore other locations, we can say more generally that $h = \{\ell_1 \mapsto \ell_3, \ell_2 \mapsto \overline{7}, \ell_3 \mapsto \true \} \union h_f$ for some $h_f$ that does not contain $\ell_1$, $\ell_2$, or $\ell_3$, and the final heap will be $h' = \{\ell_1 \mapsto \ell_3, \ell_2 \mapsto \overline{7}, \ell_3 \mapsto \overline{7}\} \union h_f$ with the same $h_f$. This statement captures all the possibilities for how this example expression executes, not just the smallest heap. However, writing doesn the general statement took much more work, and this is only a one-line program; separation logic will help with that.
+If we choose not to ignore other locations, we can say more generally that $h = \{\ell_1 \mapsto \ell_3, \ell_2 \mapsto \num{7}, \ell_3 \mapsto \true \} \union h_f$ for some $h_f$ that does not contain $\ell_1$, $\ell_2$, or $\ell_3$, and the final heap will be $h' = \{\ell_1 \mapsto \ell_3, \ell_2 \mapsto \num{7}, \ell_3 \mapsto \num{7}\} \union h_f$ with the same $h_f$. This statement captures all the possibilities for how this example expression executes, not just the smallest heap. However, writing doesn the general statement took much more work, and this is only a one-line program; separation logic will help with that.
 
 :::
 
@@ -205,15 +207,15 @@ $\dfrac{\hoare{P}{e}{\fun{v} Q(v)}}%
 {\hoare{P \sep F}{e}{\fun{v} Q(v) \sep F}} \eqnlabel{frame}%
 $
 
-The frame rule supports separation logic's _ownership reasoning_. The idea is that having an assertion in the precondition expresses "ownership", for example $\ell \pointsto v$ means the function starts out owning the location $\ell$. Owning a location means no other part of the program can read or write it. For example, in the triple $\hoare{\ell \mapsto \overline{0}}{f \, (\ell, \ell')}{\funblank \ell \mapsto \overline{42}}$, the function $f$ owns $\ell$ for the duration of its execution and during the proof of this triple we can be sure no other function will interfere with $\ell$. Furthermore because the triple does not mention $\ell'$ in its precondition, we know it does not need to access that location; this is what the frame rule captures.
+The frame rule supports separation logic's _ownership reasoning_. The idea is that having an assertion in the precondition expresses "ownership", for example $\ell \pointsto v$ means the function starts out owning the location $\ell$. Owning a location means no other part of the program can read or write it. For example, in the triple $\hoare{\ell \mapsto \num{0}}{f \, (\ell, \ell')}{\funblank \ell \mapsto \num{42}}$, the function $f$ owns $\ell$ for the duration of its execution and during the proof of this triple we can be sure no other function will interfere with $\ell$. Furthermore because the triple does not mention $\ell'$ in its precondition, we know it does not need to access that location; this is what the frame rule captures.
 
 As an example, consider proving a specification for the following program:
 
 $$
 \begin{aligned}
 &e_{\text{own}} ::= \\
-&\quad \lete{x}{\alloc{\overline{0}}} \\ %
-&\quad \lete{y}{\alloc{\overline{42}}} \\ %
+&\quad \lete{x}{\alloc{\num{0}}} \\ %
+&\quad \lete{y}{\alloc{\num{42}}} \\ %
 &\quad f \, (x, y)\then \\ %
 &\quad \assert{(\load{x} == \load{y})}
 \end{aligned}
@@ -222,7 +224,7 @@ $$
 Assume the specification above for $f$:
 
 $$
-\hoareV{\ell \mapsto \overline{0}}{f \, (\ell, \ell')}{\funblank \ell \mapsto \overline{42}}
+\hoareV{\ell \mapsto \num{0}}{f \, (\ell, \ell')}{\funblank \ell \mapsto \num{42}}
 $$
 
 ::: details Definition of e1; e2 and assert
@@ -231,7 +233,7 @@ If it bothers you that we are using $e_1\then e_2$ in a program and $\assert{e}$
 
 $e_1 \then e_2 ::= \lete{\_}{e_1} e_2$ (equivalently, a let binding with any variable unused in $e_2$)
 
-$\assert{e} ::= \ife{e}{()}{\overline{1} == \true}$ (evaluates to $()$ if $e$ is true, otherwise is an error)
+$\assert{e} ::= \ife{e}{()}{\num{1} == \true}$ (evaluates to $()$ if $e$ is true, otherwise is an error)
 
 What you need to know about $\operatorname{assert}$ is really just that it has the following specification:
 
@@ -248,18 +250,16 @@ We can give a proof outline in separation logic for this function, in the same s
 $$
 \begin{aligned}
 &\outlineSpec{\True} \\
-&\quad \lete{x}{\alloc{\overline{0}}} \\
-&\outlineSpec{x \pointsto \overline{0}} \\
-&\quad \lete{y}{\alloc{\overline{42}}} \\
-&\outlineSpec{x \pointsto \overline{0} \sep y \pointsto \overline{42}} \\
+&\quad \lete{x}{\alloc{\num{0}}} \\
+&\outlineSpec{x \pointsto \num{0}} \\
+&\quad \lete{y}{\alloc{\num{42}}} \\
+&\outlineSpec{x \pointsto \num{0} \sep y \pointsto \num{42}} \\
 &\quad f \, (x, y) \\
-&\outlineSpec{x \pointsto \overline{42} \sep y \pointsto \overline{42}} \\
+&\outlineSpec{x \pointsto \num{42} \sep y \pointsto \num{42}} \\
 &\quad \assert{(\load{x} == \load{y})} \\
-&\outlineSpec{x \pointsto \overline{42} \sep y \pointsto \overline{42}} \\
-&\quad \assert{(\overline{42} == \load{y})} \\
-&\outlineSpec{x \pointsto \overline{42} \sep y \pointsto \overline{42}} \\
-&\quad \assert{(\overline{42} == \overline{42})} \\
-&\outlineSpec{x \pointsto \overline{42} \sep y \pointsto \overline{42}} \\
+&\quad \assert{(\load{x} == \num{42})} \\
+&\quad \assert{(\num{42} == \num{42})} \\
+&\outlineSpec{x \pointsto \num{42} \sep y \pointsto \num{42}} \\
 &\quad () \\
 &\outlineSpec{\True} \\
 \end{aligned}
@@ -309,7 +309,7 @@ _Heap predicate soundness:_ If $\hoare{P}{e}{\fun{v} Q}$ holds, if we have $P(h)
 
 This definition is directly given in the model with $P$ and $Q(v)$ interpreted as heap predicates.
 
-## Recursion & loops
+## Recursion & loops {#recursion}
 
 Imperative programs typically have loops, and we haven't yet shown a way to reason about them. As you'll see later, the ultimate goal will be to use the simple programs we have above to _model_ the behavior of an imperative program. In this process we can translate a complex feature like `for` loops into something more primitive. For all types of loops, it's sufficient to add recursion to our programming language, and a way to reason about recursive functions.
 
@@ -346,7 +346,6 @@ We'll set aside recursion for a moment and start reasoning about loops. Let's sa
 
 $$
 \gdef\for{\mathrm{for}}
-\gdef\num#1{\overline{#1}}
 \begin{aligned}
 &sumN ::= \\
 &\quad \lete{x}{\alloc{\num{0}}} \\
@@ -395,7 +394,15 @@ Using this rule, we can prove that $sumN$ returns $\num{n(n+1)/2}$. The key is t
 
 ## Magic wand (separating implication)
 
-There is one more operator for separation logic assertions: $P \wand Q$, typically pronounced "$P$ wand $Q$". It is often affectionally called "magic wand". $P \wand Q$ is a _heap predicate_ that is true in a (sub)heap if when you add some disjoint heap satisfying $P$, the whole heap would satisfy $Q$. The wand operator is the implication of separation logic; if you remember only one thing, remember $P \sep (P \wand Q) \entails Q$. Notice the similarity to $P \land (P \to Q) \entails Q$, if we had mere $\mathrm{Prop}$s.
+There is one more operator for separation logic assertions: $P \wand Q$, typically pronounced "$P$ wand $Q$". It is often affectionally called "magic wand". $P \wand Q$ is a _heap predicate_ that is true in a (sub)heap if when you add some disjoint heap satisfying $P$, the whole heap would satisfy $Q$. The wand operator is the implication of separation logic.
+
+::: info Characterization of wand
+
+If you remember only one thing about wand, remember $P \sep (P \wand Q) \entails Q$.
+
+Notice the similarity to $P \land (P \to Q) \entails Q$, if we had mere $\mathrm{Prop}$s; this might help you remember this fact.
+
+:::
 
 Formally we can define wand as
 
@@ -419,15 +426,19 @@ There's more to say about magic wand. Some practice is needed before you become 
 
 We will now introduce weakest preconditions. The high-level view is that weakest preconditions are an alternate view on triples which have practical benefits for formalizing and automating proofs in separation logic. There's also a broader motivation to learn weakest preconditions, which is that even more automated tools for program verification like Dafny use weakest preconditions to turn the user's program, specification, and proof into a query for an SMT solver like Z3, which knows nothing about pre or postconditions.
 
-The weakest precondition $\wp(e, Q)$, where $e$ is an expression and $Q : val \to hProp$, is a heap predicate such that $P \entails \wp(e, Q) \iff \hoare{P}{e}{Q}$, for any $P$. That is to say, $\wp(e, Q)$ is a precondition that if satisfied would make $Q$ a valid postcondition for $e$, and also it is the _weakest_ such precondition, more general or "better" than any other valid precondition $P$.
+The weakest precondition $\wp(e, Q)$, where $e$ is an expression and $Q : val \to hProp$, is a heap predicate. It is defined so that $\wp(e, Q)$ is a precondition that, if true initially, would make $Q$ a valid postcondition for $e$, and also it is the _weakest_ such precondition, more general or "better" than any other valid precondition.
 
 We can define weakest preconditions in terms of the semantics, as a heap predicate. $\wp(e, Q)(h)$ is true if for any $e'$, $h'$ such that $(e, h) \leadsto (e', h')$, either (a) $e'$ is not stuck, or (b) $e'$ is a value $v'$ and $Q(v')(h')$.
 
-Notice how very similar this definition is to the heap predicate soundness definition above. In fact, it is chosen so that the characterization above is trivial:
+Notice how very similar this definition is to the heap predicate soundness definition above. It is equivalent to the following (very useful) characterization:
+
+::: info Characterization of weakest preconditions
 
 $$
 P \entails \wp(e, Q) \iff \hoare{P}{e}{Q}
 $$
+
+:::
 
 We can reformulate this as:
 

@@ -10,9 +10,15 @@ Install the dependencies: `pnpm install`.
 
 Run a dev server to preview changes: `pnpm docs:dev`. The dev server auto-updates and hot-reloads page content, but not structure. Restart it if you make structural changes that affect the sidebar (e.g., add new files), or start it with `pnpm docs:dev --debug` to do a more expensive reload on every change.
 
+Auto-format code (with [prettier](https://prettier.io/)): `pnpm fmt`.
+
 Build static site: `pnpm docs:build`.
 
-Auto-format code (with [prettier](https://prettier.io/)): `pnpm fmt`.
+## Contributing
+
+Make sure to preview your change with `pnpm docs:dev`: confirm that it compiles, and if any LaTeX is involved, make sure the output doesn't render with red errors.
+
+Run `pnpm fmt`.
 
 ## Tech stack
 
