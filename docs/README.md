@@ -30,3 +30,7 @@ See the course [lecture notes](./notes/) and the [resources](./resources.md) pag
 The schedule is still under construction. Consider anything more than ~2 weeks out to be subject to changes.
 
 <!-- @include: ./calendar.snippet.md -->
+
+## Note for instructors
+
+If you're interested in this class please send me an email at <chajed@wisc.edu>. I'd love to hear what you think!

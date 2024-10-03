@@ -9,7 +9,23 @@ import { googleAnalyticsPlugin } from "@vuepress/plugin-google-analytics";
 //
 // README.md is used for the index page of a directory.
 
-const navbarConfig = navbar(["/", "/assignments/", "/notes/"]);
+const navbarConfig = navbar([
+  "/",
+  "/assignments/",
+  "/notes/",
+  {
+    text: "Other",
+    children: [
+      {
+        text: "Calendar",
+        icon: "calendar",
+        link: "/#calendar",
+      },
+      "/syllabus.md",
+      "/resources.md",
+    ],
+  },
+]);
 const sidebarConfig = sidebar({
   "/": [
     "",

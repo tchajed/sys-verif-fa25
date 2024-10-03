@@ -122,7 +122,6 @@ Fixpoint list_rep (v: llist A) (xs: list A): hProp :=
 
 This definition says that `v` is the value of a linked list that holds abstract values `xs` in the current heap. It relates a programming value `v`, which has references, to a purely mathematical `list`. Importantly, `list_rep` is a separation logic proposition `hProp`; it only makes sense to have a linked list in some heap, since the code representation involves pointers. However the mathematical part does _not_ involve pointers.
 
-
 ::: info Where does "xs" come from?
 
 The name `xs` is meant to evoke `x`s, the plural of `x`. It's a common variable name for a list of values (similarly you'll see `ys`) in functional languages like OCaml or Haskell.
@@ -147,7 +146,6 @@ Fixpoint app_list (l1: ref (llist A)) (l2: ref (llist A)) :=
   | lcons hd tl => app_list tl y
   end
 ```
-
 
 Write a specification for `app_list l1 l2`. **You may assume an affine separation logic**, so the postcondition can drop any facts you don't think are relevant.
 
