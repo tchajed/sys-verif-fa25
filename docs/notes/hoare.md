@@ -14,6 +14,8 @@ shortTitle: "Lecture 6+7: Hoare Logic"
 
 ---
 
+<!-- @include: ./macros.snippet.md -->
+
 ## Introduction
 
 We have so far taken a view of program verification where the code is a functional program in Coq, the specification is a property about that function, and the proof uses any Coq-level reasoning required; we specifically developed a style where the code is an ADT and the specification relates it to a model.
@@ -51,23 +53,6 @@ subsequent math blocks.
 -->
 
 $$
-\gdef\ife#1#2#3{\text{\textbf{if} } #1 \text{ \textbf{then} } #2 \text{ \textbf{else} } #3}
-\gdef\lete#1#2{\text{\textbf{let} } #1 := #2 \text{ \textbf{in} }}
-\gdef\letV#1#2{&\text{\textbf{let} } #1 := #2 \text{ \textbf{in} }}
-\gdef\true{\mathrm{true}}
-\gdef\True{\mathrm{True}}
-\gdef\false{\mathrm{false}}
-\gdef\hoare#1#2#3{\left\{#1\right\} \, #2 \, \left\{#3\right\}}
-\gdef\hoareV#1#2#3{\begin{aligned}%
-&\left\{#1\right\} \\ &\quad #2 \\ &\left\{#3\right\}%
-\end{aligned}}
-\gdef\outlineSpec#1{\left\{#1\right\}}
-\gdef\fun#1{\lambda #1.\,}
-\gdef\app#1#2{#1 \, #2}
-\gdef\entails{\vdash}
-\gdef\eqnlabel#1{\:\:\text{#1}}
-\gdef\lift#1{\lceil #1 \rceil}
-
 \begin{aligned}
 &\mathrm{Expressions} &e &::= x \mid v \mid \fun{x} e \mid \app{e_1}{e_2} \\
 &&&\phantom{::=} \mid \ife{e}{e_1}{e_2} \\

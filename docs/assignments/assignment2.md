@@ -6,6 +6,8 @@ icon: pen-fancy
 
 # Assignment 2: Separation Logic theory
 
+<!-- @include: ../notes/macros.snippet.md -->
+
 ::: warning
 
 This assignment hasn't been checked carefully yet. I would still recommend you get started, but I will add some details that might be helpful for exercise 5 to the lecture notes. I also intend to give you a LaTeX template with macros to help you typeset your solutions.
@@ -19,20 +21,6 @@ This is a theory assignment: you'll submit written responses rather than doing p
 :::
 
 In this assignment, you'll answer some questions about Hoare logic and separation logic on paper rather than submitting mechanized proofs. The goal is to build and exercise your mental model for the specifications, proof rules, and program proofs, without having to work out all the details or translate your argument to something Coq understands. The two downsides are that you have to do all the calculations yourself, and there's no computer patiently checking your work and confirming when you're done; you'll have to think about it and wait for (much slower) feedback from me.
-
-$$
-\gdef\hoare#1#2#3{\left\{#1\right\} \, #2 \, \left\{#3\right\}}
-\gdef\True{\mathrm{True}}
-\gdef\False{\mathrm{False}}
-\gdef\rec#1#2{\text{\textbf{rec} } #1 \; #2.\;\,}
-\gdef\fun#1{\lambda #1.\,}
-\gdef\num#1{\overline{#1}}
-\gdef\lift#1{\lceil #1 \rceil}
-
-\gdef\sep{\mathbin{\raisebox{1pt}{$\star$}}}
-\gdef\pointsto{\mapsto}
-\gdef\emp{\mathrm{emp}}
-$$
 
 ## Exercise 1
 
