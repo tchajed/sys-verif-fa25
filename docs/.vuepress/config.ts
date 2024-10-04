@@ -90,7 +90,8 @@ export default defineUserConfig({
           dark: "one-dark-pro",
         },
         // add something like {1,7-9} to the ```lang line
-        highlightLines: true,
+        // TODO: disabled for now since text="goal 1" is parsed as highlighting line 1
+        highlightLines: false,
         // add // [!code ++] or // [!code --] to the end of a code line (emitted from template compiler for Coq output diffs)
         notationDiff: true,
         // add // [!code highlight] to the end of a line
