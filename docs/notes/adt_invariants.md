@@ -304,7 +304,7 @@ End list_map.
 
 ```
 
-## Extension 2: abstraction relations
+## Extension 2: abstraction relations {#abstraction-relations}
 
 There's one more extension beyond invariants that allows us to verify even more examples. Instead of an abstraction function `abs : T → S`, we can instead have an **abstraction relation** `abs_rel : T → S → Prop`, which you can think of as answering for each `T`, what are the possible values of `S` that could be the current abstract state? There might not be _any_ values of `S`, which corresponds to a `T` that doesn't satisfy the invariant, or there might be one unique one like we had before with the abstraction function.
 

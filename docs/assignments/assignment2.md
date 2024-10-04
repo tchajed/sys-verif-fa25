@@ -8,7 +8,7 @@ icon: pen-fancy
 
 ::: warning
 
-This assignment hasn't been checked carefully yet. I would still recommend you get started, but I will add some details that might be helpful for exercise 5 to the lecture notes. I also intend to give you a LaTeX template with macros to help you typeset your solutions.
+I plan to give you a LaTeX template with macros to help you typeset your solutions.
 
 :::
 
@@ -58,7 +58,7 @@ What do you say to Ben?
 
 ## Exercise 5
 
-We will develop a linked list implementation and give it a specification using a _representation predicate_. This is the separation logic analog to the ADT specifications we saw earlier for functional programs. The model of a linked list will be a Coq `list`, as expected; its code will be an implementation in our "lecture notes" programming language, which I'll call `expr`.
+We will develop a linked list implementation in our "lecture notes" programming language (which I'll call `expr` here) and give it a specification using a _representation predicate_.
 
 This problem will follow the presentation of linked lists in Robbert Krebbers's program verification course. We will be following the notes from that class on [separation logic](https://gitlab.science.ru.nl/program-verification/course-2023-2024/-/blob/master/lectures/week10.md).
 
@@ -78,7 +78,7 @@ llist A :=
 
 Notice that this is not like the Coq `list A` type in that the `tl` field is a _pointer_ to the rest of the list.
 
-To use this inductive, we need pattern matching. Assume a `match` construct that behaves like Coq's `match`; here's an example, the `sum_list` from the notes linked above:
+To use this inductive, we need pattern matching. Assume a `match` construct in `expr` that behaves like Coq's `match`; here's an example, the `sum_list` from the notes linked above:
 
 ```coq title="expr"
 Fixpoint sum_list (x: ref nat) (l: ilist nat) :=
@@ -93,9 +93,9 @@ Fixpoint sum_list (x: ref nat) (l: ilist nat) :=
 
 We use `Fixpoint` for clarity but this function can also be written using the recursive anonymous function $\rec{f}{x}{e}$ in the notes.
 
-The program verification notes include many examples of proof outlines, especially those using pattern matching.
+The program verification notes linked above include several examples of proof outlines, especially those using pattern matching.
 
-We will use the following _representation invariant_ for linked lists (this is a Coq definition for a separation logic proposition, except that `v` would just be a `val`; we give here its type in the expr language for clarity):
+To specify functions over linked lists, we will use the following _representation invariant_ for linked lists (this is a Coq definition for a separation logic proposition, except that `v` would just be a `val`; we give here its type in the expr language for clarity):
 
 ```coq
 Fixpoint list_rep (v: llist A) (xs: list A): hProp :=
@@ -110,7 +110,9 @@ Fixpoint list_rep (v: llist A) (xs: list A): hProp :=
 
 This definition says that `v` is the value of a linked list that holds abstract values `xs` in the current heap. It relates a programming value `v`, which has references, to a purely mathematical `list`. Importantly, `list_rep` is a separation logic proposition `hProp`; it only makes sense to have a linked list in some heap, since the code representation involves pointers. However the mathematical part does _not_ involve pointers.
 
-::: info Where does "xs" come from?
+This is the separation logic analog to the ADT specifications we saw earlier for functional programs. The model of a linked list will be a Coq `list`, as expected. We will be using [abstraction relations](./adt_invariants#abstraction-relations) rather than functions. If linked lists were implemented in a functional programming language, we would specify `sum_list` using an abstraction relation `list_absr l xs : Prop` that said `∀ l xs, list_absr l xs → sum_list l = sum xs`. Now, a similar specification is written as a triple `{list_rep l xs} sum_list l {λv. v = sum xs * list_rep l xs}`. Notice that we need to re-state `list_rep l xs` in the postcondition; otherwise, the specification allows `sum_list` to de-allocate `l`, or re-use its memory for something else.
+
+::: info Side note: where does "xs" come from?
 
 The name `xs` is meant to evoke `x`s, the plural of `x`. It's a common variable name for a list of values (similarly you'll see `ys`) in functional languages like OCaml or Haskell.
 
@@ -140,6 +142,8 @@ Write a specification for `app_list l1 l2`. **You may assume an affine separatio
 ### Exercise 5c
 
 Write a proof outline that shows `app_list l1 l2` meets your specification. You may assume an affine separation logic.
+
+Remember that if you think something is wrong here, you may need to re-visit your specification. I can check your specification and give feedback before you spend too much time proving it.
 
 ## Exercise 5d
 

@@ -245,7 +245,7 @@ $$
 
 Some of the proof steps involve multiple operations on the same line, so I've annotated those with $\leadsto$ to indicate that we're showing how the program executes rather than a new line of code. (This is a somewhat ad-hoc notation; these proof outlines are only meant to communicate the idea of the proof to other people, so we don't need to be completely precise in what they mean.)
 
-### Exercise: prove swap correct
+### Exercise: prove swap correct {#ex-swap}
 
 $$
 \operatorname{swap} \, \ell_1 \, \ell_2 ::=
@@ -271,16 +271,16 @@ Recall that from one assertion to the next is supposed to use a known specificat
 
 $$
 \begin{aligned}
-&\outlineSpec{x \mapsto a \sep y \mapsto b} \\
+&\outlineSpec{x \pointsto a \sep y \pointsto b} \\
 &\quad \lete{t}{\load{x}} \\
-&\outlineSpec{\lift{t = a} \sep x \mapsto a \sep y \mapsto b} \\
+&\outlineSpec{\lift{t = a} \sep x \pointsto a \sep y \pointsto b} \\
 &\quad \store{x}{\load{y}} \leadsto \\
-&\outlineSpec{\lift{t = a} \sep x \mapsto a \sep y \mapsto b} \\
+&\outlineSpec{\lift{t = a} \sep x \pointsto a \sep y \pointsto b} \\
 &\quad \store{x}{b} \\
-&\outlineSpec{\lift{t = a} \sep x \mapsto b \sep y \mapsto b} \\
+&\outlineSpec{\lift{t = a} \sep x \pointsto b \sep y \pointsto b} \\
 &\quad \store{y}{t} \\
-&\outlineSpec{\lift{t = a} \sep x \mapsto b \sep y \mapsto t} \\
-&\outlineSpec{x \mapsto b \sep y \mapsto a} \\
+&\outlineSpec{\lift{t = a} \sep x \pointsto b \sep y \pointsto t} \\
+&\outlineSpec{x \pointsto b \sep y \pointsto a} \\
 \end{aligned}
 $$
 
