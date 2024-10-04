@@ -14,6 +14,7 @@
   "devDependencies": {
     "@vuepress/bundler-vite": "2.0.0-rc.17",
     "@vuepress/plugin-google-analytics": "2.0.0-rc.52",
+    "@vuepress/plugin-search": "2.0.0-rc.52",
     "@vuepress/plugin-shiki": "2.0.0-rc.52",
     "katex": "^0.16.11",
     "mathjax-full": "^3.2.2",

@@ -99,6 +99,15 @@ export default defineUserConfig({
         // add :line-numbers to ```lang line
         lineNumbers: false,
       },
+      // https://ecosystem.vuejs.press/plugins/search/search.html
+      search: {
+        hotKeys: [{ key: "k", ctrl: true }, "/"],
+        locales: {
+          "/": {
+            placeholder: "Search",
+          },
+        },
+      },
     },
 
     // control page meta information shown

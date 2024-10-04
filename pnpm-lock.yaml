@@ -14,6 +14,9 @@ importers:
       '@vuepress/plugin-google-analytics':
         specifier: 2.0.0-rc.52
         version: 2.0.0-rc.52(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.17(@types/node@22.7.4)(sass@1.79.3))(vue@3.5.10))
+      '@vuepress/plugin-search':
+        specifier: 2.0.0-rc.52
+        version: 2.0.0-rc.52(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.17(@types/node@22.7.4)(sass@1.79.3))(vue@3.5.10))
       '@vuepress/plugin-shiki':
         specifier: 2.0.0-rc.52
         version: 2.0.0-rc.52(@vueuse/core@11.1.0(vue@3.5.10))(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.17(@types/node@22.7.4)(sass@1.79.3))(vue@3.5.10))
@@ -34,7 +37,7 @@ importers:
         version: 2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.17(@types/node@22.7.4)(sass@1.79.3))(vue@3.5.10)
       vuepress-theme-hope:
         specifier: 2.0.0-rc.58
-        version: 2.0.0-rc.58(katex@0.16.11)(markdown-it@14.1.0)(mathjax-full@3.2.2)(sass@1.79.3)(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.17(@types/node@22.7.4)(sass@1.79.3))(vue@3.5.10))
+        version: 2.0.0-rc.58(@vuepress/plugin-search@2.0.0-rc.52(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.17(@types/node@22.7.4)(sass@1.79.3))(vue@3.5.10)))(katex@0.16.11)(markdown-it@14.1.0)(mathjax-full@3.2.2)(sass@1.79.3)(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.17(@types/node@22.7.4)(sass@1.79.3))(vue@3.5.10))
 
 packages:
 
@@ -828,6 +831,11 @@ packages:
         optional: true
       sass-loader:
         optional: true
+
+  '@vuepress/plugin-search@2.0.0-rc.52':
+    resolution: {integrity: sha512-FV77rtvnVXZqUxOWhdoOugAbZoT74A1YjD2TcYr93cuvWqAbKodbzC2Iry5qWpt2KDPcjvyc2bGIW0ztah+mog==}
+    peerDependencies:
+      vuepress: 2.0.0-rc.17
 
   '@vuepress/plugin-seo@2.0.0-rc.52':
     resolution: {integrity: sha512-q3BhGXnhrDBms4QZbMryKnCLR+TIY79J8Xt01SfkhD8UanYWvMg3+pXg7+Wn9HNLNAUsuuXfLZ4tLQwlF0OxJQ==}
@@ -2801,6 +2809,14 @@ snapshots:
       - '@vue/composition-api'
       - typescript
 
+  '@vuepress/plugin-search@2.0.0-rc.52(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.17(@types/node@22.7.4)(sass@1.79.3))(vue@3.5.10))':
+    dependencies:
+      chokidar: 3.6.0
+      vue: 3.5.10
+      vuepress: 2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.17(@types/node@22.7.4)(sass@1.79.3))(vue@3.5.10)
+    transitivePeerDependencies:
+      - typescript
+
   '@vuepress/plugin-seo@2.0.0-rc.52(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.17(@types/node@22.7.4)(sass@1.79.3))(vue@3.5.10))':
     dependencies:
       '@vuepress/helper': 2.0.0-rc.52(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.17(@types/node@22.7.4)(sass@1.79.3))(vue@3.5.10))
@@ -3821,7 +3837,7 @@ snapshots:
       - '@vue/composition-api'
       - typescript
 
-  vuepress-theme-hope@2.0.0-rc.58(katex@0.16.11)(markdown-it@14.1.0)(mathjax-full@3.2.2)(sass@1.79.3)(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.17(@types/node@22.7.4)(sass@1.79.3))(vue@3.5.10)):
+  vuepress-theme-hope@2.0.0-rc.58(@vuepress/plugin-search@2.0.0-rc.52(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.17(@types/node@22.7.4)(sass@1.79.3))(vue@3.5.10)))(katex@0.16.11)(markdown-it@14.1.0)(mathjax-full@3.2.2)(sass@1.79.3)(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.17(@types/node@22.7.4)(sass@1.79.3))(vue@3.5.10)):
     dependencies:
       '@vuepress/helper': 2.0.0-rc.52(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.17(@types/node@22.7.4)(sass@1.79.3))(vue@3.5.10))
       '@vuepress/plugin-active-header-links': 2.0.0-rc.52(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.17(@types/node@22.7.4)(sass@1.79.3))(vue@3.5.10))
@@ -3859,6 +3875,7 @@ snapshots:
       vuepress-plugin-md-enhance: 2.0.0-rc.57(markdown-it@14.1.0)(sass@1.79.3)(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.17(@types/node@22.7.4)(sass@1.79.3))(vue@3.5.10))
       vuepress-shared: 2.0.0-rc.57(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.17(@types/node@22.7.4)(sass@1.79.3))(vue@3.5.10))
     optionalDependencies:
+      '@vuepress/plugin-search': 2.0.0-rc.52(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.17(@types/node@22.7.4)(sass@1.79.3))(vue@3.5.10))
       sass: 1.79.3
     transitivePeerDependencies:
       - '@vue/composition-api'
