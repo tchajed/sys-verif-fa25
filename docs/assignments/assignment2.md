@@ -24,9 +24,13 @@ In this assignment, you'll answer some questions about Hoare logic and separatio
 
 ## Exercise 1
 
+> Rule of consequence (5 points)
+
 [Prove the rule of consequence](../notes/hoare.md#ex-soundness-consequence) for Hoare logic, from the soundness definition for a Hoare triple.
 
 ## Exercise 2
+
+> Understanding separation logic propositions (10 points)
 
 For each separation logic proposition below, describe precisely the set of heaps where it is true. Briefly explain if you think it's warranted (or if you're unsure of your answer). Assume a linear separation logic.
 
@@ -35,18 +39,23 @@ Note that the overlapping conjunction $(P \land Q)(h)$ is defined to be true whe
 - (a) $\exists v.\, \ell \pointsto v$
 - (b) $\exists \ell'.\, \ell' \pointsto v$
 - (c) $\forall v.\, \ell \pointsto v$
-- (d) $(\ell \pointsto v) \sep (\True \land \emp)$
-- (e) $\ell \pointsto v \land \ell \pointsto v$
-- (f) $\ell \pointsto v \sep \ell \pointsto v$
-- (g) $(\exists v.\, \ell_1 \pointsto v) \sep (\exists \ell.\, \ell \pointsto \num{3})$
-- (h) $(\exists v.\, \ell \pointsto v) \land (\exists \ell'.\, \ell' \pointsto \num{3})$
-- (i) $(\exists x. \lift{x > 2}) \sep (\exists x. \lift{x < 2})$
+- (d) $(\ell \pointsto v) \sep \True$
+- (e) $(\ell \pointsto v) \sep (\True \land \emp)$
+- (f) $\ell \pointsto v \land \ell \pointsto v$
+- (g) $\ell \pointsto v \sep \ell \pointsto v$
+- (h) $(\exists v.\, \ell_1 \pointsto v) \sep (\exists \ell.\, \ell \pointsto \num{3})$
+- (i) $(\exists v.\, \ell \pointsto v) \land (\exists \ell'.\, \ell' \pointsto \num{3})$
+- (j) $(\exists x. \lift{x > 2}) \sep (\exists x. \lift{x < 2})$
 
 ## Exercise 3
+
+> Frame rule vs weakening (10 points)
 
 Compare the separation logic frame rule to the rule for weakening. Explain why the weaken rule does not imply the frame rule. Explain why the frame rule does not imply the weaken rule.
 
 ## Exercise 4
+
+> A bug in separation logic? (15 points)
 
 Your friend Ben Bitdiddle has read the section on [recursion and loops](../notes/sep-logic.md#recursion-loops) and thinks he has found a bug in separation logic. He claims to have proven the following triple:
 
@@ -58,11 +67,15 @@ What do you say to Ben?
 
 ## Exercise 5
 
+> Verifying linked list implementation (35 points, total)
+
 We will develop a linked list implementation in our "lecture notes" programming language (which I'll call `expr` here) and give it a specification using a _representation predicate_.
 
 This problem will follow the presentation of linked lists in Robbert Krebbers's program verification course. We will be following the notes from that class on [separation logic](https://gitlab.science.ru.nl/program-verification/course-2023-2024/-/blob/master/lectures/week10.md).
 
 ### Exercise 5a
+
+> Reading (0 points)
 
 Read the notes linked above. You should be able to skim the first part, since it's very similar to our own class notes. The new material relevant to this problem starts at [Linked data structures and representation predicates](https://gitlab.science.ru.nl/program-verification/course-2023-2024/-/blob/master/lectures/week10.md#linked-data-structures-and-representation-predicates).
 
@@ -125,7 +138,11 @@ Definition list_ref_rep (v: ref (llist A)) (xs: list A): hProp :=
   ∃ (p: loc) (l: llist A), (v = p) * (p ↦ l) * list_rep l xs.
 ```
 
+There is nothing to turn in for this part.
+
 ### Exercise 5b
+
+> Specification for append (10 points)
 
 Consider the following function for appending two linked lists. It's your job to figure out exactly how it works (that is, how does it manage the memory of the two lists?).
 
@@ -141,11 +158,15 @@ Write a specification for `app_list l1 l2`. **You may assume an affine separatio
 
 ### Exercise 5c
 
+> Proof of append (15 points)
+
 Write a proof outline that shows `app_list l1 l2` meets your specification. You may assume an affine separation logic.
 
 Remember that if you think something is wrong here, you may need to re-visit your specification. I can check your specification and give feedback before you spend too much time proving it.
 
 ## Exercise 5d
+
+> Specification for tail (10 points)
 
 Let us now implement a function to get the tail of a list:
 
@@ -167,5 +188,7 @@ Consider the following specification for `tail`:
 Is this specification true? If yes, prove this specification. If not, explain why, find another valid specification, and prove it.
 
 ## Bonus exercise (optional)
+
+> 5-15 bonus points (depending on importance of contribution)
 
 Find a typo in the lecture notes on Hoare logic or Separation Logic. Submit a GitHub pull request with a fix.
