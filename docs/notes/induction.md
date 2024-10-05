@@ -7,6 +7,8 @@ order: 3
 
 # Lecture 3: Induction
 
+> Follow these notes in Coq at [src/sys_verif/coq/induction.v](https://github.com/tchajed/sys-verif-fa24-proofs/blob/main/src/sys_verif/coq/induction.v).
+
 ## Learning outcomes
 
 By the end of this lecture, you should be able to

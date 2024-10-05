@@ -8,6 +8,8 @@ order: 5
 
 ## Lecture 5: ADT specification with invariants
 
+> Follow these notes in Coq at [src/sys_verif/coq/adt_invariants.v](https://github.com/tchajed/sys-verif-fa24-proofs/blob/main/src/sys_verif/coq/adt_invariants.v).
+
 ### Learning outcomes
 
 1. State a model-based specification for an ADT with an invariant
