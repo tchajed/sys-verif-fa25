@@ -22,6 +22,8 @@ In this assignment, you'll answer some questions about Hoare logic and separatio
 
 <!-- @include: ../notes/macros.snippet.md -->
 
+**This assignment is due Tuesday, Oct 22, 2024 at 11pm.** Submit to [Canvas](https://canvas.wisc.edu/courses/425519/assignments/2471003) either handwritten (digital or paper) answers, or typeset your solution with LaTeX.
+
 ## Exercise 1
 
 > Rule of consequence (5 points)
