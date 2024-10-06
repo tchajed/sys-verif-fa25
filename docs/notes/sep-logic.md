@@ -47,7 +47,7 @@ The semantics of a program will now be given by a new small-step operational sem
 
 ### Exercise: simulate heap operations
 
-Suppose we have a heap $h$. The locations $\ell_1$, $\ell_2$, and $\ell_3$ are allocated in $h$. Starting in $h$, the expression $\load{\ell_1}$ evalutes to $\ell_3$, $\load{\ell_2}$ evalutes to $\num{7}$, and $\load{\ell_3}$ evaluates to $\true$. We then fully evaluate the expression $\store{\load{\ell_1}}{\load{\ell_2}}$ and finish in heap $h'$. What are $h$ and $h'$?
+Suppose we have a heap $h$. The locations $\ell_1$, $\ell_2$, and $\ell_3$ are allocated in $h$. Starting in $h$, the expression $\load{\ell_1}$ evaluates to $\ell_3$, $\load{\ell_2}$ evaluates to $\num{7}$, and $\load{\ell_3}$ evaluates to $\true$. We then fully evaluate the expression $\store{\load{\ell_1}}{\load{\ell_2}}$ and finish in heap $h'$. What are $h$ and $h'$?
 
 You can use notation like $h_0 = \{\ell_1 \mapsto a, \ell_2 \mapsto b\}$ to write out a heap where $h_0(\ell_1) = a$ and $h_0(\ell_2) = b$ (and nothing else is allocated). You can also ignore any locations not mentioned.
 
@@ -89,13 +89,13 @@ The assertion $\ell \pointsto v$ (read "$\ell$ points to $v$") says that the hea
 
 We also add a new proposition $\emp$ which says the heap is empty.
 
-Remembering that propositions are interpreted as heap predicates, we can formally define them as follow:
+Remembering that propositions are interpreted as heap predicates, we can formally define them as follows:
 
 _Points-to:_ The points-to connective $\ell \pointsto v$ is true for exactly one heap, which maps $\ell$ to $v$ and nothing else.
 
 $$(\ell \pointsto v)(h) ::= h(\ell) = v \land \dom(h) = \{\ell\}$$
 
-_Separating conjunction:_ For separating conjuction we need to say two heaps are disjoint. We could say $\dom(h) \intersect \dom(h') = \emptyset$, but it's convenient to have a shorter notation and we'll use $h \disjoint h'$:
+_Separating conjunction:_ For separating conjunction we need to say two heaps are disjoint. We could say $\dom(h) \intersect \dom(h') = \emptyset$, but it's convenient to have a shorter notation and we'll use $h \disjoint h'$:
 
 $$(P \sep Q)(h) ::= \exists h_1, h_2.\, (h = h_1 \union h_2) \land (h_1 \disjoint h_2) \land P(h_1) \land Q(h_2)$$
 
