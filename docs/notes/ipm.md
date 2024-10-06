@@ -151,6 +151,12 @@ Qed.
 
 To prove theorems in Coq, we use tactics to manipulate the proof state. The IPM works the same way, providing a collection of tactics to manipulate the IPM context and conclusion. These tactics are intentionally designed to look like analogous Coq tactics, but there are some key differences that come from separation logic. Let's start with some things that are very similar.
 
+::: warning Draft
+
+TODO: write this section
+
+:::
+
 ## Program proofs in the IPM
 
 ```coq
