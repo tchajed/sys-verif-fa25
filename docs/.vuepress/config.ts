@@ -99,6 +99,7 @@ export default defineUserConfig({
         // add :line-numbers to ```lang line
         lineNumbers: false,
       },
+      copyCode: false,
       // https://ecosystem.vuejs.press/plugins/search/search.html
       search: {
         hotKeys: [{ key: "k", ctrl: true }, "/"],
