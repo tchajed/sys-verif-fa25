@@ -3,6 +3,7 @@
 category: lecture
 tags: literate
 order: 2
+pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
 # Lecture 2: Introduction to Coq

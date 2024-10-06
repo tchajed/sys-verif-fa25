@@ -4,6 +4,7 @@ category: lecture
 tags: literate
 shortTitle: "Lecture 4: ADT specification"
 order: 4
+pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
 # Lecture 4: Model-based specifications for functional programs

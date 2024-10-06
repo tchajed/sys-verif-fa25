@@ -4,6 +4,7 @@ category: lecture
 tags: literate
 order: 10
 shortTitle: "Lecture 10: IPM"
+pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
 # Lecture 10: Iris Proof Mode

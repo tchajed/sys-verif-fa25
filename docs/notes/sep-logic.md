@@ -2,6 +2,7 @@
 category: lecture
 order: 8
 shortTitle: "Lecture 8+9: Separation Logic"
+pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
 # Lectures 8 and 9: Separation Logic

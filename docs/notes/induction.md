@@ -3,6 +3,7 @@
 category: lecture
 tags: literate
 order: 3
+pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
 # Lecture 3: Induction

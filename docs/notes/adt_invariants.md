@@ -4,6 +4,7 @@ category: lecture
 tags: literate
 shortTitle: "Lecture 5: ADTs with invariants"
 order: 5
+pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
 ## Lecture 5: ADT specification with invariants
