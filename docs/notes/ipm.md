@@ -21,6 +21,13 @@ By the end of this lecture, you should be able to
 
 ---
 
+::: info Additional resources
+
+- [Interactive Proofs in Higher-Order Concurrent Separation Logic (POPL 2017)](https://iris-project.org/pdfs/2017-popl-proofmode-final.pdf). The paper for the first version of the IPM, which remains a very readable introduction.
+- [Iris Proof Mode documentation](https://gitlab.mpi-sws.org/iris/iris/-/blob/master/docs/proof_mode.md). A reference manual of tactics.
+
+:::
+
 <!-- @include: ./macros.snippet.md -->
 
 ## Motivation
@@ -34,13 +41,6 @@ To prove this in the model would be difficult: there would be the union of three
 It would also be difficult to use the rules: some re-association (we never even said what the associativity of separating conjunction is; it shouldn't matter) would reach a statement $\lift{t = a} ∗ (x \pointsto b) ∗ (y \pointsto a)$, then something like prop-from-pure would be used to "extract" $t = a$, then we would need to drop it &mdash; but wait, sep-pure-weaken requires the pure proposition on the _right_, so we have to swap the order, then swap back &mdash; and this is quickly getting out of hand.
 
 The Iris Proof Mode (IPM) is the better way to formalize the proofs and also to _think_ about the proof.
-
-::: info Additional resources
-
-- [Interactive Proofs in Higher-Order Concurrent Separation Logic (POPL 2017)](https://iris-project.org/pdfs/2017-popl-proofmode-final.pdf). The paper for the first version of the IPM, which remains a very readable introduction.
-- [Iris Proof Mode documentation](https://gitlab.mpi-sws.org/iris/iris/-/blob/master/docs/proof_mode.md). A reference manual of tactics.
-
-:::
 
 ## IPM goals
 
@@ -150,13 +150,321 @@ Qed.
 
 ## IPM tactics
 
-To prove theorems in Coq, we use tactics to manipulate the proof state. The IPM works the same way, providing a collection of tactics to manipulate the IPM context and conclusion. These tactics are intentionally designed to look like analogous Coq tactics, but there are some key differences that come from separation logic. Let's start with some things that are very similar.
+To prove theorems in Coq, we use tactics to manipulate the proof state. The IPM works the same way, providing a collection of tactics to manipulate the IPM context and conclusion. These tactics are intentionally designed to look like analogous Coq tactics, but there are some key differences that come from separation logic. Let's see an example, adapted from Figure 2 from the IPM paper. In this example I'll use the names P, Q, R in both, even though they are `Prop`s in one case and `iProp`s in the other:
 
-::: warning Draft
+### Analogy to the Coq proof mode
 
-TODO: write this section
+```coq
+Lemma and_exist_ex A (P Q: Prop) (R: A → Prop) :
+  P ∧ (∃ a, R a) ∧ Q → ∃ a, R a ∧ P.
+Proof.
+  intros (HP & HR & HQ).
+  destruct HR as [x HR].
+  exists x.
+  split.
+  - assumption.
+  - assumption.
+Qed.
 
-:::
+```
+
+Now a very similar proof, in the IPM with separating conjunction:
+
+```coq
+Lemma sep_exist_ex A (P Q: iProp Σ) (R: A → iProp Σ) :
+  P ∗ (∃ a, R a) ∗ Q -∗ ∃ a, R a ∗ P.
+Proof.
+  iIntros "(HP & HR & HQ)".
+  iDestruct "HR" as (x) "HR".
+  iExists (x).
+  iSplitL "HR".
+  - iAssumption.
+  - iAssumption.
+Qed.
+
+```
+
+Here's the same thing, but with the goals shown:
+
+```coq
+Lemma sep_exist_ex_v2 A (P Q: iProp Σ) (R: A → iProp Σ) :
+  P ∗ (∃ a, R a) ∗ Q -∗ ∃ a, R a ∗ P.
+Proof.
+  iIntros "(HP & HR & HQ)".
+```
+
+:::: info Goal diff
+
+```txt title="goal diff"
+  Σ : gFunctors
+  A : Type
+  P, Q : iProp Σ
+  R : A → iProp Σ
+  ============================
+  P ∗ (∃ a : A, R a) ∗ Q -∗ ∃ a : A, R a ∗ P // [!code --]
+  "HP" : P // [!code ++]
+  "HR" : ∃ a : A, R a // [!code ++]
+  "HQ" : Q // [!code ++]
+  --------------------------------------∗ // [!code ++]
+  ∃ a : A, R a ∗ P // [!code ++]
+```
+
+::::
+
+```coq
+  iDestruct "HR" as (x) "HR".
+```
+
+:::: info Goal diff
+
+```txt title="goal diff"
+  Σ : gFunctors
+  A : Type
+  P, Q : iProp Σ
+  R : A → iProp Σ
+  x : A // [!code ++]
+  ============================
+  "HP" : P
+  "HR" : ∃ a : A, R a // [!code --]
+  "HR" : R x // [!code ++]
+  "HQ" : Q
+  --------------------------------------∗
+  ∃ a : A, R a ∗ P
+```
+
+::::
+
+```coq
+  iExists (x).
+```
+
+:::: info Goal diff
+
+```txt title="goal diff"
+  Σ : gFunctors
+  A : Type
+  P, Q : iProp Σ
+  R : A → iProp Σ
+  x : A
+  ============================
+  "HP" : P
+  "HR" : R x
+  "HQ" : Q
+  --------------------------------------∗
+  ∃ a : A, R a ∗ P // [!code --]
+  R x ∗ P // [!code ++]
+```
+
+::::
+
+```coq
+  iSplitL "HR".
+```
+
+:::: info Goals
+
+```txt title="goal 1"
+  Σ : gFunctors
+  A : Type
+  P, Q : iProp Σ
+  R : A → iProp Σ
+  x : A
+  ============================
+  "HR" : R x
+  --------------------------------------∗
+  R x
+```
+
+```txt title="goal 2"
+  Σ : gFunctors
+  A : Type
+  P, Q : iProp Σ
+  R : A → iProp Σ
+  x : A
+  ============================
+  "HP" : P
+  "HQ" : Q
+  --------------------------------------∗
+  P
+```
+
+::::
+
+```coq
+  - iAssumption.
+  - iAssumption.
+Qed.
+
+```
+
+Notice how `iIntros`, `iDestruct`, `iExists`, and `iAssumption` are all very similar to the analogous Coq tactics. You can see in `iDestruct` and `iExists` that we sometimes need to mix Coq-level identifiers (`x` is given to name the variable in `iDestruct` and passed as an argument to `iExists`) and IPM hypotheses (which all appear in quotes).
+
+What is different in this proof is that `iSplit` is written `iSplitL "HR"`. This is because if we're proving $R ⊢ P ∗ Q$, we have to decide how to split up the hypotheses in $R$. Each hypothesis can be used for $P$ or $Q$ but not both; this is coming directly from the _separation_ in separation logic, and no such decision is needed in the Coq logic since all hypotheses can be used on both sides. The tactic `iSplitL` defines the split by naming all the hypotheses that should be used for the left-hand side; similarly `iSplitR` takes the hypotheses that should be used on the right-hand side.
+
+### Separation logic-specific features
+
+There are a few more tactics with behavior specific to separation logic.
+
+- `iApply` is analogous to `apply`, but applying a wand rather than an implication. It can be used with Coq lemmas as well.
+- `iDestruct` is similar to `iApply` but for forward reasoning. It can also be used with Coq lemmas.
+- `iFrame` automates the process of proving something like `P1 ∗ P3 ∗ P2 ⊢ P1 ∗ P2 ∗ P3` by lining up hypotheses to the goal and "canceling" them out.
+
+```coq
+Lemma apply_simple_ex P Q :
+  (P -∗ Q) ∗ P -∗ Q.
+Proof.
+  iIntros "[HPQ HP]".
+  iApply "HPQ".
+```
+
+:::: info Goal
+
+```txt title="goal 1"
+  Σ : gFunctors
+  A : Type
+  P, Q : iProp Σ
+  R : A → iProp Σ
+  x : A
+  ============================
+  "HP" : P
+  "HQ" : Q
+  --------------------------------------∗
+  P
+```
+
+::::
+
+```coq
+  iAssumption.
+Qed.
+
+```
+
+Applying is a little trickier when there are multiple hypotheses. Just like with `iSplit` we have to decide how hypotheses are divided up. We also see an example below where the wand comes from a Coq-level assumption; more realistically imagine that this is a lemma.
+
+```coq
+Lemma apply_split_ex P1 P2 P3 Q :
+  ((P1 ∗ P3) -∗ P2 -∗ Q) →
+  P1 ∗ P2 ∗ P3 -∗ Q.
+Proof.
+  intros HQ.
+  iIntros "(H1 & H2 & H3)".
+```
+
+:::: info Goal
+
+```txt title="goal 1"
+  Σ : gFunctors
+  P, Q : iProp Σ
+  ============================
+  "HP" : P
+  --------------------------------------∗
+  P
+```
+
+::::
+
+At this point `iApply HQ` needs to produce two subgoals: one for `P1 ∗ P3` and another for `P2`. By default, it will assume you want all hypotheses for the last subgoal, which makes this proof unprovable.
+
+Instead, we will use a _specialization pattern_ `with "[H1 H3]"` to divide the premises up.
+
+```coq
+iApply (HQ with "[H1 H3]").
+  - (* This is a perfect use case for `iFrame`, which spares us from carefully splitting this goal up. *)
+    iFrame.
+  - iFrame.
+Qed.
+
+```
+
+We did the proof "backward" with `iApply`. Let's see a forward proof with `iDestruct`;
+
+```coq
+Lemma destruct_ex P1 P2 P3 Q :
+  ((P1 ∗ P3) -∗ P2 -∗ Q) →
+  P1 ∗ P2 ∗ P3 -∗ Q.
+Proof.
+  intros HQ.
+  iIntros "(H1 & H2 & H3)".
+
+  iDestruct (HQ with "[H1 H3]") as "HQ".
+```
+
+:::: info Goals
+
+```txt title="goal 1"
+  Σ : gFunctors
+  P1, P2, P3, Q : iProp Σ
+  HQ : P1 ∗ P3 -∗ P2 -∗ Q
+  ============================
+  "H1" : P1
+  "H2" : P2
+  "H3" : P3
+  --------------------------------------∗
+  Q
+```
+
+```txt title="goal 2"
+  Σ : gFunctors
+  P1, P2, P3, Q : iProp Σ
+  HQ : P1 ∗ P3 -∗ P2 -∗ Q
+  ============================
+  "H1" : P1
+  "H3" : P3
+  --------------------------------------∗
+  P1 ∗ P3
+```
+
+::::
+
+The first goal is the premise of `HQ` (using the hypotheses we made available using `with "[H1 H3]"`). The second goal has `HQ`.
+
+```coq
+{ iFrame. }
+
+
+```
+
+"H2" and "HQ" are lost after this tactic, which is actually required because of separation logic; the wand is "used up" in proving `Q`, in the same ay that "H1" and "H3" were used in the premise of `HQ`.
+
+```coq
+iDestruct ("HQ" with "[H2]") as "HQ".
+  { iFrame. }
+
+  iFrame.
+Qed.
+
+```
+
+All of these calls to `iFrame` are tedious. The IPM provides some features in specialization patterns and intro patterns to automate things better. Here's a quick demo, but see the documentation to learn more.
+
+```coq
+Lemma destruct_more_framing_ex P1 P2 P3 Q :
+  ((P1 ∗ P3) -∗ P2 -∗ Q) →
+  P1 ∗ P2 ∗ P3 -∗ Q.
+Proof.
+  intros HQ.
+  iIntros "(H1 & H2 & H3)".
+
+
+```
+
+`$H1` in a specialization pattern frames that hypothesis right away. We don't do the same with `"H3"` only for illustration purposes.
+
+```coq
+iDestruct (HQ with "[$H1 H3]") as "HQ". (* {GOALS} *)
+  { iFrame "H3". }
+
+
+```
+
+`as "$"` is an introduction pattern that does not name the resulting hypothesis but instead immediately frames it with something in the goal. In this case that finishes the proof.
+
+```coq
+iDestruct ("HQ" with "[$H2]") as "$".
+Qed.
+
+```
 
 ## Program proofs in the IPM
 
@@ -285,17 +593,13 @@ Proof.
 
 ```txt title="goal 1"
   Σ : gFunctors
-  hG : heapGS Σ
-  Φ : val → iPropI Σ
+  P1, P2, P3, Q : iProp Σ
+  HQ : P1 ∗ P3 -∗ P2 -∗ Q
   ============================
-  "Hpre" : True
-  "HΦ" : True -∗ Φ #()
+  "H1" : P1
+  "H3" : P3
   --------------------------------------∗
-  WP let: "x" := ref_to uint64T #(W64 0) in
-     let: "y" := ref_to uint64T #(W64 42) in
-     IgnoreOneLocF "x" "y";;
-     impl.Assert (![uint64T] "x" = ![uint64T] "y");; #()
-  {{ v, Φ v }}
+  P1 ∗ P3
 ```
 
 ::::
@@ -312,19 +616,13 @@ wp_bind (ref_to uint64T #(W64 0))%E.
 
 ```txt title="goal 1"
   Σ : gFunctors
-  hG : heapGS Σ
-  Φ : val → iPropI Σ
+  P1, P2, P3, Q : iProp Σ
+  HQ : P1 ∗ P3 -∗ P2 -∗ Q
   ============================
-  "Hpre" : True
-  "HΦ" : True -∗ Φ #()
+  "H2" : P2
+  "HQ" : P2 -∗ Q
   --------------------------------------∗
-  WP ref_to uint64T #(W64 0)
-  {{ v,
-     WP let: "x" := v in
-        let: "y" := ref_to uint64T #(W64 42) in
-        IgnoreOneLocF "x" "y";;
-        impl.Assert (![uint64T] "x" = ![uint64T] "y");; #()
-     {{ v, Φ v }} }}
+  Q
 ```
 
 ::::
@@ -340,13 +638,20 @@ Check wp_ref_to.
 :::: note Output
 
 ```txt title="coq output"
-wp_ref_to
-     : ∀ (t : ty) (stk : stuckness) (E : coPset) (v : val),
-         val_ty v t
-         → {{{ True }}}
-             ref_to t v
-           @ stk; E
-           {{{ (l : loc), RET #l; l ↦[t] v }}}
+goal 1 is:
+
+  Σ : gFunctors
+  hG : heapGS Σ
+  Φ : val → iPropI Σ
+  ============================
+  "Hpre" : True
+  "HΦ" : True -∗ Φ #()
+  --------------------------------------∗
+  WP let: "x" := ref_to uint64T #(W64 0) in
+     let: "y" := ref_to uint64T #(W64 42) in
+     IgnoreOneLocF "x" "y";;
+     impl.Assert (![uint64T] "x" = ![uint64T] "y");; #()
+  {{ v, Φ v }}
 ```
 
 ::::
@@ -375,23 +680,27 @@ wp_pures.
 :::: info Goal diff
 
 ```txt title="goal diff"
-  Σ : gFunctors
-  hG : heapGS Σ
-  Φ : val → iPropI Σ
-  x : loc
-  ============================
-  "Hpre" : True
-  "HΦ" : True -∗ Φ #()
-  "Hx" : x ↦[uint64T] #(W64 0)
-  --------------------------------------∗
-  WP let: "x" := #x in // [!code --]
-     let: "y" := ref_to uint64T #(W64 42) in // [!code --]
-     IgnoreOneLocF "x" "y";;  // [!code --]
-     impl.Assert (![uint64T] "x" = ![uint64T] "y");; #() // [!code --]
-  WP let: "y" := ref_to uint64T #(W64 42) in // [!code ++]
-     IgnoreOneLocF #x "y";;  // [!code ++]
-     impl.Assert (![uint64T] #x = ![uint64T] "y");; #() // [!code ++]
-  {{ v, Φ v }}
+  Σ : gFunctors // [!code --]
+  hG : heapGS Σ // [!code --]
+  Φ : val → iPropI Σ // [!code --]
+  ============================ // [!code --]
+  "Hpre" : True // [!code --]
+  "HΦ" : True -∗ Φ #() // [!code --]
+  --------------------------------------∗ // [!code --]
+  WP ref_to uint64T #(W64 0) // [!code --]
+  {{ v, // [!code --]
+     WP let: "x" := v in // [!code --]
+        let: "y" := ref_to uint64T #(W64 42) in // [!code --]
+        IgnoreOneLocF "x" "y";;  // [!code --]
+        impl.Assert (![uint64T] "x" = ![uint64T] "y");; #() // [!code --]
+     {{ v, Φ v }} }} // [!code --]
+wp_ref_to // [!code ++]
+     : ∀ (t : ty) (stk : stuckness) (E : coPset) (v : val), // [!code ++]
+         val_ty v t // [!code ++]
+         → {{{ True }}} // [!code ++]
+             ref_to t v // [!code ++]
+           @ stk; E  // [!code ++]
+           {{{ (l : loc), RET #l; l ↦[t] v }}} // [!code ++]
 ```
 
 ::::
@@ -410,16 +719,17 @@ wp_alloc y as "Hy".
   Σ : gFunctors
   hG : heapGS Σ
   Φ : val → iPropI Σ
-  x, y : loc
+  x : loc
   ============================
   "Hpre" : True
   "HΦ" : True -∗ Φ #()
   "Hx" : x ↦[uint64T] #(W64 0)
-  "Hy" : y ↦[uint64T] #(W64 42)
   --------------------------------------∗
-  WP IgnoreOneLocF #x #y
-  {{ v,
-     WP v;; impl.Assert (![uint64T] #x = ![uint64T] #y);; #() {{ v, Φ v }} }}
+  WP let: "x" := #x in
+     let: "y" := ref_to uint64T #(W64 42) in
+     IgnoreOneLocF "x" "y";;
+     impl.Assert (![uint64T] "x" = ![uint64T] "y");; #()
+  {{ v, Φ v }}
 ```
 
 ::::
@@ -436,10 +746,16 @@ iApply wp_IgnoreOneLocF.
   Σ : gFunctors
   hG : heapGS Σ
   Φ : val → iPropI Σ
-  x, y : loc
+  x : loc
   ============================
+  "Hpre" : True
+  "HΦ" : True -∗ Φ #()
+  "Hx" : x ↦[uint64T] #(W64 0)
   --------------------------------------∗
-  x ↦[uint64T] #(W64 0)
+  WP let: "y" := ref_to uint64T #(W64 42) in
+     IgnoreOneLocF #x "y";;
+     impl.Assert (![uint64T] #x = ![uint64T] "y");; #()
+  {{ v, Φ v }}
 ```
 
 ```txt title="goal 2"
@@ -453,8 +769,9 @@ iApply wp_IgnoreOneLocF.
   "Hx" : x ↦[uint64T] #(W64 0)
   "Hy" : y ↦[uint64T] #(W64 42)
   --------------------------------------∗
-  ▷ (x ↦[uint64T] #(W64 42) -∗
-     WP #();; impl.Assert (![uint64T] #x = ![uint64T] #y);; #() {{ v, Φ v }})
+  WP IgnoreOneLocF #x #y
+  {{ v,
+     WP v;; impl.Assert (![uint64T] #x = ![uint64T] #y);; #() {{ v, Φ v }} }}
 ```
 
 ::::
@@ -489,8 +806,9 @@ Undo 1.
   "Hx" : x ↦[uint64T] #(W64 0)
   "Hy" : y ↦[uint64T] #(W64 42)
   --------------------------------------∗
-  ▷ (x ↦[uint64T] #(W64 42) -∗
-     WP #();; impl.Assert (![uint64T] #x = ![uint64T] #y);; #() {{ v, Φ v }})
+  WP IgnoreOneLocF #x #y
+  {{ v,
+     WP v;; impl.Assert (![uint64T] #x = ![uint64T] #y);; #() {{ v, Φ v }} }}
 ```
 
 ::::
