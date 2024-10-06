@@ -434,6 +434,16 @@ $$P \entails (Q \to R) \iff P \land Q \entails R$$
 
 If you read (either of these rules) left to right, you can think of them as moving $Q$ into the hypotheses, if this were a Coq tactic. Reading right to left, we can move a hypotheses back into the goal (you haven't really needed to do that in Coq but you should certainly imagine it's sound).
 
+One very useful rule for wands is that they _curry_ in the same way as functions and propositional implication:
+
+$P \wand (Q \wand R) \bient (P \sep Q \wand R)$
+
+(the notation $P \bient Q$ is a shorthand for $P \entails Q$ and $Q \entails P$; it's like $\iff$).
+
+Again, make an analogy to how $P \to (Q \to R)$ is equivalent to $P \land Q \to R$.
+
+Because of currying, implication and wand are parsed as right associative: $P \to (Q \to R)$ is written without parentheses as $P \to Q \to R$ and $P \wand (Q \wand R)$ is written $P \wand Q \wand R$. The other parenthesization, $(P \to Q) \to R$, has a less intuitive meaning ("if we had a proof that $P$ implies $Q$, then we could prove $R$") and comes up less often.
+
 There's more to say about magic wand. Some practice is needed before you become comfortable with it, which I think will be easier with the Coq development than just seeing rules on paper.
 
 ## Weakest preconditions

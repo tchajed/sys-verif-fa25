@@ -40,6 +40,7 @@ $$
 \gdef\wp{\operatorname{wp}}
 \gdef\outlineSpec#1{\left\{#1\right\}}
 \gdef\entails{\vdash}
+\gdef\bient{\dashv\vdash}
 \gdef\eqnlabel#1{\:\:\text{#1}}
 \gdef\lift#1{\lceil #1 \rceil}
 
