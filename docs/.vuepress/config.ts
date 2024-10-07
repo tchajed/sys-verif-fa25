@@ -95,9 +95,10 @@ export default defineUserConfig({
       // see https://ecosystem.vuejs.press/plugins/markdown/shiki.html for the below config
       shiki: {
         langs: ["coq", "go", "bash"],
+        // customized from one-light and one-dark-pro
         themes: {
-          light: "one-light",
-          dark: "one-dark-pro",
+          light: "catppuccin-latte",
+          dark: "catppuccin-macchiato",
         },
         // add something like {1,7-9} to the ```lang line
         // TODO: disabled for now since text="goal 1" is parsed as highlighting line 1
@@ -106,7 +107,7 @@ export default defineUserConfig({
         notationDiff: true,
         // add // [!code highlight] to the end of a line
         notationHighlight: true,
-        // add :line-numbers to ```lang line
+        // add :line-numbers to ```lang line to enable selectively
         lineNumbers: false,
       },
       copyCode: false,
