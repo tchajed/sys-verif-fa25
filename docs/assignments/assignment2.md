@@ -34,9 +34,15 @@ In this assignment, you'll answer some questions about Hoare logic and separatio
 
 > Understanding separation logic propositions (10 points)
 
-For each separation logic proposition below, describe precisely the set of heaps where it is true. Briefly explain if you think it's warranted (or if you're unsure of your answer). Assume a linear separation logic.
+For each separation logic proposition below, describe precisely the set of heaps where it is true. If you think the answer is non-trivial or are unsure of your answer, briefly explain so I can see your thought process. Assume a linear separation logic - remember that $\True(h)$ holds for any heap, even in a linear logic.
 
 Note that the overlapping conjunction $(P \land Q)(h)$ is defined to be true when $P(h)$ and $Q(h)$. While not commonly used, this is a perfectly valid separation logic proposition.
+
+If a variable is _free_ (that is, not bound by a $\forall$ or $\exists$ quantifier), assume it to be a constant throughout the problem (but each problem is independent).
+
+Here is a worked example:
+
+$\ell_1 \mapsto v \sep \ell_2 \mapsto v$. If $\ell_1 \neq \ell_2$, holds for only the two-element heap $\{\ell_1 \mapsto v; \ell_2 \mapsto v\}$; if $\ell_1 = \ell_2$, never holds.
 
 - (a) $\exists v.\, \ell \pointsto v$
 - (b) $\exists \ell'.\, \ell' \pointsto v$
@@ -53,7 +59,7 @@ Note that the overlapping conjunction $(P \land Q)(h)$ is defined to be true whe
 
 > Frame rule vs weakening (10 points)
 
-Compare the separation logic frame rule to the rule for weakening. Explain why the weaken rule does not imply the frame rule. Explain why the frame rule does not imply the weaken rule.
+Compare the separation logic frame rule to the rule for weakening. Explain why the weaken rule does not imply the frame rule. Explain why the frame rule does not imply the weaken rule. These explanations are not meant to be fully formal proofs (which is well beyond the scope of this class for this question), but should aim to be convincing explanations - in this case, convincing me that you've understood what these rules mean.
 
 ## Exercise 4
 
