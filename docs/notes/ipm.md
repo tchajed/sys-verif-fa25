@@ -632,16 +632,16 @@ To understand this, it helps to first rewrite it to an equivalent entailment wit
 
 $$∀ Φ.\, P ∗ (∀ v.\, Q(v) \wand Φ(v)) ⊢ \wp(e, Φ)$$
 
-This is like a _continuation-passing style_ version of $P ⊢ \wp(e, Q)$. Observe that it is at least as strong: we can set $Φ = Q$ and recover the original triple. It also includes framing; it is like applying the wp-ramified-rule.
+This is like a _continuation-passing style_ version of $P ⊢ \wp(e, Q)$ (if you've seen the term that might give some intuition). Observe that it is at least as strong: we can set $Φ = Q$ and recover the original triple. It also includes framing; it is like applying the wp-ramified-rule.
 
-The benefit of applying the frame rule is that this form of specification gives a way to prove $\wp(e, Φ)$ for an arbitrary postcondition. However, it requires that the user prove $∀ v.\, Q(v) \wand Φ(v)$. The benefit of using this rule is that it can be applied when the goal has $e$ while deferring the proof that $Q$ implies $Φ$.
+The benefit of applying the frame rule is that this form of specification gives a way to prove $\wp(e, Φ)$ for an arbitrary postcondition. However, it requires that the user prove $∀ v.\, Q(v) \wand Φ(v)$. The benefit of using this rule is that it can be applied whenever the goal is about $e$ while deferring the proof that $Q$ implies $Φ$.
 
-The practical consequence, as we will see in Coq below, is that if we are in the midst of proving $R ⊢ \wp(e, Φ)$, we can use the specification $\hoare{P}{e}{Q}$ by splitting the context into $R ⊢ R_{\text{pre}} ∗ R_f$ and then prove the following things:
+The practical consequence, as we will see in Coq below, is convenience when we _use_ the specification in a larger proof. If we are in the midst of proving $R ⊢ \wp(e, Ψ)$ for some $Ψ$, we can use the specification $\hoare{P}{e}{Q}$ by splitting the context into $R ⊢ R_{\text{pre}} ∗ R_f$ and then proving the following things:
 
 - $R_{\text{pre}} ⊢ P$
-- $∀ v.\, Q(v) ∗ R_f ⊢ Φ(v)$
+- $∀ v.\, Q(v) ∗ R_f ⊢ Ψ(v)$
 
-Intuitively, the $R_f$ are the "leftover" facts that were not needed for the postcondition, and thus they can be used for the remainder of the proof. This this exactly the sort of reasoning that the frame rule would give with $R_f$ as the frame (what we called $F$ in the rule). This consequence does follow from the rules for wands, but it's okay if you don't see that right away; it's useful to see the intuition for this reasoning without deriving it purely formally.
+Intuitively, the $R_f$ are the "leftover" facts that were not needed for the call to $e$, and thus they can be used for the remainder of the proof. This is exactly what the frame rule would give with $R_f$ as the frame (what we called $F$ in the rule). This reasoning does follow from separation logic rules, but it's okay if you don't see that right away; it's useful to see the intuition for this reasoning without deriving it purely formally.
 
 ### IPM tactics for WPs
 
@@ -650,6 +650,7 @@ The IPM has some tactics for weakest precondition reasoning specifically. It's a
 - `wp_pures` is the most commonly used tactic. It applies the pure-step rule: if $e \purestep e'$, then $\wp(e', Q) ⊢ \wp(e, Q)$. Applying this rule has the effect of going from $e$ to the $e'$ that it reduces to, something that can be computed automatically. `wp_pures` applies the pure-step as many times as it can, but without going into the bodies of functions.
 - `wp_bind e` automatically applies the bind rule, finding a way to split the current goal into `e` followed by `K[e]` (and failing if `e` is not actually the next part of the code to execute).
 - `wp_apply lem` uses `wp_bind` to find a way to apply the already-proven triple `lem`.
+- `wp_load`, `wp_store`, and `wp_alloc` automate using those specifications, since they are so commonly used.
 
 All of these are easiest understood by seeing them in context; read on for an example.
 
