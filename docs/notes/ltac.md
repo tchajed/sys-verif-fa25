@@ -447,8 +447,8 @@ rewrite -> gmap_lookup_delete_ne by done.
   k' : Z
   Hne : k ≠ k'
   ============================
-  <[k:=v]> m !! k' = delete k m !! k' // [!code --]
-  delete k (<[k:=v]> m) !! k' = delete k m !! k' // [!code ++]
+  delete k (<[k:=v]> m) !! k' = delete k m !! k' // [!code --]
+  <[k:=v]> m !! k' = delete k m !! k' // [!code ++]
 ```
 
 ::::
@@ -468,7 +468,8 @@ rewrite gmap_lookup_delete_ne; [ done | ].
   k' : Z
   Hne : k ≠ k'
   ============================
-  <[k:=v]> m !! k' = delete k m !! k'
+  <[k:=v]> m !! k' = delete k m !! k' // [!code --]
+  <[k:=v]> m !! k' = m !! k' // [!code ++]
 ```
 
 ::::

@@ -194,12 +194,11 @@ split.
 :::: info Goals
 
 ```txt title="goal 1"
-  P, Q, R : Prop
-  HR1 : P -> R
-  HR2 : Q -> R
+  P, Q : Prop
+  HP : P
   HQ : Q
   ============================
-  R
+  P
 ```
 
 ```txt title="goal 2"
@@ -207,7 +206,7 @@ split.
   HP : P
   HQ : Q
   ============================
-  P
+  Q
 ```
 
 ::::
@@ -271,12 +270,11 @@ Proof.
 :::: info Goal diff
 
 ```txt title="goal diff"
-  P, Q : Prop
-  HP : P
-  HQ : Q
+  n, m : nat
+  Hn : n = 0 // [!code ++]
   ============================
-  P // [!code --]
-  Q // [!code ++]
+  n = 0 -> m = 0 -> n + m = 0 // [!code --]
+  m = 0 -> n + m = 0 // [!code ++]
 ```
 
 ::::
@@ -297,10 +295,11 @@ rewrite Hn.
 
 ```txt title="goal diff"
   n, m : nat
-  Hn : n = 0 // [!code ++]
+  Hn : n = 0
+  Hm : m = 0
   ============================
-  n = 0 -> m = 0 -> n + m = 0 // [!code --]
-  m = 0 -> n + m = 0 // [!code ++]
+  n + m = 0 // [!code --]
+  0 + m = 0 // [!code ++]
 ```
 
 ::::
@@ -326,13 +325,9 @@ Proof.
 :::: note Output
 
 ```txt title="coq output"
-goal 1 is:
-
-  n, m : nat
-  Hn : n = 0
-  Hm : m = 0
-  ============================
-  n + m = 0
+Notation "x <> y  :> T" := (not (eq x y)) : type_scope
+  (default interpretation)
+Notation "x <> y" := (not (eq x y)) : type_scope (default interpretation)
 ```
 
 ::::
@@ -344,13 +339,7 @@ goal 1 is:
 :::: note Output
 
 ```txt title="coq output"
-goal 1 is:
-
-  n, m : nat
-  Hn : n = 0
-  Hm : m = 0
-  ============================
-  0 + m = 0
+Notation "~ x" := (not x) : type_scope (default interpretation)
 ```
 
 ::::
@@ -362,9 +351,10 @@ goal 1 is:
 :::: note Output
 
 ```txt title="coq output"
-Notation "x <> y  :> T" := (not (eq x y)) : type_scope
-  (default interpretation)
-Notation "x <> y" := (not (eq x y)) : type_scope (default interpretation)
+not = fun A : Prop => A -> False
+     : Prop -> Prop
+
+Arguments not A%type_scope
 ```
 
 ::::
@@ -425,7 +415,7 @@ Proof.
 :::: note Output
 
 ```txt title="coq output"
-Notation "~ x" := (not x) : type_scope (default interpretation)
+Notation "A <-> B" := (iff A B) : type_scope (default interpretation)
 ```
 
 ::::
@@ -471,10 +461,10 @@ rewrite add_0_r.
 :::: info Goal
 
 ```txt title="goal 1"
-not = fun A : Prop => A -> False
-     : Prop -> Prop
-
-Arguments not A%type_scope
+  n1, n2 : nat
+  IHn : n1 + n2 = n2 + n1
+  ============================
+  S (n1 + n2) = n2 + S n1
 ```
 
 ::::

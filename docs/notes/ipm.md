@@ -331,13 +331,9 @@ Proof.
 
 ```txt title="goal 1"
   Σ : gFunctors
-  A : Type
   P, Q : iProp Σ
-  R : A → iProp Σ
-  x : A
   ============================
   "HP" : P
-  "HQ" : Q
   --------------------------------------∗
   P
 ```
@@ -365,11 +361,14 @@ Proof.
 
 ```txt title="goal 1"
   Σ : gFunctors
-  P, Q : iProp Σ
+  P1, P2, P3, Q : iProp Σ
+  HQ : P1 ∗ P3 -∗ P2 -∗ Q
   ============================
-  "HP" : P
+  "H1" : P1
+  "H2" : P2
+  "H3" : P3
   --------------------------------------∗
-  P
+  Q
 ```
 
 ::::
@@ -409,10 +408,9 @@ Proof.
   HQ : P1 ∗ P3 -∗ P2 -∗ Q
   ============================
   "H1" : P1
-  "H2" : P2
   "H3" : P3
   --------------------------------------∗
-  Q
+  P1 ∗ P3
 ```
 
 ```txt title="goal 2"
@@ -420,10 +418,10 @@ Proof.
   P1, P2, P3, Q : iProp Σ
   HQ : P1 ∗ P3 -∗ P2 -∗ Q
   ============================
-  "H1" : P1
-  "H3" : P3
+  "H2" : P2
+  "HQ" : P2 -∗ Q
   --------------------------------------∗
-  P1 ∗ P3
+  Q
 ```
 
 ::::
@@ -473,10 +471,9 @@ iDestruct (HQ with "[$H1 H3]") as "HQ".
   P1, P2, P3, Q : iProp Σ
   HQ : P1 ∗ P3 -∗ P2 -∗ Q
   ============================
-  "H1" : P1
   "H3" : P3
   --------------------------------------∗
-  P1 ∗ P3
+  P3
 ```
 
 ```txt title="goal 2"
@@ -557,15 +554,12 @@ Proof.
 
 ```txt title="goal diff"
   Σ : gFunctors
-  P1, P2, P3, Q : iProp Σ
-  HQ : P1 ∗ P3 -∗ P2 -∗ Q
+  P : iProp Σ
   ============================
-  "H2" : P2 // [!code --]
-  "HQ" : P2 -∗ Q // [!code --]
-  "H3" : P3 // [!code ++]
+  "H" : P
   --------------------------------------∗
-  Q // [!code --]
-  P3 // [!code ++]
+  ▷ P // [!code --]
+  P // [!code ++]
 ```
 
 ::::
@@ -585,16 +579,12 @@ Proof.
 
 ```txt title="goal diff"
   Σ : gFunctors
-  P1, P2, P3, Q : iProp Σ // [!code --]
-  HQ : P1 ∗ P3 -∗ P2 -∗ Q // [!code --]
-  P : iProp Σ // [!code ++]
+  P : iProp Σ
   ============================
-  "H2" : P2 // [!code --]
-  "HQ" : P2 -∗ Q // [!code --]
-  "H" : P // [!code ++]
+  "H" : P
   --------------------------------------∗
-  Q // [!code --]
-  ▷ P // [!code ++]
+  |==> P // [!code --]
+  P // [!code ++]
 ```
 
 ::::
@@ -737,11 +727,17 @@ Proof.
 
 ```txt title="goal 1"
   Σ : gFunctors
-  P : iProp Σ
+  hG : heapGS Σ
+  Φ : val → iPropI Σ
   ============================
-  "H" : P
+  "Hpre" : True
+  "HΦ" : True -∗ Φ #()
   --------------------------------------∗
-  P
+  WP let: "x" := ref_to uint64T #(W64 0) in
+     let: "y" := ref_to uint64T #(W64 42) in
+     IgnoreOneLocF "x" "y";;
+     impl.Assert (![uint64T] "x" = ![uint64T] "y");; #()
+  {{ v, Φ v }}
 ```
 
 ::::
@@ -758,11 +754,19 @@ wp_bind (ref_to uint64T #(W64 0))%E.
 
 ```txt title="goal 1"
   Σ : gFunctors
-  P : iProp Σ
+  hG : heapGS Σ
+  Φ : val → iPropI Σ
   ============================
-  "H" : P
+  "Hpre" : True
+  "HΦ" : True -∗ Φ #()
   --------------------------------------∗
-  |==> P
+  WP ref_to uint64T #(W64 0)
+  {{ v,
+     WP let: "x" := v in
+        let: "y" := ref_to uint64T #(W64 42) in
+        IgnoreOneLocF "x" "y";;
+        impl.Assert (![uint64T] "x" = ![uint64T] "y");; #()
+     {{ v, Φ v }} }}
 ```
 
 ::::
@@ -778,14 +782,13 @@ Check wp_ref_to.
 :::: note Output
 
 ```txt title="coq output"
-goal 1 is:
-
-  Σ : gFunctors
-  P : iProp Σ
-  ============================
-  "H" : P
-  --------------------------------------∗
-  P
+wp_ref_to
+     : ∀ (t : ty) (stk : stuckness) (E : coPset) (v : val),
+         val_ty v t
+         → {{{ True }}}
+             ref_to t v
+           @ stk; E
+           {{{ (l : loc), RET #l; l ↦[t] v }}}
 ```
 
 ::::
@@ -817,22 +820,20 @@ wp_pures.
   Σ : gFunctors
   hG : heapGS Σ
   Φ : val → iPropI Σ
+  x : loc
   ============================
   "Hpre" : True
   "HΦ" : True -∗ Φ #()
+  "Hx" : x ↦[uint64T] #(W64 0)
   --------------------------------------∗
-  WP let: "x" := ref_to uint64T #(W64 0) in // [!code --]
+  WP let: "x" := #x in // [!code --]
      let: "y" := ref_to uint64T #(W64 42) in // [!code --]
      IgnoreOneLocF "x" "y";;  // [!code --]
      impl.Assert (![uint64T] "x" = ![uint64T] "y");; #() // [!code --]
-  {{ v, Φ v }} // [!code --]
-  WP ref_to uint64T #(W64 0) // [!code ++]
-  {{ v, // [!code ++]
-     WP let: "x" := v in // [!code ++]
-        let: "y" := ref_to uint64T #(W64 42) in // [!code ++]
-        IgnoreOneLocF "x" "y";;  // [!code ++]
-        impl.Assert (![uint64T] "x" = ![uint64T] "y");; #() // [!code ++]
-     {{ v, Φ v }} }} // [!code ++]
+  WP let: "y" := ref_to uint64T #(W64 42) in // [!code ++]
+     IgnoreOneLocF #x "y";;  // [!code ++]
+     impl.Assert (![uint64T] #x = ![uint64T] "y");; #() // [!code ++]
+  {{ v, Φ v }}
 ```
 
 ::::
@@ -848,13 +849,19 @@ wp_alloc y as "Hy".
 :::: info Goal
 
 ```txt title="goal 1"
-wp_ref_to
-     : ∀ (t : ty) (stk : stuckness) (E : coPset) (v : val),
-         val_ty v t
-         → {{{ True }}}
-             ref_to t v
-           @ stk; E
-           {{{ (l : loc), RET #l; l ↦[t] v }}}
+  Σ : gFunctors
+  hG : heapGS Σ
+  Φ : val → iPropI Σ
+  x, y : loc
+  ============================
+  "Hpre" : True
+  "HΦ" : True -∗ Φ #()
+  "Hx" : x ↦[uint64T] #(W64 0)
+  "Hy" : y ↦[uint64T] #(W64 42)
+  --------------------------------------∗
+  WP IgnoreOneLocF #x #y
+  {{ v,
+     WP v;; impl.Assert (![uint64T] #x = ![uint64T] #y);; #() {{ v, Φ v }} }}
 ```
 
 ::::
@@ -871,33 +878,25 @@ iApply wp_IgnoreOneLocF.
   Σ : gFunctors
   hG : heapGS Σ
   Φ : val → iPropI Σ
-  x : loc
+  x, y : loc
   ============================
-  "Hpre" : True
-  "HΦ" : True -∗ Φ #()
-  "Hx" : x ↦[uint64T] #(W64 0)
   --------------------------------------∗
-  WP let: "x" := #x in
-     let: "y" := ref_to uint64T #(W64 42) in
-     IgnoreOneLocF "x" "y";;
-     impl.Assert (![uint64T] "x" = ![uint64T] "y");; #()
-  {{ v, Φ v }}
+  x ↦[uint64T] #(W64 0)
 ```
 
 ```txt title="goal 2"
   Σ : gFunctors
   hG : heapGS Σ
   Φ : val → iPropI Σ
-  x : loc
+  x, y : loc
   ============================
   "Hpre" : True
   "HΦ" : True -∗ Φ #()
   "Hx" : x ↦[uint64T] #(W64 0)
+  "Hy" : y ↦[uint64T] #(W64 42)
   --------------------------------------∗
-  WP let: "y" := ref_to uint64T #(W64 42) in
-     IgnoreOneLocF #x "y";;
-     impl.Assert (![uint64T] #x = ![uint64T] "y");; #()
-  {{ v, Φ v }}
+  ▷ (x ↦[uint64T] #(W64 42) -∗
+     WP #();; impl.Assert (![uint64T] #x = ![uint64T] #y);; #() {{ v, Φ v }})
 ```
 
 ::::
@@ -925,16 +924,11 @@ Undo 1.
   Σ : gFunctors
   hG : heapGS Σ
   Φ : val → iPropI Σ
-  x : loc
+  x, y : loc
   ============================
-  "Hpre" : True
-  "HΦ" : True -∗ Φ #()
   "Hx" : x ↦[uint64T] #(W64 0)
   --------------------------------------∗
-  WP let: "y" := ref_to uint64T #(W64 42) in
-     IgnoreOneLocF #x "y";;
-     impl.Assert (![uint64T] #x = ![uint64T] "y");; #()
-  {{ v, Φ v }}
+  x ↦[uint64T] #(W64 0)
 ```
 
 ::::
