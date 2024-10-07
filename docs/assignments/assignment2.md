@@ -2,6 +2,7 @@
 order: 3
 shortTitle: "Assignment 2"
 icon: pen-fancy
+date: "2024-10-04"
 ---
 
 # Assignment 2: Separation Logic theory
@@ -28,7 +29,7 @@ In this assignment, you'll answer some questions about Hoare logic and separatio
 
 > Rule of consequence (5 points)
 
-[Prove the rule of consequence](../notes/hoare.md#ex-soundness-consequence) for Hoare logic, from the soundness definition for a Hoare triple.
+[Prove the rule of consequence](../notes/hoare.md#ex-soundness-consequence) for Hoare logic, from the [soundness definition](../notes/hoare.md#soundness) for a Hoare triple.
 
 ## Exercise 2
 

@@ -560,7 +560,7 @@ Modularity is also beneficial when a helper function is reused, since then the p
 
 :::
 
-## Soundness
+## Soundness {#soundness}
 
 What does it mean to prove $\hoare{P}{e}{\fun{v} Q(v)}$? We have a bunch of "rules" above, but where do they come from?
 
