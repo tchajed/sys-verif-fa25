@@ -42,7 +42,11 @@ It would also be difficult to use the rules: some re-association (we never even 
 
 The Iris Proof Mode (IPM) is the better way to formalize the proofs and also to _think_ about the proof.
 
-## IPM goals
+### Exercise: on-paper proof by hand
+
+Finish the proof of the entailment above using only separation logic rules. This exercise is instructive so you appreciate the IPM and understand why various manipulations are allowed.
+
+## Reading IPM goals
 
 The Iris Proof Mode provides an interface similar to Coq's proof mode; since you already have experience using that, it's helpful to understand it by analogy to how Coq's proof mode helps you work with the rules of Coq's logic.
 
@@ -52,7 +56,7 @@ The IPM is used to prove entailments in separation logic. It's sufficient to get
 
 An IPM goal looks like the following:
 
-```text
+```text title="IPM goal"
 "H1": P
 "H2": Q
 -----------∗
@@ -61,7 +65,7 @@ Q ∗ P
 
 This represents the separation logic entailment $P ∗ Q ⊢ Q ∗ P$. However, the IPM goal has a richer representation of the context than a single proposition: it divides it into several _named conjuncts_. The names use Coq strings, which we write with quotes. Notice how this is exactly analogous to how we might have the following Coq goal:
 
-```text
+```text title="Coq goal"
 H1: φ
 H2: ψ
 ============
@@ -71,6 +75,8 @@ H2: ψ
 which represents an entailment in the Coq logic `φ ∧ ψ ⊢ ψ ∧ φ`.
 
 To recap: both representations have a _context_ with _named hypotheses_ and a _conclusion_. The names have no semantic meaning but are instead used to refer to hypotheses in tactics.
+
+---
 
 Now let's see how these look in Coq. First, we need to do some setup:
 
@@ -147,6 +153,10 @@ Proof.
 Qed.
 
 ```
+
+### Aside: inputting special symbols
+
+You might be wondering, how do you type this stuff? See the notes on [inputting special symbols](./program-proofs/input.md).
 
 ## IPM tactics
 
@@ -370,7 +380,8 @@ Instead, we will use a _specialization pattern_ `with "[H1 H3]"` to divide the p
 
 ```coq
 iApply (HQ with "[H1 H3]").
-  - (* This is a perfect use case for `iFrame`, which spares us from carefully splitting this goal up. *)
+  - (* This is a perfect use case for `iFrame`, which spares us from carefully
+    splitting this goal up. *)
     iFrame.
   - iFrame.
 Qed.
@@ -452,7 +463,36 @@ Proof.
 `$H1` in a specialization pattern frames that hypothesis right away. We don't do the same with `"H3"` only for illustration purposes.
 
 ```coq
-iDestruct (HQ with "[$H1 H3]") as "HQ". (* {GOALS} *)
+iDestruct (HQ with "[$H1 H3]") as "HQ".
+```
+
+:::: info Goals
+
+```txt title="goal 1"
+  Σ : gFunctors
+  P1, P2, P3, Q : iProp Σ
+  HQ : P1 ∗ P3 -∗ P2 -∗ Q
+  ============================
+  "H1" : P1
+  "H3" : P3
+  --------------------------------------∗
+  P1 ∗ P3
+```
+
+```txt title="goal 2"
+  Σ : gFunctors
+  P1, P2, P3, Q : iProp Σ
+  HQ : P1 ∗ P3 -∗ P2 -∗ Q
+  ============================
+  "H2" : P2
+  "HQ" : P2 -∗ Q
+  --------------------------------------∗
+  Q
+```
+
+::::
+
+```coq
   { iFrame "H3". }
 
 
@@ -466,12 +506,115 @@ Qed.
 
 ```
 
+One more commonly used intro pattern is used for pure facts `⌜φ⌝` that show up within a separation logic statement.
+
+(Ignore the `{hG: !heapGS Σ}` part, this is needed to use ↦ in this example.)
+
+```coq
+Lemma pure_intro_pattern `{hG: !heapGS Σ} (t a b: val) (x y: loc) :
+  ⌜t = a⌝ ∗ x ↦ b ∗ y ↦ t -∗ x ↦ b ∗ y ↦ a.
+Proof.
+
+```
+
+The `%Heq` intro pattern moves the hypothesis into the Coq context (sometimes called the "pure" context). It is unusual in that `Heq` appears in a string but turns into a Coq identifier.
+
+```coq
+iIntros "(%Heq & Hx & Hy)".
+  iFrame.
+  rewrite Heq.
+  iFrame.
+Qed.
+
+```
+
+Here's a different way to move something into the pure context:
+
+```coq
+Lemma pure_intro_pattern_v2 `{hG: !heapGS Σ} (t a b: val) (x y: loc) :
+  ⌜t = a⌝ ∗ x ↦ b ∗ y ↦ t -∗ x ↦ b ∗ y ↦ a.
+Proof.
+  iIntros "(Heq & Hx & Hy)".
+  iDestruct "Heq" as %Heq. subst.
+  iFrame.
+Qed.
+
+```
+
+One last tactic: you will need to use `iModIntro` in a couple situations. What's going on here is beyond the scope of this lecture.
+
+`iModIntro` "introduces a modality". You'll use it for the _later modality_ `▷ P` (rarely) and for the _fancy update modality_ `|==> P` (often pronounced "fup-d", or "update").
+
+```coq
+Lemma iModIntro_later P :
+  P -∗ ▷ P.
+Proof.
+  iIntros "H".
+  iModIntro.
+```
+
+:::: info Goal diff
+
+```txt title="goal diff"
+  Σ : gFunctors
+  P1, P2, P3, Q : iProp Σ
+  HQ : P1 ∗ P3 -∗ P2 -∗ Q
+  ============================
+  "H2" : P2 // [!code --]
+  "HQ" : P2 -∗ Q // [!code --]
+  "H3" : P3 // [!code ++]
+  --------------------------------------∗
+  Q // [!code --]
+  P3 // [!code ++]
+```
+
+::::
+
+```coq
+  iAssumption.
+Qed.
+
+Lemma iModIntro_fupd P :
+  P -∗ |==> P.
+Proof.
+  iIntros "H".
+  iModIntro.
+```
+
+:::: info Goal diff
+
+```txt title="goal diff"
+  Σ : gFunctors
+  P1, P2, P3, Q : iProp Σ // [!code --]
+  HQ : P1 ∗ P3 -∗ P2 -∗ Q // [!code --]
+  P : iProp Σ // [!code ++]
+  ============================
+  "H2" : P2 // [!code --]
+  "HQ" : P2 -∗ Q // [!code --]
+  "H" : P // [!code ++]
+  --------------------------------------∗
+  Q // [!code --]
+  ▷ P // [!code ++]
+```
+
+::::
+
+```coq
+  iAssumption.
+Qed.
+
+```
+
+### Exercise: find the documentation for these features
+
+Go to the [IPM documentation](https://gitlab.mpi-sws.org/iris/iris/-/blob/master/docs/proof_mode.md) and find the _exact_ lines where the `%Heq` in both the first proof and second proof are documented.
+
 ## Program proofs in the IPM
 
 There are two parts to understanding how program proofs are mechanized:
 
 - How specifications are encoded (which goes slightly beyond what we've seen so far around weakest preconditions).
-- Custom tactics.
+- Tactics specific to program proofs (the `wp_*` family of tactics).
 
 ### Specifications
 
@@ -593,13 +736,11 @@ Proof.
 
 ```txt title="goal 1"
   Σ : gFunctors
-  P1, P2, P3, Q : iProp Σ
-  HQ : P1 ∗ P3 -∗ P2 -∗ Q
+  P : iProp Σ
   ============================
-  "H1" : P1
-  "H3" : P3
+  "H" : P
   --------------------------------------∗
-  P1 ∗ P3
+  P
 ```
 
 ::::
@@ -616,13 +757,11 @@ wp_bind (ref_to uint64T #(W64 0))%E.
 
 ```txt title="goal 1"
   Σ : gFunctors
-  P1, P2, P3, Q : iProp Σ
-  HQ : P1 ∗ P3 -∗ P2 -∗ Q
+  P : iProp Σ
   ============================
-  "H2" : P2
-  "HQ" : P2 -∗ Q
+  "H" : P
   --------------------------------------∗
-  Q
+  |==> P
 ```
 
 ::::
@@ -641,17 +780,11 @@ Check wp_ref_to.
 goal 1 is:
 
   Σ : gFunctors
-  hG : heapGS Σ
-  Φ : val → iPropI Σ
+  P : iProp Σ
   ============================
-  "Hpre" : True
-  "HΦ" : True -∗ Φ #()
+  "H" : P
   --------------------------------------∗
-  WP let: "x" := ref_to uint64T #(W64 0) in
-     let: "y" := ref_to uint64T #(W64 42) in
-     IgnoreOneLocF "x" "y";;
-     impl.Assert (![uint64T] "x" = ![uint64T] "y");; #()
-  {{ v, Φ v }}
+  P
 ```
 
 ::::
@@ -680,27 +813,25 @@ wp_pures.
 :::: info Goal diff
 
 ```txt title="goal diff"
-  Σ : gFunctors // [!code --]
-  hG : heapGS Σ // [!code --]
-  Φ : val → iPropI Σ // [!code --]
-  ============================ // [!code --]
-  "Hpre" : True // [!code --]
-  "HΦ" : True -∗ Φ #() // [!code --]
-  --------------------------------------∗ // [!code --]
-  WP ref_to uint64T #(W64 0) // [!code --]
-  {{ v, // [!code --]
-     WP let: "x" := v in // [!code --]
-        let: "y" := ref_to uint64T #(W64 42) in // [!code --]
-        IgnoreOneLocF "x" "y";;  // [!code --]
-        impl.Assert (![uint64T] "x" = ![uint64T] "y");; #() // [!code --]
-     {{ v, Φ v }} }} // [!code --]
-wp_ref_to // [!code ++]
-     : ∀ (t : ty) (stk : stuckness) (E : coPset) (v : val), // [!code ++]
-         val_ty v t // [!code ++]
-         → {{{ True }}} // [!code ++]
-             ref_to t v // [!code ++]
-           @ stk; E  // [!code ++]
-           {{{ (l : loc), RET #l; l ↦[t] v }}} // [!code ++]
+  Σ : gFunctors
+  hG : heapGS Σ
+  Φ : val → iPropI Σ
+  ============================
+  "Hpre" : True
+  "HΦ" : True -∗ Φ #()
+  --------------------------------------∗
+  WP let: "x" := ref_to uint64T #(W64 0) in // [!code --]
+     let: "y" := ref_to uint64T #(W64 42) in // [!code --]
+     IgnoreOneLocF "x" "y";;  // [!code --]
+     impl.Assert (![uint64T] "x" = ![uint64T] "y");; #() // [!code --]
+  {{ v, Φ v }} // [!code --]
+  WP ref_to uint64T #(W64 0) // [!code ++]
+  {{ v, // [!code ++]
+     WP let: "x" := v in // [!code ++]
+        let: "y" := ref_to uint64T #(W64 42) in // [!code ++]
+        IgnoreOneLocF "x" "y";;  // [!code ++]
+        impl.Assert (![uint64T] "x" = ![uint64T] "y");; #() // [!code ++]
+     {{ v, Φ v }} }} // [!code ++]
 ```
 
 ::::
@@ -716,20 +847,13 @@ wp_alloc y as "Hy".
 :::: info Goal
 
 ```txt title="goal 1"
-  Σ : gFunctors
-  hG : heapGS Σ
-  Φ : val → iPropI Σ
-  x : loc
-  ============================
-  "Hpre" : True
-  "HΦ" : True -∗ Φ #()
-  "Hx" : x ↦[uint64T] #(W64 0)
-  --------------------------------------∗
-  WP let: "x" := #x in
-     let: "y" := ref_to uint64T #(W64 42) in
-     IgnoreOneLocF "x" "y";;
-     impl.Assert (![uint64T] "x" = ![uint64T] "y");; #()
-  {{ v, Φ v }}
+wp_ref_to
+     : ∀ (t : ty) (stk : stuckness) (E : coPset) (v : val),
+         val_ty v t
+         → {{{ True }}}
+             ref_to t v
+           @ stk; E
+           {{{ (l : loc), RET #l; l ↦[t] v }}}
 ```
 
 ::::
@@ -752,9 +876,10 @@ iApply wp_IgnoreOneLocF.
   "HΦ" : True -∗ Φ #()
   "Hx" : x ↦[uint64T] #(W64 0)
   --------------------------------------∗
-  WP let: "y" := ref_to uint64T #(W64 42) in
-     IgnoreOneLocF #x "y";;
-     impl.Assert (![uint64T] #x = ![uint64T] "y");; #()
+  WP let: "x" := #x in
+     let: "y" := ref_to uint64T #(W64 42) in
+     IgnoreOneLocF "x" "y";;
+     impl.Assert (![uint64T] "x" = ![uint64T] "y");; #()
   {{ v, Φ v }}
 ```
 
@@ -762,16 +887,16 @@ iApply wp_IgnoreOneLocF.
   Σ : gFunctors
   hG : heapGS Σ
   Φ : val → iPropI Σ
-  x, y : loc
+  x : loc
   ============================
   "Hpre" : True
   "HΦ" : True -∗ Φ #()
   "Hx" : x ↦[uint64T] #(W64 0)
-  "Hy" : y ↦[uint64T] #(W64 42)
   --------------------------------------∗
-  WP IgnoreOneLocF #x #y
-  {{ v,
-     WP v;; impl.Assert (![uint64T] #x = ![uint64T] #y);; #() {{ v, Φ v }} }}
+  WP let: "y" := ref_to uint64T #(W64 42) in
+     IgnoreOneLocF #x "y";;
+     impl.Assert (![uint64T] #x = ![uint64T] "y");; #()
+  {{ v, Φ v }}
 ```
 
 ::::
@@ -799,16 +924,16 @@ Undo 1.
   Σ : gFunctors
   hG : heapGS Σ
   Φ : val → iPropI Σ
-  x, y : loc
+  x : loc
   ============================
   "Hpre" : True
   "HΦ" : True -∗ Φ #()
   "Hx" : x ↦[uint64T] #(W64 0)
-  "Hy" : y ↦[uint64T] #(W64 42)
   --------------------------------------∗
-  WP IgnoreOneLocF #x #y
-  {{ v,
-     WP v;; impl.Assert (![uint64T] #x = ![uint64T] #y);; #() {{ v, Φ v }} }}
+  WP let: "y" := ref_to uint64T #(W64 42) in
+     IgnoreOneLocF #x "y";;
+     impl.Assert (![uint64T] #x = ![uint64T] "y");; #()
+  {{ v, Φ v }}
 ```
 
 ::::
