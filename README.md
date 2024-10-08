@@ -27,3 +27,7 @@ Run `pnpm fmt`.
   - Using the [VuePress Hope theme](https://theme-hope.vuejs.press/) (rather than the default)
   - Pretty much the whole setup is in [config.ts](docs/.vuepress/config.ts). YAML frontmatter in individual pages takes care of some aspects.
 - Build and deploy via [GitHub Pages workflow](./.github/workflows/deploy.yml)
+
+## License
+
+The contents of this website are licensed under the [CC-BY-NC 4.0 license](https://creativecommons.org/licenses/by-nc/4.0/).

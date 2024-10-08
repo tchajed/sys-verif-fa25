@@ -133,7 +133,7 @@ export default defineUserConfig({
     print: false, // no need to offer print button
 
     author: "Tej Chajed",
-    license: "CC0-1.0",
+    license: "CC-BY-NC 4.0",
     logo: "/logo.png",
     favicon: "/favicon.png",
     iconAssets: "fontawesome",
