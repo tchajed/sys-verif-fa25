@@ -120,6 +120,7 @@ export default defineUserConfig({
           },
         },
       },
+      photoSwipe: false,
     },
 
     // control page meta information shown
