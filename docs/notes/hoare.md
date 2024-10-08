@@ -75,7 +75,7 @@ $$
 
 Some notation is worth explaining here. The notation uses _metavariables_ to indicate what is being defined; $e$ always refers to an expression, $v$ to a value, $x$ to a variable, and $n$ to a number. When we write $v ::= \true \mid \false$, this defines variables $v$ to be either the constant $\true$ or $\false$ (the vertical bar separates alternatives, just like a Coq `Inductive`). The grammar for expressions includes one alternative $e ::= v$, which says that any value (defined above) can also be used as an expression. The grammar defines a recursive inductive datatype for expressions and for values; the definitions refer to each other ($e ::= v$ refers to values when defining expressions, but also $v ::= \fun{x} e$ says anonymous functions are values and the body is an expression), so we have _mutually recursive inductives_.
 
-The grammar rule $e ::= x$ says that a variable like $x$ or $y$ is an expression ($e$ in the grammar). $v ::= \overline{n}$ says that an integer constant $\overline{n}$ is a value; the overline is used to distinguish between a meta-level number $n : \mathbb{Z}$ and the literal $\overline{n}$ which is a value in the language. $\pi_1 \, e$ and $pi_2 \, e$ are "projection functions" (often denoted using $\pi$) that get the first and second element of a tuple, respectively.
+The grammar rule $e ::= x$ says that a variable like $x$ or $y$ is an expression ($e$ in the grammar). $v ::= \overline{n}$ says that an integer constant $\overline{n}$ is a value; the overline is used to distinguish between a meta-level number $n : \mathbb{Z}$ and the literal $\overline{n}$ which is a value in the language. $\pi_1 \, e$ and $\pi_2 \, e$ are "projection functions" (often denoted using $\pi$) that get the first and second element of a tuple, respectively.
 
 ::: warning If you've seen the λ-calculus before...
 
@@ -564,7 +564,7 @@ Modularity is also beneficial when a helper function is reused, since then the p
 
 What does it mean to prove $\hoare{P}{e}{\fun{v} Q(v)}$? We have a bunch of "rules" above, but where do they come from?
 
-The reason Hoare logic is useful and what it means to have a (proven) Hoare triple is that we can give a definition of _soundness_ of a Hoare triple that relates it the semantics of programs, and then all the rules given above can be proven as theorems. The soundness definition requires that we interpret propositions, and you can think of that interpretation as being Coq propositions here.
+The reason Hoare logic is useful and what it means to have a (proven) Hoare triple is that we can give a definition of _soundness_ of a Hoare triple that relates it to the semantics of programs, and then all the rules given above can be proven as theorems. The soundness definition requires that we interpret propositions, and you can think of that interpretation as being Coq propositions here.
 
 ::: important Hoare triple definition/soundness
 
