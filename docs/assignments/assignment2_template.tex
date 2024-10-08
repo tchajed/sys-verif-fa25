@@ -1,0 +1,262 @@
+\documentclass[11pt,twoside]{exam}
+
+\usepackage{amsmath}
+\usepackage{color}
+\usepackage{hyperref}
+
+\title{Assignment 2: Separation logic theory}
+\author{\textcolor{red}{FILL IN NAME}}
+
+%% These are the same macros used in the lecture notes, from macros.snippet.md.
+%%%%%%%%%%%% macros
+
+%% basic math
+\def\intersect{\cap}
+\def\union{\cup}
+\def\dom{\operatorname{dom}}
+\def\disjoint{\mathrel{\bot}}
+\def\finto{\overset{\text{fin}}{\rightharpoonup}}
+
+%% language
+\def\ife#1#2#3{\text{\textbf{if} } #1 \text{ \textbf{then} } #2 \text{ \textbf{else} } #3}
+\def\lete#1#2{\text{\textbf{let} } #1 := #2 \text{ \textbf{in} }}
+\def\letV#1#2{&\text{\textbf{let} } #1 := #2 \text{ \textbf{in} }}
+\def\num#1{\overline{#1}}
+\def\true{\mathrm{true}}
+\def\false{\mathrm{false}}
+\def\fun#1{\lambda #1.\,}
+\def\funblank{\fun{\_}}
+\def\rec#1#2{\text{\textbf{rec} } #1 \; #2.\;\,}
+\def\app#1#2{#1 \, #2}
+\def\then{;\;}
+\def\assert#1{\operatorname{assert} \, #1}
+\def\val{\mathrm{val}}
+\def\purestep{\xrightarrow{\text{pure}}}
+
+%% hoare logic
+\def\False{\mathrm{False}}
+\def\True{\mathrm{True}}
+\def\hoare#1#2#3{\left\{#1\right\} \, #2 \, \left\{#3\right\}}
+\def\hoareV#1#2#3{\begin{aligned}%
+  &\left\{#1\right\} \\ &\quad #2 \\ &\left\{#3\right\}%
+  \end{aligned}}
+\def\wp{\operatorname{wp}}
+\def\outlineSpec#1{\left\{#1\right\}}
+\def\entails{\vdash}
+\def\bient{\dashv\vdash}
+\def\eqnlabel#1{\:\:\text{#1}}
+\def\lift#1{\lceil #1 \rceil}
+
+%% separation logic
+% imperative constructs
+\def\load#1{{!}\,#1}
+\def\store#1#2{#1 \mathbin{\gets} #2}
+\def\free#1{\operatorname{free} \, #1}
+\def\alloc#1{\operatorname{alloc} \, #1}
+% logic
+\def\sep{\mathbin{\raisebox{1pt}{$\star$}}}
+\def\bigsep{\mathop{\vcenter{\LARGE\hbox{$\star$}}}}
+\def\wand{\mathbin{\raisebox{1pt}{$-\hspace{-0.06em}\star$}}}
+\def\emp{\mathrm{emp}}
+\def\pointsto{\mapsto}
+\def\Heap{\mathrm{Heap}}
+\def\Loc{\mathrm{loc}}
+
+%%%%%% end of macros
+
+%% ``exam'' setup
+\pointsinmargin
+\pointformat{}
+\printanswers
+
+\begin{document}
+\maketitle
+
+\begin{questions}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Exercise 1
+\question[5]
+Prove the rule of consequence for Hoare logic, from the soundness definition for
+a Hoare triple.
+
+\paragraph{Consequence}
+\[
+  \frac{P' \entails P \quad (\forall v.\, Q(v) \entails Q'(v)) \quad \hoare{P}{e}{Q(v)}}{%
+  \hoare{P'}{e}{\fun{v} Q'(v)}
+  }
+\]
+
+\paragraph{Soundness}
+$\hoare{P}{e}{\fun{v} Q(v)}$ means if $P$ holds and $e \to^* e'$, then either
+(a) $\exists e''.\, e' \to e''$ ($e'$ is not stuck), or (b) there exists a value
+$v'$ such that $e' = v'$ and $Q(v')$ holds.
+
+\begin{solution}
+  YOUR SOLUTION HERE
+\end{solution}
+
+%% Exercise 2
+\question
+For each proposition of separation logic below, state precisely the set of heaps
+it describes.
+
+\begin{parts}
+\part[1] $\exists v.\, \ell \pointsto v$
+  \begin{solution}
+  YOUR SOLUTION HERE
+  \end{solution}
+\part[1] $\exists \ell'.\, \ell' \pointsto v$
+  \begin{solution}
+  YOUR SOLUTION HERE
+  \end{solution}
+\part[1] $\forall v.\, \ell \pointsto v$
+  \begin{solution}
+  YOUR SOLUTION HERE
+  \end{solution}
+\part[1] $(\ell \pointsto v) \sep \True$
+  \begin{solution}
+  YOUR SOLUTION HERE
+  \end{solution}
+\part[1] $(\ell \pointsto v) \sep (\True \land \emp)$
+  \begin{solution}
+  YOUR SOLUTION HERE
+  \end{solution}
+\part[1] $\ell \pointsto v \land \ell \pointsto v$
+  \begin{solution}
+  YOUR SOLUTION HERE
+  \end{solution}
+\part[1] $\ell \pointsto v \sep \ell \pointsto v$
+  \begin{solution}
+  YOUR SOLUTION HERE
+  \end{solution}
+\part[1] $(\exists v.\, \ell_1 \pointsto v) \sep (\exists \ell.\, \ell \pointsto \num{3})$
+  \begin{solution}
+  YOUR SOLUTION HERE
+  \end{solution}
+\part[1] $(\exists v.\, \ell \pointsto v) \land (\exists \ell'.\, \ell' \pointsto \num{3})$
+  \begin{solution}
+  YOUR SOLUTION HERE
+  \end{solution}
+\part[1] $(\exists x. \lift{x > 2}) \sep (\exists x. \lift{x < 2})$
+  \begin{solution}
+  YOUR SOLUTION HERE
+  \end{solution}
+\end{parts}
+
+%% Exercise 3
+\question
+Compare the separation logic frame rule to the rule for weakening. Explain why the weaken rule does not imply the frame rule. Explain why the frame rule does not imply the weaken rule. These explanations are not meant to be fully formal proofs (which is well beyond the scope of this class for this question), but should aim to be convincing explanations --- in this case, convincing me that you've understood what these rules mean.
+
+\begin{solution}
+  YOUR SOLUTION HERE
+\end{solution}
+
+%% Exercise 4
+\question
+Your friend Ben Bitdiddle has read the section on recursion and loops and thinks he has found a bug in separation logic. He claims to have proven the following triple:
+
+\[
+  \hoare{\True}{(\rec{f}{x} f \, x) \, ()}{\fun{\_} \False}
+\]
+
+``This proves False with no hypotheses, which makes separation logic unsound!'' he exclaims, a little too excited at having broken what you spent so much time learning.
+
+What do you say to Ben?
+
+\begin{solution}
+  YOUR SOLUTION HERE
+\end{solution}
+
+%% Exercise 5
+\question
+
+We will develop a linked list implementation in our ``lecture notes'' programming language (which I'll call \texttt{expr} here) and give it a specification using a \emph{representation predicate}.
+
+This problem will follow the presentation of linked lists in Robbert Krebbers's
+program verification course. We will be following the notes from that class on
+\href{https://gitlab.science.ru.nl/program-verification/course-2023-2024/-/blob/master/lectures/week10.md}{separation
+logic}.
+
+\begin{parts}
+\part[0]
+
+See the \href{https://tchajed.github.io/sys-verif-fa24/assignments/assignment2.html}{web version} for the problem setup.
+
+\part[10]
+Consider the following function for appending two linked lists. It's your job to figure out exactly how it works (that is, how does it manage the memory of the two lists?).
+
+\begin{verbatim}
+Fixpoint app_list (l1: ref (llist A)) (l2: ref (llist A)) :=
+  match !l1 with
+  | lnil => l1 <- !l2; free l2; ()
+  | lcons hd tl => app_list tl y
+  end
+\end{verbatim}
+
+Write a specification for \texttt{app\_list l1 l2}. You may assume an affine separation logic, so the postcondition can drop any facts you don't think are relevant.
+
+\begin{solution}
+  YOUR SOLUTION HERE
+\end{solution}
+
+\part[15]
+Write a proof outline that shows \texttt{app\_list l1 l2} meets your specification. You may assume an affine separation logic.
+
+Remember that if you think something is wrong here, you may need to re-visit your specification. I can check your specification and give feedback before you spend too much time proving it.
+
+%% LaTeX advice:
+
+You can write your solution in a \texttt{verbatim} environment, similar to the
+separation logic course's notes. Use \texttt{|->} as an ASCII substitute for the
+points-to assertion. Or, you can typeset it in an \texttt{aligned} environment
+in math mode.
+
+\begin{solution}
+  YOUR SOLUTION HERE
+\end{solution}
+
+\part[10]
+
+Let us now implement a function to get the tail of a list:
+
+\begin{verbatim}
+Definition tail (l: llist A) : llist A :=
+match x with
+| lnil => ()
+| lcons hd tl => !tl
+\end{verbatim}
+
+Consider the following specification for \texttt{tail}:
+
+\begin{verbatim}
+[ list_rep l (x :: xs) ]
+  tail l
+[ v. list_rep l (x :: xs) * list_rep v xs ]
+\end{verbatim}
+
+Is this specification true? If yes, prove this specification. If not, explain why, find another valid specification, and prove it.
+
+\begin{solution}
+  YOUR SOLUTION HERE
+\end{solution}
+
+\end{parts}
+
+%% Bonus question
+\question
+
+Find a typo in the lecture notes on Hoare logic or Separation Logic. Submit a
+GitHub pull request with a fix.
+
+In your solution here just mention your GitHub username or what pull request
+number(s) you submitted.
+
+\begin{solution}
+  YOUR SOLUTION HERE
+\end{solution}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{questions}
+\end{document}

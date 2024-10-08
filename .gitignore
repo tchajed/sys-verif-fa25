@@ -3,3 +3,5 @@ node_modules/
 /docs/.vuepress/.cache/
 /docs/.vuepress/dist/
 /.vscode/settings.json
+/docs/assignments/*.pdf
+latex.out/

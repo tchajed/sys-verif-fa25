@@ -7,12 +7,6 @@ date: "2024-10-04"
 
 # Assignment 2: Separation Logic theory
 
-::: warning
-
-I plan to give you a LaTeX template with macros to help you typeset your solutions.
-
-:::
-
 ::: info
 
 This is a theory assignment: you'll submit written responses rather than doing proofs in a computer.
@@ -23,13 +17,13 @@ In this assignment, you'll answer some questions about Hoare logic and separatio
 
 <!-- @include: ../notes/macros.snippet.md -->
 
-**This assignment is due Tuesday, Oct 22, 2024 at 11pm.** Submit to [Canvas](https://canvas.wisc.edu/courses/425519/assignments/2471003) either handwritten (digital or paper) answers, or typeset your solution with LaTeX.
+**This assignment is due Tuesday, Oct 22, 2024 at 11pm.** Submit to [Canvas](https://canvas.wisc.edu/courses/425519/assignments/2471003) either handwritten (digital or paper) answers, or typeset your solution with LaTeX using the <a href="./assignment2_template.tex" download>assignment 2 template <HopeIcon icon="download" /></a>.
 
 ## Exercise 1
 
 > Rule of consequence (5 points)
 
-[Prove the rule of consequence](../notes/hoare.md#ex-soundness-consequence) for Hoare logic, from the [soundness definition](../notes/hoare.md#soundness) for a Hoare triple.
+[Prove the rule of consequence](../notes/hoare.md#hoare-rules) for Hoare logic, from the [soundness definition](../notes/hoare.md#soundness) for a Hoare triple.
 
 ## Exercise 2
 
