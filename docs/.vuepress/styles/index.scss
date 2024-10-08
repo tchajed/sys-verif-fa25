@@ -1,3 +1,20 @@
 :root {
   --hint-font-size: 1rem;
 }
+
+// see https://theme-hope.vuejs.press/guide/customize/color.html
+.language-coq {
+  --code-c-bg: hsl(0, 0%, 97%);
+  [data-theme="dark"] & {
+    --code-c-bg: hsl(240, 10%, 25%);
+  }
+}
+
+/*
+.language-txt[data-title="goal diff"] {
+}
+.language-txt[data-title*="goal "] {
+}
+.language-txt[data-title="coq output"] {
+}
+*/

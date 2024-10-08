@@ -1,21 +1,2 @@
 // this green is the default
 $theme-color: #3eaf7c;
-
-*[data-theme="dark"] {
-  .language-coq {
-    --code-c-bg: hsl(240, 10%, 25%);
-  }
-}
-
-*[data-theme="light"] {
-  .language-coq {
-    --code-c-bg: hsl(0, 0%, 97%);
-  }
-}
-
-// .language-txt[data-title="goal diff"] {
-// }
-// .language-txt[data-title*="goal "] {
-// }
-// .language-txt[data-title="coq output"] {
-// }
