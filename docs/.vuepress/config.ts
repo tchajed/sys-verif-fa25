@@ -81,10 +81,7 @@ export default defineUserConfig({
           allowed: ["id"],
         },
       },
-      git: {
-        createdTime: true,
-        updatedTime: true,
-      },
+      git: process.env.NODE_ENV === "production",
       markdownMath: {
         type: "katex",
         // copy as text (change to true to copy as LaTeX source)
