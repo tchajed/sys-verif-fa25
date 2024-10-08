@@ -35,4 +35,4 @@ The schedule is still under construction. Consider anything more than ~2 weeks o
 
 If you're interested in this class please send me an email at <chajed@wisc.edu>. I'd love to hear what you think!
 
-The contents of this website are licensed under the [CC-BY-NC 4.0 license](https://creativecommons.org/licenses/by-nc/4.0/).
+The course material (including this website) is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License. See [CC-BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) for the text of the license.
