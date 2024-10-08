@@ -2,7 +2,7 @@
 order: 3
 shortTitle: "Assignment 2"
 icon: pen-fancy
-date: "2024-10-04"
+date: 2024-10-04 08:00:00 -5
 ---
 
 # Assignment 2: Separation Logic theory
