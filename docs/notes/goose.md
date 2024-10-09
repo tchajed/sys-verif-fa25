@@ -210,9 +210,22 @@ From sys_verif.program_proof Require Import prelude empty_ffi.
 From Perennial.program_proof Require Import std_proof.
 From Goose.sys_verif_code Require heap functional.
 
+#[local] Ltac Zify.zify_post_hook ::= Z.div_mod_to_equations.
+
 Section goose.
 Context `{hG: !heapGS Σ}.
 
+```
+
+Code being verified:
+
+```go
+func Add(a uint64, b uint64) uint64 {
+	return a + b
+}
+```
+
+```coq
 Lemma wp_Add (n m: w64) :
   {{{ ⌜uint.Z n + uint.Z m < 2^64⌝ }}}
     functional.Add #n #m
@@ -226,6 +239,18 @@ Proof.
   word.
 Qed.
 
+```
+
+Code being verified:
+
+```go
+func StackEscape() *uint64 {
+	var x = uint64(42)
+	return &x
+}
+```
+
+```coq
 Lemma wp_StackEscape :
   {{{ True }}}
     heap.StackEscape #()
@@ -239,6 +264,21 @@ Proof.
   iFrame.
 Qed.
 
+```
+
+Code being verified
+
+```go
+// SumNrec adds up the numbers from 1 to n, recursively.
+func SumNrec(n uint64) uint64 {
+	if n == 0 {
+		return 0
+	}
+	return n + SumNrec(n-1)
+}
+```
+
+```coq
 Lemma wp_SumNrec (n: w64) :
   {{{ ⌜uint.Z n * (uint.Z n + 1) / 2 < 2^64⌝ }}}
     functional.SumNrec #n
@@ -267,6 +307,13 @@ Proof.
     + rewrite Hm. word.
 Qed.
 
+```
+
+The proof below has a minimal loop invariant that shows that the heap loads and stores work, but nothing about the values of the `sum` and `i` variables.
+
+**Exercise:** what loop invariant does this code maintain? What is specifically true at exit?
+
+```coq
 Lemma wp_SumN_failed (n: w64) :
   {{{ True }}}
     functional.SumN #n
@@ -305,6 +352,13 @@ Proof.
     (* oops, didn't prove anything about sum *)
 Abort.
 
+```
+
+::: details Solution
+
+Here is a proof with the right loop invariant.
+
+```coq
 Lemma wp_SumN (n: w64) :
   {{{ ⌜uint.Z n < 2^64-1⌝ }}}
     functional.SumN #n
@@ -344,16 +398,10 @@ Proof.
       iApply "HΦ".
       iFrame.
       iPureIntro.
-      split.
+      split_and!.
       * word.
-      * word_cleanup.
-        rewrite Hsum_ok.
-        set (i_val := uint.Z i).
-        assert (i_val = (i_val + i_val) `div` 2) as Hfrac.
-        { replace (i_val + i_val) with (i_val * 2) by lia.
-          rewrite Z_div_mult //. }
-        rewrite {3}Hfrac.
-        admit.
+      * word.
+      * word.
   - iFrame.
     iPureIntro.
     split; word.
@@ -364,8 +412,13 @@ Proof.
     iPureIntro.
     rewrite Hsum_ok.
     word.
-Admitted.
+Qed.
 
+```
+
+:::
+
+```coq
 End goose.
 
 ```
