@@ -216,7 +216,7 @@ $\assert{e} ::= \ife{e}{()}{\num{1} == \true}$ (evaluates to $()$ if $e$ is true
 
 What you need to know about $\operatorname{assert}$ is really just that it has the following specification:
 
-$$\hoare{\True}{\assert{\true}}{\fun{v} \lift{v = ()}}$$.
+$$\hoare{\True}{\assert{\true}}{\fun{v} \lift{v = ()}}$$
 
 :::
 
