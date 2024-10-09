@@ -11,6 +11,6 @@ dir:
 
 - [Setup](./setup)
 - [Assignment 1 (Coq)](./assignment1)
-- [Assignment 2 (Verifying Go code)](./assignment2)
-- [Assignment 3 (Separation logic theory)](./assignment3)
+- [Assignment 2 (Separation logic theory)](./assignment2)
+- [Assignment 3 (Verifying Go code)](./assignment3)
 - [Final project](./project)
