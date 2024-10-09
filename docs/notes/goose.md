@@ -186,6 +186,7 @@ Next, do you believe this is a correct model of `for` loops?
 
 ```coq
 From sys_verif.program_proof Require Import prelude empty_ffi.
+From Perennial.program_proof Require Import std_proof.
 From Goose.sys_verif_code Require heap functional.
 
 Section goose.
@@ -245,7 +246,7 @@ Proof.
     + rewrite Hm. word.
 Qed.
 
-Lemma wp_SumN (n: w64) :
+Lemma wp_SumN_failed (n: w64) :
   {{{ True }}}
     functional.SumN #n
   {{{ (m: w64), RET #m; ⌜uint.Z m = uint.Z n * (uint.Z n + 1) / 2⌝ }}}.
@@ -268,7 +269,10 @@ Proof.
     + iModIntro.
       iApply "HΦ".
       iFrame.
-    + wp_load. wp_load. wp_store. wp_load. wp_store.
+    + wp_load. wp_load.
+      wp_apply wp_SumAssumeNoOverflow.
+      iIntros (Hoverflow).
+      wp_store. wp_load. wp_store.
       iModIntro.
       iApply "HΦ".
       iFrame.
@@ -279,6 +283,67 @@ Proof.
     iApply "HΦ".
     (* oops, didn't prove anything about sum *)
 Abort.
+
+Lemma wp_SumN (n: w64) :
+  {{{ ⌜uint.Z n < 2^64-1⌝ }}}
+    functional.SumN #n
+  {{{ (m: w64), RET #m; ⌜uint.Z m = uint.Z n * (uint.Z n + 1) / 2⌝ }}}.
+Proof.
+  wp_start as "%Hn_bound".
+  wp_alloc sum_l as "sum".
+  wp_alloc i_l as "i".
+  wp_pures.
+  wp_apply (wp_forBreak
+              (λ continue,
+                ∃ (sum i: w64),
+                  "sum" :: sum_l ↦[uint64T] #sum ∗
+                  "i" :: i_l ↦[uint64T] #i ∗
+                  "%i_bound" :: ⌜uint.Z i ≤ uint.Z n + 1⌝ ∗
+                  "%Hsum_ok" :: ⌜uint.Z sum = (uint.Z i-1) * (uint.Z i) / 2⌝ ∗
+              "%Hcontinue" :: ⌜continue = false → uint.Z i = (uint.Z n + 1)%Z⌝)%I
+             with "[] [sum i]").
+  - clear Φ.
+    wp_start as "IH".
+    iNamed "IH".
+    wp_load.
+    wp_pures. wp_if_destruct.
+    + iModIntro.
+      iApply "HΦ".
+      iFrame.
+      iPureIntro.
+      split_and!.
+      * word.
+      * word.
+      * intros. word.
+    + wp_load. wp_load.
+      wp_apply wp_SumAssumeNoOverflow.
+      iIntros (Hoverflow).
+      wp_store. wp_load. wp_store.
+      iModIntro.
+      iApply "HΦ".
+      iFrame.
+      iPureIntro.
+      split.
+      * word.
+      * word_cleanup.
+        rewrite Hsum_ok.
+        set (i_val := uint.Z i).
+        assert (i_val = (i_val + i_val) `div` 2) as Hfrac.
+        { replace (i_val + i_val) with (i_val * 2) by lia.
+          rewrite Z_div_mult //. }
+        rewrite {3}Hfrac.
+        admit.
+  - iFrame.
+    iPureIntro.
+    split; word.
+  - iIntros "IH". iNamed "IH".
+    wp_load.
+    iModIntro.
+    iApply "HΦ".
+    iPureIntro.
+    rewrite Hsum_ok.
+    word.
+Admitted.
 
 End goose.
 
