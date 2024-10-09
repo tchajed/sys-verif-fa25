@@ -191,6 +191,60 @@ From Goose.sys_verif_code Require heap functional.
 Section goose.
 Context `{hG: !heapGS Σ}.
 
+Lemma wp_Add (n m: w64) :
+  {{{ ⌜uint.Z n + uint.Z m < 2^64⌝ }}}
+    functional.Add #n #m
+  {{{ (y: w64), RET #y; ⌜(uint.Z y = uint.Z n + uint.Z m)%Z⌝ }}}.
+Proof.
+  wp_start as "%Hoverflow".
+  wp_pures.
+  iModIntro.
+  iApply "HΦ".
+  iPureIntro.
+  word.
+Qed.
+
+Lemma wp_StackEscape :
+  {{{ True }}}
+    heap.StackEscape #()
+  {{{ (l: loc), RET #l; l ↦[uint64T] #(W64 42) }}}.
+Proof.
+  wp_start as "_".
+  wp_alloc x as "x".
+  wp_pures.
+  iModIntro.
+  iApply "HΦ".
+  iFrame.
+Qed.
+
+Lemma wp_SumNrec (n: w64) :
+  {{{ ⌜uint.Z n * (uint.Z n + 1) / 2 < 2^64⌝ }}}
+    functional.SumNrec #n
+  {{{ (m: w64), RET #m; ⌜uint.Z m = uint.Z n * (uint.Z n + 1) / 2⌝ }}}.
+Proof.
+  iIntros (Φ) "Hpre HΦ". iDestruct "Hpre" as %Hoverflow.
+  iLöb as "IH" forall (n Hoverflow Φ).
+  wp_rec. wp_pures.
+  wp_if_destruct.
+  - iModIntro.
+    iApply "HΦ".
+    iPureIntro.
+    word.
+  - wp_pures.
+    wp_apply "IH".
+    { iPureIntro.
+      word. }
+    iIntros (m Hm).
+    wp_pures.
+    iModIntro.
+    iApply "HΦ".
+    iPureIntro.
+    rewrite word.unsigned_add_nowrap.
+    + rewrite Hm.
+      word.
+    + rewrite Hm. word.
+Qed.
+
 Lemma wp_SumN (n: w64) :
   {{{ True }}}
     functional.SumN #n
