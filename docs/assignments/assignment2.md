@@ -5,7 +5,7 @@ icon: pen-fancy
 date: 2024-10-04 08:00:00 -5
 ---
 
-# Assignment 2: Separation Logic theory
+# Assignment 2: Separation logic theory
 
 ::: info
 
