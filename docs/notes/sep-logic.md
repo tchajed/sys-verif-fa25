@@ -410,7 +410,7 @@ Using this rule, we can prove that $sumN$ returns $\num{n(n+1)/2}$. The key is t
 
 ## Magic wand (separating implication)
 
-There is one more operator for separation logic assertions: $P \wand Q$, typically pronounced "$P$ wand $Q$". It is often affectionally called "magic wand". $P \wand Q$ is a _heap predicate_ that is true in a (sub)heap if when you add some disjoint heap satisfying $P$, the whole heap would satisfy $Q$. The wand operator is the implication of separation logic.
+There is one more operator for separation logic assertions: $P \wand Q$, typically pronounced "$P$ wand $Q$". It is often affectionately called "magic wand". $P \wand Q$ is a _heap predicate_ that is true in a (sub)heap if when you add some disjoint heap satisfying $P$, the whole heap would satisfy $Q$. The wand operator is the implication of separation logic.
 
 ::: info Characterization of wand
 
