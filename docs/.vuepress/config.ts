@@ -44,7 +44,7 @@ const sidebarConfig = sidebar({
       icon: "lightbulb",
       prefix: "notes/",
       link: "/notes/",
-      children: ["sep-logic.md", "ipm.md"],
+      children: ["ipm.md", "goose.md"],
     },
   ],
   "/notes/": "structure",
