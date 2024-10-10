@@ -33,7 +33,7 @@ The workflow is that we write the code we plan to run in Go, then translate it t
 
 What goes into making the Goose approach work?
 
-First, we need to define GooseLang, the target of the translation. This language will look a lot like our `expr`s, but an important change is that values will be more realistic primitives - for example, we'll replace numbers of type $\mathbb{Z}$ with 64-bit unsigned integers. GooseLang has a precise semantics in the same style as the notes, a relation $(e, h) \leadsto (e', h')$ where $h$ is the heap, a (finite) map from locations to values.
+First, we need to define GooseLang, the target of the translation. This language will look a lot like our `expr`s, but an important change is that values will be more realistic primitives - for example, we'll replace numbers of type $\mathbb{Z}$ with 64-bit unsigned integers. GooseLang has a precise semantics in the same style as the notes, a relation $(e, h) \leadsto^* (e', h')$ where $h$ is the heap, a (finite) map from locations to values.
 
 Second, we need to translate Go to GooseLang. The basic idea is to translate each Go package to a Coq file, and each Go function to an expression. Go has structs and _methods_ on structs, which will be translated to GooseLang functions that take the struct as the first argument. Some complications we'll have to deal with when we get to the specifics include handling slices (variable-length arrays), concurrency, and loops.
 
@@ -80,7 +80,9 @@ Goose _models_ Go code using GooseLang. You can see one evidence of this modelin
 GooseLang has the following features:
 
 - Values can be bytes, 64-bit integers, strings. As before, we have the unit value $()$ and functions as first-class values.
+- The Coq implementation has a concrete syntax. Constructs like `λ:`, `rec:`, and `if:` all have a colon to disambiguate them during parsing from similar Coq syntax. Literals have to be explicitly turned into value with `#`, so we write `#true` and `#()` for the boolean true and the unit value. Similarly, `#(W64 1)` represents the 64-bit integer constant 1.
 - Allocation supports arrays that get contiguous locations, to model slices.
+- The binary operator `ℓ +ₗ n` implements pointer arithmetic: we can take an offset to a location. Allocating an array returns a single location `ℓ`, and loading and storing at `ℓ +ₗ n` accesses the `n`th element of the array.
 
 In addition, GooseLang has some primitives related to concurrency:
 
@@ -95,9 +97,11 @@ There are also some features we won't talk about:
 
 ### Local variables
 
-Goose models immutable local variables as `let` bindings, vs using heap variables. In Go, it is permitted and safe to take the address of local variables; conceptually, they are all on the heap. The compiler does a simple _escape analysis_: if the analysis proves that a function's address is never used outside the function, then it is instead allocated on the stack.
+Goose models immutable local variables as `let` bindings, while mutable variables are modeled by allocating them on the heap. In Go, it is permitted and safe to take the address of local variables; conceptually, it would be sound to model all variables as being on the heap. The compiler does a simple _escape analysis_: if the analysis proves that a function's address is never used outside the function, then it is instead allocated on the stack (for example, in the common case that the address is never taken).
 
-One caveat about this "optimization": Goose translates variables declared with `x := ...` as immutable and variables declared as `var x = ...` as mutable; this is not a feature of Go, in which all local variables are mutable. A future version should probably do an analysis of the function rather than using the syntax.
+Goose uses a `let` binding (vs always using a heap variable) only to make the resulting code easier to reason about: the let binding is a pure operation that is handled by substituting the right-hand side, whereas a heap variable (even if constant) would result in a points-to assertion.
+
+Here's an example where Go and Goose both use a heap-allocated local variable.
 
 ```go
 func StackEscape() *uint64 {
@@ -112,6 +116,8 @@ Definition StackEscape: val :=
     let: "x" := ref_to uint64T #42 in
     "x".
 ```
+
+One caveat about this "optimization": Goose translates variables declared with `x := ...` as immutable and variables declared as `var x = ...` as mutable; this is not a feature of Go, in which all local variables are mutable. A future version should probably do an analysis of the function rather than using the syntax.
 
 Go also has a construct `new(T)` that allocates a pointer to a value of type `T` and initializes it to the _zero value_ of the type (and every type in Go has a well-defined zero value). Goose also supports this form of allocation, although allocating by taking the address of a heap variable is more common. (For structs, the most common pattern is actually `&S { ... }` - that is, taking the address of a struct literal.)
 
@@ -311,7 +317,17 @@ Qed.
 
 The proof below has a minimal loop invariant that shows that the heap loads and stores work, but nothing about the values of the `sum` and `i` variables.
 
-**Exercise:** what loop invariant does this code maintain? What is specifically true at exit?
+### Exercise: loop invariant for SumN
+
+What loop invariant does this code maintain that makes the postcondition true? A complete answer should have a loop invariant when continue is true and one when it is false (the two are very similar).
+
+Remember that the loop body needs to satisfy the Hoare triple `{{{ I true }}} body #() {{{ r, RET #r; I r }}}`. The return value `r` is true when the loop will execute one more iteration and false when it is done and will immediately terminate, so `I false` is the only thing we will know in the proof after the loop executes.
+
+::: warning
+
+I _strongly_ recommend being fairly confident in your answer before reading the solution. Don't spoil the exercise for yourself!
+
+:::
 
 ```coq
 Lemma wp_SumN_failed (n: w64) :
@@ -425,18 +441,20 @@ End goose.
 
 ## Implementation
 
-Translation uses `go/ast` and `go/types` for parsing, type checking, and resolving references (e.g., which function is being called?). Using official tooling reduces chance of bugs.
+The Goose translation uses [go/ast](https://pkg.go.dev/go/ast) and [go/types](https://pkg.go.dev/go/types) for parsing, type checking, and resolving references (e.g., which function is being called?). Using these official packages reduces chance of bugs, and allows us to rely on types; writing a type inference engine for Go from scratch would be a daunting task otherwise.
 
-Testing at several levels:
+Goose is tested at several levels:
 
 - "Golden" outputs help check if translation changes (e.g., if adding a feature, that unrelated inputs aren't affected).
 - "Semantics" tests run the same code in Go and GooseLang, using an interpreter for GooseLang.
 - Tests of the user interface - package loading, for example.
 - Continuously check that the code we're verifying matches what Goose is outputting, to avoid using stale translations.
 
-The semantics tests - a form of _differential testing_ - is one of the most valuable parts of this process.
+The semantics tests - a form of _differential testing_ - is one of the most valuable parts of this process. For an example, see [shortcircuiting.go](https://github.com/goose-lang/goose/blob/585abc3cfef50dd466e112d7c535dbdfccd3c0ca/internal/examples/semantics/shortcircuiting.go). The test `testShortcircuitAndTF`, for example, is designed to return `true` in Go. The goose test infrastructure (a) checks that it actually returns true in Go, (b) translates it to GooseLang, and (c) executes it with an interpreter written in Coq for GooseLang and confirms this produces `#true`. Furthermore, the interpreter is verified to ensure that it matches the semantics, so we don't have to trust its implementation for our differential testing.
 
 ## What does a proof mean?
+
+You might wonder, what do proofs mean? They must depend on Goose being correct. This is indeed the case, but we can be more precise about what "correct" means (and we should be since this is a verification class).
 
 For a Go program $p$ let $\mathrm{goose}(p)$ be the Goose output on that program. We said $\mathrm{goose}(p)$ should "model" $p$, but what does that mean?
 
