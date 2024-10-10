@@ -174,6 +174,20 @@ Lemma add_0_r (n: nat) :
   n + 0 = n.
 Proof.
   induction n as [ |n IHn]; simpl; [ reflexivity | ].
+```
+
+:::: info Goal
+
+```txt title="goal 1"
+  n : nat
+  IHn : n + 0 = n
+  ============================
+  S (n + 0) = S n
+```
+
+::::
+
+```coq
   (* note that we already ran `simpl` in this goal *)
   rewrite IHn. reflexivity.
 Qed.
@@ -185,6 +199,38 @@ Qed.
 ### `subst`
 
 `subst` repeatedly finds an equality of the form `x = ...` and substitutes `x` for the right-hand side: it rewrites the lemma everywhere, then removes `x` from the context (since it is no longer used). Useful to clean up the context.
+
+```coq
+Lemma subst_example (a b c: nat) (f: nat → nat) :
+  a = b →
+  b = c →
+  f a = f c.
+Proof.
+  intros H1 H2.
+  subst.
+```
+
+:::: info Goal diff
+
+```txt title="goal diff"
+  a, b, c : nat // [!code --]
+  c : nat // [!code ++]
+  f : nat → nat
+  H1 : a = b // [!code --]
+  H2 : b = c // [!code --]
+  ============================
+  f a = f c // [!code --]
+  f c = f c // [!code ++]
+```
+
+::::
+
+```coq
+  reflexivity.
+Qed.
+
+
+```
 
 ## List tactics
 
@@ -207,7 +253,62 @@ Proof.
   know what names to use for the notations, start with [Locate "!!"] (to find
   `lookup`) and [Locate "++"] (to find `app`). It's enough to search for one
   "token" (sequence of symbols) from the notation. *)
-  rewrite lookup_app_l.
+
+```
+
+::::: details Output of Search lookup app
+
+```coq
+Search lookup app.
+```
+
+:::: note Output
+
+```txt title="coq output"
+lookup_app_l:
+  ∀ {A : Type} (l1 l2 : list A) (i : nat),
+    i < length l1 → (l1 ++ l2) !! i = l1 !! i
+list_lookup_middle:
+  ∀ {A : Type} (l1 l2 : list A) (x : A) (n : nat),
+    n = length l1 → (l1 ++ x :: l2) !! n = Some x
+lookup_app_l_Some:
+  ∀ {A : Type} (l1 l2 : list A) (i : nat) (x : A),
+    l1 !! i = Some x → (l1 ++ l2) !! i = Some x
+lookup_app_r:
+  ∀ {A : Type} (l1 l2 : list A) (i : nat),
+    length l1 ≤ i → (l1 ++ l2) !! i = l2 !! (i - length l1)
+take_drop_middle:
+  ∀ {A : Type} (l : list A) (i : nat) (x : A),
+    l !! i = Some x → take i l ++ x :: drop (S i) l = l
+take_S_r:
+  ∀ {A : Type} (l : list A) (n : nat) (x : A),
+    l !! n = Some x → take (S n) l = take n l ++ [x]
+lookup_app:
+  ∀ {A : Type} (l1 l2 : list A) (i : nat),
+    (l1 ++ l2) !! i =
+    match l1 !! i with
+    | Some x => Some x
+    | None => l2 !! (i - length l1)
+    end
+elem_of_list_split_length:
+  ∀ {A : Type} (l : list A) (i : nat) (x : A),
+    l !! i = Some x → ∃ l1 l2 : list A, l = l1 ++ x :: l2 ∧ i = length l1
+lookup_snoc_Some:
+  ∀ {A : Type} (x : A) (l : list A) (i : nat) (y : A),
+    (l ++ [x]) !! i = Some y
+    ↔ i < length l ∧ l !! i = Some y ∨ i = length l ∧ x = y
+lookup_app_Some:
+  ∀ {A : Type} (l1 l2 : list A) (i : nat) (x : A),
+    (l1 ++ l2) !! i = Some x
+    ↔ l1 !! i = Some x ∨ length l1 ≤ i ∧ l2 !! (i - length l1) = Some x
+```
+
+::::
+
+:::::
+
+```coq
+rewrite lookup_app_l.
   { (* [apply ... in] applies the tactic to a premise, working forward from the
        hypotheses. (In this case the result exactly matches the goal, but this
        proof strategy is more general.) *)
@@ -430,7 +531,7 @@ Proof.
 
 ```
 
-Adding `by t` to a `rewrite` causes it to succeed only if all side conditions can be proven with the tactic `t`. This is especially useful because if a side condition is false, the goal might become unprovable after applying the rewrite, and we want to avoid getting stuck in those situations (without realizing it).
+`rewrite -> lem by t` causes it to succeed only if all side conditions can be proven with the tactic `t`. This is especially useful because if a side condition is false, the goal might become unprovable after applying the rewrite, and we want to avoid getting stuck in those situations (without realizing it).
 
 Unfortunately Coq actually has two `rewrite` tactics: one from the standard library and one from a library called SSReflect; the latter is what we're using because it has some other useful features, but `rewrite ... by t` is only in the standard one. We can use the standard rewrite with `rewrite ->`.
 
@@ -505,13 +606,12 @@ Proof. lia. Qed.
 
 `intuition` destructs ∧ in the hypotheses, splits ∧ in the goals, destructs ∨ in the hypotheses, looks for `H1: P → Q` and derives `Q` if it can prove `P` with `auto`, and finally calls `auto` to try to prove the goal. This is essentially all of the forward propositional reasoning above, plus `auto`. This is all relatively simple reasoning individually but collectively can be very powerful, especially because it also incorporates the power of `auto`.
 
-**Note**: the tactic name `intuition`, confusingly, does not refer to an obvious or instinctive proof, but to _intuitionistic logic_. This is a version of logic in which doesn't use _classical logic_'s "excluded middle", which says that `∀ P, P ∨ ¬P` holds. For the most part you can ignore this distinction, and Coq supports assuming the law of excluded middle and thus using classical logic.
+**Note**: the tactic name `intuition`, confusingly, does not refer to an obvious or instinctive proof, but to _intuitionistic logic_. This is a version of logic in which doesn't use _classical logic_'s "excluded middle", which says that `∀ P, P ∨ ¬P` holds. For the most part you can ignore this distinction (if you ever need it, Coq does also support adding excluded middle as an axiom and working in classical logic.)
 
 ```coq
 Lemma propositional_demo_3 (P Q R : Prop) :
   (P -> Q) ∧ (Q -> R) -> P -> R.
 Proof.
-  intros H1 HP.
   intuition.
 Qed.
 
