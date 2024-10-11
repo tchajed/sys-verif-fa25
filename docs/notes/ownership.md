@@ -23,16 +23,341 @@ Theme for today: ownership in Go and in GooseLang
 
 ## Structs
 
-How to model structs, then how to reason about them. Need for some "types".
+Go has structs. Here's an example, along with a few methods:
 
-Difference between _shallow_ and _deep_ embedding.
+```go
+type Person struct {
+	FirstName string
+	LastName  string
+	Age       uint64
+}
 
-## Slices and map
+func (p Person) Name() string {
+	return p.FirstName + " " + p.LastName
+}
 
-Modeling length, capacity, and contiguous allocations. Ownership in slices, slice append.
+func (p *Person) Older(delta uint64) {
+	p.Age += delta
+}
 
-Maps as non-atomic values.
+func (p *Person) GetAge() *uint64 {
+	return &p.Age
+}
+
+func ExamplePerson() Person {
+	return Person{
+		FirstName: "Ada",
+		LastName:  "Lovelace",
+		Age:       25,
+	}
+}
+```
+
+Methods on structs are actually quite easy to model: `Name` becomes a function `Person__Name` that takes `p` as its first argument. The struct name is prepended to disambiguate this function from another function `Name` in the same scope (or another struct method called `Name`). Whenever Go calls a method on a struct, it is translated to a call to the appropriate function. If you're not sure how Go methods work as a language feature, read the [Go tour on methods](https://go.dev/tour/methods/1).
+
+You might wonder if this is too simple. Go's methods are actually what is simple in this case: what complicates methods in object-oriented languages with inheritance like Java or C++ is that a call to a method might actually resolve to a superclass implementation, and in fact the exact method called might be dynamic. Go has `interface`s that behave somewhat similarly, which Goose does not model; interfaces are still simpler than inheritance and with some engineering Goose could support them without too much pain. (Inheritance could also be modeled but with a little more pain.)
+
+Having handled methods, structs introduce two main challenges: how to model struct values, and how to model struct pointers.
+
+Let's start with modeling struct values. The basic strategy is to translate a value of type `p: Person` to a tuple of the fields of the struct. To keep GooseLang simple, it only has binary pairs, not arbitrary-sized tuples, and functions `Fst` and `Snd` access the elements of a pair (these were called $\pi_1$ and $\pi_2$ way back in the `expr` language, but we'll use names for them now). With the tuple model, a person as in the `ExamplePerson()` function above would have the value `(#"Ada", (#"Lovelace", #(W64 25)))`.
+
+To model field access, like `p.FirstName` that shows up in the `Name` method, we need to use `Fst` and `Snd` appropriately based on what index the field has; in this case it's easy and the model should be `Fst p`.
+
+### Exercise: accessing other fields
+
+:::: info Exercise
+
+What's the right model of `p.LastName` and `p.Age`? Remember that we organized the tuple as `(#"Ada", (#"Lovelace", #(W64 25)))`.
+
+::: details Solution
+
+`p.LastName` should be modeled as `Fst (Snd p)` and `p.Age` is `Snd (Snd p)`.
+
+:::
+
+::::
+
+### Struct pointers
+
+We might be tempted to say a pointer to a struct is a location, and we store the tuple in the heap. The code `p.Older(delta)` above could be translated to something like `p <- (FirstName p, (LastName p, Age p + delta))` - notice that this method takes a struct _pointer_ and not a _value_ in Go, and this is reflected in how we use `p` in the model. This approach to translating structs is basically fine for this case (even if a bit complicated to implement), but it is limited.
+
+The third method, `GetAge`, however, would be problematic for this model. What pointer should it return? We know what should happen if we read and write to that pointer, but don't have a value to return for just `GetAge`.
+
+The solution Goose uses is not to use a single location for a struct, but instead _one per field_. The heap locations are all laid out contiguously, just like an array. Thus the model for `GetAge` is actually `GetAge := λ: "ℓ", "ℓ" +ₗ 2`, where 2 is the index of the `Age` field.
+
+## Proofs using structs
+
+Now let's see how this theory translates to Goose. First of all, we don't literally work with field offsets as literals; we would want constants based on the field names for those immediately in the proofs, and the actual translation uses field names in an even better way.
+
+Here's the actual translation of the structs above:
+
+```coq
+Definition Person := struct.decl [
+  "FirstName" :: stringT;
+  "LastName" :: stringT;
+  "Age" :: uint64T
+].
+
+Definition Person__Name: val :=
+  rec: "Person__Name" "p" :=
+    ((struct.loadF Person "FirstName" "p") +
+    #(str" ")) +
+    (struct.loadF Person "LastName" "p").
+
+Definition Person__Older: val :=
+  rec: "Person__Older" "p" "delta" :=
+    struct.storeF Person "Age" "p"
+                  ((struct.loadF Person "Age" "p") + "delta");;
+    #().
+
+Definition Person__GetAge: val :=
+  rec: "Person__GetAge" "p" :=
+    struct.fieldRef Person "Age" "p".
+
+Definition ExamplePerson: val :=
+  rec: "ExamplePerson" <> :=
+    struct.mk Person [
+      "FirstName" ::= #(str"Ada");
+      "LastName" ::= #(str"Lovelace");
+      "Age" ::= #25
+    ].
+```
+
+The first thing to notice is that even the struct `Person` is translated. It doesn't produce a GooseLang expression, but instead a "struct declaration", which records the fields and their types in a list - we'll come back to those types later, which are most important when we have nested structs. This declaration is later used by _Gallina_ functions like `struct.loadF` and `struct.storeF` to figure out what offset the fields have.
+
+The easiest model to understand is `GetAge`, which is entirely based on the Gallina function `struct.fieldRef`. The implementation searches the `Person` declaration for the field `Age` and returns a GooseLang function that takes the right offset from the input location, 2 in this case.
+
+Similarly, `struct.mk` takes a struct declaration and a list of field values and assembles them into a struct value, a tuple with all the fields. This is needed since a struct literal in Go need not be in the same order as the declaration (what would go wrong if we assumed it was?) and because fields can be omitted, in which case they get the zero value for their type. The declaration records both the order of the fields and the types for this reason.
+
+The other Gallina functions in this example, `struct.loadF` and `struct.storeF` are very similar to `struct.fieldRef`, except that they also do a store or load at the location.
+
+Goose has a nice set of reasoning principles for structs, which extend the basic points-to assertion we've been using for heap locations. Let's see what specifications for the code above look like.
+
+```coq
+From sys_verif.program_proof Require Import prelude empty_ffi.
+From Coq Require Import Strings.String.
+From Goose.sys_verif_code Require heap.
+
+Section goose.
+Context `{hG: !heapGS Σ}.
+
+```
+
+Goose does actually model struct values as tuples, and doesn't (yet) have a better way to write them in specs.
+
+In practical use, we typically define a Gallina record and relate these records to the GooseLang representation, and then most specs work with the Gallina record and not with these tuples.
+
+Notice also that there's an extra unit value at the end; this makes the recursive functions for accessing fields much simpler.
+
+```coq
+Lemma wp_ExamplePerson :
+  {{{ True }}}
+    heap.ExamplePerson #()
+  {{{ RET (#"Ada", (#"Lovelace", (#25, #()))); True }}}.
+Proof.
+  wp_start as "_".
+  wp_pures.
+  iModIntro.
+  iApply "HΦ".
+  done.
+Qed.
+
+Lemma String_app_empty_l s :
+  "" +:+ s = s.
+Proof.
+  unfold String.app.
+  reflexivity.
+Qed.
+
+(* shockingly, this is not in the standard library *)
+Lemma String_app_assoc (s1 s2 s3: string) :
+  (s1 +:+ s2) +:+ s3 = s1 +:+ s2 +:+ s3.
+Proof.
+  induction s1; simpl.
+  - rewrite !String_app_empty_l //.
+  - rewrite !String_append.
+    congruence.
+Qed.
+
+Lemma wp_Person__Name (firstName lastName: string) (age: w64) :
+  {{{ True }}}
+    heap.Person__Name (#firstName, (#lastName, (#age, #())))
+  {{{ RET #(str (firstName ++ " " ++ lastName)); True }}}.
+Proof.
+  wp_start as "_".
+  wp_pures.
+  wp_rec. wp_pures.
+  iModIntro.
+  iDestruct ("HΦ" with "[]") as "HΦ".
+  { done. }
+  iExactEq "HΦ".
+  f_equal.
+  f_equal.
+  f_equal.
+  rewrite String_app_assoc //.
+Qed.
+
+```
+
+It's helpful to see the struct reasoning where `*Person` gets allocated before seeing how to use it. For that we'll use this function:
+
+```go
+func ExamplePersonRef() *Person {
+	return &Person{
+		FirstName: "Ada",
+		LastName:  "Lovelace",
+		Age:       25,
+	}
+}
+```
+
+The postcondition of the following spec introduces the _struct field points-to_. `l ↦[heap.Person :: "Age"] #(W64 25)` combines calculating an offset from `l` for the Age field of Person (that is, computing `l +ₗ #2`) with asserting that the value at that location is `#25`.
+
+```coq
+Lemma wp_ExamplePersonRef :
+  {{{ True }}}
+    heap.ExamplePersonRef #()
+  {{{ (l: loc), RET #l;
+      l ↦[heap.Person :: "FirstName"] #(str "Ada") ∗
+      l ↦[heap.Person :: "LastName"] #(str "Lovelace") ∗
+      l ↦[heap.Person :: "Age"] #(W64 25)
+  }}}.
+Proof.
+  wp_start as "_".
+  wp_apply wp_allocStruct.
+  { val_ty. }
+  iIntros (p) "Hperson".
+```
+
+:::: info Goal
+
+```txt title="goal 1"
+  Σ : gFunctors
+  hG : heapGS Σ
+  Φ : val → iPropI Σ
+  p : loc
+  ============================
+  "HΦ" : ∀ l : loc,
+           l ↦[heap.Person::"FirstName"] #(str "Ada") ∗
+           l ↦[heap.Person::"LastName"] #(str "Lovelace") ∗
+           l ↦[heap.Person::"Age"] #(W64 25) -∗ Φ #l
+  "Hperson" : p ↦[struct.t heap.Person] (#(str "Ada"),
+                                         (#(str "Lovelace"), (#(W64 25), #())))
+  --------------------------------------∗
+  Φ #p
+```
+
+::::
+
+Notice in the goal above how the struct allocation produced a `p ↦[struct.t heap.Person] v` assertion. This is actually the same as the points-to assertion we've been using all along, albeit with a more complex type. This assertion actually says that `v` is a tuple with the right structure to be a `Person` struct, and its three values are laid out in memory starting at `p`.
+
+Now look at what the following line of proof does to the goal.
+
+```coq
+iApply struct_fields_split in "Hperson"; iNamed "Hperson".
+```
+
+:::: info Goal diff
+
+```txt title="goal diff"
+  Σ : gFunctors
+  hG : heapGS Σ
+  Φ : val → iPropI Σ
+  p : loc
+  ============================
+  "HΦ" : ∀ l : loc,
+           l ↦[heap.Person::"FirstName"] #(str "Ada") ∗
+           l ↦[heap.Person::"LastName"] #(str "Lovelace") ∗
+           l ↦[heap.Person::"Age"] #(W64 25) -∗ Φ #l
+  "Hperson" : p ↦[struct.t heap.Person] (#(str "Ada"), // [!code --]
+                                         (#(str "Lovelace"), (#(W64 25), #()))) // [!code --]
+  "FirstName" : p ↦[heap.Person::"FirstName"] #(str "Ada") // [!code ++]
+  "LastName" : p ↦[heap.Person::"LastName"] #(str "Lovelace") // [!code ++]
+  "Age" : p ↦[heap.Person::"Age"] #(W64 25) // [!code ++]
+  --------------------------------------∗
+  Φ #p
+```
+
+::::
+
+The theorem `struct_fields_split` gives a way to take any points-to assertion with a struct type and split it into its component field points-to assertions, which is what the postcondition of this spec gives.
+
+```coq
+iApply "HΦ".
+  iFrame.
+Qed.
+
+Lemma wp_Older (firstName lastName: string) (age: w64) (p: loc) (delta: w64) :
+  {{{ p ↦[heap.Person :: "FirstName"] #firstName ∗
+      p ↦[heap.Person :: "LastName"] #lastName ∗
+      p ↦[heap.Person :: "Age"] #age
+  }}}
+    heap.Person__Older #p #delta
+  {{{ RET #();
+      p ↦[heap.Person :: "FirstName"] #firstName ∗
+      p ↦[heap.Person :: "LastName"] #lastName ∗
+      (* we avoid overflow reasoning by saying the resulting integer is just `word.add age delta`, which will wrap at 2^64  *)
+      p ↦[heap.Person :: "Age"] #(LitInt (word.add age delta))
+  }}}.
+Proof.
+  wp_start as "H".
+  iDestruct "H" as "(first & last & age)".
+  wp_pures.
+  (* there's a tactic to struct field loads/stores as well *)
+  wp_loadField.
+  wp_storeField.
+  iModIntro.
+  iApply "HΦ".
+  iFrame.
+Qed.
+
+```
+
+Here is one spec for `GetAge`, which results in breaking off the age field into its points-to assertion.
+
+```coq
+Lemma wp_GetAge (firstName lastName: string) (age: w64) (p: loc) (delta: w64) :
+  {{{ "first" :: p ↦[heap.Person :: "FirstName"] #firstName ∗
+      "last" :: p ↦[heap.Person :: "LastName"] #lastName ∗
+      "age" :: p ↦[heap.Person :: "Age"] #age
+  }}}
+    heap.Person__GetAge #p
+  {{{ (age_l: loc), RET #age_l;
+      p ↦[heap.Person :: "FirstName"] #firstName ∗
+      p ↦[heap.Person :: "LastName"] #lastName ∗
+      age_l ↦[uint64T] #age
+  }}}.
+Proof.
+  wp_start as "H". iNamed "H".
+  wp_apply wp_struct_fieldRef.
+  { simpl. auto. }
+  iApply "HΦ".
+  iFrame.
+  iExactEq "age".
+  rewrite struct_field_pointsto_eq.
+  reflexivity.
+Qed.
+
+```
+
+## Slices and maps
+
+Slices are (pointer, length, capacity).
+
+Ownership of slice vs capacity for appending.
+
+Maps as values, spec for iteration.
 
 ## Fractional permissions
 
-"Fictional separation" models read-only access.
+Covered reasonably well already in [fractional permissions](./program-proofs/fractions.md)
+
+"Fictional separation".
+
+Fractional permission models read-only access.
+
+Discardable fractions.
+
+```coq
+End goose.
+```

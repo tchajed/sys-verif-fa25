@@ -49,5 +49,5 @@ These papers are directly relevant to the class:
 These are interesting papers for verification more broadly:
 
 - [Formal verification of a realistic compiler (CACM 2009)](https://dl.acm.org/doi/pdf/10.1145/1538788.1538814)
-- [How Amazon Web Services Uses Formal Methods (CACM 2015)](https://assets.amazon.science/67/f9/92733d574c11ba1a11bd08bfb8ae/how-amazon-web-services-uses-formal-methods.pdf)
+- [How Amazon Web Services Uses Formal Methods (CACM 2015)](https://dl.acm.org/doi/pdf/10.1145/2699417)
 - [BP: Formal Proofs, the Fine Print and Side Effects (IEEE SecDev 2018)](https://6826.csail.mit.edu/2020/papers/secdev2018.pdf)
