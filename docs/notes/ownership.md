@@ -296,7 +296,8 @@ Lemma wp_Older (firstName lastName: string) (age: w64) (p: loc) (delta: w64) :
   {{{ RET #();
       p ↦[heap.Person :: "FirstName"] #firstName ∗
       p ↦[heap.Person :: "LastName"] #lastName ∗
-      (* we avoid overflow reasoning by saying the resulting integer is just `word.add age delta`, which will wrap at 2^64  *)
+      (* we avoid overflow reasoning by saying the resulting integer is just
+      [word.add age delta], which will wrap at 2^64  *)
       p ↦[heap.Person :: "Age"] #(LitInt (word.add age delta))
   }}}.
 Proof.
@@ -340,13 +341,104 @@ Qed.
 
 ```
 
-## Slices and maps
+## Slices
 
-Slices are (pointer, length, capacity).
+Go has a slice type `[]T`, a generic type that works for any element type `T`. Slices in Go are implemented as a struct value with a pointer, a length, and a capacity; this is also how they are modeled in GooseLang.
 
-Ownership of slice vs capacity for appending.
+### What are slices?
 
-Maps as values, spec for iteration.
+You can read more about them in this post on [Go data structures](https://research.swtch.com/godata) or in even more detail in this [post on slices and append](https://go.dev/blog/slices). Below are some basic details.
+
+A slice represents a piece of a contiguous block of memory, which is often called an array.
+
+The length of a slice is the number of elements of valid data the slice references starting at the pointer. The capacity tracks how many additional elements past the length are available for the slice to grow to, if elements are appended.
+
+In Go, the common idiom for appending to a slice `s []T` is `s = append(s, x)`. This is because if `s` has no spare capacity, `append` allocates a new, larger array and copies the elements over to it; this cannot change `s` since this is passed by value, so instead the new slice is returned. When a slice is grown, typically its capacity will be double the original length, to amortize the cost of copying over the elements.
+
+### Reasoning about slices
+
+The basic assertion for working with slices is `own_slice s t dq xs`. `s` is a `Slice.t`, a Coq record representing the slice value (the triple of pointer, length, and capacity); in GooseLang code, you will instead use `slice_val s : val`. `t` is the type of elements, similar to the types used for structs and struct fields. `dq` is a fraction, explained below; for now we will pretend like it's always `DfracOwn 1`. Finally, `xs` is a Gallina `list` of the elements of the slice. The overall result is an assertion that gives ownership over the slice `s`, and records that it has the elements `xs`.
+
+This abstraction uses typeclasses so the type of `xs` can vary, so for example we can use `list w64` for a slice of integers. You can see this in the type signature for `own_slice`, where there are parameters `V: Type` and `IntoVal V`:
+
+```coq
+About own_slice.
+```
+
+:::: note Output
+
+```txt title="coq output"
+own_slice :
+∀ {ext : ffi_syntax} {ffi : ffi_model} {ffi_interp0 : ffi_interp ffi}
+  {Σ : gFunctors},
+  heapGS Σ
+  → ∀ {ext_ty : ext_types ext} {V : Type},
+      IntoVal V → Slice.t → ty → dfrac → list V → iProp Σ
+
+own_slice is not universe polymorphic
+Arguments own_slice {ext ffi ffi_interp0 Σ heapGS0 ext_ty}
+  {V}%type_scope {IntoVal0} s t%heap_type q vs%list_scope
+own_slice is transparent
+Expands to: Constant Perennial.goose_lang.lib.slice.typed_slice.own_slice
+```
+
+::::
+
+You can ignore this whole string of parameters, which are related to Goose support for interacting with disks and the network (all of the "external" and "FFI" related parameters):
+
+```coq
+{ext : ffi_syntax} {ffi : ffi_model} {ffi_interp0 : ffi_interp ffi}
+  {Σ : gFunctors},
+  heapGS Σ
+  → ∀ {ext_ty : ext_types ext}
+```
+
+The capacity of a slice is interesting in the model because it turns out ownership of the capacity is separate from ownership of the elements. Consider the following code, which splits a slice:
+
+```go
+s := []int{1,2,3}
+s1 := s[:1]
+s2 := s[1:]
+```
+
+What is not obvious in this example is that `s1` has a capacity that _overlaps_ with that of `s2`. Specifically, the behavior of this code is surprising (you can [run it yourself](https://go.dev/play/p/yhcjYdVBVjo) on the Go playground):
+
+```go
+s := []int{1,2,3}
+s1 := s[:1]
+s2 := s[1:]
+fmt.Println(s2[0]) // prints 2
+s1 = append(s1, 5)
+fmt.Println(s2[0]) // prints 5, not 2!
+```
+
+Goose accurately models this situation. It does so by separating out the predicates for ownership of a slice's elements (between 0 and its length) and its capacity (from length to capacity).
+
+- `own_slice_small s dq t xs` asserts ownership only over the elements within the length of `s`, and says they have values `xs`.
+- `own_slice_cap s t` asserts ownership over just the capacity of `s`, saying nothing about their contents (but they must have type `t`).
+- `own_slice s dq t xs := own_slice_small s dq t xs ∗ own_slice_cap s t` asserts ownership over the elements and capacity.
+
+The main specification related to capacity is the one for append:
+
+```coq
+Lemma wp_SliceAppend s t vs x :
+  {{{ own_slice s t (DfracOwn 1) vs ∗ ⌜val_ty x t⌝ }}}
+    SliceAppend t s x
+  {{{ s', RET slice_val s'; own_slice s' t (DfracOwn 1) (vs ++ [x]) }}}.
+```
+
+Notice that `own_slice` appears in the pre- and post-condition; it would be unsound to use `own_slice_small` here, since appending modifies the capacity of a slice.
+
+What is key to understanding the Go example above is that the Go expression `s[:n]` is ambiguous as to how it handles ownership. The capacity of `s[:n]` and `s[n:]` overlap; if we model `s[:n]` with `slice_take s n` and `s[n:]` as `slice_drop s n`, then there are two main choices for how to divide ownership when taking a prefix:
+
+- `own_slice s dq t xs ⊢ own_slice (slice_take s dq t (take xs n))`. Drop any ownership over the elements after `n`, but retain the capacity of the smaller slice.
+- `own_slice_small s dq t xs ⊢ own_slice_small (slice_take s dq t (take xs n)) ∗ own_slice_small (slice_drop s dq t (drop xs n))`. Split ownership, but lose the ability to append to the prefix.
+
+There is one more possibility which is a slight variation on splitting:
+
+- `own_slice s dq t xs ⊢ own_slice_small (slice_take s dq t (take xs n)) ∗ own_slice (slice_drop s dq t (drop xs n))`. If we start out with ownership of the capacity, we can split ownership and still be able to append to the _second_ part (its capacity is the capacity of the original slice). We can actually derive this from the lower-level fact that `slice_cap s t ⊣⊢ slice_cap (slice_skip s n)` if `n` is in-bounds.
+
+## Maps
 
 ## Fractional permissions
 
