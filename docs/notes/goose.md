@@ -345,8 +345,7 @@ Proof.
                   "sum" :: sum_l ↦[uint64T] #sum ∗
                     "i" :: i_l ↦[uint64T] #i)%I
              with "[] [sum i]").
-  - clear Φ.
-    wp_start as "IH".
+  - wp_start as "IH".
     iNamed "IH".
     wp_load.
     wp_pures. wp_if_destruct.
@@ -393,8 +392,7 @@ Proof.
                   "%Hsum_ok" :: ⌜uint.Z sum = (uint.Z i-1) * (uint.Z i) / 2⌝ ∗
               "%Hcontinue" :: ⌜continue = false → uint.Z i = (uint.Z n + 1)%Z⌝)%I
              with "[] [sum i]").
-  - clear Φ.
-    wp_start as "IH".
+  - wp_start as "IH".
     iNamed "IH".
     wp_load.
     wp_pures. wp_if_destruct.

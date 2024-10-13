@@ -393,6 +393,16 @@ You can ignore this whole string of parameters, which are related to Goose suppo
   → ∀ {ext_ty : ext_types ext}
 ```
 
+Getting and setting slice elements have reasonable specifications:
+
+::: warning TODO
+
+copy these from perennial
+
+:::
+
+### Appending to a slice
+
 The capacity of a slice is interesting in the model because it turns out ownership of the capacity is separate from ownership of the elements. Consider the following code, which splits a slice:
 
 ```go
