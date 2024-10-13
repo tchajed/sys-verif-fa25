@@ -48,6 +48,8 @@ These papers are directly relevant to the class:
 
 These are interesting papers for verification more broadly:
 
-- [Formal verification of a realistic compiler (CACM 2009)](https://dl.acm.org/doi/pdf/10.1145/1538788.1538814)
+- [Formal verification of a realistic compiler (CACM 2009)](https://dl.acm.org/doi/pdf/10.1145/1538788.1538814) (CompCert)
+- [IronFleet: Proving Practical Distributed Systems Correct (SOSP 2015)](https://www.andrew.cmu.edu/user/bparno/papers/ironfleet.pdf)
 - [How Amazon Web Services Uses Formal Methods (CACM 2015)](https://dl.acm.org/doi/pdf/10.1145/2699417)
 - [BP: Formal Proofs, the Fine Print and Side Effects (IEEE SecDev 2018)](https://6826.csail.mit.edu/2020/papers/secdev2018.pdf)
+- [Simple High-Level Code For Cryptographic Arithmetic – With Proofs, Without Compromises (IEEE S&P 2019)](https://jasongross.github.io/papers/2019-fiat-crypto-ieee-sp.pdf) (Fiat Crypto)
