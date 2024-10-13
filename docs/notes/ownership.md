@@ -395,11 +395,56 @@ You can ignore this whole string of parameters, which are related to Goose suppo
 
 Getting and setting slice elements have reasonable specifications:
 
-::: warning TODO
+```coq
+Check wp_SliceGet.
+```
 
-copy these from perennial
+:::: note Output
 
-:::
+```txt title="coq output"
+wp_SliceGet
+     : ∀ (stk : stuckness) (E : coPset) (s : Slice.t)
+         (t : ty) (q : dfrac) (vs : list ?V) (i : w64)
+         (v0 : ?V) (Φ : val → iPropI Σ),
+         own_slice_small s t q vs ∗ ⌜vs !! uint.nat i = Some v0⌝ -∗
+         ▷ (own_slice_small s t q vs -∗ Φ (to_val v0)) -∗
+         WP SliceGet t s #i @ stk; E {{ v, Φ v }}
+where
+?V : [Σ : gFunctors  hG : heapGS Σ |- Type]
+?IntoVal0 : [Σ : gFunctors  hG : heapGS Σ |- IntoVal ?V]
+```
+
+::::
+
+We got this specification using `Check` rather than copying it from the Perennial source code. Notice that the Hoare triple notation is not used here (I'm not entirely sure why, possibly a bug in the notations). You should still be able to read this specification, if you understood the "continuation-passing style" encoding of Hoare triple used in Iris.
+
+The one complication with this particular specification is that its precondition requires the caller to pass the value `v0` that is in the slice. `SliceGet` itself requires `i` to be in-bounds (otherwise `s[i]` panics in Go), and `vs !! uint.nat i = Some v0` has the side of enforcing this obligation, and the postcondition then uses the same value `v0`.
+
+```coq
+Check wp_SliceSet.
+```
+
+:::: note Output
+
+```txt title="coq output"
+wp_SliceSet
+     : ∀ (stk : stuckness) (E : coPset) (s : Slice.t) (t : ty),
+         IntoValForType ?V t
+         → ∀ (vs : list ?V) (i : w64) (v : ?V) (Φ : val → iPropI Σ),
+             own_slice_small s t (DfracOwn 1) vs ∗
+             ⌜is_Some (vs !! uint.nat i)⌝ -∗
+             ▷ (own_slice_small s t (DfracOwn 1) (<[uint.nat i:=v]> vs) -∗
+                Φ #()) -∗ WP SliceSet t s #i (to_val v) @ stk; E {{ v, Φ v }}
+where
+?V : [Σ : gFunctors  hG : heapGS Σ |- Type]
+?IntoVal0 : [Σ : gFunctors  hG : heapGS Σ |- IntoVal ?V]
+```
+
+::::
+
+Storing into a slice requires a proof `is_Some (vs !! uint.nat i)`, which similarly guarantees that `i` is in-bounds, but the original value is not needed. The postcondition uses `<[uint.nat i := v]> vs` which is a Gallina implementation of updating one index of a list (it's notation for the function `insert` from std++).
+
+You may notice that there's an arbitrary `q : dfrac` in the specification for `SliceGet`, while `SliceSet` has `DfracOwn 1`. This difference is no accident and corresponds to the fact that `SliceGet` works even on a _read-only_ slice while `SliceSet` needs to be able to modify the input slice. We'll cover the mechanism with fractions [later on](#read-only).
 
 ### Appending to a slice
 
@@ -448,17 +493,17 @@ There is one more possibility which is a slight variation on splitting:
 
 - `own_slice s dq t xs ⊢ own_slice_small (slice_take s dq t (take xs n)) ∗ own_slice (slice_drop s dq t (drop xs n))`. If we start out with ownership of the capacity, we can split ownership and still be able to append to the _second_ part (its capacity is the capacity of the original slice). We can actually derive this from the lower-level fact that `slice_cap s t ⊣⊢ slice_cap (slice_skip s n)` if `n` is in-bounds.
 
-## Maps
+### Exercise: find the theorems above in Perennial
 
-## Fractional permissions
+Either using `Search` or by looking at the source code in Perennial, find the theorems above.
 
-Covered reasonably well already in [fractional permissions](./program-proofs/fractions.md)
+The relevant source code is the file `src/goose_lang/lib/slice/typed_slice.v` in Perennial (you can use the submodule copy in your exercises repo).
 
-"Fictional separation".
+## Read-only ownership: fractional permissions {#read-only}
 
-Fractional permission models read-only access.
+Fractional permissions are an approach to reasoning about read-only access in separation logic.
 
-Discardable fractions.
+This concept is explained as part of the Program Proofs guide in [fractional permissions](./program-proofs/fractions.md).
 
 ```coq
 End goose.
