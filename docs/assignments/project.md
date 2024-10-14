@@ -42,3 +42,9 @@ This requires some data structure design. A starting point would be to maintain 
 Port [trie-hard](https://github.com/cloudflare/trie-hard) to Go and verify it. Specialize that implementation to u64.
 
 This is a trie (an efficient prefix-search data structure, especially for a fixed set of search strings), but with the twist of encoding the pointers into the bits of an integer for space efficiency (without this Cloudflare found it wasn't faster than a Rust `HashMap`).
+
+## Verify Go's sort.Find
+
+We saw a simplified binary search implementation in the notes. Specify and verify the Go binary search implementation, [sort.Find](https://pkg.go.dev/sort#Find) from the standard library.
+
+(I think this project is a bit more straightforward than many of the others.)
