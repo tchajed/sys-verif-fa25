@@ -441,7 +441,138 @@ Qed.
 
 :::
 
+### Case study: Binary search
+
+Here is a larger example with a provided loop invariant but not the correctness proof. The code being verified is the following (inspired by <https://go.dev/src/sort/search.go>):
+
+```go
+// BinarySearch looks for needle in the sorted list s. It returns (index, found)
+// where if found = false, needle is not present in s, and if found = true, s[index]
+// == needle.
+//
+// If needle appears multiple times in s, no guarantees are made about which of
+// those indices is returned.
+func BinarySearch(s []uint64, needle uint64) (uint64, bool) {
+	var i = uint64(0)
+	var j = uint64(len(s))
+	for i < j {
+		mid := i + (j-i)/2
+		if s[mid] < needle {
+			i = mid + 1
+		} else {
+			j = mid
+		}
+	}
+	if i < uint64(len(s)) {
+		return i, s[i] == needle
+	}
+	return i, false
+}
+```
+
+The source for this example suggests the following invariant. To relate the more general code for `Find` to `BinarySearch`, use the following relationships:
+
+- `h` in the original is `mid` in `BinarySearch`
+- `cmp(mid)` is what we would write `needle - s[mid]`, so that `cmp(mid) > 0` is `s[mid] < needle`.
+
+The suggested invariant is the following:
+
+> Define cmp(-1) > 0 and cmp(n) <= 0.
+>
+> Invariant: cmp(i-1) > 0, cmp(j) <= 0
+
 ```coq
+Definition is_sorted (xs: list w64) :=
+  ∀ (i j: nat), (i < j)%nat →
+         ∀ (x1 x2: w64), xs !! i = Some x1 →
+                  xs !! j = Some x2 →
+                  uint.Z x1 < uint.Z x2.
+
+Lemma wp_BinarySearch (s: Slice.t) (xs: list w64) (needle: w64) :
+  {{{ own_slice_small s uint64T (DfracOwn 1) xs ∗ ⌜is_sorted xs⌝ }}}
+    heap.BinarySearch s #needle
+  {{{ (i: w64) (ok: bool), RET (#i, #ok);
+      own_slice_small s uint64T (DfracOwn 1) xs ∗
+      ⌜ok = true → xs !! uint.nat i = Some needle⌝
+  }}}.
+Proof.
+  wp_start as "[Hs %Hsorted]".
+  wp_pures.
+  wp_alloc i_l as "i".
+  iDestruct (own_slice_small_sz with "Hs") as %Hsz.
+  wp_apply (wp_slice_len).
+  wp_alloc j_l as "j".
+  wp_pures.
+  wp_apply (wp_forBreak_cond
+           (λ continue, ∃ (i j: w64),
+               "Hs" :: own_slice_small s uint64T (DfracOwn 1) xs ∗
+               "i" :: i_l ↦[uint64T] #i ∗
+               "j" :: j_l ↦[uint64T] #j ∗
+               "%Hij" :: ⌜uint.Z i ≤ uint.Z j ≤ Z.of_nat (length xs)⌝ ∗
+               "%H_low" :: ⌜∀ (i': nat),
+                            i' < uint.nat i →
+                            ∀ (x: w64), xs !! i' = Some x →
+                                uint.Z x < uint.Z needle⌝ ∗
+               "%H_hi" :: ⌜∀ (j': nat),
+                            uint.nat j ≤ j' →
+                            ∀ (y: w64), xs !! j' = Some y →
+                                uint.Z needle < uint.Z y⌝ ∗
+               "%Hbreak" ∷ ⌜continue = false → i = j⌝
+           )%I
+           with "[] [Hs i j]").
+  - wp_start as "IH".
+    iNamed "IH".
+    wp_load. wp_load.
+    wp_pures.
+    wp_if_destruct.
+    + wp_pures.
+      wp_load. wp_load. wp_load. wp_pures.
+      set (mid := word.add i (word.divu (word.sub j i) (W64 2)) : w64).
+      assert (uint.Z mid = (uint.Z i + uint.Z j) / 2) as Hmid_ok.
+      { subst mid.
+        word. }
+      list_elem xs (uint.nat mid) as x_mid.
+      wp_apply (wp_SliceGet with "[$Hs]").
+      { eauto. }
+      iIntros "Hs".
+      simpl to_val.
+      wp_pures.
+      wp_if_destruct.
+      * wp_store.
+        iModIntro.
+        iApply "HΦ".
+        iFrame.
+        iPureIntro.
+        split_and!; try word.
+        { intros.
+          (* the [revert H] is a bit of black magic here; it [word] operate on H
+          by putting it into the goal *)
+          assert (i' ≤ uint.nat mid)%nat by (revert H; word).
+          admit.
+        }
+        (* You might ask, why is this super easy? A: we didn't change any relevant variables *)
+        eauto.
+      * wp_store.
+        iModIntro.
+        iApply "HΦ".
+        iFrame.
+        iPureIntro.
+        split_and!; try word.
+        { auto. }
+        admit. (* TODO: fill in based on earlier proof *)
+    + iModIntro.
+      iApply "HΦ".
+      iFrame.
+      iPureIntro.
+      split_and!; try word; auto.
+      intros.
+      word.
+  - iFrame.
+    admit.
+  - iIntros "Hpost".
+    admit.
+Admitted.
+
 End goose.
 
 ```
