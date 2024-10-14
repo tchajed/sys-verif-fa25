@@ -443,7 +443,7 @@ Qed.
 
 ### Case study: Binary search
 
-Here is a larger example with a provided loop invariant but not the correctness proof. The code being verified is the following (inspired by <https://go.dev/src/sort/search.go>):
+Here is a larger example with a provided loop invariant but not the correctness proof. The code being verified is the following (inspired by [the standard library's sort package](https://go.dev/src/sort/search.go)):
 
 ```go
 // BinarySearch looks for needle in the sorted list s. It returns (index, found)
@@ -470,16 +470,20 @@ func BinarySearch(s []uint64, needle uint64) (uint64, bool) {
 }
 ```
 
-The source for this example suggests the following invariant. To relate the more general code for `Find` to `BinarySearch`, use the following relationships:
+The standard library implementation suggests the following invariant. To relate the more general code for `Find` to `BinarySearch`, use the following relationships:
 
-- `h` in the original is `mid` in `BinarySearch`
-- `cmp(mid)` is what we would write `needle - s[mid]`, so that `cmp(mid) > 0` is `s[mid] < needle`.
+- `h` in `Find` is `mid` in `BinarySearch`
+- The more general `cmp(mid)` becomes the specific comparison function `needle - s[mid]`, so that `cmp(mid) > 0` becomes `s[mid] < needle`.
 
 The suggested invariant is the following:
 
 > Define cmp(-1) > 0 and cmp(n) <= 0.
 >
 > Invariant: cmp(i-1) > 0, cmp(j) <= 0
+
+Can you see how this invariant relates to the one below? Notice how we had to be much more precise, filling in many missing details above.
+
+A note on Go function names: Go makes a global decision that function calls always use the package name, so other than within the standard library's sort package, the function will be invoked as `sort.Find`. That is how I'll refer to it from now on.
 
 ```coq
 Definition is_sorted (xs: list w64) :=
@@ -573,6 +577,17 @@ Proof.
     admit.
 Admitted.
 
+```
+
+The standard library implements a more general API than above, since the caller passes in a comparison function. It does not directly assume this comparison function is transitive.
+
+### Exercise: prove the standard library sort.Find
+
+What is Go's `sort.Find` assuming and promising? Translate the prose specification to a Coq predicate. Then, translate the invariant in the implementation to a more formal Coq predicate, similar to what you see in the proof of `BinarySearch`.
+
+Proving the real `sort.Find` with Goose is also a possibility, with minor tweaks to the code due to Goose translation limitations. A tricky part is that `Find` is a higher-order function: it takes a function as an argument. We already saw one such function, `For`, but this was only in GooseLang; now we have to deal with one coming from Go.
+
+```coq
 End goose.
 
 ```
