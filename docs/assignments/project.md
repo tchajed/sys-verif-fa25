@@ -47,4 +47,4 @@ This is a trie (an efficient prefix-search data structure, especially for a fixe
 
 We saw a simplified binary search implementation in the notes. Specify and verify the Go binary search implementation, [sort.Find](https://pkg.go.dev/sort#Find) from the standard library.
 
-(I think this project is a bit more straightforward than many of the others.)
+(I think this project is a bit more straightforward than the others in this list.)
