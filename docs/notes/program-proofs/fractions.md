@@ -63,13 +63,8 @@ Proof.
 :::: info Goal diff
 
 ```txt title="goal diff"
-  ext : ffi_syntax
-  ffi : ffi_model
-  ffi_interp0 : ffi_interp ffi
   Σ : gFunctors
   hG : heapGS Σ
-  ffi_semantics0 : ffi_semantics ext ffi
-  ext_types0 : ext_types ext
   l : loc
   x : w64
   ============================
@@ -93,13 +88,8 @@ Proof.
 :::: info Goal diff
 
 ```txt title="goal diff"
-  ext : ffi_syntax
-  ffi : ffi_model
-  ffi_interp0 : ffi_interp ffi
   Σ : gFunctors
   hG : heapGS Σ
-  ffi_semantics0 : ffi_semantics ext ffi
-  ext_types0 : ext_types ext
   l : loc
   x : w64
   ============================
@@ -145,13 +135,8 @@ Proof.
 :::: info Goal
 
 ```txt title="goal 1"
-  ext : ffi_syntax
-  ffi : ffi_model
-  ffi_interp0 : ffi_interp ffi
   Σ : gFunctors
   hG : heapGS Σ
-  ffi_semantics0 : ffi_semantics ext ffi
-  ext_types0 : ext_types ext
   l : loc
   x : w64
   ============================
@@ -194,7 +179,7 @@ Third, discarding the fraction involves an Iris "update", a change in ghost stat
 Lemma alloc_ro_spec (x: w64) :
   {{{ True }}}
     ref_to uint64T #x
-  {{{ (l: loc), RET (#l: @val ext); l ↦[uint64T]□ #x }}}.
+  {{{ (l: loc), RET (#l: val); l ↦[uint64T]□ #x }}}.
 Proof.
   (* This proof is a bit odd because it's just a single allocation, so the
   tactics don't quite do the right thing. We'll need to do the work of
@@ -215,13 +200,8 @@ iMod (struct_pointsto_persist with "H") as "#Hro".
 :::: info Goal diff
 
 ```txt title="goal diff"
-  ext : ffi_syntax
-  ffi : ffi_model
-  ffi_interp0 : ffi_interp ffi
   Σ : gFunctors
   hG : heapGS Σ
-  ffi_semantics0 : ffi_semantics ext ffi
-  ext_types0 : ext_types ext
   x : w64
   Φ : val → iPropI Σ
   l : loc
