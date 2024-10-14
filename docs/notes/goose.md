@@ -159,7 +159,7 @@ Definition SumN: val :=
     ![uint64T] "sum".
 ```
 
-The (GooseLang) syntax `for:` is a very thin Notation around the following _model_ of (Go) `for` loops (the order of arguments differs though):
+The (GooseLang) syntax `for:` is a very thin Notation around the following _model_ of (Go) `for` loops:
 
 ```coq
 Definition For: val :=
@@ -174,23 +174,23 @@ Definition For: val :=
      else #()) #().
 ```
 
-The Go code `for e1; e2; e3 { body }` is translated (roughly) into `e1;; For e2 body e3`.
+The Go code `for init; cond; post { body }` is translated (roughly) into `init;; For cond body post`. (Unfortunately this isn't the order of arguments of the notation, which goes `for: cond ; post := body`. The function `For` should be fixed.)
 
-`For` takes three _functions_ as arguments: cond, body, and post. You can think of it as having the type `For : (unit -> bool) -> (unit -> unit) -> (unit -> unit) -> unit`, where `#() : unit` is the unit value in GooseLang. (You are welcome to think about these types but we don't actually have a type system for GooseLang, so it's only in your imagination.)
+`For` takes three _functions_ as arguments (making it a so-called _higher-order function_): cond, body, and post. You can think of it as having the type `For : (unit -> bool) -> (unit -> unit) -> (unit -> unit) -> unit`, where `#() : unit` is the unit value in GooseLang. (You are welcome to think about these types but we don't actually have a type system for GooseLang, so it's only in your imagination.)
 
 You might be confused by the `unit` argument each function takes: this is sometimes called a _thunk_ and is needed to prevent evaluating the condition, body, and post until they are needed in the loop. For example, if for the `cond` we passed a `bool` rather than a `unit -> bool` it would be a constant throughout the entire loop. A function that takes a unit isn't evaluated until desired by passing the argument.
 
 ::: info Exercise
 
-Check your understanding: does the `cond` return `true` when the loop should stop or keep going? Try to figure out how this follows from the definition of `Fo`, not just your expectations.
+Check your understanding: does the `cond` return `true` when the loop should stop or keep going? Try to figure out how this follows from the definition of `For`, not just your expectations.
 
 Next, do you believe this is a correct model of `for` loops?
 
 :::
 
-### Loop invariants
+## Loop invariants
 
-The general idea for proving the correctness of a loop is to invent a _loop invariant_, an assertion that is (1) true when the loop starts, and (2) _if_ the loop invariant holds at the start of the loop, it should hold at the end. If you prove these two things, via induction, you've proven that the loop invariant is true at the end of the loop. We also can learn one more fact which is necessary in practice: the loop probably has some "break condition", a property that is true when it terminates. We know the break condition is false at the beginning of the loop, and we know it is true at the end.
+The general idea for proving the correctness of a loop is to invent a _loop invariant_, an assertion that is (1) true when the loop starts, and (2) _if_ the loop invariant holds at the start of the loop, it should hold at the end. If you prove these two things, via induction, you've proven that the loop invariant is true at the end of the loop. We also can learn one more fact which is necessary in practice: the loop probably has a "break condition", a property that is true when it terminates. We know the loop invariant is preserved by each iteration, and if the loop exits it satisfies the break condition.
 
 Here's the principle of loop invariants stated formally, for the `for` loop model above. This is a theorem in Perennial (slightly simplified).
 
@@ -209,7 +209,16 @@ The invariant `I` takes a boolean which is true if the loop is continuing and be
 
 Note that loop invariants are a _derived principle_. The proof of the theorem above is based only on recursion (since that's how `For` is implemented), and in fact Perennial has some other loop invariant-like rules for special cases of `for` loops, like the common case of `for i := 0; i < n; i++ { ... }`.
 
-### Proofs with Goose
+### Exercise (difficult, especially useful)
+
+The informal description above describes a "continue condition" and "break condition", but that is not how `wp_forBreak` is written. In this exercise you'll bridge the gap.
+
+1. Reformulate `wp_forBreak` so that it takes a regular loop invariant and a break condition as separate arguments, to more closely match the principle above. That, state a different theorem (let's call it `wp_for_breakCondition`) for proving a specification about that same expression `(for: (λ: <>, #true)%V ; (λ: <>, Skip)%V := body)`.
+2. Prove your new `wp_for_breakCondition` using `wp_forBreak`. You should replace the `-∗` in the theorem statement with a `→` (we will discuss what difference this creates later when we talk about something called the _persistently modality_).
+
+## Proofs with Goose
+
+This section shows some examples of specifications and proofs.
 
 ```coq
 From sys_verif.program_proof Require Import prelude empty_ffi.
@@ -439,7 +448,7 @@ End goose.
 
 ## Implementation
 
-The Goose translation uses [go/ast](https://pkg.go.dev/go/ast) and [go/types](https://pkg.go.dev/go/types) for parsing, type checking, and resolving references (e.g., which function is being called?). Using these official packages reduces chance of bugs, and allows us to rely on types; writing a type inference engine for Go from scratch would be a daunting task otherwise.
+The Goose translation uses [go/ast](https://pkg.go.dev/go/ast) and [go/types](https://pkg.go.dev/go/types) for parsing, type checking, and resolving references (e.g., which function is being called?). Using these official packages reduces chance of bugs, and allows us to rely on types; writing a type inference engine for Go from scratch would be a daunting task, and would be much less trustworthy than the official package. (This package is not literally the one used by the `go` binary, but it is very close. You can read more about the situation by looking at the [`internal/types2`](https://cs.opensource.google/go/go/+/master:src/cmd/compile/internal/types2/README.md) documentation. If you're confused about something in Go, there's a higher than usual chance you can find the answer in the source code.)
 
 Goose is tested at several levels:
 
@@ -463,3 +472,5 @@ $$\mathrm{behavior}(p) \subseteq \mathrm{semantics}(\mathrm{goose}(p))$$
 The reason this is the direction of the inequality is that the proofs will show that every execution in $\mathrm{semantics}(\mathrm{goose}(p))$ satisfy some specification, and in that case this inclusion guarantees that all the real executable behaviors are also "good", even if the semantics has some extra behaviors. On the other hand it would not be ok to verify a _subset_ of the behaviors of a program since one of the excluded behaviors could be exactly the kind of bug you wanted to avoid.
 
 If translation does not work, sound (can't prove something wrong) but not a good developer experience. Failure modes: does not translate, does not compile in Coq, compiles but GooseLang code is always undefined.
+
+This correctness criteria for Goose makes it easier to understand why the implementation would want the official typechecker and not some other version: whatever the meaning of a Go program, we want the Goose understanding to match the Go compiler's understanding. If they both don't match the reference manual, or if the reference manual is ambiguous, that doesn't affect Goose's correctness.
