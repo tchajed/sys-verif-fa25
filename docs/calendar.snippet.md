@@ -16,8 +16,8 @@
 |   9 | Wed Oct 2  | [Separation logic (part 2)](./notes/sep_logic.md) |
 |  10 | Mon Oct 7  | [Iris Proof Mode](./notes/ipm.md)                 |
 |  11 | Wed Oct 9  | [Modeling Go programs](./notes/goose.md)          |
-|  12 | Mon Oct 14 | [Ownership in Go](./notes/ownership.md)           |
-|  13 | Wed Oct 16 | Examples                                          |
+|  12 | Mon Oct 14 | [Loop invariants](./notes/loop_invariants.md)     |
+|  13 | Wed Oct 16 | [Ownership](./notes/ownership.md)                 |
 |  14 | Mon Oct 21 | Examples                                          |
 |     | Tue Oct 22 | _Assignment 2 due (11pm)_                         |
 |     |            | **Part 3: Concurrency**                           |
