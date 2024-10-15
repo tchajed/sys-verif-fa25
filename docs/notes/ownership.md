@@ -2,12 +2,12 @@
 # Auto-generated from literate source. DO NOT EDIT.
 category: lecture
 tags: literate
-order: 12
-shortTitle: "Lecture 12: Ownership in Go"
+order: 13
+shortTitle: "Lecture 13: Ownership in Go"
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
-# Lecture 12: Goose - Ownership reasoning
+# Lecture 13: Goose - Ownership reasoning
 
 > Follow these notes in Coq at [src/sys_verif/program_proof/ownership.v](https://github.com/tchajed/sys-verif-fa24-proofs/blob/main/src/sys_verif/program_proof/ownership.v).
 

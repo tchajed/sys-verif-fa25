@@ -21,6 +21,7 @@ $$
 \gdef\num#1{\overline{#1}}
 \gdef\true{\mathrm{true}}
 \gdef\false{\mathrm{false}}
+\gdef\skip{\mathrm{skip}}
 \gdef\fun#1{\lambda #1.\,}
 \gdef\funblank{\fun{\_}}
 \gdef\rec#1#2{\text{\textbf{rec} } #1 \; #2.\;\,}
