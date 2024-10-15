@@ -22,6 +22,7 @@ Once you have the setup, you'll need to use the right LaTeX commands. Here's a r
 | `\land` | ∧ | **l**ogical **and** |
 | `\lor` | ∨ | **l**ogical **or** |
 | `\sep` | ∗ | separating conjunction (note: not same as usual `*`) |
+| `\mapsto` | ↦ | points-to for separation logic |
 | `\named` | ∷ | used for named propositions |
 | `\lc` and `\rc` | ⌜ and ⌝ | brackets for pure propositions |
 
