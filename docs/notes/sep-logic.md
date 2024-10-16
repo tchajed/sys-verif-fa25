@@ -406,7 +406,7 @@ $$
 }
 $$
 
-Using this rule, we can prove that $sumN$ returns $\num{n(n+1)/2}$. The key is to use a loop invariant $I(i) ::= x \pointsto \num{i(i+1)/2)}$.
+Using this rule, we can prove that $sumN$ returns $\num{n(n+1)/2}$. The key is to use a loop invariant $I(i) ::= x \pointsto \num{i(i+1)/2}$.
 
 ## Magic wand (separating implication)
 
