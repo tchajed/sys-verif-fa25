@@ -122,12 +122,6 @@ You can't tell from just the API (which does not even describe ownership in comm
 
 ## Structs
 
-::: warning Draft
-
-This section is a complete description of structs and ownership around structs, but I haven't yet written an introduction tying it back to the overall themes of the lecture.
-
-:::
-
 Go has structs. Here's an example, along with a few methods:
 
 ```go
@@ -157,6 +151,8 @@ func ExamplePerson() Person {
 	}
 }
 ```
+
+The ownership principle for structs can best be seen in `Older` and `GetAge`. Notice that `Older` only needs ownership (or permission to access) the field Age, not the entire struct `p *Person`. Similarly, `GetAge` is fundamentally about extracting ownership over the single field `p.Age`; different (but related) assertions are needed to give the ownership of `p` and of `&p.Age`.
 
 Methods on structs are actually quite easy to model: `Name` becomes a function `Person__Name` that takes `p` as its first argument. The struct name is prepended to disambiguate this function from another function `Name` in the same scope (or another struct method called `Name`). Whenever Go calls a method on a struct, it is translated to a call to the appropriate function. If you're not sure how Go methods work as a language feature, read the [Go tour on methods](https://go.dev/tour/methods/1).
 
