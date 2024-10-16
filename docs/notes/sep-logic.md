@@ -303,9 +303,9 @@ This definition requires a pretty specific triple: it cannot involve anything ab
 
 **Definition 2** _Sequential Separation Logic Soundness_: If
 
-$$\hoare{\bigsep_{(\ell, v) \in h_{in}} \ell \mapsto v}{e}{\fun{v} \exists h_{out}.\, \left(\bigsep_{(\ell, w) \in h_{out}} \ell \pointsto w\right) \sep \phi(v, h_{out})}$$
+$$\hoare{\bigsep_{(\ell, v) \in h_{in}} \ell \mapsto v}{e}{\fun{v'} \exists h_{out}.\, \left(\bigsep_{(\ell, w) \in h_{out}} \ell \pointsto w\right) \sep \phi(v', h_{out})}$$
 
-and $h_{in} \subseteq h$ and $(e, h) \leadsto (e', h')$, then $(e', h')$ is not stuck or $e' = v'$ for some value $v'$ and there is an $h_{out} \subseteq h'$ such that $\phi(v, h_{out})$.
+and $h_{in} \subseteq h$ and $(e, h) \leadsto (e', h')$, then $(e', h')$ is not stuck or $e' = v'$ for some value $v'$ and there is an $h_{out} \subseteq h'$ such that $\phi(v', h_{out})$.
 
 This definition uses only the new separation logic propositions we've seen, points-to and separating conjunction, and also doesn't reference the fact that they are heap predicates. Notice that it does talk about framing out any extra parts of the heap not used by the precondition.
 
