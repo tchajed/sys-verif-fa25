@@ -568,11 +568,25 @@ s1 = append(s1, 5)
 fmt.Println(s2[0]) // prints 5, not 2!
 ```
 
-Goose accurately models this situation. It does so by separating out the predicates for ownership of a slice's elements (between 0 and its length) and its capacity (from length to capacity).
+Goose accurately models this situation. If `s = (ptr, l, c)`, we know from construction that `l = 3` and `c ≥ 3`. The key to modeling the rest of the code is that `s[:1] = (ptr, 1, c)` (with a capacity that includes the original allocation) while `s[1:] = (ptr + 1, 2, c-2)`. The append to `s1 = s[:1]` writes to the same memory occupied by `s2[0]`.
+
+In proofs, Goose separates out the predicates for ownership of a slice's elements (between 0 and its length) and its capacity (from length to capacity).
 
 - `own_slice_small s dq t xs` asserts ownership only over the elements within the length of `s`, and says they have values `xs`.
 - `own_slice_cap s t` asserts ownership over just the capacity of `s`, saying nothing about their contents (but they must have type `t`).
 - `own_slice s dq t xs := own_slice_small s dq t xs ∗ own_slice_cap s t` asserts ownership over the elements and capacity.
+
+These predicates are just definitions that are separating conjunctions over regular points-to facts for the elements. In the context of the example above, with `s = (ptr, 3, 4)` (notice we picked a capacity of 4), these predicates are equal to the following:
+
+- `own_slice_small s [1;2;3] = (ptr + 0) ↦ 1 ∗ (ptr + 1) ↦ 2 ∗ (ptr + 2) ↦ 3`
+- `own_slice_cap s [1;2;3] = ∃ x, (ptr + 3) ↦ x`
+- ```
+  own_slice_small (s[1:]) [2; 3]
+   = ((ptr + 1) + 0) ↦ 2 ∗ ((ptr + 1) + 1) ↦ 3
+   = (ptr + 1) ↦ 2 ∗ (ptr + 2) ↦ 3
+  ```
+
+Confirm for yourself that `own_slice_small` and `own_slice_cap` are disjoint; without that, `own_slice` wouldn't be useful since it would be equivalent to $\False$.
 
 The main specification related to capacity is the one for append:
 
@@ -599,6 +613,10 @@ There is one more possibility which is a slight variation on splitting:
 Either using `Search` or by looking at the source code in Perennial, find the theorems above.
 
 The relevant source code is the file `src/goose_lang/lib/slice/typed_slice.v` in Perennial (you can use the submodule copy in your exercises repo).
+
+### Exercise: attempt a proof outline for the append example
+
+Try to use the predicates and rules for slice ownership to give a proof outline for the append example. At some point you will get stuck, because the reasoning principles don't give a way to verify the code above - this is fine in that we don't really intend to verify odd code like the above, but seeing exactly where you get stuck is instructive for learning how the rules work.
 
 ## Read-only ownership: fractional permissions {#read-only}
 
