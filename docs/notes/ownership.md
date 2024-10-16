@@ -13,15 +13,118 @@ pageInfo: ["Date", "Category", "Tag", "Word"]
 
 ## Learning outcomes
 
-1. Understand the assertions for structs in Goose.
-2. State the right ownership over a slice for a function.
-3. Use and understand fractional permissions in specifications.
+1. Translate informal descriptions of ownership to separation logic specifications, and back.
+2. Use the different slice permissions to specify functions.
+3. Read and write specifications with fractional permissions.
 
 Theme for today: ownership in Go and in GooseLang
 
 ---
 
+## Motivation
+
+Consider the following hypothetical functions (these are not actual Go APIs):
+
+```go
+// FileAppend writes data to the end of f
+func FileAppend(f *os.File, data []byte)
+```
+
+```go
+// NetworkSend sends data on the TCP connection c
+//
+// data is not safe to use after this function.
+func NetworkSend(c *net.Conn, data []byte)
+```
+
+These two signatures are very similar, but the comments say different things about data. `FileAppend` doesn't mention anything about safety of using data, while `NetworkSend` specifically cautions not to use the input buffer afterward. What's going on here?
+
+What's going on is that these two functions have different _ownership_ disciplines for their input buffers, and these are expressed only through comments. The ownership of the slice becomes more concrete when we look at (hypothetical) separation logic specifications:
+
+```coq
+Lemma wp_FileAppend f data_s bs bs' :
+  {{{ file_data(f, bs) ∗ own_slice data_s byteT (DfracOwn 1) bs' }}}
+    FileAppend f data_s
+  {{{ file_data(f, bs ++ bs') ∗ own_slice data_s byteT (DfracOwn 1) bs' }}}.
+```
+
+```coq
+Lemma wp_NetworkSend c data_s bs bs' :
+  {{{ conn_stream(c, bs) ∗ own_slice data_s byteT (DfracOwn 1) bs' }}}
+    NetworkSend c data_s
+  {{{ conn_stream(c, bs ++ bs') }}}.
+```
+
+What these functions might do differently and how this translates to these specifications is one mystery this lecture will aim to resolve.
+
+As another example, consider a hashmap with an iteration API that looks like this:
+
+```go
+func PrintKeys(m HashMap) {
+  it := m.KeyIterator()
+  for k, ok := it.Next(); ok {
+      fmt.Println(k)
+  }
+}
+```
+
+That is, we have an API like this (where `Key` is a placeholder for the key type):
+
+```go
+// normal operations:
+func (m HashMap) Get(k Key) (v Value, ok bool)
+func (m HashMap) Put(k Key, v Value)
+func (m HashMap) Delete(k Key)
+
+// iteration:
+func (m HashMap) KeyIterator() *Iterator
+func (it *Iterator) Next() (k Key, ok bool)
+```
+
+Given this API, is this safe?
+
+```go
+// does this work?
+
+func PrintValues(m HashMap) {
+  it := m.KeyIterator()
+  for k, ok := it.Next(); ok {
+      v, _ := m.Get(k)
+      fmt.Println(v)
+  }
+}
+```
+
+What about this one?
+
+```go
+// does this work?
+
+func ClearMap(m HashMap) {
+  it := m.KeyIterator()
+  for k, ok := it.Next(); ok {
+      m.Delete(k)
+  }
+}
+```
+
+::: details Solution
+
+You can't tell from just the API (which does not even describe ownership in comments), but for most hashmap implementations this would not be safe - the problem is often called _iterator invalidation_ since the call to `m.Delete(k)` is considered to _invalidate_ `it` in the next iteration.
+
+:::
+
+The ideas of _ownership_ and _permissions_ are at play in all of these examples. In each example, the code doesn't tell us which piece of the code is allowed to read or write a data structure, but knowing these permission rules is important for writing correct code. Separation logic allows us to specify and prove the permission discipline for a function. The specification communicates the ownership discpline, the proof ensures that we follow our stated ownership, and the caller's proof ensures that they follow whatever rules our function requires to be correct.
+
+**Terminology note:** The term _ownership_ in C++ and Rust refers specifically to the permission (and responsibility) to _destroy_ an object, which is not important in Go as a garbage collected language. In the separation logic context ownership and permissions are used a bit more interchangeably.
+
 ## Structs
+
+::: warning Draft
+
+This section is a complete description of structs and ownership around structs, but I haven't yet written an introduction tying it back to the overall themes of the lecture.
+
+:::
 
 Go has structs. Here's an example, along with a few methods:
 
@@ -343,17 +446,17 @@ Qed.
 
 ## Slices
 
-Go has a slice type `[]T`, a generic type that works for any element type `T`. Slices in Go are implemented as a struct value with a pointer, a length, and a capacity; this is also how they are modeled in GooseLang.
+Go has a slice type `[]T`, a generic type that works for any element type `T`.
 
 ### What are slices?
 
-You can read more about them in this post on [Go data structures](https://research.swtch.com/godata) or in even more detail in this [post on slices and append](https://go.dev/blog/slices). Below are some basic details.
+Slices in Go are implemented as a struct value with a pointer, a length, and a capacity; this is also how they are modeled in GooseLang. It is helpful to know this implementation detail to understand how they work, and it is also a common pattern for dynamically sized arrays (e.g., C++'s `std::vector` and Rust's `Vec` are almost identical).
 
-A slice represents a piece of a contiguous block of memory, which is often called an array.
+You can read more about Rust slices in this post on [Go data structures](https://research.swtch.com/godata) or in even more detail in this [post on slices and append](https://go.dev/blog/slices). Below are some basic details.
 
-The length of a slice is the number of elements of valid data the slice references starting at the pointer. The capacity tracks how many additional elements past the length are available for the slice to grow to, if elements are appended.
+More primitive than slices are arrays. An array is a contiguous block of memory, and we interact with them through a pointer to the first element. A slice is a "view" into a piece of an array (possibly the entire thing, but not necessarily). You can think of a slice as containing (at any given time) a sequence of elements. The slice is a (pointer, length, capacity) tuple, where the pointer points to the first element in the slice and the length says how many elements are in the slice. The array in memory is contiguous, so we can find any element by taking an offset from the pointer. Finally, the capacity tracks elements past the length that are allocated and in the array, which is memory available to grow the slice if elements are appended.
 
-In Go, the common idiom for appending to a slice `s []T` is `s = append(s, x)`. This is because if `s` has no spare capacity, `append` allocates a new, larger array and copies the elements over to it; this cannot change `s` since this is passed by value, so instead the new slice is returned. When a slice is grown, typically its capacity will be double the original length, to amortize the cost of copying over the elements.
+In Go, the common idiom for appending to a slice `s []T` is `s = append(s, x)`. This is because if `s` has no spare capacity, `append` allocates a new, larger array and copies the elements over to it; this cannot change `s` since this is passed by value, so instead the new slice is returned. When a slice is grown, typically its capacity will be double the original length, to amortize the cost of copying over the elements; hopefully you saw something like this in a data structure class, perhaps as the first example of an amortized analysis.
 
 ### Reasoning about slices
 
