@@ -39,23 +39,29 @@ func NetworkSend(c *net.Conn, data []byte)
 
 These two signatures are very similar, but the comments say different things about data. `FileAppend` doesn't mention anything about safety of using data, while `NetworkSend` specifically cautions not to use the input buffer afterward. What's going on here?
 
-What's going on is that these two functions have different _ownership_ disciplines for their input buffers, and these are expressed only through comments. The ownership of the slice becomes more concrete when we look at (hypothetical) separation logic specifications:
+The answer is that these two functions have different _ownership_ disciplines for their input buffers, and these are expressed only through comments. The ownership of the slice becomes more concrete when we look at (hypothetical) separation logic specifications:
 
 ```coq
 Lemma wp_FileAppend f data_s bs bs' :
-  {{{ file_data(f, bs) ∗ own_slice data_s byteT (DfracOwn 1) bs' }}}
+  {{{ file_data(f, bs) ∗ own_slice data_s bs' }}}
     FileAppend f data_s
-  {{{ file_data(f, bs ++ bs') ∗ own_slice data_s byteT (DfracOwn 1) bs' }}}.
+  {{{ file_data(f, bs ++ bs') ∗ own_slice data_s bs' }}}.
 ```
 
 ```coq
 Lemma wp_NetworkSend c data_s bs bs' :
-  {{{ conn_stream(c, bs) ∗ own_slice data_s byteT (DfracOwn 1) bs' }}}
+  {{{ conn_stream(c, bs) ∗ own_slice data_s bs' }}}
     NetworkSend c data_s
   {{{ conn_stream(c, bs ++ bs') }}}.
 ```
 
 What these functions might do differently and how this translates to these specifications is one mystery this lecture will aim to resolve.
+
+The ideas of _ownership_ and _permissions_ are at play in all of these examples. In each example, the code doesn't tell us which piece of the code is allowed to read or write a data structure, but knowing these permission rules is important for writing correct code. Separation logic allows us to specify and prove the permission discipline for a function. The specification communicates the ownership discpline, the proof ensures that we follow our stated ownership, and the caller's proof ensures that they follow whatever rules our function requires to be correct.
+
+**Terminology note:** The term _ownership_ in C++ and Rust refers specifically to the permission (and responsibility) to _destroy_ an object, which is not important in Go as a garbage collected language. In the separation logic context ownership and permissions are used a bit more interchangeably.
+
+### Ownership in iterators
 
 As another example, consider a hashmap with an iteration API that looks like this:
 
@@ -113,10 +119,6 @@ func ClearMap(m HashMap) {
 You can't tell from just the API (which does not even describe ownership in comments), but for most hashmap implementations this would not be safe - the problem is often called _iterator invalidation_ since the call to `m.Delete(k)` is considered to _invalidate_ `it` in the next iteration.
 
 :::
-
-The ideas of _ownership_ and _permissions_ are at play in all of these examples. In each example, the code doesn't tell us which piece of the code is allowed to read or write a data structure, but knowing these permission rules is important for writing correct code. Separation logic allows us to specify and prove the permission discipline for a function. The specification communicates the ownership discpline, the proof ensures that we follow our stated ownership, and the caller's proof ensures that they follow whatever rules our function requires to be correct.
-
-**Terminology note:** The term _ownership_ in C++ and Rust refers specifically to the permission (and responsibility) to _destroy_ an object, which is not important in Go as a garbage collected language. In the separation logic context ownership and permissions are used a bit more interchangeably.
 
 ## Structs
 
