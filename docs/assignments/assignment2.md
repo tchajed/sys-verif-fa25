@@ -154,7 +154,7 @@ Fixpoint app_list (l1: ref (llist A)) (l2: ref (llist A)) :=
   match !l1 with
   | lnil => l1 <- !l2; free l2; ()
   | lcons hd tl => app_list tl y
-  end
+  end.
 ```
 
 Write a specification for `app_list l1 l2`. **You may assume an affine separation logic**, so the postcondition can drop any facts you don't think are relevant.
@@ -178,6 +178,7 @@ Definition tail (l: llist A) : llist A :=
 match l with
 | lnil => ()
 | lcons hd tl => !tl
+end.
 ```
 
 Consider the following specification for `tail`:
