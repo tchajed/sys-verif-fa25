@@ -117,10 +117,10 @@ To specify functions over linked lists, we will use the following _representatio
 Fixpoint list_rep (v: llist A) (xs: list A): hProp :=
   match xs with
   | [] => v = lnil
-  | hd :: xs' => ∃ tl l',
-     (l = lcons hd tl) ∗
-     (tl ↦ l') ∗
-     list_rep l' xs'
+  | hd :: xs' => ∃ tl v',
+     (v = lcons hd tl) ∗
+     (tl ↦ v') ∗
+     list_rep v' xs'
    end.
 ```
 
