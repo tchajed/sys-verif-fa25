@@ -115,9 +115,9 @@ To specify functions over linked lists, we will use the following _representatio
 
 ```coq
 Fixpoint list_rep (v: llist A) (xs: list A): hProp :=
-  match x with
+  match xs with
   | [] => v = lnil
-  | hd :: x2 => ∃ tl l',
+  | hd :: xs' => ∃ tl l',
      (l = lcons hd tl) ∗
      (tl ↦ l') ∗
      list_rep l' xs'
@@ -154,7 +154,7 @@ Fixpoint app_list (l1: ref (llist A)) (l2: ref (llist A)) :=
   match !l1 with
   | lnil => l1 <- !l2; free l2; ()
   | lcons hd tl => app_list tl y
-  end
+  end.
 ```
 
 Write a specification for `app_list l1 l2`. **You may assume an affine separation logic**, so the postcondition can drop any facts you don't think are relevant.
@@ -175,9 +175,10 @@ Let us now implement a function to get the tail of a list:
 
 ```coq title="expr"
 Definition tail (l: llist A) : llist A :=
-match x with
+match l with
 | lnil => ()
 | lcons hd tl => !tl
+end.
 ```
 
 Consider the following specification for `tail`:
