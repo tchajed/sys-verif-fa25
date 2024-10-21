@@ -153,7 +153,7 @@ Consider the following function for appending two linked lists. It's your job to
 Fixpoint app_list (l1: ref (llist A)) (l2: ref (llist A)) :=
   match !l1 with
   | lnil => l1 <- !l2; free l2; ()
-  | lcons hd tl => app_list tl y
+  | lcons hd tl => app_list tl l2
   end.
 ```
 
