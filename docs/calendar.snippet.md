@@ -28,7 +28,7 @@
 |  19 | Wed Nov 6  | **No class**                                      |
 |  18 | Mon Nov 11 | Update modality                                   |
 |  19 | Wed Nov 13 | Locks                                             |
-|     | Thu Nov 14 | _Assignment 4 due (11pm)_                         |
+|     | Thu Nov 14 | _Assignment 3 due (11pm)_                         |
 |  20 | Mon Nov 18 | Specifying atomic operations                      |
 |  21 | Wed Nov 20 | Examples 1                                        |
 |  22 | Mon Nov 25 | Examples 2                                        |
