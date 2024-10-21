@@ -25,6 +25,8 @@ Make sure to preview your change with `pnpm dev`: confirm that it compiles, and 
 
 Run `pnpm fmt`.
 
+You can use the provided git pre-commit hook (in `.git-hooks/`) to automatically format your code (you will need to run `pnpm install` first). Set it up with `git config core.hooksPath .git-hooks/`.
+
 ## Tech stack
 
 - pnpm for package management

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+FILES=$(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g')
+[ -z "$FILES" ] && exit 0
+
+# Prettify all selected files
+if [ ! -x ./node_modules/.bin/prettier ]; then
+  echo "run pnpm install to run prettier" 1>&2
+  exit 1
+fi
+echo "$FILES" | xargs ./node_modules/.bin/prettier --ignore-unknown --write
+
+# Add back the modified/prettified files to staging
+echo "$FILES" | xargs git add
+
+exit 0
