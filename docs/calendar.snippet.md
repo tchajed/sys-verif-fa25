@@ -18,19 +18,22 @@
 |  11 | Wed Oct 9  | [Modeling Go programs](./notes/goose.md)          |
 |  12 | Mon Oct 14 | [Loop invariants](./notes/loop_invariants.md)     |
 |  13 | Wed Oct 16 | [Ownership](./notes/ownership.md)                 |
-|  14 | Mon Oct 21 | Examples                                          |
+|  14 | Mon Oct 21 | In-class work                                     |
 |     | Tue Oct 22 | _Assignment 2 due (11pm)_                         |
 |     |            | **Part 3: Concurrency**                           |
-|  15 | Wed Oct 23 | Concurrency intro                                 |
-|  16 | Mon Oct 28 | Ghost state                                       |
-|  17 | Wed Oct 30 | Modalities                                        |
+|  15 | Wed Oct 23 | Persistence modality                              |
+|  16 | Mon Oct 28 | Concurrency intro                                 |
+|  17 | Wed Oct 30 | Ghost state                                       |
 |  18 | Mon Nov 4  | **No class**                                      |
 |  19 | Wed Nov 6  | **No class**                                      |
-|  18 | Mon Nov 11 | Locks                                             |
-|  19 | Wed Nov 13 | Specifying atomic operations                      |
-|  20 | Mon Nov 18 | Examples 1                                        |
-|  21 | Wed Nov 20 | Examples 2                                        |
-|  22 | Mon Nov 25 |                                                   |
-|  23 | Wed Nov 27 |                                                   |
-
-Tentatively, assignment 3 will be due Thu Nov 21.
+|  18 | Mon Nov 11 | Update modality                                   |
+|  19 | Wed Nov 13 | Locks                                             |
+|     | Thu Nov 14 | _Assignment 4 due (11pm)_                         |
+|  20 | Mon Nov 18 | Specifying atomic operations                      |
+|  21 | Wed Nov 20 | Examples 1                                        |
+|  22 | Mon Nov 25 | Examples 2                                        |
+|  23 | Wed Nov 27 | Property-based testing                            |
+|  24 | Mon Dec 2  |                                                   |
+|  25 | Wed Dec 4  |                                                   |
+|  26 | Mon Dec 9  |                                                   |
+|  27 | Wed Dec 11 |                                                   |
