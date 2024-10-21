@@ -16,6 +16,10 @@ See [Inferring specifications](./assignment3/infer_specs.md).
 
 See [Factorial](./assignment3/factorial_proof.md).
 
-## Part 3: Linked lists as lists
+## Part 3: Linked lists
 
 See [Linked lists](./assignment3/linked_list_proof.md).
+
+## Part 4: Queue using two stacks
+
+See [Queue](./assignment3/queue_proof.md).

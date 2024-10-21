@@ -2,7 +2,7 @@
 # Auto-generated from literate source. DO NOT EDIT.
 category: assignment
 tags: literate
-shortTitle: "Assignment 3: linked lists 1"
+shortTitle: "Assignment 3: linked lists"
 ---
 
 # Assignment 3: Linked lists as lists
