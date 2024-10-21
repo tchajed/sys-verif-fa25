@@ -18,16 +18,16 @@ Part 1 is intended as a warmup and Part 4 has an open-ended component (you'll wr
 
 ## Part 1: Inferring specifications
 
-See [Inferring specifications](./assignment3/infer_specs.md).
+See [Inferring specifications](./infer_specs.md).
 
 ## Part 2: Verify factorial
 
-See [Factorial](./assignment3/factorial_proof.md).
+See [Factorial](./factorial_proof.md).
 
 ## Part 3: Linked lists
 
-See [Linked lists](./assignment3/linked_list_proof.md).
+See [Linked lists](./linked_list_proof.md).
 
 ## Part 4: Queue using two stacks
 
-See [Queue](./assignment3/queue_proof.md).
+See [Queue](./queue_proof.md).
