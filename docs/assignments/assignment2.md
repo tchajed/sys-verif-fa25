@@ -52,9 +52,15 @@ $\ell_1 \mapsto v \sep \ell_2 \mapsto v$. If $\ell_1 \neq \ell_2$, holds for onl
 
 ## Exercise 3
 
-> Frame rule vs weakening (10 points)
+> Frame rule vs consequence (10 points)
 
-Compare the separation logic frame rule to the rule for weakening. Explain why the weaken rule does not imply the frame rule. Explain why the frame rule does not imply the weaken rule. These explanations are not meant to be fully formal proofs (which is well beyond the scope of this class for this question), but should aim to be convincing explanations - in this case, convincing me that you've understood what these rules mean.
+Compare the separation logic frame rule to the consequence/weaken rule. Explain why the consequence rule does not imply the frame rule. Explain why the frame rule does not imply the consequence rule. These explanations are not meant to be fully formal proofs (which is well beyond the scope of this class for this question), but should aim to be convincing explanations - in this case, convincing me that you've understood what these rules mean.
+
+::: info Rule of consequence = weaken rule
+
+This assignment originally only used the term "weaken rule", but the notes say "rule of consequence". These are the same thing; sorry for the confusion. Note that this question _not_ referring to weakening propositions, $P \sep Q \entails P$.
+
+:::
 
 ## Exercise 4
 
