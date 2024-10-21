@@ -8,6 +8,14 @@ shortTitle: Assignment 3
 
 In this assignment you'll verify imperative programs written in Go.
 
+::: warning Draft
+
+This assignment is very nearly done (you can and should start on it), but I will be adding point values and some more advice to this page.
+
+:::
+
+Part 1 is intended as a warmup and Part 4 has an open-ended component (you'll write almost the entire proof yourself). Please take this into account when planning how to work on the assignment.
+
 ## Part 1: Inferring specifications
 
 See [Inferring specifications](./assignment3/infer_specs.md).
