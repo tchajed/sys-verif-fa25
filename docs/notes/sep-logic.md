@@ -382,17 +382,15 @@ $$
 \begin{aligned}
 &\for ::= \\
 &\quad \fun{n, f} \\
-&\quad \lete{g}{\\
+&\quad \text{\textbf{let}} \; g :=\\
 &\quad\quad\begin{aligned}
 &\rec{loop}{i} \\
-&\quad\ife{(i = n)}{()}{f \, i\then loop \, (i + 1)} \\
-\end{aligned}
-} \\
-&\quad g
+&\quad\quad\text{\textbf{if} } (i = n) \text{ \textbf{then} } () \\
+&\quad\quad\text{\textbf{else} } f \, i\then loop \, (i + 1) \; \text{\textbf{in}}
+\end{aligned} \\
+&\quad g \; 0
 \end{aligned}
 $$
-
-(Apologies for the formatting, still working on it.)
 
 :::
 
