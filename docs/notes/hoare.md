@@ -111,7 +111,7 @@ The semantics answers precisely what it means to run some expression $e$. We nee
 
 We will give what is called a _small-step operational semantics_ for this language; you can look to a programming language theory class to get a broader perspective on other approaches to semantics of a programming language.
 
-The semantics is based is based on a step relation (to be defined below in the [Reduction rules](./hoare.md#reduction-rules) subsection) $e_1 \to e_2$. This is just a relation that we use special notation for; it's not implication. Intuitively, $e_1 \to e_2$ is defined in such a way that it means $e_1$ executes to $e_2$ in one execution step. We will then generally talk about $e_1 \to^* e_2$, which allows zero or more $\to$ steps between $e_1$ and $e_2$; formally it would be defined by these rules:
+The semantics is based on a step relation (to be defined below in the [Reduction rules](./hoare.md#reduction-rules) subsection) $e_1 \to e_2$. This is just a relation that we use special notation for; it's not implication. Intuitively, $e_1 \to e_2$ is defined in such a way that it means $e_1$ executes to $e_2$ in one execution step. We will then generally talk about $e_1 \to^* e_2$, which allows zero or more $\to$ steps between $e_1$ and $e_2$; formally it would be defined by these rules:
 
 $$
 e \to^* e \text{ always} \\
