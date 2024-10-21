@@ -2,7 +2,7 @@
 # Auto-generated from literate source. DO NOT EDIT.
 category: assignment
 tags: literate
-shortTitle: "Assignment 3: infer specs"
+shortTitle: "Assignment 3: queue"
 ---
 
 # Assignment 3: queue using two stacks
