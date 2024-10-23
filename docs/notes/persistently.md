@@ -7,7 +7,7 @@ shortTitle: "Lecture 15: Persistently"
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
-# Lecture 13: The persistently modality
+# Lecture 15: The persistently modality
 
 > Follow these notes in Coq at [src/sys_verif/program_proof/persistently.v](https://github.com/tchajed/sys-verif-fa24-proofs/blob/main/src/sys_verif/program_proof/persistently.v).
 
