@@ -88,6 +88,11 @@ export default defineUserConfig({
         copy: false,
         // the rest of the config is passed to KaTeX, see
         // https://katex.org/docs/options.html
+        macros: {
+          "□": "\\square",
+          "∗": "\\sep",
+          "⊢": "\\entails",
+        },
       },
       // see https://ecosystem.vuejs.press/plugins/markdown/shiki.html for the below config
       shiki: {
