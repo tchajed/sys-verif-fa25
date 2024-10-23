@@ -13,8 +13,8 @@ pageInfo: ["Date", "Category", "Tag", "Word"]
 
 ## Learning outcomes
 
-- Read IPM goals with spatial and persistent contexts.
-- Explain the difference between top-level specifications and Hoare triples in separation logic.
+- Appreciate the value of having persistent propositions.
+- Explain the difference between a Hoare triple as a Prop and as an iProp.
 
 ## Motivation
 
@@ -193,7 +193,7 @@ Lemma read_discarded_spec (l: loc) (x: w64) :
   {{{ RET #x; True }}}.
 Proof.
   wp_start as "#H".
-  wp_apply (wp_LoadAt with "H"). iIntros "_".
+  wp_apply (wp_LoadAt with "[$H]"). iIntros "_".
   iApply "HΦ". auto.
 Qed.
 
