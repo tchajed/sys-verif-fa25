@@ -183,7 +183,7 @@ In Coq, `with "[] [sum i]"` is a specialization pattern which decides how the hy
 This is a lot to figure out from first principles. You should be able to do so, but it's also fine to use this example as a reference, or see the obligations in Coq and then go back and figure out how to divide up your hypotheses.
 
 ```coq
-wp_apply (wp_forBreak
+  wp_apply (wp_forBreak
               (λ continue,
                 ∃ (sum i: w64),
                   "sum" :: sum_l ↦[uint64T] #sum ∗

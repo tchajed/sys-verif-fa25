@@ -378,7 +378,7 @@ At this point `iApply HQ` needs to produce two subgoals: one for `P1 ∗ P3` and
 Instead, we will use a _specialization pattern_ `with "[H1 H3]"` to divide the premises up.
 
 ```coq
-iApply (HQ with "[H1 H3]").
+  iApply (HQ with "[H1 H3]").
   - (* This is a perfect use case for `iFrame`, which spares us from carefully
     splitting this goal up. *)
     iFrame.
@@ -429,7 +429,7 @@ Proof.
 The first goal is the premise of `HQ` (using the hypotheses we made available using `with "[H1 H3]"`). The second goal has `HQ`.
 
 ```coq
-{ iFrame. }
+  { iFrame. }
 
 
 ```
@@ -437,7 +437,7 @@ The first goal is the premise of `HQ` (using the hypotheses we made available us
 "H2" and "HQ" are lost after this tactic, which is actually required because of separation logic; the wand is "used up" in proving `Q`, in the same ay that "H1" and "H3" were used in the premise of `HQ`.
 
 ```coq
-iDestruct ("HQ" with "[H2]") as "HQ".
+  iDestruct ("HQ" with "[H2]") as "HQ".
   { iFrame. }
 
   iFrame.
@@ -461,7 +461,7 @@ Proof.
 `$H1` in a specialization pattern frames that hypothesis right away. We don't do the same with `"H3"` only for illustration purposes.
 
 ```coq
-iDestruct (HQ with "[$H1 H3]") as "HQ".
+  iDestruct (HQ with "[$H1 H3]") as "HQ".
 ```
 
 :::: info Goals
@@ -498,7 +498,7 @@ iDestruct (HQ with "[$H1 H3]") as "HQ".
 `as "$"` is an introduction pattern that does not name the resulting hypothesis but instead immediately frames it with something in the goal. In this case that finishes the proof.
 
 ```coq
-iDestruct ("HQ" with "[$H2]") as "$".
+  iDestruct ("HQ" with "[$H2]") as "$".
 Qed.
 
 ```
@@ -517,7 +517,7 @@ Proof.
 The `%Heq` intro pattern moves the hypothesis into the Coq context (sometimes called the "pure" context). It is unusual in that `Heq` appears in a string but turns into a Coq identifier.
 
 ```coq
-iIntros "(%Heq & Hx & Hy)".
+  iIntros "(%Heq & Hx & Hy)".
   iFrame.
   rewrite Heq.
   iFrame.
@@ -747,7 +747,7 @@ The next step in the proof outline is this call to `ref_to`, which allocates.
 Formally, the proof proceeds by applying the bind rule (to split the program into `ref_to uint64T #(W64 0)` and the rest of the code that uses this value). We can use an IPM tactic to automate this process, in particular identifying the context `K` in the bind rule.
 
 ```coq
-wp_bind (ref_to uint64T #(W64 0))%E.
+  wp_bind (ref_to uint64T #(W64 0))%E.
 ```
 
 :::: info Goal
@@ -776,7 +776,7 @@ Take a moment to read this goal: it says we need to prove a specification for ju
 The next step you'd expect is that we need to use the rule of consequence to prove this goal from the existing specification for `ref`:
 
 ```coq
-Check wp_ref_to.
+  Check wp_ref_to.
 ```
 
 :::: note Output
@@ -796,7 +796,7 @@ wp_ref_to
 We do _not_ end up needing the rule of consequence. The reason is that the meaning of `{{{ P }}} e {{{ RET v; Q }}}` in Iris already has consequence built-in.
 
 ```coq
-iApply wp_ref_to.
+  iApply wp_ref_to.
   { (* typing-related: ignore for now *)
     auto. }
   { (* the (trivial) precondition in wp_ref_to *)
@@ -811,7 +811,7 @@ iApply wp_ref_to.
 At this point there is a `let:` binding which we need to apply the pure-step rule to. Thankfully, the IPM has automation to handle this for us.
 
 ```coq
-wp_pures.
+  wp_pures.
 ```
 
 :::: info Goal diff
@@ -841,7 +841,7 @@ wp_pures.
 The IPM can automate all of the above for allocation, load, and store:
 
 ```coq
-wp_alloc y as "Hy".
+  wp_alloc y as "Hy".
   wp_pures.
   wp_bind (IgnoreOneLocF _ _). (* make the goal easier to understand *)
 ```
@@ -869,7 +869,7 @@ wp_alloc y as "Hy".
 You might think we should do `iApply wp_IgnoreOneLocF`. Let's see what happens if we do that:
 
 ```coq
-iApply wp_IgnoreOneLocF.
+  iApply wp_IgnoreOneLocF.
 ```
 
 :::: info Goals
@@ -914,7 +914,7 @@ Unlike `apply`, we need to prove the two subgoals from whatever premises we have
 The IPM provides several mechanisms for deciding on these splits. A _specialization pattern_ (spat) is the simplest one: we'll list in square brackets the hypotheses that should go into the first subgoal, the precondition, and the remainder will be left for the second subgoal (which is the rest of the code and proof).
 
 ```coq
-Undo 1.
+  Undo 1.
   iApply (wp_IgnoreOneLocF with "[Hx]").
 ```
 
@@ -946,7 +946,7 @@ Undo 1.
 We'll now breeze through the rest of the proof:
 
 ```coq
-wp_pures.
+  wp_pures.
   wp_load.
   wp_load.
   wp_apply (wp_Assert).

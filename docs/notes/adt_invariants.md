@@ -327,7 +327,7 @@ We use `Record` here to create an inductive type, which defines a constructor `m
 Records in Coq have some special associated syntax for constructors and projections, but we're not using it (and disable printing with that syntax as well).
 
 ```coq
-Record database :=
+  Record database :=
     mkDb { db_sum : Z; db_num : Z; }.
 
   Definition empty_db : database := mkDb 0 0.

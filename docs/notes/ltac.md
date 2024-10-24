@@ -259,7 +259,7 @@ Proof.
 ::::: details Output of Search lookup app
 
 ```coq
-Search lookup app.
+  Search lookup app.
 ```
 
 :::: note Output
@@ -308,7 +308,7 @@ lookup_app_Some:
 :::::
 
 ```coq
-rewrite lookup_app_l.
+  rewrite lookup_app_l.
   { (* [apply ... in] applies the tactic to a premise, working forward from the
        hypotheses. (In this case the result exactly matches the goal, but this
        proof strategy is more general.) *)
@@ -364,7 +364,7 @@ Proof.
 It's a seemingly small change but the left and right-hand sides are now equal!
 
 ```coq
-reflexivity.
+  reflexivity.
 Qed.
 
 
@@ -433,7 +433,7 @@ Proof.
 `rewrite !lem` rewrites `lem` one or more times (fails if it never applies)
 
 ```coq
-rewrite !gmap_lookup_delete.
+  rewrite !gmap_lookup_delete.
 ```
 
 :::: info Goal
@@ -466,7 +466,7 @@ Proof.
 The `//` is an _action_ that tries to prove "trivial" goals (or subgoals from rewrite side conditions). We can use it to give a one-line proof.
 
 ```coq
-rewrite !gmap_lookup_delete //.
+  rewrite !gmap_lookup_delete //.
 Qed.
 
 ```
@@ -485,7 +485,7 @@ Proof.
 This lemma to rewrite with has a premise or _side condition_: it only applies if the two keys involved are not equal. By default, `rewrite` creates a subgoal for every side condition, so we are left with the modified goal and the side condition.
 
 ```coq
-rewrite gmap_lookup_delete_ne.
+  rewrite gmap_lookup_delete_ne.
 ```
 
 :::: info Goals
@@ -536,7 +536,7 @@ Proof.
 Unfortunately Coq actually has two `rewrite` tactics: one from the standard library and one from a library called SSReflect; the latter is what we're using because it has some other useful features, but `rewrite ... by t` is only in the standard one. We can use the standard rewrite with `rewrite ->`.
 
 ```coq
-rewrite -> gmap_lookup_delete_ne by done.
+  rewrite -> gmap_lookup_delete_ne by done.
 ```
 
 :::: info Goal diff
@@ -557,7 +557,7 @@ rewrite -> gmap_lookup_delete_ne by done.
 It's more cumbersome but we can still assert that the side condition is proven with SSReflect's rewrite. The syntax here is `t; [ t1 | ]`, which runs `t2` only on the first goal from `t`. (You can also do `t; [ | t2 ]` or even `t; [ t1 |t2 ]`).
 
 ```coq
-rewrite gmap_lookup_delete_ne; [ done | ].
+  rewrite gmap_lookup_delete_ne; [ done | ].
 ```
 
 :::: info Goal diff
@@ -578,7 +578,7 @@ rewrite gmap_lookup_delete_ne; [ done | ].
 Another trick is to use `rewrite lem //`, and then only proceed if this leaves one goal. This won't work when you want a tactic more powerful than `done`.
 
 ```coq
-rewrite lookup_insert_ne //.
+  rewrite lookup_insert_ne //.
 Qed.
 ```
 

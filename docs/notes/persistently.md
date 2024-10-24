@@ -150,7 +150,7 @@ Proof.
 This is the step where we persist the points-to permission and turn it into a persistent, read-only fact. Using `struct_pointsto_persist` requires the `iMod` tactic, which we will cover later when we talk about concurrency; for now think of it as a variation on `iDestruct`.
 
 ```coq
-iMod (struct_pointsto_persist with "H") as "#Hro".
+  iMod (struct_pointsto_persist with "H") as "#Hro".
 ```
 
 :::: info Goal diff
@@ -177,7 +177,7 @@ Notice from the goal diff that the output (renamed to "Hro" for clarity) is put 
 To obtain the persistent points-to assertion, we have to give up the regular fractional assertion, and this operation is _not_ reversible - the persistence relies on the location never being written to.
 
 ```coq
-iModIntro.
+  iModIntro.
   iApply "HΦ".
   iFrame "Hro".
 Qed.
@@ -362,7 +362,7 @@ Proof.
 The use of `iMod` above has turned our regular points-to (for a struct field) into a persistent fact. We can never write to that field again in the proof, but in exchange the assertion is persistent.
 
 ```coq
-iModIntro. iApply "HΦ".
+  iModIntro. iApply "HΦ".
   (* `iFrame` doesn't use the persistent context by default (for performance
   reasons primarily), but we can ask it to by passing `#` as an argument. *)
   iFrame "#".
@@ -413,7 +413,7 @@ Observe how in the next line we use a Hoare triple that comes _from the persiste
 (Unfolding `fun_implements` isn't required, it's only there to show you the definition in the goal.)
 
 ```coq
-rewrite /fun_implements. wp_apply "Hf_spec".
+  rewrite /fun_implements. wp_apply "Hf_spec".
 ```
 
 :::: info Goal diff
@@ -590,7 +590,7 @@ Proof.
 Setting up the memoization is the most interesting part of the proof. To use the spec, we have to both supply a pure function that the function implements (it's `λ x, word.mul x x` in this case) and prove that it actually implements that function (the proof that immediately follows in curly braces).
 
 ```coq
-wp_apply (wp_NewMemoize (λ x, word.mul x x)).
+  wp_apply (wp_NewMemoize (λ x, word.mul x x)).
   {
     rewrite /fun_implements.
     iIntros (x).
@@ -613,7 +613,7 @@ wp_apply (wp_NewMemoize (λ x, word.mul x x)).
 It's somewhat subtle but the proof at this point is a Hoare triple inside separation logic (you can tell because of the `------∗` line). `wp_start` knows how to handle this so you can use it in the same way.
 
 ```coq
-wp_start as "_".
+    wp_start as "_".
     wp_pures.
     iModIntro. iApply "HΦ". done.
   }
@@ -717,7 +717,7 @@ Notice how the slice is available in the persistent context for this Hoare tripl
 The rest of this proof is general loop and slice reasoning and not related to this specific example.
 
 ```coq
-wp_start as "_".
+    wp_start as "_".
     wp_apply (wp_slice_len). wp_pures.
     wp_if_destruct.
     { iModIntro.
@@ -758,7 +758,7 @@ wp_start as "_".
 The little proof pattern below of using `iExactEq` is sometimes useful - it allows you to use any `"H": P` to prove `Q` if you can prove `P = Q`. This often has to be paired with `repeat f_equal` since you'll otherwise have `#(...) = #(...)` and you generally want to get rid of the `#` function in front of both sides.
 
 ```coq
-iDestruct ("HΦ" with "[]") as "HΦ".
+    iDestruct ("HΦ" with "[]") as "HΦ".
     { done. }
     iExactEq "HΦ". repeat f_equal.
 
@@ -801,7 +801,7 @@ iDestruct ("HΦ" with "[]") as "HΦ".
 Here we come back from calling `NewMemoize`. As in `UseMemoize1`, all the hard work is done and calling the new object is easy.
 
 ```coq
-wp_pures.
+  wp_pures.
   wp_apply (wp_Memoize__Call with "[$Hm]"). iIntros "Hm".
   wp_pures.
   wp_apply (wp_Memoize__Call with "[$Hm]"). iIntros "Hm".

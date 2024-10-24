@@ -178,7 +178,7 @@ Löb induction says `∀ P, (▷ P → P) → P`. This seems pretty magical: we 
 Note that we can't use this mechanism to prove a program's recursion eventually terminates, so it only works to prove properties about a function if it terminates.
 
 ```coq
-iLöb as "IH" forall (l keys Φ).
+  iLöb as "IH" forall (l keys Φ).
   wp_rec. wp_pures.
 ```
 
@@ -215,7 +215,7 @@ iLöb as "IH" forall (l keys Φ).
 Notice that the ▷ in front of "IH" has disappeared because we've taken a step. We're now free to use it whenever there's a call to `SearchTree__Contains`.
 
 ```coq
-wp_if_destruct.
+  wp_if_destruct.
   {
     (* If the root is nil, then the tree is empty. We need to prove that to show
        that returning false is the right thing to do. *)

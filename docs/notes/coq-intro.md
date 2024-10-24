@@ -350,7 +350,7 @@ Module Option.
 `option` is a polymorphic type: it takes a type `A` as an argument, and (maybe) contains a value of that arbitrary type. `option A` is the simplest "container" type.
 
 ```coq
-Inductive option (A: Type) :=
+  Inductive option (A: Type) :=
   | Some (x: A)
   | None.
 
@@ -360,7 +360,7 @@ Inductive option (A: Type) :=
 Here are some functions you can define on `option`. There are good motivations for _why_ you should define these particular ones, but we won't get into that (and it isn't all that important for this class). For now, just try to understand the behavior. `map` runs `f` "inside" the optional value.
 
 ```coq
-Definition map {A B} (ma: option A) (f: A -> B) : option B :=
+  Definition map {A B} (ma: option A) (f: A -> B) : option B :=
     match ma with
     | Some _ x => Some B (f x)
     | None _ => None B
@@ -372,7 +372,7 @@ Definition map {A B} (ma: option A) (f: A -> B) : option B :=
 Notice the extra type argument we had to provide to `Some`, and the somewhat odd `_` in the pattern match. To make it easier to work with polymorphic functions, Coq has a feature called _implicit arguments_. These commands modify how type inference treats `Some` and `None`, making the type argument implicit (that's what the curly braces mean). Don't worry about the syntax; you won't need to do this yourself.
 
 ```coq
-Arguments Some {A} x.
+  Arguments Some {A} x.
   Arguments None {A}.
 
 
@@ -381,7 +381,7 @@ Arguments Some {A} x.
 We'll now define `return_` (it should be called `return` but that's a Coq keyword) and `bind`. These make `option` into a _Monad_ but you don't need to understand that, just read the definitions.
 
 ```coq
-Definition return_ {A} (x: A) : option A := Some x.
+  Definition return_ {A} (x: A) : option A := Some x.
 
   Definition bind {A B} (ma: option A) (f: A -> option B) : option B :=
     match ma with
@@ -395,7 +395,7 @@ Definition return_ {A} (x: A) : option A := Some x.
 These are some properties of `return_` and `bind` (again, good reason for these but not relevant here).
 
 ```coq
-Lemma return_left_id {A B} (x: A) (f: A -> option B) :
+  Lemma return_left_id {A B} (x: A) (f: A -> option B) :
     bind (return_ x) f = f x.
   Proof. reflexivity. Qed.
 
@@ -477,7 +477,7 @@ Proof.
 `rewrite` is another fundamental proof technique
 
 ```coq
-rewrite Hn.
+  rewrite Hn.
 ```
 
 :::: info Goal diff

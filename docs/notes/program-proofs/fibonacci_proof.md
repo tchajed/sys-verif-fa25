@@ -93,7 +93,7 @@ Proof.
 The core of the proof's argument is this loop invariant about the `prev` and `cur` variables.
 
 ```coq
-wp_apply (wp_forUpto'
+  wp_apply (wp_forUpto'
             (λ i, ∃ (prev cur: w64),
               "fib_prev" ∷ fib_prev ↦[uint64T] #prev ∗
               "fib_cur" ∷ fib_cur ↦[uint64T] #cur ∗

@@ -355,7 +355,7 @@ Notice in the goal above how the struct allocation produced a `p ↦[struct.t he
 Now look at what the following line of proof does to the goal.
 
 ```coq
-iApply struct_fields_split in "Hperson"; iNamed "Hperson".
+  iApply struct_fields_split in "Hperson"; iNamed "Hperson".
 ```
 
 :::: info Goal diff
@@ -384,7 +384,7 @@ iApply struct_fields_split in "Hperson"; iNamed "Hperson".
 The theorem `struct_fields_split` gives a way to take any points-to assertion with a struct type and split it into its component field points-to assertions, which is what the postcondition of this spec gives.
 
 ```coq
-iApply "HΦ".
+  iApply "HΦ".
   iFrame.
 Qed.
 

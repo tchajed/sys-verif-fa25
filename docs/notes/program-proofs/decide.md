@@ -270,7 +270,7 @@ Module decide_playground.
 What is that type for `decide`? `{P} + {~P}` is notation for `sumbool` from the Coq standard library, which has the following definition:
 
 ```coq
-Inductive sumbool (A B : Prop): Type :=
+  Inductive sumbool (A B : Prop): Type :=
   | left (H: A)
   | right (H: B).
 

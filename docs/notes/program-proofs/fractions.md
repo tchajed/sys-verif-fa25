@@ -194,7 +194,7 @@ Proof.
 This is the step where we persist the points-to permission and turn it into a persistent, read-only fact. Also notice that the output (renamed to "Hro" for clarity) is put into the persistent context.
 
 ```coq
-iMod (struct_pointsto_persist with "H") as "#Hro".
+  iMod (struct_pointsto_persist with "H") as "#Hro".
 ```
 
 :::: info Goal diff
