@@ -132,5 +132,12 @@ Proof.
   iModIntro. iApply "HΦ". done.
 Qed.
 
+```
+
+## Pointers to integers
+
+You'll also see `uint64T` used as an argument as in `l ↦[uint64T] #x` and `own_slice s q uint64T xs`. This is a GooseLang type that represents the Go type `uint64`.
+
+```coq
 End goose.
 ```
