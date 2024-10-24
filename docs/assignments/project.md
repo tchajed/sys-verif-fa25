@@ -23,6 +23,12 @@ We saw a simplified binary search implementation in the notes. Specify and verif
 
 Verify a memory allocator, using the [buddy allocator algorithm](https://www.geeksforgeeks.org/buddy-system-memory-allocation-technique/). The Go implementation should keep a large byte slice as the backing storage, and return a struct on allocation with both the data and any metadata required by the algorithm (this is a simplification since working with the pointers alone is difficult in Go).
 
+### Make Memoize more useful
+
+Memoization is mostly useful when memoizing a recursive function and caching its recursive subcalls. The interface of the example in the [Persistence lecture](/notes/persistently.md) does not allow this - there is a circularity where the function is required to create a `Memoize`, but we want to call the `Memoize` in recursive calls.
+
+Re-implement memoization to solve this problem. See these [lecture notes](https://www.cs.cornell.edu/courses/cs3110/2011sp/Lectures/lec22-memoization/memo.htm) (specifically the last section, "Automatic Memoization Using Higher Order Functions") for how this works. Implement a memoized fibonacci function and verify it using the new specification.
+
 ## "Medium" projects
 
 These are projects that you have the techniques for, but are a bit more effort.
