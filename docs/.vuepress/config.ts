@@ -123,6 +123,11 @@ export default defineUserConfig({
         },
       },
       photoSwipe: false,
+      // NOTE: this doesn't work (non-existent pages go to a 404 page)
+      linksCheck: {
+        dev: true,
+        build: "error",
+      },
     },
 
     // control page meta information shown
