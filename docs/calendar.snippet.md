@@ -20,20 +20,20 @@
 |  13 | Wed Oct 16 | [Ownership](./notes/ownership.md)                 |
 |  14 | Mon Oct 21 | In-class work                                     |
 |     | Tue Oct 22 | _Assignment 2 due (11pm)_                         |
+|  15 | Wed Oct 23 | [Persistence](./notes/persistently.md)            |
 |     |            | **Part 3: Concurrency**                           |
-|  15 | Wed Oct 23 | Persistence modality                              |
 |  16 | Mon Oct 28 | Concurrency intro                                 |
-|  17 | Wed Oct 30 | Ghost state                                       |
+|  17 | Wed Oct 30 | Invariants                                        |
 |  18 | Mon Nov 4  | **No class**                                      |
 |  19 | Wed Nov 6  | **No class**                                      |
-|  18 | Mon Nov 11 | Update modality                                   |
-|  19 | Wed Nov 13 | Locks                                             |
+|  18 | Mon Nov 11 | Ghost state                                       |
+|  19 | Wed Nov 13 | Update modality                                   |
 |     | Thu Nov 14 | _Assignment 3 due (11pm)_                         |
-|  20 | Mon Nov 18 | Specifying atomic operations                      |
-|  21 | Wed Nov 20 | Examples 1                                        |
-|  22 | Mon Nov 25 | Examples 2                                        |
-|  23 | Wed Nov 27 | Property-based testing                            |
-|  24 | Mon Dec 2  |                                                   |
+|  20 | Mon Nov 18 | Locks                                             |
+|  21 | Wed Nov 20 | Specifying atomic operations                      |
+|  22 | Mon Nov 25 | Examples 1                                        |
+|  23 | Wed Nov 27 | Examples 2                                        |
+|  24 | Mon Dec 2  | Property-based testing                            |
 |  25 | Wed Dec 4  |                                                   |
 |  26 | Mon Dec 9  |                                                   |
 |  27 | Wed Dec 11 |                                                   |
