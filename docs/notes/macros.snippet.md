@@ -13,6 +13,7 @@ $$
 \gdef\dom{\operatorname{dom}}
 \gdef\disjoint{\mathrel{\bot}}
 \gdef\finto{\overset{\text{fin}}{\rightharpoonup}}
+\gdef\listapp{\mathbin{+\mkern-10mu+}}
 
 %% language
 \gdef\ife#1#2#3{\text{\textbf{if} } #1 \text{ \textbf{then} } #2 \text{ \textbf{else} } #3}
@@ -30,6 +31,7 @@ $$
 \gdef\assert#1{\operatorname{assert} \, #1}
 \gdef\val{\mathrm{val}}
 \gdef\purestep{\xrightarrow{\text{pure}}}
+\gdef\spawn{\text{\textbf{spawn}}}
 
 %% hoare logic
 \gdef\False{\mathrm{False}}
