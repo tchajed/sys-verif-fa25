@@ -20,14 +20,15 @@ This lecture is still a draft
 At the end of this lecture, you should be able to
 
 1. Formalize what a concurrent program does.
-2. Use concurrency in Go with goroutines.
-3. Motivate verification of concurrent programs.
+2. Understand why reasoning about concurrency is challenging.
 
 ## Motivation
 
 Modern CPUs have many cores. Concurrency is important to get good performance from the machine. Systems software often needs to be concurrent so that applications can get good performance.
 
 Concurrency is challenging due to the number of interleavings of a concurrent program: a small amount of code can now execute in many ways. How do we make sure every interleaving works correctly? Testing every interleaving isn't feasible, which makes verification more attractive in this setting.
+
+In this lecture, we won't focus on proof techniques, but instead on describing _what concurrency is_ and motivating _why reasoning is challenging_.
 
 ## Programming with concurrency
 
@@ -76,6 +77,103 @@ llo 2
 ```
 
 Depends on what is atomic. In this case, ultimately printing is a `write(2)` system call to the stdout file of the process, and these writes are turned into output on the terminal device - there's no real guarantee but most likely the write system calls are each atomic, and Go will issue one for each `fmt.Println`.
+
+### Race condition
+
+Imagine we have the following code:
+
+```go
+var counter uint64
+...
+go func() {
+  counter = counter + 1
+}()
+go func() {
+  counter = counter + 1
+}()
+```
+
+Imagine `counter = counter + 1` compiles to the following assembly, where 0x80a1c is the address of the global counter variable:
+
+```asm
+mov 0x80a1c, %eax
+add $0x1, %eax
+mov %eax, 0x80a1c
+```
+
+What happens when we run this program?
+
+Here's one interleaving:
+
+```asm
+# counter = 10
+mov 0x80a1c, %eax
+add $0x1, %eax
+mov %eax, 0x80a1c
+                         mov %eax, 0x80a1c
+                         mov 0x80a1c, %eax
+                         add $0x1, %eax
+# counter = 12
+```
+
+```asm
+# counter = 10
+mov 0x80a1c, %eax
+                         mov 0x80a1c, %eax
+                         add $0x1, %eax
+add $0x1, %eax
+                         mov %eax, 0x80a1c
+mov %eax, 0x80a1c
+# counter = 11 (bug!)
+```
+
+What went wrong? This is called a race condition: two simultaneous operations on the same memory, where at least one is a write. More formally (avoiding defining "simultaneous"): `counter = counter + 1` didn't run atomically, as desired.
+
+## Synchronizing programs
+
+### Mutexes
+
+Mutexes or locks provide mutual exclusion: if threads (goroutines in this cae) call `m.Lock()` and `m.Unlock()` around a _critical section_, only on thread can be inside the critical section at any time.
+
+```go
+var m sync.Mutex
+go func() {
+  m.Lock()
+  fmt.Println("hello...")
+  fmt.Println("world")
+  m.Unlock()
+}()
+m.Lock()
+fmt.Println("bye...")
+fmt.Println("there")
+m.Unlock()
+```
+
+No longer any doubt about what interleavings are possible.
+
+### WaitGroup (barrier)
+
+Go's `sync` package also provides `sync.WaitGroup`, a particular form of barrier used to wait for threads to finish:
+
+```go
+func printTwo() {
+  var wg sync.WaitGroup
+  wg.Add(2)
+  go func() {
+    fmt.Println("hello 1")
+    wg.Done()
+  }()
+  go func() {
+    fmt.Println("hello 2")
+    wg.Done()
+  }()
+  wg.Wait()
+}
+```
+
+Always prints "hello 1" and "hello 2" (in either order), and then returns. If we call this in `main` both print statements are guaranteed to run.
+
+Not the same feature as locks! There's no mutual exclusion here, the fundamental primitive is waiting for something to happen.
 
 ## Modeling concurrent programs
 

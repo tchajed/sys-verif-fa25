@@ -96,7 +96,7 @@ export default defineUserConfig({
       },
       // see https://ecosystem.vuejs.press/plugins/markdown/shiki.html for the below config
       shiki: {
-        langs: ["coq", "go", "bash"],
+        langs: ["coq", "go", "bash", "asm"],
         // customized from one-light and one-dark-pro
         themes: {
           light: "catppuccin-latte",
