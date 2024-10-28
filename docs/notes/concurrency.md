@@ -15,6 +15,8 @@ This lecture is still a draft
 
 :::
 
+<!-- @include: ../notes/macros.snippet.md -->
+
 ## Learning outcomes
 
 At the end of this lecture, you should be able to
@@ -48,7 +50,7 @@ We will use _thread_ generically for an independent unit of execution. Multiple 
 
 When we consider threads to run "simultaneously" it's sufficient to instead consider each thread as having atomic actions (for the sake of intuition you can imagine these are individual CPU instructions) which interleave in some single global order. When two actions happen truly simultaneously (say, because they happen on separate cores), this will produce two interleavings, one for each order. If the actions would conflict then they aren't truly atomic, and should be split into smaller and logically atomic steps.
 
-## Examples
+### goroutines
 
 In Go, there is an easy way to run something concurrently: the `go` statement. (See the [tour](https://go.dev/tour/concurrency/1) for more details.)
 
@@ -69,6 +71,10 @@ fmt.Println("hello 2")
 
 Could print "hello 1" then "hello 2" or the reverse. In reality, if this is in `main` then the background goroutine might not get to finish and we could easily see "hello 2".
 
+**Exercise**: what else do you think could happen?
+
+::: details Solution
+
 What about this?
 
 ```txt title=" "
@@ -78,13 +84,46 @@ llo 2
 
 Depends on what is atomic. In this case, ultimately printing is a `write(2)` system call to the stdout file of the process, and these writes are turned into output on the terminal device - there's no real guarantee but most likely the write system calls are each atomic, and Go will issue one for each `fmt.Println`.
 
-### Race condition
+:::
+
+## Modeling concurrent programs
+
+We will add a new language construct $\spawn \, e$ which creates a new thread running $e$ and which evaluates to $()$ (the "unit value" or empty tuple).
+
+Remember the semantics of heap programs $(e, h) \leadsto (e', h')$.
+
+At any given time, we're no longer running _one expression_ $e$ but a whole list, which we'll call a _thread pool_ $T$ - it will simply be a list of expressions in our model. The semantics will now have the form $(T, h) \leadsto_{tp} (T', h')$. Notice that we have a single global heap and the only state within one thread is the expression itself - there's no additional thread metadata or thread-local storage, and everything in the heap is in principle accessible to any thread.
+
+The threadpool semantics is closely related to the semantics of individual expressions. In fact for the most part the transitions of a threadpool are to pick some thread, execute it for a bit, and then possibly switch to another thread:
+
+$$
+\dfrac{(e, h) \leadsto (e', h')}
+{(T_1 \listapp [e] \listapp T_2, h) \leadsto_{tp} (T_1 \listapp [e'] \listapp T_2, h')}
+$$
+
+The rule looks more complicated than it is. If a threadpool is running some thread in the middle being $e$, it has the shape $T_1 \listapp [e] \listapp T_2$. The transition taken only changes the one expression $e$ to $e'$, and the heap goes from $h$ to $h'$. This transition models the thread $e$ being chosen to run next, and the semantics only ever runs one thread at a time.
+
+We haven't said what the new $\spawn \, e$ primitive does, but it will be the one construct that expands the threadpool:
+
+$$(T_1 \listapp [\spawn \, e] \listapp T_2, h) \leadsto_{tp} (T_1 \listapp [()] \listapp T_2 \listapp [e], h)$$
+
+This time the heap is uninvolved, and the only effect is to create a new thread. This rule may look strange on its own, since $\spawn \, e$ immediately seems to terminate in a value and thus no new threads are created. If $\spawn \, e$ were part of a larger program then the remainder would continue to run, so for example $(\spawn \, e); e'$ would become two threads, $e$ and $e'$.
+
+Recall that we defined the soundness of separation logic in terms of whether an expression got stuck: if $(e, h)$ cannot step to anything and $e$ is not a value, then we called it stuck. Soundness was partly about expressions not getting stuck (and partly about the postcondition being true if they did terminate in a value). We have to decide what to do with those definitions now that there are multiple threads.
+
+The decision we'll take is that the _concurrent separation logic_ we develop will show that after an expression has run for a while, _none of the spawned threads are stuck_, but the postcondition will only apply to the value of the "main thread", the first element of the threadpool - background threads can go into infinite loops or terminate in any value.
+
+## Synchronizing programs
+
+Since threads interleave with each other, we will need programming mechanisms to control how they interleave. First, let's see one example of a bug due to interleavings. Then, we'll see two core synchronization primitives: mutexes provide mutual exclusion (e.g., to make more than one assembly instruction run atomically) and barriers provide waiting (e.g., to efficiently implementing waiting for several threads to finish).
+
+### Bugs: race condition
 
 Imagine we have the following code:
 
 ```go
-var counter uint64
-...
+var counter uint64 // global
+// ...
 go func() {
   counter = counter + 1
 }()
@@ -127,13 +166,13 @@ mov %eax, 0x80a1c
 # counter = 11 (bug!)
 ```
 
-What went wrong? This is called a race condition: two simultaneous operations on the same memory, where at least one is a write. More formally (avoiding defining "simultaneous"): `counter = counter + 1` didn't run atomically, as desired.
+What went wrong? The two accesses to `counter` in the Go program form a race condition: two simultaneous operations on the same memory, where at least one is a write.
 
-## Synchronizing programs
+We can more simply think of the problem as being that `counter = counter + 1` didn't run atomically, as desired, and the effect is to cause two simultaneous writes to have the effect of only one.
 
 ### Mutexes
 
-Mutexes or locks provide mutual exclusion: if threads (goroutines in this cae) call `m.Lock()` and `m.Unlock()` around a _critical section_, only on thread can be inside the critical section at any time.
+Mutexes or locks provide mutual exclusion: if threads (goroutines in this cae) call `m.Lock()` and `m.Unlock()` around a _critical section_, only one thread can be inside the critical section at any time.
 
 ```go
 var m sync.Mutex
@@ -149,7 +188,7 @@ fmt.Println("there")
 m.Unlock()
 ```
 
-No longer any doubt about what interleavings are possible.
+There's no longer any doubt about what interleavings are possible: each critical section must run atomically, so even with multiple calls to `fmt.Println` we expect only the two possible interleavings (plus the possibility that the goroutine never runs and we only see "bye... there").
 
 ### WaitGroup (barrier)
 
@@ -174,30 +213,3 @@ func printTwo() {
 Always prints "hello 1" and "hello 2" (in either order), and then returns. If we call this in `main` both print statements are guaranteed to run.
 
 Not the same feature as locks! There's no mutual exclusion here, the fundamental primitive is waiting for something to happen.
-
-## Modeling concurrent programs
-
-We will add a new language construct $\spawn \, e$ which creates a new thread running $e$ and which evaluates to $()$ (the "unit value" or empty tuple).
-
-Remember the semantics of heap programs $(e, h) \leadsto (e', h')$.
-
-At any given time, we're no longer running _one expression_ $e$ but a whole list, which we'll call a _thread pool_ $T$ - it will simply be a list of expressions in our model. The semantics will now have the form $(T, h) \leadsto_{tp} (T', h')$. Notice that we have a single global heap and the only state within one thread is the expression itself - there's no additional thread metadata or thread-local storage, and everything in the heap is in principle accessible to any thread.
-
-The threadpool semantics is closely related to the semantics of individual expressions. In fact for the most part the transitions of a threadpool are to pick some thread, execute it for a bit, and then possibly switch to another thread:
-
-$$
-\dfrac{(e, h) \leadsto (e', h')}
-{(T_1 \listapp [e] \listapp T_2, h) \leadsto_{tp} (T_1 \listapp [e'] \listapp T_2, h')}
-$$
-
-The rule looks more complicated than it is. If a threadpool is running some thread in the middle being $e$, it has the shape $T_1 \listapp [e] \listapp T_2$. The transition taken only changes the one expression $e$ to $e'$, and the heap goes from $h$ to $h'$. This transition models the thread $e$ being chosen to run next, and the semantics only ever runs one thread at a time.
-
-We haven't said what the new $\spawn \, e$ primitive does, but it will be the one construct that expands the threadpool:
-
-$$(T_1 \listapp [\spawn \, e] \listapp T_2, h) \leadsto_{tp} (T_1 \listapp [()] \listapp T_2 \listapp [e], h)$$
-
-This time the heap is uninvolved, and the only effect is to create a new thread. This rule may look strange on its own, since $\spawn \, e$ immediately seems to terminate in a value and thus no new threads are created. If $\spawn \, e$ were part of a larger program then the remainder would continue to run, so for example $(\spawn \, e); e'$ would become two threads, $e$ and $e'$.
-
-Recall that we defined the soundness of separation logic in terms of whether an expression got stuck: if $(e, h)$ cannot step to anything and $e$ is not a value, then we called it stuck. Soundness was partly about expressions not getting stuck (and partly about the postcondition being true if they did terminate in a value). We have to decide what to do with those definitions now that there are multiple threads.
-
-The decision we'll take is that the _concurrent separation logic_ we develop will show that after an expression has run for a while, _none of the spawned threads are stuck_, but the postcondition will only apply to the value of the "main thread", the first element of the threadpool - background threads can go into infinite loops or terminate in any value.

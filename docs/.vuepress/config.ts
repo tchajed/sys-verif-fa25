@@ -44,7 +44,7 @@ const sidebarConfig = sidebar({
       icon: "lightbulb",
       prefix: "notes/",
       link: "/notes/",
-      children: ["ownership.md", "persistently.md"],
+      children: ["persistently.md", "concurrency.md"],
     },
   ],
   "/notes/": "structure",
