@@ -99,9 +99,15 @@ The rule looks more complicated than it is. If a threadpool is running some thre
 
 We haven't said what the new $\spawn \, e$ primitive does, but it will be the one construct that expands the threadpool:
 
-$$(T_1 \listapp [\spawn \, e] \listapp T_2, h) \leadsto_{tp} (T_1 \listapp [()] \listapp T_2 \listapp [e], h)$$
+$$(T_1 \listapp [K[\spawn \, e]] \listapp T_2, h) \leadsto_{tp} (T_1 \listapp [K[()]] \listapp T_2 \listapp [e], h)$$
 
-This time the heap is uninvolved, and the only effect is to create a new thread. This rule may look strange on its own, since $\spawn \, e$ immediately seems to terminate in a value and thus no new threads are created. If $\spawn \, e$ were part of a larger program then the remainder would continue to run, so for example $(\spawn \, e); e'$ would become two threads, $e$ and $e'$.
+This time the heap is uninvolved, and the only effect is to create a new thread. Recall that $K[\spawn \, e]$ refers to an evaluation context $K$ surrounding $\spawn \, e$, meaning the spawn is the next thing to run. Concretely the simplest such evaluation context would be if the expression to be evaluated was $\spawn \, e;\, e_2$, in which case the program would continue as $(); e_2$, which will quickly evaluate to $e_2$. The semantics of spawn say to launch a new thread, then continue running the rest of the program with $\spawn \, e$ having returned $()$.
+
+::: important Exercise: add thread id to semantics
+
+To check your understanding of this rule, modify it so that $\spawn \, e$ returns a "thread id" instead of nothing interesting. A natural choice of which thread id to return is the index of the thread in the threadpool.
+
+:::
 
 Recall that we defined the soundness of separation logic in terms of whether an expression got stuck: if $(e, h)$ cannot step to anything and $e$ is not a value, then we called it stuck. Soundness was partly about expressions not getting stuck (and partly about the postcondition being true if they did terminate in a value). We have to decide what to do with those definitions now that there are multiple threads.
 
