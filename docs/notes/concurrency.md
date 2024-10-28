@@ -170,6 +170,28 @@ What went wrong? The two accesses to `counter` in the Go program form a race con
 
 We can more simply think of the problem as being that `counter = counter + 1` didn't run atomically, as desired, and the effect is to cause two simultaneous writes to have the effect of only one.
 
+Here's a puzzle for you.
+
+Consider a similar example, but incrementing in a loop:
+
+```go
+var counter = 0
+go func() {
+  for i := 0; i < 10; i++ {
+    counter = counter + 1
+  }
+}()
+go func() {
+  for i := 0; i < 10; i++ {
+    counter = counter + 1
+  }
+}()
+```
+
+As before, `counter = counter + 1` runs as three separate steps (load, add, store).
+
+What is the maximum value of the counter after both loops terminate? (Answer: 20). **What is the minimum value?**
+
 ### Mutexes
 
 Mutexes or locks provide mutual exclusion: if threads (goroutines in this cae) call `m.Lock()` and `m.Unlock()` around a _critical section_, only one thread can be inside the critical section at any time.
