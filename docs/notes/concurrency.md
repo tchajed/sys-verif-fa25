@@ -9,12 +9,6 @@ pageInfo: ["Date", "Category", "Tag", "Word"]
 
 We will now introduce concurrency to our programs and GooseLang model of programs, and shortly we'll start proving properties of concurrent programs.
 
-::: warning Draft
-
-This lecture is still a draft
-
-:::
-
 <!-- @include: ../notes/macros.snippet.md -->
 
 ## Learning outcomes
