@@ -190,7 +190,31 @@ go func() {
 
 As before, `counter = counter + 1` runs as three separate steps (load, add, store).
 
-What is the maximum value of the counter after both loops terminate? (Answer: 20). **What is the minimum value?**
+What is the maximum value of the counter after both loops terminate? (Answer: 20). **What is the minimum value?** This is harder than it might look, so think about it before expanding the solution.
+
+::: details Solution
+
+The answer is 2.
+
+Before getting to the explanation it helps to make one observation. We can safely think of the loop body as being two steps rather than three: $\lete{x}{\load{ctr}} \store{ctr}{x + 1}$. This is because the other thread can't affect anything between the local increment and the final store; that operation only touches local state.
+
+It's relatively easy to show that there's an interleaving that leaves the counter at 10. We already saw how one iteration of `counter = counter + 1` could interleave with another iteration to produce an overall increment of 1; this could happen 10 times. But this execution has the two threads synchronizing after every iteration; perhaps we could do better by overlapping one iteration of one thread with _multiple_ of the other.
+
+Here's the trace that produces 2:
+
+| thread 1           | thread 2           |
+| :----------------- | :----------------- |
+| x := !ctr (0)      | x := !ctr (0)      |
+|                    | ... (9 iterations) |
+| ctr ← x + 1 (1)    |                    |
+|                    | x := !ctr (1)      |
+| ... (9 iterations) |                    |
+| ctr ← x + 1 (?)    |                    |
+| (done)             |                    |
+|                    | ctr ← x + 1 (2)    |
+|                    | (done)             |
+
+:::
 
 ### Mutexes
 
