@@ -2,6 +2,7 @@
 # Auto-generated from literate source. DO NOT EDIT.
 category: assignment
 tags: literate
+order: 5
 shortTitle: "Assignment 3: queue"
 ---
 

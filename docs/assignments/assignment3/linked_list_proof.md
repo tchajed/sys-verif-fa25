@@ -2,6 +2,7 @@
 # Auto-generated from literate source. DO NOT EDIT.
 category: assignment
 tags: literate
+order: 4
 shortTitle: "Assignment 3: linked lists"
 ---
 

@@ -1,18 +1,13 @@
 ---
 # Auto-generated from literate source. DO NOT EDIT.
 tags: literate
-shortTitle: Getting started exercises
+order: 1
+shortTitle: "Assignment 3: intro"
 ---
 
-# Getting started with program proofs
+# Introduction to program proofs
 
-These exercises should help you get started with doing program proofs. They're split into two parts: using the Iris Proof Mode for proving $P ⊢ Q$ with separation logic assertions (without any proofs about programs), and proving specifications using the weakest precondition tactics and lemmas.
-
-::: warning Draft
-
-This set of exercises is still a draft.
-
-:::
+These exercises should help you get started with doing program proofs with Goose. They're split into two parts: using the Iris Proof Mode for proving $P ⊢ Q$ with separation logic assertions (without any proofs about programs), and proving specifications using the weakest precondition tactics and lemmas.
 
 ```coq
 From sys_verif.program_proof Require Import prelude empty_ffi.
@@ -65,7 +60,7 @@ You should make sure you know how to type the special symbols in these specifica
 
 Delete each specification in this file and type it out again.
 
-Refer to the [input guide](/notes/program-proofs/input.md) for guidance on how to type each symbol (they match the LaTeX commands, but you may not be familiar with this).
+Refer to the [input guide](/notes/program-proofs/input.md) for guidance on how to type each symbol.
 
 One easy thing to miss is that `P ∗ Q` (separating conjunction) requires you to type \sep. It's not the same as `x * y` (multiplication of integers).
 
@@ -148,6 +143,20 @@ Lemma ex_pure_impl s q (bs: list w8) :
   length bs = 3%nat →
   own_slice_small s byteT q bs -∗
   ⌜Slice.sz s = 3%Z⌝ ∗ own_slice_small s byteT q bs.
+Proof.
+Admitted.
+
+```
+
+**Exercise:** complete the proof
+
+Read about [structs](/notes/ownership#proofs-using-structs) (in particular `wp_ExamplePersonRef`) to see how to do this.
+
+```coq
+Lemma ex_split_struct l s :
+  l ↦[struct.t S1] (#(W64 3), (s, #())) -∗
+  l ↦[S1 :: "a"] #(W64 3) ∗
+  l ↦[S1 :: "b"] s.
 Proof.
 Admitted.
 
