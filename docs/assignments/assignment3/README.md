@@ -16,7 +16,7 @@ This assignment is very nearly done (you can and should start on it), but I will
 
 :::
 
-Part 1 is a tutorial and part 2 is a warmup. Part 4 has an open-ended component (you'll write almost the entire proof yourself). Please take this into account when planning how to work on the assignment.
+Part 1 is a tutorial and part 2 is a warmup. Part 5 has an open-ended component (you'll write almost the entire proof yourself). Please take this into account when planning how to work on the assignment.
 
 ## Part 1: Introduction to program proofs
 
