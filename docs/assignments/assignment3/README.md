@@ -16,24 +16,24 @@ This assignment is very nearly done (you can and should start on it), but I will
 
 :::
 
-Part 0 is a tutorial and part 1 is a warmup. Part 4 has an open-ended component (you'll write almost the entire proof yourself). Please take this into account when planning how to work on the assignment.
+Part 1 is a tutorial and part 2 is a warmup. Part 4 has an open-ended component (you'll write almost the entire proof yourself). Please take this into account when planning how to work on the assignment.
 
-## Part 0: Introduction to program proofs
+## Part 1: Introduction to program proofs
 
 See [Intro to program proofs](./intro.md)
 
-## Part 1: Inferring specifications
+## Part 2: Inferring specifications
 
 See [Inferring specifications](./infer_specs.md).
 
-## Part 2: Verify factorial
+## Part 3: Verify factorial
 
 See [Factorial](./factorial_proof.md).
 
-## Part 3: Linked lists
+## Part 4: Linked lists
 
 See [Linked lists](./linked_list_proof.md).
 
-## Part 4: Queue using two stacks
+## Part 5: Queue using two stacks
 
 See [Queue](./queue_proof.md).
