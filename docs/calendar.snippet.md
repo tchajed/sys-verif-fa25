@@ -26,14 +26,14 @@
 |  17 | Wed Oct 30 | [Lock invariants](./notes/invariants.md)          |
 |  18 | Mon Nov 4  | **No class**                                      |
 |  19 | Wed Nov 6  | **No class**                                      |
-|  18 | Mon Nov 11 | Ghost state                                       |
-|  19 | Wed Nov 13 | Update modality                                   |
+|  18 | Mon Nov 11 | Resource algebras                                 |
+|  19 | Wed Nov 13 | Ghost state                                       |
 |     | Thu Nov 14 | _Assignment 3 due (11pm)_                         |
-|  20 | Mon Nov 18 | Locks                                             |
-|  21 | Wed Nov 20 | Specifying atomic operations                      |
-|  22 | Mon Nov 25 | Examples 1                                        |
-|  23 | Wed Nov 27 | Examples 2                                        |
-|  24 | Mon Dec 2  | Property-based testing                            |
+|  20 | Mon Nov 18 | Specifying atomic operations                      |
+|  21 | Wed Nov 20 | Barrier proof                                     |
+|  22 | Mon Nov 25 | More examples                                     |
+|  23 | Wed Nov 27 | Property-based testing                            |
+|  24 | Mon Dec 2  |                                                   |
 |  25 | Wed Dec 4  |                                                   |
 |  26 | Mon Dec 9  |                                                   |
 |  27 | Wed Dec 11 |                                                   |
