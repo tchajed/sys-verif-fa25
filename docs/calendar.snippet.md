@@ -23,7 +23,7 @@
 |  15 | Wed Oct 23 | [Persistence](./notes/persistently.md)            |
 |     |            | **Part 3: Concurrency**                           |
 |  16 | Mon Oct 28 | [Concurrency intro](./notes/concurrency.md)       |
-|  17 | Wed Oct 30 | Invariants                                        |
+|  17 | Wed Oct 30 | [Lock invariants](./notes/invariants.md)          |
 |  18 | Mon Nov 4  | **No class**                                      |
 |  19 | Wed Nov 6  | **No class**                                      |
 |  18 | Mon Nov 11 | Ghost state                                       |

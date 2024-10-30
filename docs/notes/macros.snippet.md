@@ -61,4 +61,7 @@ $$
 \gdef\pointsto{\mapsto}
 \gdef\Heap{\mathrm{Heap}}
 \gdef\Loc{\mathrm{loc}}
+
+%% concurrent separation logic
+\gdef\isLock{\mathrm{isLock}}
 $$
