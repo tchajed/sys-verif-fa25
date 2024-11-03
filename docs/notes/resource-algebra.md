@@ -30,7 +30,7 @@ We can use a logic abstractly, following the rules to prove $P \entails Q$ for v
 
 A _model_ of the logic is an interpretation or definition for the propositions and syntax where the rules can be proven as theorems. We introduced separation logic alongside a model where propositions are predicates over heaps, and separating conjunction $(P \sep Q)(h)$ holds when $P$ and $Q$ hold over disjoint subsets $h_1$ and $h_2$ of $h$.
 
-Notice that I said **a model** and not **the model**. The same logic can have more than one model! That's exactly what we'll do today.
+Notice that I said **a** model and not **the** model. The same logic can have more than one model! That's exactly what we'll do today.
 
 As an example, you might be familiar with comes from geometry. Euclid's axioms include a parallel postulate: if you have a line and a point not on the line, there is exactly one line parallel to the given line which goes through the given point. If you remove that axiom, then there are multiple possible models of Euclid's axioms: Euclidean geometry, hyperbolic geometry, and elliptic geometry.
 
@@ -65,10 +65,10 @@ More formally, an RA is an algebraic structure $(A, \cdot, \valid, \pcore)$. Her
 
 To understand why this is how a resource algebra is defined, it will help to see how it will be "plugged into" a separation logic assertion later. After we pick some resource algebra for our separation logic, we'll add $\own(x)$ as a separation logic proposition where $x : A$ to represent ownership of the resource $x$. Now we won't need a special syntax for $\ell \mapsto v$; it will be _defined_ to be $\own(\{h \mapsto v\})$ (that is, ownership over the singleton heap).
 
-- $A$ is a type called the carrier of the resource algebra. In our examples this is a heap and a $q$ fraction respectively. For the heap we'll need to add an "error" value $\errorval$.
-- $(\cdot) : A \to A \to A$ combines two resources. The expression $x \cdot y$ can be pronounced "x dot y" (you might also hear "plus"). For the heap resource algebra, $h_1 \cdot h_2$ is disjoint union. In that case, we will have $h_1 \cdot h_2 = \errorval$ if $h_1$ and $h_2$ overlap.
-- $\valid : A \to \bool$ says which elements are valid. We pronounced $\valid(x)$ as "valid x". For the heap, all resources are valid except $\errorval$. For fractions, $\valid(q) \triangleq 0 < q \leq 1$.
-- $\pcore : A \to \option(A)$ is the "partial core" of a resource. This is the most unusual of the operations; it is used to implement persistence. When $\pcore(x) = \Some(p)$, it says that the persistent "core" of the resource $x$ is $p$. The operation is partial, so $\pcore(y) = \None$ says there is no persistent part of $y$. This part is the most complicated and we'll defer talking about it; the heap and fraction examples have no persistent resources so we can't use them to explain.
+- $A$ is a type called the carrier of the resource algebra. In our examples this is a heap and a $q$ fraction respectively. For the heap RA we'll need to add an "error" value $\errorval$.
+- $(\cdot) : A \to A \to A$ combines two resources. The expression $x \cdot y$ can be pronounced "x dot y" (you might also hear "plus"). For the heap RA, $h_1 \cdot h_2$ is disjoint union. In that case, we will have $h_1 \cdot h_2 = \errorval$ if $h_1$ and $h_2$ overlap.
+- $\valid : A \to \bool$ says which elements are valid. We pronounced $\valid(x)$ as "valid x". For the heap RA, all resources are valid except $\errorval$. For fractions, $\valid(q) \triangleq 0 < q \leq 1$.
+- $\pcore : A \to \option(A)$ is the "partial core" of a resource. When $\pcore(x) = \Some(p)$, it says that the "shareable" part of $x$ is $p$. The operation is partial, so $\pcore(y) = \None$ says there is no persistent/shareable part of $y$. This is the most unusual part of the RA definition.
 
 Let's walk through each example:
 

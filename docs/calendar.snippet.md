@@ -26,7 +26,7 @@
 |  17 | Wed Oct 30 | [Lock invariants](./notes/invariants.md)          |
 |  18 | Mon Nov 4  | **No class**                                      |
 |  19 | Wed Nov 6  | **No class**                                      |
-|  18 | Mon Nov 11 | Resource algebras                                 |
+|  18 | Mon Nov 11 | [Resource algebras](./notes/resource-algebra.md)  |
 |  19 | Wed Nov 13 | Ghost state                                       |
 |     | Thu Nov 14 | _Assignment 3 due (11pm)_                         |
 |  20 | Mon Nov 18 | Specifying atomic operations                      |
