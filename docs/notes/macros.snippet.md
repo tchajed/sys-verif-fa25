@@ -17,6 +17,9 @@ $$
 \gdef\bool{\operatorname{bool}}
 \gdef\box{\Box}
 
+\gdef\iProp{\operatorname{iProp}}
+\gdef\Prop{\operatorname{Prop}}
+
 
 %% language
 \gdef\ife#1#2#3{\text{\textbf{if} } #1 \text{ \textbf{then} } #2 \text{ \textbf{else} } #3}

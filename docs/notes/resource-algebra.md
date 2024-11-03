@@ -36,11 +36,21 @@ As an example, you might be familiar with comes from geometry. Euclid's axioms i
 
 ## Algebraic model of separation logic
 
-We'll actually give a very general model of separation logic where heaps are replaced with "resources". I'll start calling the propositions `iProp` so that `hProp` is reserved for the definition with heaps specifically; this is much closer to how Iris actually works, hence `iProp`. Abstractly, `iProp` will be a $\operatorname{Res} \to Prop$ where we'll write some rules for what $\operatorname{Res}$ should look like (they will form a _resource algebra_). Then concretely we'll pick a particular $\operatorname{Res}$ that gives fractional and persistent permissions. The reason to do this in these two steps is that we'll see other examples of resource algebras, and having the generality in place will help you unify the various definitions.
+Let's try to sketch out the ingredients of this generalization. Instead of ownership over one location and one value specifically, we'll want ownership to be more flexible. Wanting to stay as general as possible, let's say we'll pick a type $A$ and own elements $x : A$, which we'll refer to as resources. An $\iProp$ will represent a set of resources $A \to \Prop$; it's a set because separation logic propositions can describe one of several possible worlds, just like before an hProp could be true in zero or several heaps.
+
+We need a way to represent ownership of one specific resource: we'll write it $\own(x) : \iProp$ for the resource $x : A$. The heap model was a special case: the resources were heaplets, and we had special syntax $\ell \mapsto v : \operatorname{hProp}$. Now we'd write that as $\own(\{\ell \mapsto v\})$.
+
+One of the things we need for separation logic is to split and combine resources, to implement the _separation_ in the name of the logic. Combining is easier: the assertion $\own(x) \sep \own(y)$ should hold for some resource which combines the two sides. We have some arbitrary type $A$, but now we'll assume we can combine two resources in $A$, which we'll write $x \cdot y$ ("x compose y"). Splitting will essentially be the reverse, where we have $\own(x \cdot y) \entails \own(x) \sep \own(y)$.
+
+There's still one thing missing, which is that for heaps at least disjointness was somehow relevant to $P \sep Q$. The way we'll incorporate this is a bit indirectly: we'll define $\valid x$ ("valid x") to say that some elements are valid, and others are not. $\own(x)$ will only be true for a resource $y$ if $x = y$ _and_ $\valid x$. We'll make sure $\own(x) \sep \own(y)$ will only be provable when $\valid(x \cdot y)$, and overlapping heaps do not combine to something valid.
+
+What we've described is the beginning of a _resource algebra_ $A$: it defines some resources, a way to split and combine them, and a subset of valid ones to define when we're allowed to combine them.
 
 ::: info Aside on algebra
 
-There are many algebraic structures (such as fields, monoids, groups, and vector spaces). If you've never seen an algebraic structure, this setup might seem strange to you. The definition of a monoid is simpler to get across, but an RA has more operations and rules than a monoid:
+We're about to define more formally what a resource algebra is.
+
+There are many algebraic structures (such as fields, monoids, groups, and vector spaces). If you've never seen an algebraic structure, the setup for a resource algebra might seem strange to you. The definition of a monoid is simpler to get across, but an RA has more operations and rules than a monoid:
 
 A monoid is a structure $(M, +)$ with a carrier type $M$ (of elements "in the monoid") and a single operation $(+) : M \to M \to M$ that adds or "composes" two elements. The addition operation must be associative; that is $\forall x, y, z.\; (x + y) + z = x + (y + z)$.
 
@@ -52,9 +62,9 @@ Our second example is the monoid of lists with elements of type $A$ (this needs 
 
 ### Resource algebra definition
 
-A resource algebra (RA) is a collection of "resources" that can be combined and split. It will help to keep in mind two concrete examples we've already seen: heaps, which can be split and combined into disjoint subsets; and for a fixed $\ell$ and $v$ $\ell \mapsto_q v$ can be viewed as a collection of resources (one for each fraction $q$) that is split and combined by addition (we'll get to multiple locations and values later).
+A resource algebra (RA) is a collection of "resources" that can be combined and split. It will help to keep in mind two concrete examples we've already seen. The first is our core example of heaps, which can be split and combined into disjoint subsets and was our original model of separation logic. The other is a slightly odd example of how we combine and split fractions $q$, which we saw when we split and combined $\ell \mapsto_{q} v$ for some fixed location $\ell$ and value $v$. That example is odd in that the resource algebra will only manipulate the fraction and we won't worry about multiple locations yet.
 
-More formally, an RA is an algebraic structure $(A, \cdot, \valid, \pcore)$. Here's a quick reference of what the components are:
+Formally, a resource algebra (RA) is an algebraic structure $(A, \cdot, \valid, \pcore)$. It has these components:
 
 | component | type               | description                         |
 | :-------- | :----------------- | :---------------------------------- |
@@ -63,20 +73,47 @@ More formally, an RA is an algebraic structure $(A, \cdot, \valid, \pcore)$. Her
 | $\valid$  | $A \to \bool$      | valid resources                     |
 | $\pcore$  | $A \to \option(A)$ | partial core                        |
 
-To understand why this is how a resource algebra is defined, it will help to see how it will be "plugged into" a separation logic assertion later. After we pick some resource algebra for our separation logic, we'll add $\own(x)$ as a separation logic proposition where $x : A$ to represent ownership of the resource $x$. Now we won't need a special syntax for $\ell \mapsto v$; it will be _defined_ to be $\own(\{h \mapsto v\})$ (that is, ownership over the singleton heap).
-
-- $A$ is a type called the carrier of the resource algebra. In our examples this is a heap and a $q$ fraction respectively. For the heap RA we'll need to add an "error" value $\errorval$.
+- $A$ is a type called the carrier of the resource algebra. In our examples this is a heap and a $q$ fraction respectively. For the heap RA we'll need to add an "error" value $\errorval$ for invalid compositions.
 - $(\cdot) : A \to A \to A$ combines two resources. The expression $x \cdot y$ can be pronounced "x dot y" (you might also hear "plus"). For the heap RA, $h_1 \cdot h_2$ is disjoint union. In that case, we will have $h_1 \cdot h_2 = \errorval$ if $h_1$ and $h_2$ overlap.
 - $\valid : A \to \bool$ says which elements are valid. We pronounced $\valid(x)$ as "valid x". For the heap RA, all resources are valid except $\errorval$. For fractions, $\valid(q) \triangleq 0 < q \leq 1$.
-- $\pcore : A \to \option(A)$ is the "partial core" of a resource. When $\pcore(x) = \Some(p)$, it says that the "shareable" part of $x$ is $p$. The operation is partial, so $\pcore(y) = \None$ says there is no persistent/shareable part of $y$. This is the most unusual part of the RA definition.
+- $\pcore : A \to \option(A)$ is the "partial core" of a resource. When $\pcore(x) = \Some(p)$, it says that the "shareable" part of $x$ is $p$. The operation is partial, so $\pcore(y) = \None$ says there is no persistent/shareable part of $y$. This is the most unusual part of the RA definition. A special case that is particularly important is that if $\pcore(y) = \Some(y)$, then $y$ is entirely shareable, which will correspond exactly to persistence later in separation logic.
 
 Let's walk through each example:
 
-**Heap resource algebra:** The resources of the heap resource algebra are heaplets, subsets of the heap, or an error value $\bot$. Two heaps can be combined if they are disjoint; otherwise they produce the error value. Any heaplet is valid (but not $\bot$). No heaplet has a core. Observe that the singleton heaps $\{\ell \mapsto v\}$ function as the "smallest" resources.
+**Heap resource algebra:** The resources of the heap resource algebra are heaplets, subsets of the heap, or an error value $\bot$. Two heaps can be combined if they are disjoint; otherwise they produce the error value. Any heaplet is valid (but not $\bot$). We can define $\pcore(h) = \Some(\empty)$. Observe that the singleton heaps $\{\ell \mapsto v\}$ function as the "smallest" useful resources.
 
 **Fractional resource algebra:** The resources of the fractional resource are fractions $q$. Any two fractions can be combined by addition, but only fractions $0 < q \leq 1$ are valid. No fraction has a core.
 
+### Discardable fractions
+
+Let's see a brand new example, which will demonstrate pcore. This example is like the RA for fractions, extending them to support persistence.
+
+The carrier is a type with three possibilities: a fraction, a marker that the fraction has been discarded, or a combination of both. We'll write the three possibilities DfracOwn($q$), DfracDiscarded, and DfracBoth($q$). You can get a good intuition for this RA by thinking of DfracDiscarded as an extremely small fraction $\epsilon$ and DfracBoth($q$) as $1 + q$.
+
+Here are some examples of composition. You can predict the rules with the intuition above, formally treating $\epsilon + \epsilon = \epsilon$.
+
+- $\text{DfracOwn}(q_1) \cdot \text{DfracOwn}(q_2) = \text{DfracOwn}(q_1 + q_2)$
+- $\text{DfracOwn}(q) \cdot \text{DfracDiscarded} = \text{DfracBoth}(q)$
+- $\text{DfracDiscarded} \cdot \text{DfracDiscarded} = \text{DfracDiscarded}$
+- $\text{DfracBoth}(q_1) \cdot \text{DfracBoth}(q_2) = \text{DfracBoth}(q_1 + q_2)$
+
+The valid elements are the following:
+
+- $\valid \text{DfracOwn}(q) = 0 < q \leq 1$
+- $\valid \text{DfracDiscarded} = \True$
+- $\valid \text{DfracBoth}(q) = 0 < q < 1$
+
+This RA has a non-trivial partial core:
+
+- $\pcore(\text{DfracOwn}(q)) = \None$
+- $\pcore(\text{DfracDiscarded}) = \text{DfracDiscarded}$
+- $\pcore(\text{DfracBoth}(q)) = \text{DfracDiscarded}$
+
+Notice that DfracDiscarded is its own core, which is what makes it persistent.
+
 ### RAs in the logic
+
+To understand why this is how a resource algebra is defined, it will help to see how it will be "plugged into" a separation logic assertion later. After we pick some resource algebra for our separation logic, we'll add $\own(x)$ as a separation logic proposition where $x : A$ to represent ownership of the resource $x$. Now we won't need a special syntax for $\ell \mapsto v$; it will be _defined_ to be $\own(\{h \mapsto v\})$ (that is, ownership over the singleton heap).
 
 We introduced $\own(x)$ to represent ownership of $x$ in the logic. We will also organize things so that $\own(x)$ will always imply $\valid(x)$; owning invalid resources is forbidden. What can we do with resources? A key rule is $\own(x \cdot y) \bient \own(x) \cdot \own(y)$. That is, if we have $\own(z)$ and it can be _split_ into $z = x \cdot y$, then we can also split it into two _separate_ ownership assertions. Furthermore we can also work backwards and combine ownership.
 
