@@ -14,6 +14,9 @@ $$
 \gdef\disjoint{\mathrel{\bot}}
 \gdef\finto{\overset{\text{fin}}{\rightharpoonup}}
 \gdef\listapp{\mathbin{+\mkern-10mu+}}
+\gdef\bool{\operatorname{bool}}
+\gdef\box{\Box}
+
 
 %% language
 \gdef\ife#1#2#3{\text{\textbf{if} } #1 \text{ \textbf{then} } #2 \text{ \textbf{else} } #3}
@@ -61,6 +64,13 @@ $$
 \gdef\pointsto{\mapsto}
 \gdef\Heap{\mathrm{Heap}}
 \gdef\Loc{\mathrm{loc}}
+\gdef\valid{\text{\checkmark}}
+\gdef\pcore{\operatorname{pcore}}
+\gdef\errorval{\bot}
+\gdef\option{\operatorname{option}}
+\gdef\Some{\operatorname{Some}}
+\gdef\None{\operatorname{None}}
+\gdef\own{\operatorname{own}}
 
 %% concurrent separation logic
 \gdef\isLock{\mathrm{isLock}}
