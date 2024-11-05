@@ -6,6 +6,12 @@ pageInfo: ["Date", "Category", "Tag", "Word"]
 
 # Lecture 18: Resource Algebras
 
+::: warning Draft
+
+This lecture is still a draft.
+
+:::
+
 ## Learning Outcomes
 
 1. Explain how fractional permissions are implemented.
