@@ -42,27 +42,29 @@ As an example, you might be familiar with comes from geometry. Euclid's axioms i
 
 ## Algebraic model of separation logic
 
-Let's try to sketch out the ingredients of this generalization. Instead of ownership over one location and one value specifically, we'll want ownership to be more flexible. Wanting to stay as general as possible, let's say we'll pick a type $A$ and own elements $x : A$, which we'll refer to as resources. An $\iProp$ will represent a set of resources $A \to \Prop$; it's a set because separation logic propositions can describe one of several possible worlds, just like before an hProp could be true in zero or several heaps.
+Let's try to sketch out the ingredients of this generalization. Instead of ownership over one location and one value specifically, we'll want ownership to be more flexible. Wanting to stay as general as possible, let's say we'll pick a type $A$ and own elements $x : A$, which we'll refer to as _resources_. An $\iProp$ will represent a set of resources $A \to \Prop$; it's a set because separation logic propositions can describe one of several possible worlds, just like before an hProp could be true in zero or several heaps.
 
-We need a way to represent ownership of one specific resource: we'll write it $\own(x) : \iProp$ for the resource $x : A$. The heap model was a special case: the resources were heaplets, and we had special syntax $\ell \mapsto v : \operatorname{hProp}$. Now we'd write that as $\own(\{\ell \mapsto v\})$.
+We need a way to represent ownership of one specific resource: we'll write it $\own(x) : \iProp$ for the resource $x : A$. The heap model was a special case: the resources were heaplets, and we had special syntax $\ell \mapsto v : \operatorname{hProp}$ for the resource that represents ownership over a single location and its value. Now we'd write that as $\own(\{\ell \mapsto v\})$.
 
-One of the things we need for separation logic is to split and combine resources, to implement the _separation_ in the name of the logic. Combining is easier: the assertion $\own(x) \sep \own(y)$ should hold for some resource which combines the two sides. We have some arbitrary type $A$, but now we'll assume we can combine two resources in $A$, which we'll write $x \cdot y$ ("x compose y"). Splitting will essentially be the reverse, where we have $\own(x \cdot y) \entails \own(x) \sep \own(y)$.
+One of the things we need for separation logic is to split and combine resources, to implement the _separation_ in the name of the logic. Combining is easier: the assertion $\own(x) \sep \own(y)$ should hold for some resource which combines the two sides separately. We have some arbitrary type $A$, but now we'll assume we can combine two resources in $A$, which we'll write $x \cdot y$ ("x compose y"). Splitting will essentially be the reverse, where we have $\own(x \cdot y) \entails \own(x) \sep \own(y)$.
 
-There's still one thing missing, which is that for heaps at least disjointness was somehow relevant to $P \sep Q$. The way we'll incorporate this is a bit indirectly: we'll define $\valid x$ ("valid x") to say that some elements are valid, and others are not. $\own(x)$ will only be true for a resource $y$ if $x = y$ _and_ $\valid x$. We'll make sure $\own(x) \sep \own(y)$ will only be provable when $\valid(x \cdot y)$, and overlapping heaps do not combine to something valid.
+There's still one thing missing, which is the idea if disjointness in $P \sep Q$. The way we'll incorporate this is a bit indirectly: we'll define $\valid x$ ("valid x") to say that some elements are valid, and others are not. $\own(x)$ will only be true for a resource $y$ if $x = y$ _and_ $\valid x$. We'll make sure $\own(x) \sep \own(y)$ will only be provable when $\valid(x \cdot y)$, and $h_1 \cdot h_2$ when the heaps overlap will be defined to produce something invalid.
 
 What we've described is the beginning of a _resource algebra_ $A$: it defines some resources, a way to split and combine them, and a subset of valid ones to define when we're allowed to combine them.
 
 ::: info Aside on algebra
 
-We're about to define more formally what a resource algebra is.
+We're about to define more formally what a resource algebra is using an _algebraic structure_ There are many algebraic structures (such as fields, monoids, groups, and vector spaces). If you've never seen this setup (say, from an abstract algebra class), the setup for a resource algebra might seem strange to you.
 
-There are many algebraic structures (such as fields, monoids, groups, and vector spaces). If you've never seen an algebraic structure, the setup for a resource algebra might seem strange to you. The definition of a monoid is simpler to get across, but an RA has more operations and rules than a monoid:
+It might help to see the rules for a different structure, a monoid, which are simpler than RAs.
 
 A monoid is a structure $(M, +)$ with a carrier type $M$ (of elements "in the monoid") and a single operation $(+) : M \to M \to M$ that adds or "composes" two elements. The addition operation must be associative; that is $\forall x, y, z.\; (x + y) + z = x + (y + z)$.
 
 Our first example of a monoid is the integers. The carrier is $\mathbb{Z}$ and addition is the usual addition operation.
 
 Our second example is the monoid of lists with elements of type $A$ (this needs to be fixed but the specifics don't matter), where $+$ is list concatenation. Notice that this operation is associative but not commutative, which is fine.
+
+Notice that there are three levels here: a monoid is the collection of all types with these properties, then we have a _specific type_ like list which is a monoid, and then we have a _specific element_ like `[2; 5; 3]` of the list monoid.
 
 :::
 
@@ -153,7 +155,7 @@ Validity is defined as $\valid((q, v)) \triangleq 0 < q \leq 1$, and $\errorval$
 
 The partial core is never defined.
 
-Notice how fractions are divided and combined as before, but combining requires that the values are the same.
+Notice how fractions are divided and combined as before, and we make explicit in this definition that combining requires that the values are the same.
 
 ### The full fractional heap RA
 
