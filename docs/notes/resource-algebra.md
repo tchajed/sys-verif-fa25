@@ -127,13 +127,17 @@ Notice how fractions are divided and combined as before, and we make explicit in
 
 We'll now define a $\operatorname{heapRA}(L, V)$ parameterized by a type of addresses or locations $L$ and values $V$. Again, the specific types won't matter for the definition, and we'll use $\Loc$ and $\val$ for our actual programming language.
 
-The carrier is going to be a partial map from $L$ to $\operatorname{fracRA}(V)$. Technically the type of values is the _carrier type of that RA_, but it's common in abstract algebra to make a pun between these.
+The carrier is a partial map from $L$ to the carrier of $\operatorname{fracRA}(V)$. It's common to refer to an algebraic structure like $\operatorname{fracRA}(V)$ directly but actually means its carrier (a type); remember technically the RA is a tuple with the carrier and the composition and validity functions.
 
-We'll see that the behavior of this RA mostly defers to how $\operatorname{fracRA}(V)$ works, which is why we defined that first.
+We'll see that the behavior of this RA mostly defers to how $\operatorname{fracRA}(V)$ works, which is why we defined that RA first.
 
 The composition $h_1 \cdot h_2$ will be defined pointwise: take the union of the two maps, and if $h_1(l) = x$ and $h_2(l) = y$, the composed heap will have the value $x \cdot y$ using the composition of the fracRA resource algebra.
 
 A heap is valid $\valid(h)$ if all of its values are valid, according to the validity of fracRA.
+
+The "primitive" resources in this RA have the shape $\{\ell \mapsto (q, v)\}$: single-location heaplets, with values that are tuples of a fraction and a value. These heaplets are exactly those that we will abbreviate $\ell \mapsto_q v \triangleq \own(\{\ell \mapsto (q, v)\})$.
+
+**Exercise:** confirm that this makes sense; that is, this definition of $\ell \mapsto_q v$ splits and combines the way you expect for fractions given the general rules for $\own$.
 
 ## Persistence
 
