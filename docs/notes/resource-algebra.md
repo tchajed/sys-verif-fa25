@@ -6,25 +6,20 @@ pageInfo: ["Date", "Category", "Tag", "Word"]
 
 # Lecture 18: Resource Algebras
 
-::: warning Draft
-
-This lecture is still a draft.
-
-:::
-
 ## Learning Outcomes
 
 1. Explain how fractional permissions are implemented.
+2. Understand how a resource algebra connects to separation logic.
 
 ## Motivation
 
 When we saw sequential separation logic, we said `hProp = heap → Prop` where `heap = gmap loc val` (a partial map from locations to values). This allowed us to give a _definition_ of $\ell \mapsto v$ (points-to) and $P \sep Q$ (separating conjunction). Separation in this context meant disjoint memory addresses.
 
-However, we also saw fractional permissions with $\ell \mapsto_{1/2} v$ (a "half" and thus read-only points-to) and $\ell \mapsto_{\box} v$ (a persistent read-only points-to). These seems unrelated to the definitions above.
+However, we also saw fractional permissions with $\ell \mapsto_{1/2} v$ (a "half" and thus read-only points-to) and $\ell \mapsto_{\box} v$ (a persistent read-only points-to). These seems unrelated to the definitions above, so how do they connect?
 
-We do want fractional and persistent permissions. With concurrency, remember that when we spawn a thread $e$, we have to split up our permissions into $\wp(e, \True)$ (which the spawned thread gets) and $P$ (which the rest of the code gets). If the only splitting possible were disjoint locations, it would be hard to write any useful code: threads would need to be completely independent.
+Remember that fractional and persistent permissions are useful, especially with concurrency: remember that when we spawn a thread $e$, we have to split up our permissions into $\wp(e, \True)$ (which the spawned thread gets) and $P$ (which the rest of the code gets). If the only splitting possible were disjoint locations, it would be hard to verify any useful concurrent code: threads would need to be completely independent.
 
-In this lecture we'll generalize separation logic by changing the definition of `hProp` and splitting. However, we won't throw everything away: all the separation logic rules will remain exactly the same. In this lecture we'll be focused on the _assertions_ of separation logic; nothing will change about _program_ proofs.
+In this lecture we'll generalize separation logic by changing the definition of `hProp` and what it means to split. However, we won't throw everything away: all the separation logic rules will remain exactly the same. In this lecture we'll be focused on the _assertions_ of separation logic; nothing will change about _program_ proofs.
 
 ## Model of separation logic
 
@@ -72,52 +67,23 @@ Notice that there are three levels here: a monoid is the collection of all types
 
 A resource algebra (RA) is a collection of "resources" that can be combined and split. It will help to keep in mind two concrete examples we've already seen. The first is our core example of heaps, which can be split and combined into disjoint subsets and was our original model of separation logic. The other is a slightly odd example of how we combine and split fractions $q$, which we saw when we split and combined $\ell \mapsto_{q} v$ for some fixed location $\ell$ and value $v$. That example is odd in that the resource algebra will only manipulate the fraction and we won't worry about multiple locations yet.
 
-Formally, a resource algebra (RA) is an algebraic structure $(A, \cdot, \valid, \pcore)$. It has these components:
+Formally, a resource algebra (RA) is an algebraic structure $(A, \cdot, \valid)$. It has these components:
 
-| component | type               | description                         |
-| :-------- | :----------------- | :---------------------------------- |
-| $A$       | Type               | carrier; an $x : A$ is a "resource" |
-| $(\cdot)$ | $A \to A \to A$    | resource composition                |
-| $\valid$  | $A \to \bool$      | valid resources                     |
-| $\pcore$  | $A \to \option(A)$ | partial core                        |
+| component | type            | description                         |
+| :-------- | :-------------- | :---------------------------------- |
+| $A$       | Type            | carrier; an $x : A$ is a "resource" |
+| $(\cdot)$ | $A \to A \to A$ | resource composition                |
+| $\valid$  | $A \to \bool$   | valid resources                     |
 
 - $A$ is a type called the carrier of the resource algebra. In our examples this is a heap and a $q$ fraction respectively. For the heap RA we'll need to add an "error" value $\errorval$ for invalid compositions.
-- $(\cdot) : A \to A \to A$ combines two resources. The expression $x \cdot y$ can be pronounced "x dot y" (you might also hear "plus"). For the heap RA, $h_1 \cdot h_2$ is disjoint union. In that case, we will have $h_1 \cdot h_2 = \errorval$ if $h_1$ and $h_2$ overlap.
+- $(\cdot) : A \to A \to A$ combines two resources. The expression $x \cdot y$ can be pronounced "x compose y" (or "x plus y"). For the heap RA, $h_1 \cdot h_2$ is disjoint union. In that case, we will have $h_1 \cdot h_2 = \errorval$ if $h_1$ and $h_2$ overlap.
 - $\valid : A \to \bool$ says which elements are valid. We pronounced $\valid(x)$ as "valid x". For the heap RA, all resources are valid except $\errorval$. For fractions, $\valid(q) \triangleq 0 < q \leq 1$.
-- $\pcore : A \to \option(A)$ is the "partial core" of a resource. When $\pcore(x) = \Some(p)$, it says that the "shareable" part of $x$ is $p$. The operation is partial, so $\pcore(y) = \None$ says there is no persistent/shareable part of $y$. This is the most unusual part of the RA definition. A special case that is particularly important is that if $\pcore(y) = \Some(y)$, then $y$ is entirely shareable, which will correspond exactly to persistence later in separation logic.
 
 Let's walk through each example:
 
-**Heap resource algebra:** The resources of the heap resource algebra are heaplets, subsets of the heap, or an error value $\bot$. Two heaps can be combined if they are disjoint; otherwise they produce the error value. Any heaplet is valid (but not $\bot$). We can define $\pcore(h) = \Some(\empty)$. Observe that the singleton heaps $\{\ell \mapsto v\}$ function as the "smallest" useful resources.
+**Heap resource algebra:** The resources of the heap resource algebra are heaplets, subsets of the heap, or an error value $\bot$. Two heaps can be combined if they are disjoint; otherwise they produce the error value. Any heaplet is valid (but not $\bot$).
 
 **Fractional resource algebra:** The resources of the fractional resource are fractions $q$. Any two fractions can be combined by addition, but only fractions $0 < q \leq 1$ are valid. No fraction has a core.
-
-### Discardable fractions
-
-Let's see a brand new example, which will demonstrate pcore. This example is like the RA for fractions, extending them to support persistence.
-
-The carrier is a type with three possibilities: a fraction, a marker that the fraction has been discarded, or a combination of both. We'll write the three possibilities DfracOwn($q$), DfracDiscarded, and DfracBoth($q$). You can get a good intuition for this RA by thinking of DfracDiscarded as an extremely small fraction $\epsilon$ and DfracBoth($q$) as $1 + q$.
-
-Here are some examples of composition. You can predict the rules with the intuition above, formally treating $\epsilon + \epsilon = \epsilon$.
-
-- $\text{DfracOwn}(q_1) \cdot \text{DfracOwn}(q_2) = \text{DfracOwn}(q_1 + q_2)$
-- $\text{DfracOwn}(q) \cdot \text{DfracDiscarded} = \text{DfracBoth}(q)$
-- $\text{DfracDiscarded} \cdot \text{DfracDiscarded} = \text{DfracDiscarded}$
-- $\text{DfracBoth}(q_1) \cdot \text{DfracBoth}(q_2) = \text{DfracBoth}(q_1 + q_2)$
-
-The valid elements are the following:
-
-- $\valid \text{DfracOwn}(q) = 0 < q \leq 1$
-- $\valid \text{DfracDiscarded} = \True$
-- $\valid \text{DfracBoth}(q) = 0 < q < 1$
-
-This RA has a non-trivial partial core:
-
-- $\pcore(\text{DfracOwn}(q)) = \None$
-- $\pcore(\text{DfracDiscarded}) = \text{DfracDiscarded}$
-- $\pcore(\text{DfracBoth}(q)) = \text{DfracDiscarded}$
-
-Notice that DfracDiscarded is its own core, which is what makes it persistent.
 
 ### RAs in the logic
 
@@ -125,9 +91,9 @@ To understand why this is how a resource algebra is defined, it will help to see
 
 We introduced $\own(x)$ to represent ownership of $x$ in the logic. We will also organize things so that $\own(x)$ will always imply $\valid(x)$; owning invalid resources is forbidden. What can we do with resources? A key rule is $\own(x \cdot y) \bient \own(x) \cdot \own(y)$. That is, if we have $\own(z)$ and it can be _split_ into $z = x \cdot y$, then we can also split it into two _separate_ ownership assertions. Furthermore we can also work backwards and combine ownership.
 
-**Exercise:** confirm that $\own(\{\ell_1 \mapsto v_1\} \cdot \{\ell_2 \mapsto v_2\})$ splits the way you expect given $\ell \mapsto v$ is defined to be $\own(\{\ell \mapsto v\})$ and the earlier definition of $P \sep Q$. What happens if $\ell_1 = \ell_2$ in this example?
+**Exercise:** confirm that the definition of $\ell_1 \mapsto v_1 \sep \ell_2 \mapsto v_2$ with $\ell \mapsto v$ defined as $\own(\{\ell \mapsto v\})$ matches the definition you would expect from our original heap model of separation logic assertions prior to this lecture. What happens if $\ell_1 = \ell_2$ under the two definitions?
 
-For the above rules to make sense, we actually can't have just any RA with the signatures above. There is a bit more to a valid resource algebra, namely some _laws_ (properties) that the $(A, (\cdot), \valid, \pcore)$ components need to satisfy. Here are the laws, except for the $\pcore$ laws which we'll skip for now:
+For the above rules to make sense, we actually can't have just any RA with the signatures above. There is a bit more to a valid resource algebra, namely some _laws_ (properties) that the $(A, (\cdot), \valid)$ components need to satisfy. Here are the laws:
 
 - $\forall x, y.\; x \cdot y = y \cdot x$
 - $\forall x, y, z.\; x \cdot (y \cdot z) = (x \cdot y) \cdot z$
@@ -169,4 +135,35 @@ The composition $h_1 \cdot h_2$ will be defined pointwise: take the union of the
 
 A heap is valid $\valid(h)$ if all of its values are valid, according to the validity of fracRA.
 
-We'll define the partial core $\pcore(h)$ to be a heap of the partial cores of the locations in $h$, excluding those locations that have no core. Observe how we define this in terms of the fracRA partial core, even though we haven't defined any partial cores; this allows us to use this definition later when we replace fracRA with something that _does_ have partial cores.
+## Persistence
+
+We omitted discussion of persistence above. With the definitions above, we can already have resources that can be duplicated: if in an RA we had a resource that satisfied $x = x \cdot x$, then $\own(x) \entails \own(x) \sep \own(x)$. The persistent points-to is defined using an RA that extends fractions to have exactly such an element. Let's first see that construction, which we call _discardable fractions_, before talking about persistence.
+
+### Discardable fractions
+
+The carrier is a type with three possibilities: a fraction, a marker that the fraction has been discarded, or a combination of both. We'll write the three possibilities DfracOwn($q$), DfracDiscarded, and DfracBoth($q$). You can get a good intuition for this RA by thinking of DfracDiscarded as an extremely small fraction $\epsilon$ and DfracBoth($q$) as $1 + q$.
+
+Here are some examples of composition. You can predict the rules with the intuition above, formally treating $\epsilon + \epsilon = \epsilon$.
+
+- $\text{DfracOwn}(q_1) \cdot \text{DfracOwn}(q_2) = \text{DfracOwn}(q_1 + q_2)$
+- $\text{DfracOwn}(q) \cdot \text{DfracDiscarded} = \text{DfracBoth}(q)$
+- $\text{DfracDiscarded} \cdot \text{DfracDiscarded} = \text{DfracDiscarded}$
+- $\text{DfracBoth}(q_1) \cdot \text{DfracBoth}(q_2) = \text{DfracBoth}(q_1 + q_2)$
+
+The valid elements are the following:
+
+- $\valid \text{DfracOwn}(q) = 0 < q \leq 1$
+- $\valid \text{DfracDiscarded} = \True$
+- $\valid \text{DfracBoth}(q) = 0 < q < 1$
+
+The purpose of discardable fractions is to have an element $\text{DfracDiscarded}$ which is duplicable: $\own(\text{DfracDiscarded}) \entails \own(\text{DfracDiscarded}) \sep \own(\text{DfracDiscarded})$. However, we haven't actually explained how to obtain such an element; that will be the subject of the next lecture on ghost state.
+
+### Partial core
+
+Iris has a definition of a `Persistent P` where `P: iProp`, and `l ↦[uint64T]□ #x` is an example of such a persistence proposition. However, `Persistent P` is _not_ defined as `P ⊢ P ∗ P`; it has a slightly stronger definition which gives persistence some additional properties (we won't get into them here in detail). A key feature of the Iris definition is that it also allows defining the persistently modality, which is used to define Hoare triples and implement the Iris Proof Mode's persistent context.
+
+The way persistence is defined requires adding another operation $\pcore$ (partial core) to the RA structure that every RA must also implement, in addition to composition and validity.
+
+If you want the full details on the partial core, its laws, examples of its definition, and how it is used to implement the persistently modality, and you're generally interested in how Iris is implemented rather than how to use it, you should read [Iris from the ground up](https://people.mpi-sws.org/~dreyer/papers/iris-ground-up/paper.pdf).
+
+Here is a very short description, only to pique your interest: For an RA with carrier type $A$, $\pcore$ has the type $A \to \option(A)$. The intuition behind the partial core is that if $\pcore(x) = \Some(y)$, then $y$ is the "shareable", persistent part of $x$; the operation is partial so that $\pcore(x) = \None$ means there is _no_ shareable component of $x$. A key law for partial cores is that if $\pcore(x) = \Some(y)$, then $x \cdot y = x$. Notice the special case of $\pcore(x) = \Some(x)$; in this case $x = x \cdot x$ and $\own(x) \entails \own(x) \sep \own(x)$. We can now _define_ the persistently modality in terms of a resource algebra model: $(\box P)(r) \triangleq \exists r'. \pcore(r) = \Some(r') \land P(r')$.
