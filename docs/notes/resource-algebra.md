@@ -87,21 +87,35 @@ Let's walk through each example:
 
 ### RAs in the logic
 
-Resource algebras are defined this way to fit into the logic, which is via the $\own(x)$ proposition. We will organize things so that $\own(x)$ will always imply $\valid(x)$. What can we do with resources? A key rule is $\own(x \cdot y) \bient \own(x) \cdot \own(y)$. That is, if we have $\own(z)$ and it can be _split_ into $z = x \cdot y$, then we can also split it into two _separate_ ownership assertions. Furthermore we can also work backwards and combine ownership.
+Resource algebras are defined this way so that for a given RA with carrier $A$, we can use $A \to \Prop$ as the model of a separation logic proposition, a type I'll call iProp (though the Iris model, the actualy definition of iProp, is much more complicated to address a number of other concerns). The core ownership proposition is $\own(x)$, which asserts ownership of a single resource $x : A$.
+
+Two key properties ownership will satisfy:
+
+$\own(x) \entails \lift{\valid{x}}$
+
+$\own(x \cdot y) \bient \own(x) \cdot \own(y)$
+
+In this model, we can interpret the various parts of separation logic. Note that for each of these definitions we give them as a function, just like the definitions with hProp were all functions of the heap.
+
+$\own(x)(y) \triangleq x = y \land \valid x$
+
+$(P \sep Q)(x) \triangleq \exists (x_1: A), (x_2: A).\, x = x_1 \cdot x_2 \land P(x_1) \land P(x_2)$
+
+The definition of separating conjunction gives us $\own(x) \cdot \own(y) \entails \own(x \cdot y)$, but the reverse doesn't follow from these definitions directly; it will actually require some additional properties about $\valid$ and $(\cdot)$.
 
 **Exercise:** confirm that the definition of $\ell_1 \mapsto v_1 \sep \ell_2 \mapsto v_2$ with $\ell \mapsto v$ defined as $\own(\{\ell \mapsto v\})$ matches the definition you would expect from our original heap model of separation logic assertions prior to this lecture. What happens if $\ell_1 = \ell_2$ under the two definitions?
-
-Validity in the logic is expressed via a rule $\own(x) \entails \lift{\valid(x)}$.
 
 **Exercise:** prove $\ell_1 \mapsto v_1 \sep \ell_2 \mapsto v_2 \entails \lift{\ell_1 \neq \ell_2}$.
 
 For the above rules to make sense, we actually can't have just any RA with the signatures above. There is a bit more to a valid resource algebra, namely some _laws_ (properties) that the $(A, (\cdot), \valid)$ components need to satisfy. Here are the laws:
 
-- $\forall x, y.\; x \cdot y = y \cdot x$
-- $\forall x, y, z.\; x \cdot (y \cdot z) = (x \cdot y) \cdot z$
-- $\forall x, y.\; \valid(x \cdot y) \to \valid(x)$
+- $\forall x, y.\; x \cdot y = y \cdot x$ (commutativity)
+- $\forall x, y, z.\; x \cdot (y \cdot z) = (x \cdot y) \cdot z$ (associativity)
+- $\forall x, y.\; \valid(x \cdot y) \to \valid(x)$ (valid-op)
 
 These rules are needed so that ownership follows all the separation logic rules we had earlier; without them, we would have contradictions in the logic which would render the whole thing useless. For example, we need $\own(x) \sep \own(y)$ to be the same as $\own(y) \sep \own(x)$ (separating conjunction is commutative); since these two are equivalent to $\own(x \cdot y)$ and $\own(y \cdot x)$ respectively using our earlier rule about ownership splitting, we actually need $x \cdot y = y \cdot x$ or we run into problems (specifically, the logic becomes unsound).
+
+The last rule might look oddly asymmetric. The reason we only need this one rule is that $\valid(x \cdot y) = \valid(y \cdot x)$ (due to commutativity of composition), and thus we can prove from the above that $\valid(x \cdot y) \to \valid(x) \land \valid(y)$. This rule is what proves $\own(x \cdot y) \entails \own(x) \cdot \own(y)$; ownership of the two resources together implies validity of $x \cdot y$, and this is enough to guarantee validity of the subresources.
 
 ## An RA for fractional permissions
 
