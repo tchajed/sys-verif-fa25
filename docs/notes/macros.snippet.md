@@ -61,7 +61,10 @@ $$
 \gdef\alloc#1{\operatorname{alloc} \, #1}
 % logic
 \gdef\sep{\mathbin{\raisebox{1pt}{$\star$}}}
+%% Iris actually uses \ast (6-pointed) not \star (5-pointed)
+%\gdef\sep{\mathbin{\ast}}
 \gdef\bigsep{\mathop{\vcenter{\LARGE\hbox{$\star$}}}}
+\gdef\bigast{\mathop{\vcenter{\LARGE\hbox{$\ast$}}}}
 \gdef\wand{\mathbin{\raisebox{1pt}{$-\hspace{-0.06em}\star$}}}
 \gdef\emp{\mathrm{emp}}
 \gdef\pointsto{\mapsto}
@@ -77,4 +80,10 @@ $$
 
 %% concurrent separation logic
 \gdef\isLock{\mathrm{isLock}}
+% \pvs is the iris.sty macro for a basic update modality (without the super dot)
+\gdef\pvs{\mathord{{{\mid\kern-0.5ex\Rrightarrow\kern-0.25ex}}\kern0.2ex}}
+\gdef\vs{\Rrightarrow}
+\gdef\vsWand{\displaystyle\equiv\kern-1.6ex-\kern-1.5ex\smash{\bigast}\kern-0.2ex}
+% frame-preserving updates (macro matches iris.sty)
+\gdef\mupd{\rightsquigarrow}
 $$
