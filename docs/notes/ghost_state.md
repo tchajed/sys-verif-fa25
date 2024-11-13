@@ -24,18 +24,22 @@ Resource algebras gave a way to share locations among threads, at least read-onl
 
 Not to fear, though, since _more_ resource algebras will solve the problem. Instead of just using RAs to divide ownership of (physical) pointers, we can also use them to divide ownership of _ghost variables_ that are only created for the sake of the proof.
 
+Ghost variables are powerful because we can define them with any RA, and the choice of RA allows the proof to decide how threads coordinate. This is a bit abstract; we'll see concretely what the API looks like and some examples in this lecture.
+
 ## Code example
 
 ```go
+// Spawn runs `f` in a parallel goroutine and returns a handle. Calling Join()
+// on the handle will wait for it to finish.
+func Spawn(f func()) *JoinHandle { ... }
+
 // JoinHandle is a mechanism to wait for a goroutine to finish. Calling `Join()`
 // on the handle returned by `Spawn(f)` will wait for f to finish.
 type JoinHandle struct {
   /* private fields */
 }
 
-// Spawn runs `f` in a parallel goroutine and returns a handle to wait for
-// it to finish.
-func Spawn(f func()) *JoinHandle
+func (h *JoinHandle) Join() { ... }
 
 // ParallelAdd3 adds 2 to a shared integer from two threads, then reads the
 // result.
@@ -49,12 +53,12 @@ func ParallelAdd3() uint64 {
 	var i uint64 = 0
 	h1 := std.Spawn(func() {
 		m.Lock()
-		i = std.SumAssumeNoOverflow(i, 2)
+		i += 2
 		m.Unlock()
 	})
 	h2 := std.Spawn(func() {
 		m.Lock()
-		i = std.SumAssumeNoOverflow(i, 2)
+		i += 2
 		m.Unlock()
 	})
 	h1.Join()
@@ -66,9 +70,9 @@ func ParallelAdd3() uint64 {
 }
 ```
 
-What could the lock invariant be?
-
 ### Exercise: come up with a lock invariant
+
+What could the lock invariant be?
 
 Try to come up with a lock invariant to prove that the result is exactly 4. Then, after failing to do that, come up with a lock invariant that is at least true.
 
@@ -110,7 +114,9 @@ Whenever $a \mupd b$ (there is a frame preserving update from $a$ to $b$), what 
 
 The next API we need for ghost variables is to allocate them initially. The rule for this is fairly simple: $∀ a, \lift{✓(a)} ⊢ \pvs ∃ γ, \own_γ(a)$. This says that we can always change ghost state (that's the reading of the $\pvs$) to create a new variable with some name $γ$, and its initial value is any valid element $a$.
 
-Let's start seeing some examples of ghost variables and their updates in Coq.
+The model of the update modality (its definition in the model where iProp is $M \to \Prop$) is the following: $(\pvs P)(a) \triangleq ∃ b.\, a \mupd b ∧ P(b)$. That is, the current state/resources $a$ could be transformed into some thing else $b$ via a frame-preserving update to make $P$ true.
+
+Let's look at some examples of ghost variables and their updates in Coq.
 
 ```coq
 From sys_verif.program_proof Require Import prelude empty_ffi.
@@ -125,7 +131,9 @@ Open Scope Z_scope.
 
 ```
 
-The first example we'll see is so-called "plain" ghost variables, which have a value and a fraction, and the fraction can be split. This is just like our fracRA example.
+### Plain ghost variables
+
+The first example we'll see is so-called "plain" ghost variables. These aren't quite so plain in that they have a value and a fraction, and the fraction can be split. This is just like our fracRA example.
 
 The library hides the literal `own` construct in Iris behind some sealing machinery. Despite this, we can still print its definition with the following:
 
@@ -184,16 +192,50 @@ Check (@ghost_var_alloc Σ).
 
 ::::
 
+### Discardable fractions
+
 For our second example of an RA and its ghost variables, let's look at _discardable fractions_ (dfrac). You've seen `DfracOwn 1` instead of just the fraction 1; now we'll see (roughly) how that works.
 
-Discardable fractions are like fractions between 0 and 1 (excluding 0, including 1), with the addition of a special $ε$ value, called `DfracDiscarded`. You can see a more complete description in the RA lecture's [discardable fractions section](./resource-algebra#discardable-fractions), or look at the definition of dfrac in Iris for actually all of the details.
+Discardable fractions are like fractions between 0 and 1 (excluding 0, including 1), with the addition of a special $ε$ value, called `DfracDiscarded`. You can see a more complete description in the RA lecture's [discardable fractions section](./resource-algebra#discardable-fractions), or look at the definition of dfrac in Iris for actually all of the details:
+
+```coq
+Print dfrac_op_instance.
+```
+
+:::: note Output
+
+```txt title="coq output"
+dfrac_op_instance =
+λ dq dp : dfrac,
+  match dq with
+  | DfracOwn q =>
+      match dp with
+      | DfracOwn q' => DfracOwn (q + q')
+      | DfracDiscarded => DfracBoth q
+      | DfracBoth q' => DfracBoth (q + q')
+      end
+  | DfracDiscarded =>
+      match dp with
+      | DfracDiscarded => DfracDiscarded
+      | DfracOwn q' | DfracBoth q' => DfracBoth q'
+      end
+  | DfracBoth q =>
+      match dp with
+      | DfracDiscarded => DfracBoth q
+      | DfracOwn q' | DfracBoth q' => DfracBoth (q + q')
+      end
+  end
+     : Op dfrac
+```
+
+::::
 
 Discardable fractions are used in the ghost variable API: instead of composing fractions with $q_1 + q_2$, we're actually using $dq_1 : \mathrm{dfrac}$ and composing with dfrac composition $dq_1 \cdot dq_2$ (which does still behave a lot like addition).
 
 For this discussion there are two salient aspects of dfrac composition:
 
 - $∀ dq, ✓(dq) → dq \mupd ε$. This means that it is valid to change any fraction to the value $ε$.
-- $∀ (dq: \mathrm{dfrac}), ε \cdot ε = ε$. This makes owning a discarded $ε$ duplicable (and actually it is _persistent_).
+- $∀ (dq: \mathrm{dfrac}), ε \cdot ε = ε$. This makes owning a discarded $ε$ duplicable (in fact, ownership is also persistent).
 
 The first is the "discard" part of discardable fractions, and it means we have the following ghost update:
 
@@ -212,7 +254,7 @@ Check (@ghost_var_persist Σ).
 
 ::::
 
-The second is what makes discardable fractions especially useful:
+The second property about persistence is what makes discardable fractions especially useful:
 
 ```coq
 Check (@ghost_var_persistent Σ).
