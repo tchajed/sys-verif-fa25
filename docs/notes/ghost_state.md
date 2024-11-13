@@ -20,13 +20,13 @@ pageInfo: ["Date", "Category", "Tag", "Word"]
 
 ## Motivation
 
-Resource algebras gave a way to share locations among threads, at least read-only. This turns out not to be enough to prove reasonable programs; we'll have a running example of something apparently simple that requires new techniques.
+Resource algebras gave a way to share locations among threads, at least read-only. This turns out not to be enough to prove reasonable programs; just below is an example program that we can't verify.
 
 Not to fear, though, since _more_ resource algebras will solve the problem. Instead of just using RAs to divide ownership of (physical) pointers, we can also use them to divide ownership of _ghost variables_ that are only created for the sake of the proof.
 
 Ghost variables are powerful because we can define them with any RA, and the choice of RA allows the proof to decide how threads coordinate. This is a bit abstract; we'll see concretely what the API looks like and some examples in this lecture.
 
-## Code example
+### Motivating example: parallel add
 
 ```go
 // Spawn runs `f` in a parallel goroutine and returns a handle. Calling Join()
@@ -112,9 +112,19 @@ To use a frame-preserving update, we need to introduce the _update modality_ $\p
 
 Whenever $a \mupd b$ (there is a frame preserving update from $a$ to $b$), what we formally get in the logic is an entailment $\own_γ(a) ⊢ \pvs \own_γ(b)$. The intuitive reading of the whole entailment is easier to start with than the update modality in isolation: it's possible to change ghost state so that if $\own_γ(a)$ was true before, afterward $\own_γ(b)$ is true. It's not the case that $\own_γ(a) ⊢ \own_γ(b)$; you should think of the update as actually changing (ghost) state, and $b$ isn't true previously. However, for practical purposes we'll see that while verifying a program $\pvs P$ can be turned into $P$.
 
+One tricky thing about resource algebras is that we define composition and validity, thus deciding how to split ownership, but often in a proof what we really care about is the updates that threads are allowed to make. Furthermore, we have a lot of flexibility in a proof: any RA we can invent is valid to use. Coming up with the right resource algebras with the desired updates is tricky; at first, you should rely on existing examples, from which you can prove many interesting things, before trying to come up with a custom RA for a proof.
+
 The next API we need for ghost variables is to allocate them initially. The rule for this is fairly simple: $∀ a, \lift{✓(a)} ⊢ \pvs ∃ γ, \own_γ(a)$. This says that we can always change ghost state (that's the reading of the $\pvs$) to create a new variable with some name $γ$, and its initial value is any valid element $a$.
 
-The model of the update modality (its definition in the model where iProp is $M \to \Prop$) is the following: $(\pvs P)(a) \triangleq ∃ b.\, a \mupd b ∧ P(b)$. That is, the current state/resources $a$ could be transformed into some thing else $b$ via a frame-preserving update to make $P$ true.
+The model of the update modality (its definition in the model where iProp is $M \to \Prop$) is the following: $(\pvs P)(a) \triangleq ∃ b.\, a \mupd b ∧ P(b)$. That is, the current state/resources $a$ could be transformed into some thing else $b$ via a frame-preserving update to make $P$ true. This definition is a little harder to see intuitively compared with thinking about $P ⊢ \pvs Q$ as one statement, which says that if $P$ is true of some resources, then the ghost state can be changed to make $Q$ true.
+
+Let's see some examples of frame-preserving updates for the $\mathrm{fracRA}(V)$ RA. The main useful frame-preserving update in this RA is $(1, v) \mupd (1, v')$ - that is, full ownership of a value can be changed to any other value. The consequence in the logic is $\own_γ((1, v)) ⊢ \pvs \own_γ((1, v'))$. Let's see why this is a frame-preserving update.
+
+We need to show that $∀ q_r, v_r.\, ✓((1, v) \cdot (q_r, v_r)) → ✓((1, v') \cdot (q_r, v_r))$. It turns out that the left-hand side is never true: if $v ≠ v_r$ the composition is immediately $\errorval$, and even if $v = v_r$, $1 < 1 + q_r$. Note that it's important that the only allowed fractions are positive, or this would not work.
+
+On the other hand, $(1/2, v) \mupd (1/2, v')$ is _not_ a frame-preserving update (and in general if the fraction $q < 1$, the ghost variable cannot be updated). The reason is analogous to the soundness issue illustrated above: there could be a frame $r = (1/2, v)$ that is not compatible with the new element $(1/2, v')$; this change in ghost state could invalidate resources in another thread, which is not allowed in concurrent separation logic.
+
+## Examples
 
 Let's look at some examples of ghost variables and their updates in Coq.
 
@@ -270,9 +280,9 @@ Check (@ghost_var_persistent Σ).
 
 ::::
 
-### Proof of the example
+### Proof of the ParallelAdd example
 
-Let's put this together to verify the parallel add example. We'll use an existing spec for the Spawn/JoinHandle API, lock invariants, and two ghost variables.
+Let's put this together to verify the `ParallelAdd3` example from the motivation. We'll use an existing spec for the Spawn/JoinHandle API, lock invariants, and two ghost variables.
 
 The essence of the proof is really in the lock invariant. `l` here is the address of the `x` variable in the Go code.
 
