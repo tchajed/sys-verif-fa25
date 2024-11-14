@@ -150,7 +150,7 @@ Admitted.
 
 **Exercise:** complete the proof
 
-Read about [structs](/notes/ownership#proofs-using-structs) (in particular `wp_ExamplePersonRef`) to see how to do this.
+Read about [structs](../../notes/ownership.md#proofs-using-structs) (in particular `wp_ExamplePersonRef`) to see how to do this.
 
 ```coq
 Lemma ex_split_struct l s :
