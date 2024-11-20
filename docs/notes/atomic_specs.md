@@ -288,7 +288,9 @@ End atomic_int.
 
 ## Using atomic specs
 
-Let's see an example of using this specification, so that you can see how the caller will (a) pick `P` and (b) prove the ghost updates.
+The specification style is sometimes called HOCAP for "higher-order concurrent abstract predicates", from a [paper](https://kasv.dk/articles/hocap-tr.pdf) of the same name. The "concurrent" part is hopefully obvious; this whole thing is designed for concurrency. The "abstract predicates" part comes from the fact that we represent the data structure with an abstract predicate `P` that relates its current abstract state to an assertion (an `iProp`), which will presumably own ghost state. The "higher-order" part is due to the specification taking the representation predicate as an argument; that is, the `P` in the specs above is provided by the caller, not defined by the library.
+
+Let's see an example of using the AtomicInt HOCAP specification, so that you can see how the caller will (a) pick `P` and (b) prove the ghost updates.
 
 We'll return to the parallel add example.
 
