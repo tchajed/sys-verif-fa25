@@ -135,9 +135,9 @@ func ParallelAdd2() uint64 {
 
 This is the most interesting part of the proof: what does the barrier do? How do we express it in a way that will be useful to proofs of code that uses this synchronization primitive?
 
-The specification I settled on for the demo was inspired by Simcha van Collem's bachelor's thesis [Verifying a Barrier using Iris](https://www.cs.ru.nl/bachelors-theses/2023/Simcha_van_Collem___1040283___Verifying_a_Barrier_using_Iris.pdf) at Radboud University.
+**Exercise:** write out a specification in terms of atomic operations for the barrier, in the style you saw in the previous lecture (which we call HOCAP). You'll have to invent something for `Wait()`.
 
-**Exercise:** write out a specification in terms of atomic operations for the barrier, in the style you saw in the previous lecture (which we call HOCAP).
+Aside: the specification I settled on for the demo was inspired by Simcha van Collem's bachelor's thesis [Verifying a Barrier using Iris](https://www.cs.ru.nl/bachelors-theses/2023/Simcha_van_Collem___1040283___Verifying_a_Barrier_using_Iris.pdf) at Radboud University. We only need the "simple barrier" from that thesis, and I used the idea of send splitting but didn't implement receive splitting.
 
 ## Using the barrier spec
 

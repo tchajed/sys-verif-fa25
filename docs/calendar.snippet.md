@@ -30,7 +30,7 @@
 |  19 | Wed Nov 13 | [Ghost state](./notes/ghost_state.md)                     |
 |     | Thu Nov 14 | _[Assignment 3](./assignments/assignment3/) due (11pm)_   |
 |  20 | Mon Nov 18 | [Atomic specs](./notes/atomic_specs.md)                   |
-|  21 | Wed Nov 20 | Barrier proof                                             |
+|  21 | Wed Nov 20 | [Barrier proof](./notes/barrier.md)                       |
 |  22 | Mon Nov 25 | More examples                                             |
 |  23 | Wed Nov 27 | Property-based testing                                    |
 |  24 | Mon Dec 2  |                                                           |
