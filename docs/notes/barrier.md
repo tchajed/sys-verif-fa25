@@ -34,7 +34,7 @@ A condition variable is operationally very simple; using it correctly is a bit t
 
 It is almost always the case that `c.Wait()` is called in a loop that checks some condition protected by the mutex, then calls `c.Wait()`, then re-checks it upon re-acquiring the lock (this is where the name "condition variable" comes from). The benefit of the condition variable is that rather than check the condition as fast as possible, the waiting thread can go to sleep and consume little resources, but we still arrange for another thread to wake it up when the condition becomes true.
 
-The GooseLang model of `c.Wait()` is simply `c.mu.Lock(); c.mu.Unlock()`. This captures the possible scheduling behaviors but doesn't take into account signaling. This is because we aren't proving termination: in reality, that call to `c.mu.Unlock()` would never happen if we fail to signal to the condition variable, but for proving partial correctness the GooseLang model is adequate (it turns some infinite loops into terminating ones).
+The GooseLang model of `c.Wait()` is simply `c.mu.Unlock(); c.mu.Lock()`. This captures the possible scheduling behaviors but doesn't take into account signaling, which unblocks this call in between the unlock and lock. We use such a model because we aren't proving termination: in reality, that call to `c.mu.Lock()` would never happen if no other thread signals to the condition variable, but for proving partial correctness the GooseLang model is adequate (it turns some infinite loops into terminating ones). If we wanted to prove liveness, a more sophisticated model would be required.
 
 ### Barrier, at a high-level
 
