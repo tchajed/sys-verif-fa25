@@ -24,6 +24,7 @@ Once you have the setup, you'll need to use the right LaTeX commands. Here's a r
 | `\mapsto` | ↦ | points-to for separation logic |
 | `\lc` and `\rc` | ⌜ and ⌝ | brackets for pure propositions |
 | `\"o` | ö | used to type Löb |
+| `\union` | ∪ | map/set union |
 
 Here are some notations that you don't have to use because they have ASCII equivalents, but you will see in existing code.
 
