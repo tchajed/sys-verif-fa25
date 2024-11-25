@@ -37,6 +37,8 @@ The [Iris lecture notes](https://iris-project.org/tutorial-material.html) from A
 
 [Iris from the ground up](https://people.mpi-sws.org/~dreyer/papers/iris-ground-up/paper.pdf) is an excellent reference if you want to understand how Iris works internally (though way too much if you just want to use it).
 
+While not Iris-specific, the CS 240 notes on [program correctness](https://pages.cs.wisc.edu/~cs240-1/readings/07_Program_Correctness.pdf) give a fantastic introduction to invariants and writing specifications. (Don't be fooled by the fact that this is a 200-level classes: most discrete math classes don't cover this material, so it is likely to be new to you.)
+
 ## Papers
 
 These papers are directly relevant to the class:

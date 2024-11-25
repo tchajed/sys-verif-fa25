@@ -5,23 +5,25 @@ icon: code
 
 # Final project
 
-For the final project, you'll pick something to verify. The details are still to be finalized, but here are the rough parameters.
+::: warning Replaced with Assignment 4
 
-The idea here is for you to explore something you're interested in and complete a more substantial proof. I'll give 1-2 straightforward options and 1-2 more difficult ideas. Whatever you work on I suggest you write a short, 1-2 page proposal explaining what you're planning to do, and/or schedule a meeting with me, so I can give feedback (mainly so I can confirm the scope is reasonable and that you have some intermediate goals).
+If you haven't already talked to me about a project, you should do [Assignment 4](./sharded_hashmap.md) instead.
 
-The project will include a (short) written report on what you did. If you don't finish the proofs, that's okay - it's still important that you communicate what you did and what challenges you ran into.
+:::
+
+For the final project, you can pick something open-ended.
+
+The idea here is for you to explore something you're interested in and complete a more substantial proof. Whatever you work on you need to write a short, 1-2 page proposal explaining what you're planning to do, and/or schedule a meeting with me, so I can give feedback (mainly so I can confirm the scope is reasonable and that you have some intermediate goals).
+
+The project will include a (short) written report on what you did. If you don't finish the proofs, that's okay - it's still important that you communicate what you did and what challenges you ran into. The report should be about 2--5 pages explaining what problem you tackled and what progress you made. You will submit your code, but the report is what I will start with to make sense of what you did so spend some time making that clear.
 
 ## "Easy" projects
 
-These are projects that I believe are doable with effort comparable to that of assignment 3, except that I haven't done them myself.
+These are projects that I believe are doable, except that I haven't done them myself.
 
 ### Verify Go's sort.Find
 
 We saw a simplified binary search implementation in the notes. Specify and verify the Go binary search implementation, [sort.Find](https://pkg.go.dev/sort#Find) from the standard library.
-
-### Verify a buddy allocator
-
-Verify a memory allocator, using the [buddy allocator algorithm](https://www.geeksforgeeks.org/buddy-system-memory-allocation-technique/). The Go implementation should keep a large byte slice as the backing storage, and return a struct on allocation with both the data and any metadata required by the algorithm (this is a simplification since working with the pointers alone is difficult in Go).
 
 ### Make Memoize more useful
 
@@ -31,7 +33,7 @@ Re-implement memoization to solve this problem. See these [lecture notes](https:
 
 ## "Medium" projects
 
-These are projects that you have the techniques for, but are a bit more effort.
+These are projects that you might not finish, and which require you to figure out the scope.
 
 ### Verify a range map data structure
 
@@ -41,6 +43,10 @@ You can simplify the implementation by only supporting integer keys. A more soph
 
 This requires some data structure design. A starting point would be to maintain a list of sorted ranges that you search with binary search.
 
+### Verify a buddy allocator
+
+Verify a memory allocator, using the [buddy allocator algorithm](https://www.geeksforgeeks.org/buddy-system-memory-allocation-technique/). The Go implementation should keep a large byte slice as the backing storage, and return a struct on allocation with both the data and any metadata required by the algorithm (this is a simplification since working with the pointers alone is difficult in Go).
+
 ### Verify the Cloudflare trie-hard data structure
 
 Port [trie-hard](https://github.com/cloudflare/trie-hard) to Go and verify it. Specialize that implementation to u64.
@@ -49,7 +55,7 @@ This is a trie (an efficient prefix-search data structure, especially for a fixe
 
 ## Open-ended projects
 
-These projects are more open ended and you might not finish.
+These projects are more open ended.
 
 ### Make Goose easier to use
 

@@ -1,7 +1,9 @@
 ---
-order: 3
-icon: file-lines
-shortTitle: Assignment 3
+dir:
+  order: 4
+  icon: file-lines
+  text: Assignment 3
+shortTitle: Assignment 3 (start here)
 ---
 
 # Assignment 3: Verifying Go programs

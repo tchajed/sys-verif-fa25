@@ -1,6 +1,6 @@
 ---
 order: 3
-shortTitle: "Assignment 2"
+shortTitle: Assignment 2
 icon: pen-fancy
 date: 2024-10-04 08:00:00 -5
 ---
