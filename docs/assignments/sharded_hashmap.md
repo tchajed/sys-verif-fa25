@@ -379,6 +379,11 @@ Proof.
   rewrite !lookup_empty. auto.
 Qed.
 
+```
+
+**Exercise:** finish up the proofs of `wp_shard__Load` and `wp_shard__Store`
+
+```coq
 Lemma wp_shard__Load (s_l: loc) (key: w32) (m: gmap w32 w64) :
   {{{ own_shard s_l m }}}
     shard__Load #s_l #key
@@ -925,6 +930,16 @@ Qed.
 ### Load and Store
 
 Once initialized, our hashmap has just two key operations: `Load` and `Store`.
+
+::: info Timeless assumption
+
+You can ignore `Htimeless`, but if you're curious here's why it's there.
+
+We run into some issues with the later modality due to our setup for the HOCAP specifications and the use of an invariant. These aren't important to the presentation, so we solve them by assuming that the abstract predicate `P` is "timeless". The practical consequence is that after we open the invariant, we would ordinarily get `>I` (where `I` is the proposition for the invariant), but because `P` is timeless we can get `I` instead.
+
+Another solution is to have the update look like `∀ m, ▷ P m -∗ |==> ▷ P m ∗ Q ...` but this is less convenient for the proof.
+
+:::
 
 ```coq
 Lemma wp_HashMap__Load (hm_l: loc) γ (key: w32) P Q {Htimeless: ∀ m, Timeless (P m)} :
