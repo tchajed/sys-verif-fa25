@@ -38,8 +38,6 @@ Qed.
 
 Especially with concurrency, we might want to make a location (that is, a variable) read-only, and in exchange it should be safe to read from multiple locations. Fractional permissions are a logical feature that permits such reasoning while remaining _sound_; it won't allow us to prove something false.
 
-## Setup: normal permissions
-
 The idea is to index every points-to fact with a fraction `q ∈ (0, 1]`, written `l ↦[uint64T]{#q} #x` in Iris (we'll get back to the `#q` in bit). This new permission has the following properties:
 
 - A permission can be split into fractional parts, `l ↦[uint64T]{#1} #x ⊣⊢ l ↦[uint64T]{#1/2} #x ∗ l ↦[uint64T]{#1/2} #x` (recall `⊣⊢` is like "if and only if").
@@ -159,11 +157,11 @@ Furthermore, we don't have to split just `1` into `1/2 + 1/2`; a thread with a `
 
 In some situations a pointer is only ever going to be read-only. It would be nice to take advantage of this fact.
 
-It is possible to work with the permission `ro_ptsto l x := (∃ q, l ↦[uint64T] #x)`. `ro_ptsto` can be split into as many copies as needed. However, in Iris it is convenient to have a _persistent_ proposition, and unfortunately `ro_ptsto` is not persistent.
+It is possible to work with the permission `ro_ptsto l x := (∃ q, l ↦[uint64T]{#q} #x)`. `ro_ptsto` can be split into as many copies as needed. However, in Iris it is convenient to have a _persistent_ proposition, and unfortunately `ro_ptsto` is not persistent.
 
 As recent development in Iris called _discardable fractions_ has enabled persistent, fractional permissions, by changing how fractions are represented.
 
-The intuition is to create a new type `dfrac` that replaces `Qp` (recall that was a positive rational number). Intuitively, a `dfrac` is still like a positive rational, but it can also have a special "ε" value that represents an infinitesimal (but positive) fraction. It will be possible to obtain an "ε" fraction by _discarding_ some fraction, making it permanently impossible to recover the 1 permission, but retaining read-only permissions.
+The intuition is to create a new type `dfrac` that replaces `Qp` (recall that was a positive rational number). Intuitively, a `dfrac` is still like a positive rational, but it can also have a special "ε" value that represents an infinitesimal (but positive) fraction. It will be possible to obtain an "ε" fraction by _discarding_ some fraction, making it permanently impossible to recover the 1 permission, but in exchange getting persistent read-only permissions.
 
 Let's see how this is realized in Iris.
 
