@@ -471,17 +471,6 @@ Definition bucket_map (m: gset w32) (max_buckets: Z) : gmap Z (gset w32) :=
                (i, filter (λ k, hash_bucket k max_buckets = i) m)
                ) <$> seqZ 0 max_buckets).
 
-Lemma dom_bucket_map m max_buckets :
-  dom (bucket_map m max_buckets) = list_to_set (seqZ 0 max_buckets).
-Proof.
-  rewrite /bucket_map.
-  rewrite dom_list_to_map_L.
-  rewrite -list_fmap_compose.
-  change (fst ∘ _) with (@id Z).
-  rewrite list_fmap_id.
-  reflexivity.
-Qed.
-
 Lemma bucket_map_lookup_None m max_buckets (i: Z) :
   ~(0 ≤ i < max_buckets) →
   bucket_map m max_buckets !! i = None.
@@ -500,7 +489,6 @@ Proof.
   apply elem_of_list_to_map.
   { (* NoDup *)
     rewrite -list_fmap_compose.
-    change (fst ∘ _) with (@id Z).
     rewrite list_fmap_id.
     apply NoDup_seqZ.
   }
@@ -550,8 +538,74 @@ Definition hashmap_sub (γ: ghost_names) (hash_idx: Z) (sub_m: gmap w32 w64) : i
     "Hmap_frag" :: auth_map.auth_map_frag (map_name γ) sub_m ∗
     "Hbucket_frag" :: auth_map.auth_map_frag (buckets_name γ) {[hash_idx:=dom sub_m]}.
 
-(* We initialize the hashmap state manually during createNewBuckets, since it's
-easier to do along with that loop than all at once. *)
+```
+
+We initialize the hashmap state via the intermediate assertion `hashmap_pre_auth`, which is almost `hashmap_auth` but doesn't require non-zero buckets (so we can start out with an empty list of buckets).
+
+```coq
+Definition hashmap_pre_auth (γ: ghost_names) (num_buckets: Z): iProp Σ :=
+  "%Hpos" :: ⌜0 ≤ num_buckets⌝ ∗
+  "Hmap_auth" :: auth_map.auth_map_auth (map_name γ) (∅: gmap w32 w64) ∗
+  "Hbuckets_auth" :: auth_map.auth_map_auth (buckets_name γ) (bucket_map ∅ num_buckets).
+
+Lemma hashmap_pre_auth_init :
+  ⊢ |==> ∃ γ, hashmap_pre_auth γ 0.
+Proof.
+  iMod (auth_map.auth_map_init (K:=w32) (A:=w64)) as (map_γ) "Hmap_auth".
+  iMod (auth_map.auth_map_init (K:=Z) (A:=gset w32)) as (bucket_γ) "Hbucket_auth".
+  iModIntro.
+  iExists (mkNames map_γ bucket_γ).
+  iFrame.
+  iPureIntro. lia.
+Qed.
+
+Lemma seqZ_plus_one (m n: Z) :
+  0 ≤ m →
+  seqZ n (m + 1) = seqZ n m ++ [n + m].
+Proof.
+  intros H.
+  rewrite seqZ_app //.
+Qed.
+
+(* this is what wp_createNewBuckets uses to add one more bucket to the end *)
+Lemma hashmap_pre_auth_alloc_bucket (γ: ghost_names) (num_buckets:  Z) :
+  hashmap_pre_auth γ num_buckets ==∗ hashmap_pre_auth γ (num_buckets + 1) ∗ hashmap_sub γ num_buckets ∅.
+Proof.
+  iIntros "H". iNamed "H".
+  iDestruct (auth_map.auth_map_alloc_empty with "Hmap_auth") as "[Hmap_auth Hmap_frag]".
+  iMod (auth_map.auth_map_alloc1 num_buckets (∅ : gset w32) with "[$Hbuckets_auth]")
+          as "[Hbuckets_auth Hbucket_frag]".
+  { rewrite dom_list_to_map_L.
+    set_solver by lia. }
+  iFrame "Hmap_auth Hmap_frag Hbucket_frag".
+  iModIntro.
+  iSplit.
+  { iPureIntro. lia. }
+  rewrite /named. iExactEq "Hbuckets_auth".
+  f_equal.
+  rewrite /bucket_map.
+  (* the basic idea is that the left-hand side is an insertion into a map constructed from a list, while the right-hand side appends to a list and then constructs a map; these do the same thing in a different order *)
+  rewrite seqZ_plus_one; [ | lia ].
+  (* this just makes the goal more readable *)
+  change (filter _ ∅) with (∅ : gset w32).
+  replace (0 + num_buckets) with num_buckets by lia.
+  rewrite fmap_app /=.
+  rewrite list_to_map_app /=.
+  rewrite insert_empty.
+  rewrite -insert_union_singleton_r //.
+  apply not_elem_of_dom.
+  rewrite dom_list_to_map_L.
+  set_solver by lia.
+Qed.
+
+Lemma hashmap_pre_auth_finish (γ: ghost_names) (num_buckets: Z) :
+  0 < num_buckets < 2^32 →
+  hashmap_pre_auth γ num_buckets -∗ hashmap_auth γ num_buckets ∅.
+Proof.
+  intros Hoverflow.
+  iIntros "H". iNamed "H".
+  iFrame. iPureIntro. lia.
+Qed.
 
 Lemma hashmap_auth_sub_valid γ m max_buckets sub_m hash_idx :
   hashmap_auth γ max_buckets m ∗ hashmap_sub γ hash_idx sub_m -∗
@@ -784,22 +838,13 @@ Proof.
   iModIntro. iApply "HΦ". iFrame.
 Qed.
 
-Lemma seqZ_plus_one (m n: Z) :
-  0 ≤ m →
-  seqZ n (m + 1) = seqZ n m ++ [n + m].
-Proof.
-  intros H.
-  rewrite seqZ_app //.
-Qed.
-
 Lemma wp_createNewBuckets (γ: ghost_names) (newSize: w32) :
   {{{ ⌜0 < uint.Z newSize⌝ ∗
-      auth_map.auth_map_auth (map_name γ) (∅: gmap w32 w64) ∗
-      auth_map.auth_map_auth (buckets_name γ) (∅: gmap Z (gset w32))
+      hashmap_pre_auth γ 0
   }}}
     createNewBuckets #newSize
   {{{ (s: Slice.t) (b_ls: list loc), RET (slice_val s);
-      "Hauth" :: hashmap_auth γ (uint.Z newSize) ∅ ∗
+      "Hauth" :: hashmap_pre_auth γ (uint.Z newSize) ∗
       "Hbuckets" :: own_slice_small s ptrT (DfracOwn 1) b_ls ∗
       "His_buckets" :: ([∗ list] i↦bucket_l ∈ b_ls,
         is_bucket γ bucket_l (Z.of_nat i)
@@ -807,14 +852,13 @@ Lemma wp_createNewBuckets (γ: ghost_names) (newSize: w32) :
       "%Hlen" :: ⌜length b_ls = uint.nat newSize⌝
   }}}.
 Proof.
-  wp_start as "(%Hpos & Hmap_auth & Hbuckets_auth)".
+  wp_start as "(%Hpos & Hauth)".
   wp_apply wp_NewSlice_0. iIntros (s) "Hbuckets".
   wp_alloc newBuckets_l as "newBuckets".
   wp_alloc i_l as "i".
   wp_pures.
   wp_apply (wp_forUpto (λ i, ∃ (s: Slice.t) (b_ls: list loc),
-                  "Hmap_auth" :: auth_map.auth_map_auth (map_name γ) (∅: gmap w32 w64) ∗
-                  "Hbucket_auth" :: auth_map.auth_map_auth (buckets_name γ) (list_to_map ((λ i, (i, ∅)) <$> seqZ 0 (uint.Z i))) ∗
+                  "Hauth" :: hashmap_pre_auth γ (uint.Z i) ∗
                   "newBuckets" :: newBuckets_l ↦[slice.T ptrT] s ∗
                   "Hbuckets" :: own_slice s ptrT (DfracOwn 1) b_ls ∗
                   "%Hi" :: ⌜length b_ls = uint.nat i⌝ ∗
@@ -822,16 +866,12 @@ Proof.
                     is_bucket γ bucket_l (Z.of_nat i')
                   )
               )%I
-             with "[] [$i $newBuckets $Hbuckets $Hmap_auth Hbuckets_auth]").
+             with "[] [$i $newBuckets $Hbuckets $Hauth]").
   { word. }
   {
     iIntros (i). wp_start as "(I & i & %Hi)". iNamed "I".
-    iDestruct (auth_map.auth_map_alloc_empty with "Hmap_auth") as "[Hmap_auth Hmap_frag]".
-    iMod (auth_map.auth_map_alloc1 (uint.Z i) (∅ : gset w32) with "[$Hbucket_auth]")
-           as "[Hbucket_auth Hbucket_frag]".
-    { rewrite dom_list_to_map_L.
-      set_solver by lia. }
-    wp_apply (wp_newBucket (uint.Z i) with "[$Hmap_frag $Hbucket_frag]").
+    iMod (hashmap_pre_auth_alloc_bucket with "[$Hauth]") as "[Hauth Hsub]".
+    wp_apply (wp_newBucket (uint.Z i) with "[$Hsub]").
     iIntros (b_l) "Hbucket".
     wp_load.
     wp_apply (wp_SliceAppend with "[$Hbuckets]").
@@ -839,23 +879,11 @@ Proof.
     wp_store.
     iModIntro. iApply "HΦ". iFrame.
     replace (uint.Z (word.add i (W64 1))) with (uint.Z i + 1) by word.
+    iFrame "Hauth".
     simpl.
     replace (Z.of_nat (length b_ls + 0)) with (uint.Z i) by word.
     iFrame "Hbucket".
-    iSplit.
-    - rewrite /named. iExactEq "Hbucket_auth".
-      f_equal.
-      rewrite seqZ_plus_one; [ | word ].
-      rewrite fmap_app /=.
-      rewrite list_to_map_app /=.
-      replace (0 + uint.Z i) with (uint.Z i) by word.
-      rewrite insert_union_singleton_l.
-      rewrite map_union_comm //.
-      (* same reasoning as above *)
-      rewrite map_disjoint_dom.
-      rewrite dom_list_to_map_L.
-      set_solver by word.
-    - iPureIntro. rewrite length_app /=. word.
+    iPureIntro. rewrite length_app /=. word.
   }
   {
     (* prove loop invariant holds initially *)
@@ -870,15 +898,9 @@ Proof.
   iApply "HΦ".
   iFrame.
   iDestruct (own_slice_split with "Hbuckets") as "[$ _Hcap]".
-  iSplit; [ iSplit | ].
-  - iPureIntro. word.
-  - rewrite /named.
-    iExactEq "Hbucket_auth".
-    f_equal.
-    rewrite /bucket_map.
-    replace (uint.Z (W64 (uint.Z newSize))) with (uint.Z newSize) by word.
-    auto.
-  - iPureIntro. word.
+  replace (uint.Z (W64 (uint.Z newSize))) with (uint.Z newSize) by word.
+  iFrame "Hauth".
+  iPureIntro. word.
 Qed.
 
 ```
