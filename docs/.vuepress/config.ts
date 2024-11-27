@@ -82,6 +82,7 @@ export default defineUserConfig({
         attrs: {
           allowed: ["id"],
         },
+        mermaid: true,
       },
       git: process.env.NODE_ENV === "production",
       markdownMath: {

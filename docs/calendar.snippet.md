@@ -33,7 +33,7 @@
 | 21 | Wed Nov 20 | [Barrier proof (spec)](./notes/barrier.md) |
 | 22 | Mon Nov 25 | [Barrier proof](./notes/barrier.md) |
 | 23 | Wed Nov 27 | In-class work |
-| 24 | Mon Dec 2 | Property-based testing |
+| 24 | Mon Dec 2 | [Property-based testing](./notes/pbt.md) |
 | 25 | Wed Dec 4 |  |
 | 26 | Mon Dec 9 |  |
 | 27 | Wed Dec 11 |  |
