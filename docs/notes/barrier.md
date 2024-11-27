@@ -3,18 +3,19 @@
 category: lecture
 tags: literate
 order: 20
-shortTitle: "Lecture 21: Barrier example"
+shortTitle: "Lecture 21+22: Barrier example"
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
-# Lecture 21: Proof of a Concurrent Barrier
+# Lecture 21 and 22: Specification and Proof of a Concurrent Barrier
 
 > Follow these notes in Coq at [src/sys_verif/program_proof/barrier.v](https://github.com/tchajed/sys-verif-fa24-proofs/blob/main/src/sys_verif/program_proof/barrier.v).
 
 ## Learning outcomes
 
 1. Understand how more sophisticated resource algebras help.
-2. Explain what a barrier does in the language of separation logic.
+2. Explain the barrier's specification in the language of separation logic.
+3. Follow how the proof uses ghost state to construct the desired specification.
 
 <!-- @include: ./macros.snippet.md -->
 
@@ -352,6 +353,6 @@ End proof.
 
 ## Verifying the barrier
 
-See the separate [barrier proof](./program-proofs/barrier_proof.md).
+See the separate [barrier proof](./program-proofs/barrier_proof.md) for how the proof works.
 
-This proof uses a ghost state construction that is defined and verified in its own file, [auth set](./program-proofs/auth_set.md).
+This proof uses an `auth_set` ghost state construction that is defined and verified in its own file, [auth set](./program-proofs/auth_set.md).

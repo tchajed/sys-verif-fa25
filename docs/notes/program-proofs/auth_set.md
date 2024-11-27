@@ -12,6 +12,8 @@ This library is a dependency for the barrier proof. It's also a self-contained e
 
 As is typical, we don't define a resource algebra from scratch, but instead build one out of existing primitives. However, we do prove lemmas about the ownership of that RA (that, is the `own` predicate) to make using ghost state of this type more convenient.
 
+You should think of an instance of `auth_set A` (that is, a ghost variable that uses this RA) as being a variable of type `gset A`; the whole construction is parameterized by a type `A` of elements. It has two predicates: `auth_set_auth (γ: gname) (s: gset A)` which says exactly what the set for the variable named γ is and `auth_set_frag (γ: gname) (x: A)`, which asserts ownership of one element `x ∈ s`. The `_auth` stands for "authoritative" and there is only one copy of that predicate for any γ; think of this as the value of the ghost variable. The `_frag` stands for "fragment" and there can be many fragments, one for each element of the authoritative set.
+
 ```coq
 From iris.algebra Require Import auth gset.
 From iris.proofmode Require Import proofmode.
@@ -73,7 +75,7 @@ Section lemmas.
 
 ```
 
-The definition of auth_set is only there to make these ghost updates true. You can take this as the API for this construction, and can largely ignore the rest as an implementation detail (certainly that's what you would do if only using this library as opposed to implementing it.)
+The definition of auth_set is designed to make these ghost updates true. This as the API for this construction, in that the user of the library will not use the definitions above, only these lemmas. However, we have to carefully choose the definitions to make all of these rules true. We create an auth_set variable with an empty set and thus no fragments.
 
 ```coq
   Lemma auth_set_init :
@@ -84,6 +86,11 @@ The definition of auth_set is only there to make these ghost updates true. You c
     apply auth_auth_valid. done.
   Qed.
 
+```
+
+We can add to the set and produce a new fragment that controls the new element. `a ∉ s` is required since there can only be one `auth_set_frag γ a` for a given value of `a`.
+
+```coq
   Lemma auth_set_alloc a γ s :
     a ∉ s →
     auth_set_auth γ s ==∗
@@ -98,6 +105,11 @@ The definition of auth_set is only there to make these ghost updates true. You c
     set_solver.
   Qed.
 
+```
+
+Because a fragment expresses ownership of a part of the authoritative set, we have this rule which says that fragments agree with the authoritative predicate:
+
+```coq
   Lemma auth_set_elem γ s a :
     auth_set_auth γ s -∗ auth_set_frag γ a -∗ ⌜a ∈ s⌝.
   Proof.
@@ -110,6 +122,11 @@ The definition of auth_set is only there to make these ghost updates true. You c
     auto.
   Qed.
 
+```
+
+If we control an element via `auth_set_frag γ a`, it's also possible to delete that element from the authoritative set (as long as we also give up ownership of the fragment).
+
+```coq
   Lemma auth_set_dealloc γ s a :
     auth_set_auth γ s ∗ auth_set_frag γ a ==∗
     auth_set_auth γ (s ∖ {[a]}).
