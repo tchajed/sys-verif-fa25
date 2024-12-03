@@ -1,7 +1,9 @@
 import { hopeTheme, navbar, sidebar } from "vuepress-theme-hope";
 import { defineUserConfig } from "vuepress";
 import { viteBundler } from "@vuepress/bundler-vite";
+import { ShikiLang } from "@vuepress/plugin-shiki";
 import { googleAnalyticsPlugin } from "@vuepress/plugin-google-analytics";
+import * as fs from "fs";
 
 // Vue Router picks up configuration for paths in the navbar and sidebar from
 // the YAML frontmatter, for example the 'title' (or first h1), 'shortTitle',
@@ -53,6 +55,15 @@ const sidebarConfig = sidebar({
   "/assignments/": "structure",
 });
 
+const dafnyGrammar: any = JSON.parse(
+  fs.readFileSync("docs/assets/Dafny.tmLanguage.json", "utf-8"),
+);
+
+const dafnyLang: ShikiLang = {
+  ...dafnyGrammar,
+  name: "dafny",
+};
+
 export default defineUserConfig({
   lang: "en-US",
 
@@ -99,7 +110,7 @@ export default defineUserConfig({
       },
       // see https://ecosystem.vuejs.press/plugins/markdown/shiki.html for the below config
       shiki: {
-        langs: ["coq", "go", "bash", "asm"],
+        langs: [dafnyLang, "coq", "go", "bash", "asm"],
         // customized from one-light and one-dark-pro
         themes: {
           light: "catppuccin-latte",

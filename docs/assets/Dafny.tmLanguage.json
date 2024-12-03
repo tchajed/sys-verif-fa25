@@ -1,0 +1,431 @@
+{
+  "fileTypes": ["dfy"],
+  "foldingStartMarker": "(\\{\\s*(//.*)?$|^\\s*// \\{\\{\\{)",
+  "foldingStopMarker": "^\\s*(\\}|// \\}\\}\\}$)",
+  "name": "Dafny",
+  "patterns": [
+    {
+      "begin": "(\\bvar\\b)\\s*",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.dafny"
+        }
+      },
+      "end": ":=|:\\||;|\\)|\\}|(?=(?:abstract|class|const|constructor|export|function|ghost|greatest|import|include|iterator|least|lemma|method|module|opaque|opened|predicate|refines|static|trait|twostate|var)\\b)",
+      "name": "meta.vardecl.dafny",
+      "patterns": [
+        {
+          "include": "#attributes"
+        },
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#comments-inline"
+        },
+        {
+          "include": "#generics"
+        },
+        {
+          "include": "#formalTypeDeclaration"
+        }
+      ]
+    },
+    {
+      "begin": "(class\\b)\\s*([\\w'?]+\\b(?!<))?\\s*",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.dafny"
+        },
+        "2": {
+          "name": "storage.type.dafny"
+        }
+      },
+      "end": "([\\w'?]+)?\\s*\\{(?!:)",
+      "endCaptures": {
+        "1": {
+          "name": "storage.type.dafny"
+        }
+      },
+      "name": "meta.class.identifier.dafny",
+      "patterns": [
+        {
+          "include": "#attributes"
+        },
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#comments-inline"
+        },
+        {
+          "include": "#generics"
+        },
+        {
+          "match": "(extends)\\s+([\\w'?]+)",
+          "captures": {
+            "1": {
+              "name": "keyword.control.dafny"
+            },
+            "2": {
+              "name": "storage.type.dafny"
+            }
+          },
+          "name": "meta.class.extends.identifier"
+        }
+      ]
+    },
+    {
+      "include": "#code"
+    }
+  ],
+  "repository": {
+    "formalTypeDeclaration": {
+      "name": "meta.type.formaldeclaration",
+      "begin": "(?<!\\{|:|(?:label|assert|requires)\\s*[_\\w'?]+):\\s*(?:[\\w'?]+\\.)*([\\w'?]+\\b(?!<))",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.dafny"
+        }
+      },
+      "end": "(?=<|\\s*|,|\\)|\\}|(?:class|codatatype|const|constructor|datatype|ensures|function|greatest|iterator|least|lemma|method|modifies|module|newtype|opaque|predicate|reads|requires|trait|type|var)\\b))"
+    },
+    "genericfunctioncalls": {
+      "begin": "([a-zA-Z'?][\\w'?]*)\\s*<(?=(?:[^\\)\\(]|\\((?:!new|,|0|00|==)*\\))*>(?=\\())",
+      "beginCaptures": {
+        "1": {
+          "name": "entity.name.function.dafny"
+        }
+      },
+      "end": ">(?=\\()",
+      "name": "meta.method.genericfunctioncall",
+      "patterns": [
+        {
+          "include": "#generics"
+        },
+        {
+          "match": "[\\w'?]+",
+          "name": "storage.type.dafny"
+        }
+      ]
+    },
+    "functioncalls": {
+      "begin": "([\\w'?]+)\\s*\\(",
+      "beginCaptures": {
+        "1": {
+          "name": "entity.name.function.dafny"
+        }
+      },
+      "end": "\\)",
+      "name": "meta.method.functioncall",
+      "patterns": [
+        {
+          "include": "#parameters"
+        },
+        {
+          "include": "#keywords"
+        },
+        {
+          "include": "#keywordsIfNotHandled"
+        }
+      ]
+    },
+    "code": {
+      "patterns": [
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#comments-inline"
+        },
+        {
+          "include": "#attributes"
+        },
+        {
+          "include": "#strings"
+        },
+        {
+          "include": "#keywords"
+        },
+        {
+          "include": "#genericfunctioncalls"
+        },
+        {
+          "include": "#generics"
+        },
+        {
+          "include": "#parameters"
+        },
+        {
+          "include": "#functioncalls"
+        },
+        {
+          "include": "#typedeclaration"
+        },
+        {
+          "include": "#keywordsIfNotHandled"
+        }
+      ]
+    },
+    "attributes": {
+      "patterns": [
+        {
+          "begin": "@([\\w'\\?]+)\\(",
+          "beginCaptures": {
+            "1": {
+              "name": "entity.other.attribute-name.dafny"
+            }
+          },
+          "end": "\\)",
+          "name": "attribute",
+          "patterns": [
+            {
+              "include": "#code"
+            }
+          ]
+        },
+        {
+          "begin": "@([\\w'\\?]+)(?!\\()",
+          "beginCaptures": {
+            "1": {
+              "name": "entity.other.attribute-name.dafny"
+            }
+          },
+          "end": "(?<=[\\w'\\?]+)",
+          "name": "attribute",
+          "patterns": []
+        },
+        {
+          "begin": "\\{:(\\w+)",
+          "beginCaptures": {
+            "1": {
+              "name": "entity.other.attribute-name.dafny"
+            }
+          },
+          "end": "\\}",
+          "name": "attribute",
+          "patterns": [
+            {
+              "include": "#strings"
+            },
+            {
+              "include": "#keywords"
+            }
+          ]
+        }
+      ]
+    },
+    "comments": {
+      "patterns": [
+        {
+          "captures": {
+            "0": {
+              "name": "punctuation.definition.comment.dafny"
+            }
+          },
+          "match": "/\\*\\*/",
+          "name": "comment.block.empty.dafny"
+        },
+        {
+          "include": "#comments-inline"
+        }
+      ]
+    },
+    "comments-inline": {
+      "patterns": [
+        {
+          "begin": "/\\*",
+          "captures": {
+            "0": {
+              "name": "punctuation.definition.comment.dafny"
+            }
+          },
+          "end": "\\*/",
+          "name": "comment.block.dafny",
+          "patterns": [
+            {
+              "include": "#comments-inline"
+            }
+          ]
+        },
+        {
+          "captures": {
+            "1": {
+              "name": "comment.line.double-slash.dafny"
+            },
+            "2": {
+              "name": "punctuation.definition.comment.dafny"
+            }
+          },
+          "match": "\\s*((//).*$\\n?)"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "begin": "@\"",
+          "end": "\"(?!\")",
+          "name": "string.multiline.dafny",
+          "patterns": [
+            {
+              "match": "\"\""
+            }
+          ]
+        },
+        {
+          "begin": "\"",
+          "end": "(\"|\\n)",
+          "name": "string.singleline.dafny",
+          "patterns": [
+            {
+              "match": "\\\\((\\\\)|(\"))"
+            }
+          ]
+        }
+      ]
+    },
+    "typedeclaration": {
+      "patterns": [
+        {
+          "begin": "\\b(datatype|codatatype|type|newtype)(?=.*=)\\b",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.control.dafny"
+            }
+          },
+          "end": "=",
+          "patterns": [
+            {
+              "include": "#generics"
+            },
+            {
+              "match": "[\\w'?]+",
+              "name": "storage.type.dafny"
+            }
+          ],
+          "name": "datatype.declaration"
+        }
+      ]
+    },
+    "keywordsIfNotHandled": {
+      "patterns": [
+        {
+          "match": "\\b(datatype|codatatype|type|newtype)\\b",
+          "name": "keyword.control.dafny"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "match": "\\b(abstract|allocated|as|assert|assume|break|by|calc|case|class|const|constructor|continue|downto|else|exists|expect|export|extends|false|for|forall|fresh|function|ghost|greatest|if|import|in|include|is|iterator|label|least|lemma|match|method|modify|module|nameonly|new|null|old|opaque|opened|predicate|print|refines|return|returns|reveal|static|then|to|trait|true|twostate|unchanged|var|while|witness|yield|yields)\\b",
+          "name": "keyword.control.dafny"
+        },
+        {
+          "match": "\\b(function)\\b",
+          "name": "entity.name.function"
+        },
+        {
+          "match": ";",
+          "name": "punctuation.terminator.dafny"
+        },
+        {
+          "match": "\\b(requires|ensures|modifies|reads|invariant|decreases|reveals|provides)\\b",
+          "name": "keyword.control.verify.dafny"
+        },
+        {
+          "match": "\\b(bool|char|real|multiset|map|imap|nat|int|ORDINAL|object|string|set|iset|seq|array|array[1-9]\\d*|bv0|bv[1-9]\\d*)\\b",
+          "name": "keyword.type.dafny"
+        },
+        {
+          "match": "\\bthis\\b",
+          "name": "storage.type.dafny"
+        },
+        {
+          "match": "\\|:",
+          "name": "keyword.control.dafny"
+        },
+        {
+          "match": "(==|!=|<=|>=|<|>)",
+          "name": "keyword.operator.comparison.dafny"
+        },
+        {
+          "match": "(:=)",
+          "name": "keyword.operator.assignment.dafny"
+        },
+        {
+          "match": "(\\-|\\+|\\*|\\/|%)",
+          "name": "keyword.operator.arithmetic.dafny"
+        },
+        {
+          "match": "(!|&&|\\|\\||<==>|==>|<==)",
+          "name": "keyword.operator.logical.dafny"
+        }
+      ]
+    },
+    "parameters": {
+      "patterns": [
+        {
+          "begin": "\\(",
+          "end": "\\)",
+          "name": "meta.parameters.parenthesized",
+          "patterns": [
+            {
+              "include": "#parameters"
+            },
+            {
+              "include": "#keywords"
+            },
+            {
+              "include": "#keywordsIfNotHandled"
+            }
+          ]
+        },
+        {
+          "include": "#formalTypeDeclaration"
+        },
+        {
+          "include": "#functioncalls"
+        },
+        {
+          "include": "#generics"
+        },
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#comments-inline"
+        },
+        {
+          "include": "#strings"
+        }
+      ]
+    },
+    "generics": {
+      "patterns": [
+        {
+          "begin": "([a-zA-Z][\\w'?]*)<(?=[\\w'?]+)",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.dafny"
+            }
+          },
+          "end": ">",
+          "name": "meta.type.generic.dafny",
+          "patterns": [
+            {
+              "include": "#generics"
+            },
+            {
+              "match": "[\\w'?]+",
+              "name": "storage.type.dafny"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "scopeName": "text.dfy.dafny",
+  "uuid": "f4eb6552-5503-47cf-9d18-6388d0981235"
+}
