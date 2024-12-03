@@ -9,7 +9,7 @@
 
 ## Developing
 
-You'll need Node.js and pnpm. You should probably use [corepack](https://pnpm.io/installation#using-corepack) to get pnpm.
+You'll need Node.js and pnpm. You can probably use `corepack enable pnpm` to install pnpm (corepack is now packaged with node), but follow the [corepack](https://pnpm.io/installation#using-corepack) instructions if that doesn't work.
 
 Install the dependencies: `pnpm install`.
 
