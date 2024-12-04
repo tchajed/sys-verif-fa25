@@ -81,30 +81,122 @@ Method specifications are checked mostly automatically by a solver (which we'll 
 
 ## Example proof
 
-If simple enough, proof of a function goes through automatically (demo)
+Here's the example above, translated to a Dafny proof (the definition of `INT_MAX` has been omitted):
 
-Sometimes need to give some help to verifier with `assert`, `if` (demo)
+```dafny
+method Add(x: int, y: int) returns (z: int)
+  requires x + y <= INT_MAX
+  ensures z == x + y
+{
+  return x + y;
+}
 
-## Weakest precondition calculation
+method Min(x: int, y: int) returns (z:int)
+  ensures z <= x && z <= y
+{
+  if x < y {
+    return x;
+  } else {
+    return y;
+  }
+}
 
-Basic idea: translate method and proof (e.g., assertions) into a big formula
+method F(n: int) returns (z: int)
+  requires n < INT_MAX
+  ensures z <= 1
+{
+  var m := Min(0, n);
+  var y := Add(m, 1);
+  return y;
+}
+```
 
-negate formula and send to SMT solver: if SAT, have a bug, if UNSAT code method meets spec
+Sometimes need to give some help to verifier with `assert` and `if`:
 
-how to create formula? weakest precondition algorithm
+```dafny
+function seq_sum(s: seq<int>): int
+{
+  if s == [] then 0
+  else s[0] + seq_sum(s[1..])
+}
 
-## Loop invariants
+lemma seq_sum_app(s1: seq<int>, s2: seq<int>)
+  ensures seq_sum(s1 + s2) == seq_sum(s1) + seq_sum(s2)
+{
+  if s1 == [] {
+    assert s1 + s2 == s2;
+    return;
+  }
+  seq_sum_app(s1[1..], s2);
+  assert s1[1..] + s2 == (s1 + s2)[1..];
+}
+```
+
+## How Dafny works
+
+The basic idea is that Dafny converts your code, specification, and proof into a big formula (using weakest preconditions), and then checks if that formula is always true using a powerful logic solver. What Dafny is doing is translating everything related to programs - like code, loop invariants, and the meaning of pre- and post-conditions - into something simpler that the solver understands.
+
+### SMT solver
+
+The solver in question is an SMT solver, which stands for "satisfiability modulo theories". The most commonly used SMT solver is Z3, and this is the only solver Dafny supports (currently).
+
+To understand what an SMT solver does, it helps to start by thinking about SAT solvers ("satisfiability", without the "theories" of SMT). You give a SAT solver a question like "if we have boolean variables $a$, $b$, $c$, is there some assignment of values to those variables that makes $(a \lor b) \land (c \lor \lnot b)$ true?" and it responds with SAT and (optionally) tells you $a = \mathrm{true}$ and $c = \mathrm{true}$ makes the formula true ($b$ doesn't matter). On the other hand if you ask if $(a \lor b) \land (\lnot c \lor \lnot b) \land (b \lor \lnot a)$ then it responds UNSAT because there is no satisfying assignment.
+
+An SMT solver extends the SAT paradigm with _theories_ like arithmetic: we can add variables that aren't booleans, and we can use standard operators like + and < with the usual meanings. We can also have quantifiers (forall and exists) in our formulas. Still, the SMT solver aims to either give a satisfying assignment or determine that that the formula is UNSATisfiable.
+
+### Weakest preconditions
+
+Basic idea: compute a formula `WP(body, post)` for some method. Ask SMT solver if there exist values such that `!(pre ==> WP(body, post))`. If it says SAT, then `{pre} body {post}` does not hold (we have a bug). If it says UNSAT then `pre ==> WP(body, post)` and specification holds.
+
+How to compute WP? Mostly following the rules we've already seen, but a little work to turn this into an algorithm.
+
+**Example 1:**
+
+```dafny
+method Triple(q: int) returns (r: int)
+  requires 3 < q
+  ensures r == q * 3
+{
+  if q < 5 {
+    r := 12;
+  } else {
+    r := q * 2;
+    r := r + q;
+  }
+}
+```
+
+The corresponding verification condition (hand written, not the actual Dafny output):
+
+```smt2
+(declare-fun q () Int)
+
+(assert (not
+         (let ((b1 (=>
+                    (< q 5)
+                    ; 12 = q * 3
+                    (= 12 (* q 3))))
+               (b2 (=>
+                    (not (< q 5))
+                    ;; q * 2 + q = q * 3
+                    (= (+ (* q 2) q) (* q 3)))))
+           (=> (< 3 q) (and b1 b2)))
+         ))
+(check-sat)
+```
 
 ## Problems with SMT solving
 
-Core issue: triggers (brief explanation of trigger patterns and triggering; loop example as motivation)
+The fact that verification is undecidable means some queries (generated verification conditions) will be too difficult and the solver will take too long or go into an infinite loop. In that case the user gets a timeout rather than SAT or UNSAT, leading to an inconclusive result.
 
-Solver instability due to heuristics (maybe not strictly dependent on triggers but they help)
+One core issue with SMT solving is _triggers_. Triggers are how the SMT solver decides to use a forall quantifier, and how it picks a witness to prove an exists.
 
 ## Limitations
 
-Dafny does not support concurrency
+Dafny does not support concurrency. It has a solution different from separation logic for dealing with aliasing - dynamic frames.
 
-Newer tools like Verus (like Dafny but for Rust) have added preliminary support for concurrent verification based on Iris ghost state
+[Viper](https://www.pm.inf.ethz.ch/research/viper.html) uses weakest preconditions, but with separation logic. But this means `pre ==> WP(body, post)` is a separation logic entailment, which is harder to solve (it's no longer something supported by Z3), so Viper also has to implement a custom solver.
 
-Iris is still (currently) the most advanced tool. Due to its _foundational_ nature it's possible to extend Iris in fundamental ways (new programs, new specifications) where other tools bake-in a particular approach; but usability is probably never as good as with automation.
+Newer tools like [Verus](https://github.com/verus-lang/verus) (like Dafny but for Rust) have added preliminary support for concurrent verification based on Iris ghost state, and use Rust to handle aliasing and mutability instead of separation logic. However Iris is still (currently) the most advanced tool for reasoning about concurrency.
+
+All automated tools bake-in some particular approach and inherit the limitations of the solver. Due to [Iris](https://iris-project.org/) being more _foundational_ it's possible to extend it in fundamental ways (reasoning about new programs and new specifications) - see the long list of papers on the Iris website, many of which are extensions of the core theory. Usability of interactive proofs will probably never be as good as automation; an active area of research is extending automation to these new proofs and specifications.
