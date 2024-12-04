@@ -132,6 +132,14 @@ lemma seq_sum_app(s1: seq<int>, s2: seq<int>)
 }
 ```
 
+## Writing Dafny proofs
+
+The challenge you face when a Dafny proof doesn't go through is what to do (or how to find an error in your code or specification). In Coq, we had a goal and tactics slowly manipulated that goal. Dafny does not have such an explicit "current goal" nor a context of all the facts you have to work with like the Coq context.
+
+The process of writing a Dafny proof involves a feedback loop between seeing a Dafny error, decoding what Dafny is and isn't able to prove, writing some assertion or other part of the proof, then seeing how this changes the error. The feedback loop both helps you write the proof (e.g., you add an assertion and this makes the proof go through) and gets you more information about what the solver _can_ prove and what remains.
+
+If you're actually working on a Dafny proof, you should read the [Verification section](https://dafny.org/dafny/DafnyRef/DafnyRef#sec-verification) of the Dafny reference manual, which walks through a number of strategies for figuring out why a proof is failing. We'll demo some of these techniques on the `seq_sum_app` proof above.
+
 ## How Dafny works
 
 The basic idea is that Dafny converts your code, specification, and proof into a big formula (using weakest preconditions), and then checks if that formula is always true using a powerful logic solver. What Dafny is doing is translating everything related to programs - like code, loop invariants, and the meaning of pre- and post-conditions - into something simpler that the solver understands.
@@ -148,9 +156,44 @@ An SMT solver extends the SAT paradigm with _theories_ like arithmetic: we can a
 
 Basic idea: compute a formula `WP(body, post)` for some method. Ask SMT solver if there exist values such that `!(pre ==> WP(body, post))`. If it says SAT, then `{pre} body {post}` does not hold (we have a bug). If it says UNSAT then `pre ==> WP(body, post)` and specification holds.
 
-How to compute WP? Mostly following the rules we've already seen, but a little work to turn this into an algorithm.
+How to compute the WP of an expression? Mostly we can follow inference rules we've already seen for Hoare logic, but it takes a little work to turn this into an algorithm. See chapter 2 of _Program Proofs_ by K. Rustan M. Leino (the creator of Dafny) for an excellent detailed explanation.
 
-**Example 1:**
+#### Variable assignment
+
+Let's do some concrete examples and then see the general rule. For each exercise, fill in the `?` with the weakest precondition (that is, make the specification as general as possible):
+
+**Exercise 1:** `{{ ? }} y := a + b {{ 25 <= y }}`
+
+**Exercise 2:** `{{ ? }} a := x + 3 {{ 25 <= a + 12 }}`
+
+**Exercise 3:** `{{ ? }} x := x + 1 {{ x <= y }}`
+
+In general, $\mathit{WP}(\mathtt{x := E}, Q) = Q[x := E]$ where $Q[x := E]$ denotes substituting $E$ for every occurrence of the variable $x$ in the formula $Q$.
+
+#### If statements
+
+Consider `if B then { T } else { U }`.
+
+(TODO: add pictorial version to notes)
+
+$$
+\mathit{WP}(\text{\texttt{if B then \{ T \} else \{ U \}}}, Q) =\\
+(B \implies \mathit{WP}(T, Q)) \land (\lnot B \implies \mathit{WP}(U, Q))
+$$
+
+#### Exercise
+
+What's the weakest precondition for this expression, with the given postcondition?
+
+```txt
+{{ ? }}
+if x < 3 { x, y := x + 1, 10 } else { y := x }
+{{ x + y == 100 }}
+```
+
+(What do you think the weakest precondition for the _simultaneous assignment_ `x, y := x + 1, 10` should be?)
+
+#### Putting it all together
 
 ```dafny
 method Triple(q: int) returns (r: int)
@@ -166,12 +209,14 @@ method Triple(q: int) returns (r: int)
 }
 ```
 
-The corresponding verification condition (hand written, not the actual Dafny output):
+The corresponding verification condition (hand written, not the actual Dafny output) involves computing the weakest precondition with respect to the `ensures` clause, and then asserting that it does _not_ hold that the precondition implies the weakest precondition. Remember that if this overall formula is unsatisfiable the specification is correct, and otherwise there is a bug.
 
 ```smt2
+;; this declares q as a constant (a function with no arguments) of type int,
+;; to represent an arbitrary input to Triple
 (declare-fun q () Int)
 
-(assert (not
+(assert (not ;; this not negates the overall (pre ==> WP(body, post))
          (let ((b1 (=>
                     (< q 5)
                     ; 12 = q * 3
@@ -184,6 +229,8 @@ The corresponding verification condition (hand written, not the actual Dafny out
          ))
 (check-sat)
 ```
+
+**Exercise:** Within this expression, what part is the weakest precondition of the postcondition?
 
 ## Problems with SMT solving
 
