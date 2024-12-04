@@ -54,7 +54,7 @@ $$
 {\fun{v} \exists (p: \mathbb{Z}).\, v = \overline{p} \land p \leq n \land p \leq m }
 $$
 
-Now we'll prove a specification for $f$ with a this Hoare outline:
+Now we'll prove a specification for $f$ with this Hoare outline:
 
 $$
 \begin{aligned}
