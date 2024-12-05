@@ -35,6 +35,6 @@
 | 23 | Wed Nov 27 | In-class work |
 | 24 | Mon Dec 2 | [Property-based testing](./notes/pbt.md) |
 | 25 | Wed Dec 4 | [SMT-based verification](./notes/smt.md) |
-| 26 | Mon Dec 9 | Liveness |
+| 26 | Mon Dec 9 | [Liveness](./notes/liveness.md) |
 | 27 | Wed Dec 11 | Course wrap-up |
 |  | Mon Dec 16 | _[Assignment 4](./assignments/sharded_hashmap.md) due (11pm)_ |
