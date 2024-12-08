@@ -32,6 +32,9 @@ $$
 %% semantics
 \gdef\nat{\mathbb{N}}
 \gdef\State{\operatorname{State}}
+
+\gdef\init{\mathit{init}}
+\gdef\next{\mathit{next}}
 $$
 
 <!-- @include: ./macros.snippet.md -->
@@ -78,6 +81,8 @@ func main() {
   }()
 }
 ```
+
+`CompareAndSwap(m, UNLOCKED, LOCKED)` atomically checks if `*m = UNLOCKED` and if it does, sets it to `LOCKED`. If `*m` is not UNLOCKED, the call does nothing. `CompareAndSwap` returns true if it successfully changed the value of `*m`, so that `Lock()` loops until it successfully acquires the lock.
 
 The full state of this program can be modeled as a state machine. The state consists of a program counter for each thread (either pc0, pc1, or pc2) plus the value of the single mutex.
 
@@ -147,11 +152,11 @@ The third row has the usual connectives of a logic, negation, $P \land Q$ (logic
 
 Now let's formally give the semantics of an LTL formula. In this logic I think it helps to directly look at the semantics to get an intuition; it's simple enough to do so.
 
-We'll take every $P$ in the grammar above and describe it as a $\mathrm{trace} \to \Prop$, where $\mathrm{trace} \triangleq \nat \to \State$. A concrete trace can be written as a sequence, like $t = s_1, s_2, \dots$, but note that the trace needs to be infinite so it will mathematically be a function from $\nat$ (which you can think of as a logical time) to a state. Thus for our example $t(0) = s_1$ and $t(1) = s_2$, and the rest of the values of $t$ were unspecified in the "...".
+We'll take every $P$ in the grammar above and describe it as a $\mathrm{trace} \to \Prop$, where $\mathrm{trace} \triangleq \nat \to \State$. A concrete trace can be written as a sequence, like $t = t_0, t_1, \dots$, but note that it is important that this be an infinite sequence. A trace is a function so in this example we can say $t(0) = t_0$ and $t(1) = t_1$.
 
-Define a shift operator on traces that removes the first $k$ elements $t[k..]$. Formally we can define it to be $t[k..] = \lambda n.\, t(n+k)$. Notice $t[0..] = t$. (The notation is intentionally meant to evoke Python's `l[n..]` list slicing, but note that $t[k..]$ is defined and makes sense even for infinite traces.)
+Define a shift operator on traces that removes the first $k$ elements $t[k..]$. Formally we can define it to be $t[k..] = \lambda n.\, t(n+k)$. Notice $t[0..] = t$. (The notation is intentionally meant to evoke Go's `t[k..]` sub-slicing, but note that $t[k..]$ is defined and makes sense even for infinite traces.)
 
-The first four definitions are interesting:
+Now we can give the semantics of each temporal operator. The first four definitions are interesting:
 
 $\lift{\phi}(t) = \phi(t(0))$
 
@@ -161,7 +166,7 @@ $(\always P)(t) = \forall k.\, P(t[k..])$
 
 $(\eventually P)(t) = \exists k.\, P(t[k..])$
 
-The other connectives are boring:
+The other connectives are boring (they don't talk about time in any interesting way):
 
 $(\lnot P)(t) = \lnot (P(t))$
 
@@ -171,28 +176,132 @@ $(P \lor Q)(t) = P(t) \lor Q(t)$
 
 ### Examples
 
-$\always \lift{\phi}$ and $\eventually \lift{\phi}$.
+$\lift{\phi}$ we can think of as reflecting the following picture:
 
-Derived modalities: $\always \eventually P$ and $\eventually \always P$.
+$$\phi, t_1, t_2, ...$$
+
+where we mean "a state satisfying $\phi$", then arbitrary states $t_1$, $t_2$ and so on. $\lift{\phi}$ only cares about the first state in a trace.
+
+$\always \lift{\phi}$ has this picture:
+
+$$\phi, \phi, \phi, ...$$
+
+Every state must satisfy $\phi$ (although the concrete states could all be different).
+
+$\eventually \lift{\phi}$:
+
+$$\lnot \phi, \lnot \phi, \phi, \lnot \phi, \phi, ...$$
+
+Notice that $\phi$ must show up in this list, but after that anything can happen (we could go back and forth, or $\lnot \phi$ could hold from then on).
+
+Now consider what happens when start combining the modalities:
+
+The picture for $\eventually \always \lift{\phi}$ is this:
+
+$$\lnot \phi, \lnot \phi, \phi, \lnot \phi, \phi, \phi, \phi, ...$$
+
+The definition says that there is a time somewhere in the future (this is the $\eventually$) where from that point forward (this is the $\always$), $\phi$ holds. The example shows that at logical time 2 $\phi$ becomes true, but that's not the point where it holds _from then on_: that only happens at time 4. This trace still satisfies the temporal formula.
+
+**Exercise:** what's the intuition and picture for $\eventually \always P$?
+
+::: details Solution
+
+The picture for $\always \eventually \lift{\phi}$ is this:
+
+$$(\lnot \phi, \phi), (\lnot \phi, \lnot \phi, \phi), (\phi), ...$$
+
+I've grouped these into runs where $\eventually \lift{\phi}$ holds in each segment (the grouping is just to help you see the pattern).
+
+This one is more complicated. Expanding the definitions, the formula says that at every time step (this is $\always$), there is a later time (this is $\eventually$) where $\phi$ holds.
+
+:::
+
+**Exercise:** what does $\always \always P$ mean? What does $\eventually \eventually P$ mean? Try to reason from the definitions as well as intuitively.
 
 Negation: $\lnot \always P \iff \eventually (\lnot P)$ and $\lnot \eventually Q \iff \always (\lnot Q)$.
 
+**Exercise:** simplify $\lnot \eventually \always P$.
+
+::: details Solution
+
+Push the negation inward to get $\always \eventually \lnot P$.
+
+Notice that $\always$ flips to $\eventually$ under negation, and the composite modality $\eventually \always$ flips to $\always \eventually$. The same holds in reverse in both cases! We say that $\always$ and $\eventually$ are _dual_ and similarly that $\eventually \always$ and $\always \eventually$ are dual.
+
+:::
+
+Fun fact: $\eventually \always \eventually \always P \iff \eventually \always P$.
+
+Think about what $\always \langle
+
+## State machine definition
+
+We can describe the spinlock example in temporal logic as follows:
+
+The state consists of locked (a boolean) and two program counters: t1 for thread 1 and t2 for thread2. The program counters will be inductive datatypes with three values, pc0, pc1, and pc2, corresponding to the labeled points in the code. The threads will start in pc0 and terminate in pc2, to keep the state machine as small as possible.
+
+There are three possible transitions for thread 1:
+
+- $cas\_fail_1(s, s') \triangleq s.t1 = pc0 \land s.locked = \true \land s' = s$
+- $cas\_succ_1(s, s') \triangleq s.t1 = pc0 \land s.locked = \false \land s'.t1 = pc1 \land s'.locked = \true \land s'.t2 = s.t2$
+- $unlock_1(s, s') \triangleq s.t1 = pc1 \land \land s'.t1 = pc2 \land s'.locked = s.locked \land s'.t2 = s.t2$
+
+These correspond to the CompareAndSwap failing, CompareAndSwap succeeding, and the call to Unlock.
+
+The transitions for thread 2 are the same but with the roles of the threads reversed. It can be easier to read these if we introduce notation for changing just one field of the state: $s.(t2 := pc2)$ is the state $s$ but with the field $t2$ changed to the value $pc2$.
+
+- $cas\_fail_2(s, s') \triangleq s.t2 = pc0 \land s.locked = \true \land s' = s$
+- $cas\_succ_2(s, s') \triangleq s.t2 = pc0 \land s.locked = \false \land s' = s.(t2 := pc1).(locked := \true)$
+- $unlock_2(s, s') \triangleq s.t2 = pc1 \land \land s'.t2 = pc2 \land s' = s.(t2 := pc2$
+
+It helps to read these as consisting of a "guard" over the initial state that says when the transition can happen together with an "update" that says how $s'$ is derived from $s$.
+
+The entire behavior of the spinlock can now be written in temporal logic. First, the transition relation of the whole system is just to take an arbitrary possible transition from either thread:
+
+- $\next_1 \triangleq \langle cas\_fail_1 \rangle \lor \langle cas\_succ_1 \rangle \lor \langle unlock_1 \rangle$
+- $\next_2 \triangleq \langle cas\_fail_2 \rangle \lor \langle cas\_succ_2 \rangle \lor \langle unlock_2 \rangle$
+- $\next \triangleq N_1 \lor N_2$
+
+The initial state is this one:
+
+$$\init(s) \triangleq s.t1 = pc0 \land s.t2 = pc0 \land s.locked = \false$$
+
+Putting it together, a valid execution of the spinlock is one satisfying:
+
+$$\lift{\init} \land \always \next$$
+
+::: info Stutter steps
+
+For technical reasons, it's necessary to actually include _stutter steps_ where the state machine does nothing as part of the $\next$ predicate:
+
+$\mathit{stutter}(s, s') \triangleq s' = s$
+
+$\next \triangleq N_1 \lor N_2 \lor \langle \mathit{stutter} \rangle$
+
+If we didn't do this, consider what happens once the program terminated and $N_1$ and $N_2$ were both impossible. Then $\next(s, s')$ would be always false, and there would be _no_ infinite traces such that $\always \next$ holds! Stutter steps solve this problem by allowing repeating the final state forever.
+
+:::
+
 ## Fairness
 
-For an action $a$, define a state predicate $\enabled(a) \triangleq \fun{s} \exists s'.\, a(s, s')$. Intuitively, $enabled(a)$ holds in a state $a$ if the action can run in that state. We'll commit a minor abuse of notation and use $\enabled(a)$ as a temporal formula, rather than the technically correct $\lift{\enabled(a)}$ which is cumbersome to read.
+For an action $a$, define a state predicate $\enabled(a) \triangleq \fun{s} \exists s'.\, a(s, s')$. Intuitively, $\enabled(a)$ holds in a state $a$ if the action can run in that state. We'll commit a minor abuse of notation and use $\enabled(a)$ as a temporal formula, rather than the technically correct $\lift{\enabled(a)}$ which is cumbersome to read.
+
+For example, when is $cas\_succ_2$ enabled? Looking at the definition, it's possible for this transition to run in $s$ if $s.t2 = pc0 \land s.locked = \false$ (this is the guard of this transition).
 
 Define a notion called _weak fairness_ (of an action $a$): $\WF(a) \triangleq \always (\always \enabled(a) \Rightarrow \eventually \action{a})$.
 
 Weak fairness is equivalent to the following: $\always \eventually (\lnot \enabled(a) \lor \action{a})$.
 
-Examples, exercise decoding this definition.
+We will generally assume that a transition of the state machine runs fairly. In the spinlock example, we might assume $\WF(\next_1) \land \WF(\next_2)$; that is, the scheduler runs each thread, as long as it stays ready to run.
+
+**TODO:** examples and exercises
 
 ## Specifying liveness properties
 
-Describe system behavior with a state machine: given some choice of $\State$, need a transition $N = a_1 \lor a_2 \lor ...$ (one action for each transition) and a predicate $\mathrm{init}$ to describe initial states. Then a valid trace of executing this transition system is $\lift{\mathrm{init}} \land \always \langle N \rangle$.
+Recall we described system behavior for the spinlock example: we choose some $\State$ for our state machine, wrote a transition relation $\next = a_1 \lor a_2 \lor ...$ (one action for each transition) and a predicate $\init$ to describe initial states. Then a valid trace of executing this transition system is $\lift{\init} \land \always \langle \next \rangle$.
 
 Need _fair_ traces for liveness to be achievable. Use assumptions of the form $\WF(a_i)$ or $\WF(a_i \lor a_j)$ (they're not the same!).
 
 Generally want to say $P \leadsto Q \triangleq \always (P \Rightarrow \eventually Q)$.
 
-Putting it together: $\lift{\mathrm{init}} \land \always \langle N \rangle \land \WF(a_1) \land \WF(a_2) \entails P \leadsto Q$.
+Putting it together: $\lift{\init} \land \always \langle N \rangle \land \WF(a_1) \land \WF(a_2) \entails P \leadsto Q$.
