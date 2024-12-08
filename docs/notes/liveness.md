@@ -242,17 +242,17 @@ The state consists of locked (a boolean) and two program counters: t1 for thread
 
 There are three possible transitions for thread 1:
 
-- $cas\_fail_1(s, s') \triangleq s.t1 = pc0 \land s.locked = \true \land s' = s$
-- $cas\_succ_1(s, s') \triangleq s.t1 = pc0 \land s.locked = \false \land s'.t1 = pc1 \land s'.locked = \true \land s'.t2 = s.t2$
-- $unlock_1(s, s') \triangleq s.t1 = pc1 \land \land s'.t1 = pc2 \land s'.locked = s.locked \land s'.t2 = s.t2$
+- $cas\_fail_1(s, s') \triangleq s.t1 = pc_0 \land s.locked = \true \land s' = s$
+- $cas\_succ_1(s, s') \triangleq s.t1 = pc_0 \land s.locked = \false \land s'.t1 = pc_1 \land s'.locked = \true \land s'.t2 = s.t2$
+- $unlock_1(s, s') \triangleq s.t1 = pc_1 \land \land s'.t1 = pc_2 \land s'.locked = s.locked \land s'.t2 = s.t2$
 
 These correspond to the CompareAndSwap failing, CompareAndSwap succeeding, and the call to Unlock.
 
-The transitions for thread 2 are the same but with the roles of the threads reversed. It can be easier to read these if we introduce notation for changing just one field of the state: $s.(t2 := pc2)$ is the state $s$ but with the field $t2$ changed to the value $pc2$.
+The transitions for thread 2 are the same but with the roles of the threads reversed. It can be easier to read these if we introduce notation for changing just one field of the state: $s.(t2 := pc_2)$ is the state $s$ but with the field $t2$ changed to the value $pc_2$.
 
-- $cas\_fail_2(s, s') \triangleq s.t2 = pc0 \land s.locked = \true \land s' = s$
-- $cas\_succ_2(s, s') \triangleq s.t2 = pc0 \land s.locked = \false \land s' = s.(t2 := pc1).(locked := \true)$
-- $unlock_2(s, s') \triangleq s.t2 = pc1 \land \land s'.t2 = pc2 \land s' = s.(t2 := pc2$
+- $cas\_fail_2(s, s') \triangleq s.t2 = pc_0 \land s.locked = \true \land s' = s$
+- $cas\_succ_2(s, s') \triangleq s.t2 = pc_0 \land s.locked = \false \land s' = s.(t2 := pc_1).(locked := \true)$
+- $unlock_2(s, s') \triangleq s.t2 = pc_1 \land \land s'.t2 = pc_2 \land s' = s.(t2 := pc_2$
 
 It helps to read these as consisting of a "guard" over the initial state that says when the transition can happen together with an "update" that says how $s'$ is derived from $s$.
 
@@ -264,7 +264,7 @@ The entire behavior of the spinlock can now be written in temporal logic. First,
 
 The initial state is this one:
 
-$$\init(s) \triangleq s.t1 = pc0 \land s.t2 = pc0 \land s.locked = \false$$
+$$\init(s) \triangleq s.t1 = pc_0 \land s.t2 = pc_0 \land s.locked = \false$$
 
 Putting it together, a valid execution of the spinlock is one satisfying:
 
@@ -286,7 +286,7 @@ If we didn't do this, consider what happens once the program terminated and $N_1
 
 For an action $a$, define a state predicate $\enabled(a) \triangleq \fun{s} \exists s'.\, a(s, s')$. Intuitively, $\enabled(a)$ holds in a state $a$ if the action can run in that state. We'll commit a minor abuse of notation and use $\enabled(a)$ as a temporal formula, rather than the technically correct $\lift{\enabled(a)}$ which is cumbersome to read.
 
-For example, when is $cas\_succ_2$ enabled? Looking at the definition, it's possible for this transition to run in $s$ if $s.t2 = pc0 \land s.locked = \false$ (this is the guard of this transition).
+For example, when is $cas\_succ_2$ enabled? That is, what is a simplified expression for $\enabled(cas\_succ_2)$? Looking at the definition, it's possible for this transition to run in $s$ if $s.t2 = pc_0 \land s.locked = \false$ (this is the guard of this transition).
 
 Define a notion called _weak fairness_ (of an action $a$): $\WF(a) \triangleq \always (\always \enabled(a) \Rightarrow \eventually \action{a})$.
 
