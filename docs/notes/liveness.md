@@ -7,12 +7,6 @@ pageInfo: ["Date", "Category", "Tag", "Word"]
 
 # Lecture 26: Liveness
 
-::: warning Draft
-
-This lecture is still a draft.
-
-:::
-
 ## Learning outcomes
 
 1. Understand how fairness makes liveness complicated
@@ -232,8 +226,6 @@ Notice that $\always$ flips to $\eventually$ under negation, and the composite m
 
 Fun fact: $\eventually \always \eventually \always P \iff \eventually \always P$.
 
-Think about what $\always \langle
-
 ## State machine definition
 
 We can describe the spinlock example in temporal logic as follows:
@@ -270,6 +262,8 @@ Putting it together, a valid execution of the spinlock is one satisfying:
 
 $$\lift{\init} \land \always \next$$
 
+Think about what $\always \next$ means.
+
 ::: info Stutter steps
 
 For technical reasons, it's necessary to actually include _stutter steps_ where the state machine does nothing as part of the $\next$ predicate:
@@ -305,3 +299,7 @@ Need _fair_ traces for liveness to be achievable. Use assumptions of the form $\
 Generally want to say $P \leadsto Q \triangleq \always (P \Rightarrow \eventually Q)$.
 
 Putting it together: $\lift{\init} \land \always \langle N \rangle \land \WF(a_1) \land \WF(a_2) \entails P \leadsto Q$.
+
+## Further reading
+
+See [The Temporal Logic of Actions](https://lamport.azurewebsites.net/pubs/lamport-actions.pdf) by Leslie Lamport.
