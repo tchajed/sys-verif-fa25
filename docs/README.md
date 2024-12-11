@@ -28,8 +28,6 @@ See the course [lecture notes](./notes/) and the [resources](./resources.md) pag
 
 ## Calendar
 
-The schedule is still under construction. Consider anything more than ~2 weeks out to be subject to changes.
-
 <!-- @include: ./calendar.snippet.md -->
 
 ## Note for instructors
