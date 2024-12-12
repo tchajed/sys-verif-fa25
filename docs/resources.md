@@ -31,6 +31,8 @@ To verify code, it must also be in the subset of Go supported by [Goose](https:/
 
 Use the [IPM documentation](https://gitlab.mpi-sws.org/iris/iris/blob/master/docs/proof_mode.md) as a reference for the tactics.
 
+The new [Iris tutorial](https://github.com/logsem/iris-tutorial) is a Software Foundations-style introduction to Iris. It does not use GooseLang, so programs will look different from this class, but the high-level program reasoning and low-level tactics are otherwise the same.
+
 The lecture notes for [Semantics of Type Systems](https://plv.mpi-sws.org/semantics-course/lecturenotes.pdf) at MPI explains Iris "on paper". However, some background in programming language theory is needed to skip to the part on Iris and understand it.
 
 The [Iris lecture notes](https://iris-project.org/tutorial-material.html) from Aarhus University explain Iris "on paper", in a self-contained manner. However, there is no connection to Coq and some knowledge of logic is expected to understand the material.
