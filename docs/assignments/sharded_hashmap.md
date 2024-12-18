@@ -11,11 +11,11 @@ shortTitle: "Assignment 4"
 
 In this assignment, you'll finish the proof of a concurrent, sharded hash map. You'll only be doing proofs: all theorem statements and invariants are provided. Substantial proof is already provided, which means you'll spend more time reading code than writing it.
 
-You should start by reading and understanding the [code](https://github.com/tchajed/sys-verif-fa24-proofs/blob/main/go/sharded_hashmap/sharded_hashmap.go). Really! Go read it! And spend some time figure out why you think it works and how you would explain its correctness without any of the tools in this proof. **Write this down in a Coq comment in your solution.**
+You should start by reading and understanding the [code](https://github.com/tchajed/sys-verif-fa24-proofs/blob/main/go/sharded_hashmap/sharded_hashmap.go). Really! Go read it! And spend some time figure out why you think it works and how you would explain its correctness without any of the tools in this proof. **Exercise:** Write this down in a Coq comment in your solution. _(10 points)_
 
 I suggest you do a quick skim over everything to understand the ideas and intuition, especially compared to just blindly trying to fill in proofs. The sub-sections should also be fairly independent so feel free to skip around to avoid getting stuck for too long on one part; it's better you attempt every part than finish some proofs and never start the others.
 
-A secondary goal is for you to _understand_ this proof, so keep that in the back of your mind. After understanding the proof, how would you use it to explain to someone how per-bucket locking works? What changed from your previous explanation? **Write this down in a Coq comment in your solution.**
+A secondary goal is for you to _understand_ this proof, so keep that in the back of your mind. After understanding the proof, how would you use it to explain to someone how per-bucket locking works? What changed from your previous explanation? **Exercise:** Write this down in a Coq comment in your solution. _(10 points)_
 
 ```coq
 From sys_verif.program_proof Require Import prelude empty_ffi.
@@ -381,7 +381,7 @@ Qed.
 
 ```
 
-**Exercise:** finish up the proofs of `wp_shard__Load` and `wp_shard__Store` _(15 points)_
+**Exercise:** finish up the proofs of `wp_shard__Load` and `wp_shard__Store` _(10 points)_
 
 ```coq
 Lemma wp_shard__Load (s_l: loc) (key: w32) (m: gmap w32 w64) :
@@ -626,7 +626,7 @@ Qed.
 
 ```
 
-**Exercise:** prove `map_get_subset` below. _(25 points)_
+**Exercise:** prove `map_get_subset` below. _(20 points)_
 
 The pure theorem captures a tricky part of sharding: if in `Load` we return `(0, false)` (reporting that a key was not found), we need to prove that the key would also not be found in the global hashmap.
 
@@ -709,7 +709,7 @@ Qed.
 
 ```
 
-**Exercise:** finish the proof of `hashmap_auth_sub_insert` below. _(30 points)_
+**Exercise:** finish the proof of `hashmap_auth_sub_insert` below. _(25 points)_
 
 Inserting into a sub-map is fairly sophisticated. This proof is divided into two almost completely different sub-proofs.
 
@@ -1106,7 +1106,7 @@ Qed.
 
 ```
 
-**Exercise:** prove `wp_HashMap__Store`. _(15 points)_
+**Exercise:** prove `wp_HashMap__Store`. _(10 points)_
 
 The code and proof for `Store` are very similar to that of `Load` so you should be able to figure this out from reading the proof above.
 
