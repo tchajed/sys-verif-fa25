@@ -381,7 +381,7 @@ Qed.
 
 ```
 
-**Exercise:** finish up the proofs of `wp_shard__Load` and `wp_shard__Store`
+**Exercise:** finish up the proofs of `wp_shard__Load` and `wp_shard__Store` _(15 points)_
 
 ```coq
 Lemma wp_shard__Load (s_l: loc) (key: w32) (m: gmap w32 w64) :
@@ -497,7 +497,7 @@ Qed.
 
 ```
 
-**Exercise:** Prove this theorem using the two above.
+**Exercise:** Prove this theorem using the two above. _(5 points)_
 
 ```coq
 Lemma bucket_map_lookup_Some_iff m max_buckets (i: Z) s :
@@ -626,7 +626,9 @@ Qed.
 
 ```
 
-The next pure theorem captures a tricky part of sharding: if in `Load` we return `(0, false)` (reporting that a key was not found), we need to prove that the key would also not be found in the global hashmap.
+**Exercise:** prove `map_get_subset` below. _(25 points)_
+
+The pure theorem captures a tricky part of sharding: if in `Load` we return `(0, false)` (reporting that a key was not found), we need to prove that the key would also not be found in the global hashmap.
 
 Think about why you believe this is true based on how the hashmap works before doing this proof.
 
@@ -706,6 +708,8 @@ Proof.
 Qed.
 
 ```
+
+**Exercise:** finish the proof of `hashmap_auth_sub_insert` below. _(30 points)_
 
 Inserting into a sub-map is fairly sophisticated. This proof is divided into two almost completely different sub-proofs.
 
@@ -905,7 +909,9 @@ Qed.
 
 ```
 
-This theorem ties everything together.
+This theorem ties everything together to initialize the hashmap.
+
+**Exercise:** finish the proof of `wp_NewHashMap`. _(10 points)_
 
 You'll need to create the invariant above. Use the theorem `inv_alloc` with the `iMod` tactic:
 
@@ -927,6 +933,7 @@ Lemma wp_NewHashmap (hm_l: loc) (size: w32) P :
   }}}.
 Proof.
   wp_start as "[%Hpos HP]".
+  rewrite -wp_fupd.
   iMod (auth_map.auth_map_init (K:=w32) (A:=w64)) as (map_γ) "Hmap_auth".
   iMod (auth_map.auth_map_init (K:=Z) (A:=gset w32)) as (bucket_γ) "Hbucket_auth".
   (* `set` creates a variable just for the rest of the proof (notice it's in the context including its definition) *)
@@ -1098,6 +1105,8 @@ Finally, we can proceed with the rest of the program proof after doing our work 
 Qed.
 
 ```
+
+**Exercise:** prove `wp_HashMap__Store`. _(15 points)_
 
 The code and proof for `Store` are very similar to that of `Load` so you should be able to figure this out from reading the proof above.
 
