@@ -12,17 +12,17 @@
     "fmt": "prettier --write . --log-level error"
   },
   "devDependencies": {
-    "@vuepress/bundler-vite": "2.0.0-rc.17",
-    "@vuepress/plugin-google-analytics": "2.0.0-rc.52",
-    "@vuepress/plugin-search": "2.0.0-rc.52",
-    "@vuepress/plugin-shiki": "2.0.0-rc.52",
+    "@vuepress/bundler-vite": "2.0.0-rc.22",
+    "@vuepress/plugin-google-analytics": "2.0.0-rc.103",
+    "@vuepress/plugin-search": "2.0.0-rc.102",
+    "@vuepress/plugin-shiki": "2.0.0-rc.105",
     "katex": "^0.16.22",
     "mathjax-full": "^3.2.2",
     "mermaid": "^11.6.0",
     "prettier": "^3.5.3",
     "vue": "^3.5.14",
-    "vuepress": "2.0.0-rc.17",
-    "vuepress-theme-hope": "2.0.0-rc.58"
+    "vuepress": "2.0.0-rc.22",
+    "vuepress-theme-hope": "2.0.0-rc.87"
   },
   "packageManager": "pnpm@9.15.0+sha512.76e2379760a4328ec4415815bcd6628dee727af3779aaa4c914e3944156c4299921a89f976381ee107d41f12cfa4b66681ca9c718f0668fa0831ed4c6d8ba56c"
 }
