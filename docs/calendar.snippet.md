@@ -11,9 +11,9 @@
 |  |  | **Part 2: Imperative programs** |
 | 6 | Mon Sep 23 | [Hoare logic (part 1)](./notes/hoare.md) |
 | 7 | Wed Sep 25 | [Hoare logic (part 2)](./notes/hoare.md) |
-| 8 | Mon Sep 30 | [Separation logic (part 1)](./notes/sep_logic.md) |
+| 8 | Mon Sep 30 | [Separation logic (part 1)](./notes/sep-logic.md) |
 |  | Tue Oct 1 | _[Assignment 1](./assignments/assignment1.md) due (11pm)_ |
-| 9 | Wed Oct 2 | [Separation logic (part 2)](./notes/sep_logic.md) |
+| 9 | Wed Oct 2 | [Separation logic (part 2)](./notes/sep-logic.md) |
 | 10 | Mon Oct 7 | [Iris Proof Mode](./notes/ipm.md) |
 | 11 | Wed Oct 9 | [Modeling Go programs](./notes/goose.md) |
 | 12 | Mon Oct 14 | [Loop invariants](./notes/loop_invariants.md) |

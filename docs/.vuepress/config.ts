@@ -84,21 +84,44 @@ export default defineUserConfig({
   theme: hopeTheme({
     navbar: navbarConfig,
     repo: "https://github.com/tchajed/sys-verif-fa24",
-    headerDepth: 2,
+    toc: {
+      levels: [2, 3],
+    },
     sidebar: sidebarConfig,
 
     plugins: {
-      mdEnhance: {
-        tasklist: true,
-        include: true,
-        // allow {#custom-id} attributes
-        attrs: {
-          allowed: ["id"],
-        },
-        mermaid: true,
-      },
       git: process.env.NODE_ENV === "production",
-      markdownMath: {
+      // see https://ecosystem.vuejs.press/plugins/markdown/shiki.html for the below config
+      copyCode: false,
+      // https://ecosystem.vuejs.press/plugins/search/search.html
+      search: {
+        hotKeys: [{ key: "k", ctrl: true }, "/"],
+        locales: {
+          "/": {
+            placeholder: "Search",
+          },
+        },
+      },
+      photoSwipe: false,
+      icon: {
+        assets: "fontawesome",
+      },
+    },
+
+    markdown: {
+      // NOTE: this doesn't work (non-existent pages go to a 404 page)
+      linksCheck: {
+        dev: true,
+        build: "error",
+      },
+      tasklist: true,
+      include: true,
+      // allow {#custom-id} attributes
+      attrs: {
+        allowed: ["id"],
+      },
+      mermaid: true,
+      math: {
         type: "katex",
         // copy as text (change to true to copy as LaTeX source)
         copy: false,
@@ -110,8 +133,8 @@ export default defineUserConfig({
           "⊢": "\\entails",
         },
       },
-      // see https://ecosystem.vuejs.press/plugins/markdown/shiki.html for the below config
-      shiki: {
+      highlighter: {
+        type: "shiki",
         langs: [dafnyLang, smtLang, "coq", "go", "bash", "asm"],
         // customized from one-light and one-dark-pro
         themes: {
@@ -128,22 +151,6 @@ export default defineUserConfig({
         // add :line-numbers to ```lang line to enable selectively
         lineNumbers: false,
       },
-      copyCode: false,
-      // https://ecosystem.vuejs.press/plugins/search/search.html
-      search: {
-        hotKeys: [{ key: "k", ctrl: true }, "/"],
-        locales: {
-          "/": {
-            placeholder: "Search",
-          },
-        },
-      },
-      photoSwipe: false,
-      // NOTE: this doesn't work (non-existent pages go to a 404 page)
-      linksCheck: {
-        dev: true,
-        build: "error",
-      },
     },
 
     // control page meta information shown
@@ -153,14 +160,12 @@ export default defineUserConfig({
     // Could add "ReadingTime" (and reduce words/minute, default is 300) or
     // "Word" to give length estimate.
     pageInfo: ["Date", "Category", "Tag"],
-    toc: true, // usually desired, but disabled on home page
     print: false, // no need to offer print button
 
     author: "Tej Chajed",
     license: "CC-BY-NC 4.0",
     logo: "/logo.png",
     favicon: "/favicon.png",
-    iconAssets: "fontawesome",
   }),
 
   plugins: [
