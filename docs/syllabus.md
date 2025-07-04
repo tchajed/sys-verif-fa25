@@ -14,7 +14,7 @@ This syllabus is a bit long. I suggest you skim it at the beginning of class so 
 
 The class is divided into three sections:
 
-**Functional programs**: We'll start by learning how to write and verify _functional_ programs, a style of programming which emphasizes functions and where we won't have complications like modifying variables. This is also where we'll introduce the Coq proof assistant, which we'll use to do the proofs in this class.
+**Functional programs**: We'll start by learning how to write and verify _functional_ programs, a style of programming which emphasizes functions and where we won't have complications like modifying variables. This is also where we'll introduce the Rocq Prover, which we'll use to do the proofs in this class.
 
 **Imperative programs**: Next, we'll introduce the techniques to reason about imperative programs, which can modify heap-allocated variables. We'll also increase the realism by switching to reasoning about programs written in Go. The theoretical tool that allows us to reason about the heap is separation logic.
 
@@ -36,12 +36,12 @@ The class is divided into three sections:
 
 By the end of this class, you should be able to:
 
-1. Prove theorems in the Coq proof assistant
+1. Prove theorems in the Rocq Prover
 2. Verify imperative programs using separation logic
 3. Verify (small) concurrent programs
 4. Articulate the guarantees of formal verification
 
-Hopefully you also will have had fun.
+Hopefully you will also have fun along the way.
 
 ## Expected workload
 
@@ -51,15 +51,15 @@ You'll spend most of the time on this class outside of lecture doing the assignm
 
 ## Prerequisites
 
-The two main requirements are "mathematical maturity" and "programming experience." Mathematical maturity means you're comfortable with the precision of using and learning new math, which is required to understand program proofs. Programming experience is needed since the proofs will be programs written in the Coq proof assistant (which you'll need to be able to learn efficiently).
+The two main requirements are "mathematical maturity" and "programming experience." Mathematical maturity means you're comfortable with being precise and learning new math, which is required to understand program proofs. Programming experience is needed since the proofs will be programs written in the Rocq Prover (which you'll need to be able to learn efficiently).
 
-You do not need to have any experience with the Coq proof assistant.
+You do not need to have any experience with the Rocq prover.
 
 You do not need to have used Go before. We will verify code written in Go, but you won't be writing or modifying it (except optionally as part of the project). You should be able to get up-to-speed in reading Go quickly if you have some familiarity with C syntax.
 
 ## Assignments and grading
 
-There will be two programming assignments in Coq, one written theory assignment, and a final project in Coq. See the [assignments page](./assignments/) for details.
+There will be two programming assignments in Rocq, one written theory assignment, and a final project in Rocq. See the [assignments page](./assignments/) for details.
 
 Grading:
 
@@ -83,9 +83,9 @@ Hand-in: submit to Canvas. See more details in the [assignment setup](./assignme
 
 ## Office hours
 
-I'll hold office hours twice a week, using my office, CS 7361. Office hours are time I've blocked off for you, so please use them! You can stop by and ask whatever you want, including but not limited to:
+I'll hold office hours twice a week, using my office, Morgridge 7572. Office hours are time I've blocked off for you, so please use them! You can stop by and ask whatever you want, including but not limited to:
 
-1. Help with a Coq programming assignment
+1. Help with a Rocq programming assignment
 2. A conceptual question about the lecture material
 3. A question about something beyond the lecture
 4. Advice on anything communication related
@@ -96,13 +96,13 @@ I encourage all of you to stop by office hours just to introduce yourself and sa
 
 You can work on assignments and the final project in groups of up to two. Both of you should submit, but it's okay if the submissions are identical. Please clearly state who you worked with by putting your partner's name in a comment at the top of each file you modify.
 
-The first assignment is crucial to learning Coq, so I would suggest that even if you have a partner you type out the solutions independently so you both get experience using Coq as an interactive tool.
+The first assignment is crucial to learning Rocq, so I would suggest that even if you have a partner you type out the solutions independently so you both get experience using Rocq as an interactive tool.
 
 ## Generative AI policy
 
 If you use generative AI like ChatGPT or another LLM, you are required to explain how you used it. You may use GitHub CoPilot without an explanation.
 
-I do not believe ChatGPT does well on Coq proofs in general, and especially on the course material, but I would be happy to be proven wrong.
+I do not believe ChatGPT does well on Rocq proofs in general, and especially on the course material, but I would be happy to be proven wrong.
 
 You will need to read and understand what ChatGPT says. Identifying its mistakes is likely to be good for your learning, which is why it's permitted in the first place, but it is important that you not blindly follow it.
 
@@ -122,15 +122,15 @@ See this list of [standard syllabus statements](https://teachlearn.wisc.edu/cour
 
 ## Course communication
 
-If you have any questions, you can either (a) email me the question at <chajed@wisc.edu>, (b) post on Piazza, (c) come to office hours, or (d) (if office hours don't work for you) schedule a time by sending me an email with some suggested times.
+If you have any questions, you can either (a) post on Piazza (preferred), (b) come to office hours, or (c) (if office hours don't work for you) schedule a time by sending me an email with some suggested times.
 
 ## Asking questions
 
 Asking questions is a skill, an extremely useful one. When you ask a question, you should:
 
-1. Give sufficient context for your question. For this class, including your proof so far and current proof state (a screenshot often works for this) is helpful and often necessary for me to help. You can also all of your code as an attachment if I need to open it up and try something myself, by using `./etc/prepare-submit` and attaching `hw.tar.gz` in an email.
-2. Describe what you're trying to do and your understanding of the proof state.
-3. Describe what you've tried so far.
+1. Give sufficient context for your question. For this class, including your proof so far and current proof state (a screenshot often works for this) is helpful and often necessary for me to help. You can attach your code if I need to open it up and try something myself, by using `./etc/prepare-submit` and attaching `hw.tar.gz`.
+2. Describe your understanding of the problem.
+3. Describe what you're trying to do and what you've tried so far.
 4. Aim to make your question easy to read.
 
-Some questions will be about conceptual challenges and others will be about the mechanics of using Coq. Both are fine to ask. If it's a conceptual difficulty, try to ask something that isn't too specific to the Coq code. If it's a mechanical question about Coq, try to explain your informal proof argument or how you want to manipulate the proof state - for example, if you say you have a theorem that says `∀ n, P n ∨ Q` and in a proof you want to consider the two cases `P 3` and `Q`, then I know this is a purely mechanical question about using Coq and can give you a direct answer.
+Some questions will be about conceptual challenges and others will be about the mechanics of using Rocq. Both are fine to ask. If it's a conceptual difficulty, try to ask something that isn't too specific to the Rocq code. If it's a mechanical question about Rocq, try to explain your informal proof argument or how you want to manipulate the proof state - for example, if you say you have a theorem that says `∀ n, P n ∨ Q` and in a proof you want to consider the two cases `P 3` and `Q`, then I know this is a purely mechanical question about using Rocq and can give you a direct answer.

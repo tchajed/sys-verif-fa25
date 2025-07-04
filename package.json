@@ -12,6 +12,7 @@
     "fmt": "prettier --write . --log-level error"
   },
   "devDependencies": {
+    "@types/katex": "^0.16.7",
     "@vuepress/bundler-vite": "2.0.0-rc.23",
     "@vuepress/plugin-google-analytics": "2.0.0-rc.107",
     "@vuepress/plugin-search": "^2.0.0-rc.107",

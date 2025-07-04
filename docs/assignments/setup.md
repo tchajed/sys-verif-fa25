@@ -37,7 +37,7 @@ You don't actually have to call your repo sys-verif-fa25-proofs, but that's how 
 
 :::
 
-## Installing Coq
+## Installing Rocq
 
 The setup I recommend is to use Docker, VS Code, and a container I created for this class.
 
@@ -57,23 +57,23 @@ Install the [Dev Containers extension](https://marketplace.visualstudio.com/item
 
 The most important VS Code feature to learn is the Command Palette, accessed from View > Command Palette. The shortcut is worth learning (ctrl-shift-p, cmd-shift-p on macOS). The command palette gives search access to most editor functionality and shows keyboard shortcuts if you want to learn them.
 
-Once you have the dev container extension, use the "Dev Containers: Reopen in Container" command on the sys-verif-fa25-proofs repo. This will use Coq from the container while still running VS Code natively. You should now use the built-in VS Code terminal to run `make` to ensure your code compiles.
+Once you have the dev container extension, use the "Dev Containers: Reopen in Container" command on the sys-verif-fa25-proofs repo. This will use Rocq from the container while still running VS Code natively. You should now use the built-in VS Code terminal to run `make` to ensure your code compiles.
 
 :::
 
-If you feel very comfortable setting up your own tools, you can instead install Coq on your own.
+If you feel very comfortable setting up your own tools, you can instead install Rocq on your own.
 
-::: details Option 2: install Coq on your own
+::: details Option 2: install Rocq on your own
 
-Install Coq 8.20.0 for compatibility (Coq 8.19 is very likely to work if you can't get the latest version).
+Install Rocq 9.0.0 for compatibility.
 
-You will need an IDE for Coq:
+You will need an IDE for Rocq:
 
 - I'd recommend VS Code with the VSCoq extension.
 - If you use Emacs, then [Proof General](https://proofgeneral.github.io/) is excellent (this is what I personally use, with Doom Emacs and vim keybindings).
 - If you use Vim or Neovim, then [Coqtail](https://github.com/whonore/Coqtail) is also decent.
 
-Once you have Coq installed, run `make` to make sure everything is working.
+Once you have Rocq installed, run `make` to make sure everything is working.
 
 If you don't use VS Code, you'll need to follow the [Iris editor setup instructions](https://gitlab.mpi-sws.org/iris/iris/-/blob/master/docs/editor.md?ref_type=heads) to be able to input Unicode characters easily. For VS code that setup is already provided by the assignment repo.
 
@@ -81,7 +81,7 @@ If you don't use VS Code, you'll need to follow the [Iris editor setup instructi
 
 ## Submitting assignments
 
-We'll use the course [Canvas page](https://canvas.wisc.edu/courses/425519) for submitting assignments (and not much else).
+We'll use the course [Canvas page](https://canvas.wisc.edu/courses/477243) for submitting assignments (and not much else).
 
 You'll do all the programming in the sys-verif-fa25-proofs repo. To submit your code, run the script `./etc/prepare-submit` to generate `hw.tar.gz`. Then, go to the assignment's page on Canvas and submit that file. I'm having you submit all the code in the repo (not just for the relevant assignment) to simplify the setup for you.
 
