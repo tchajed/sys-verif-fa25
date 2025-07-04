@@ -1,7 +1,7 @@
 {
-  "name": "sys-verif-fa24",
+  "name": "sys-verif-fa25",
   "version": "0.0.1",
-  "description": "Systems Verification Fall 2024 course website",
+  "description": "Systems Verification Fall 2025 course website",
   "license": "CC0-1.0",
   "type": "module",
   "scripts": {

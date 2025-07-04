@@ -8,7 +8,7 @@ shortTitle: Assignment 3 (start here)
 
 # Assignment 3: Verifying Go programs
 
-In this assignment you'll verify imperative programs written in Go. All your proofs should be carried out in the exercises repo (sys-verif-fa24-proofs). The various parts of the assignment are divided among files in `src/sys_verif/assignment3`; each part is independent.
+In this assignment you'll verify imperative programs written in Go. All your proofs should be carried out in the exercises repo (sys-verif-fa25-proofs). The various parts of the assignment are divided among files in `src/sys_verif/assignment3`; each part is independent.
 
 Submit your work by running `./etc/prepare-submit` and uploading `hw.tar.gz` to the Canvas assignment.
 

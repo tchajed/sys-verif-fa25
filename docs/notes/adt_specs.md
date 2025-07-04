@@ -9,7 +9,7 @@ pageInfo: ["Date", "Category", "Tag", "Word"]
 
 # Lecture 4: Model-based specifications for functional programs
 
-> Follow these notes in Coq at [src/sys_verif/coq/adt_specs.v](https://github.com/tchajed/sys-verif-fa24-proofs/blob/main/src/sys_verif/coq/adt_specs.v).
+> Follow these notes in Coq at [src/sys_verif/coq/adt_specs.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/coq/adt_specs.v).
 
 ## Learning outcomes
 

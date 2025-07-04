@@ -9,9 +9,9 @@ shortTitle: "Demo: fibonacci"
 
 # Demo: verifying fibonacci function
 
-> The Coq code for this file is at [src/sys_verif/program_proof/demos/fibonacci_proof.v](https://github.com/tchajed/sys-verif-fa24-proofs/blob/main/src/sys_verif/program_proof/demos/fibonacci_proof.v).
+> The Coq code for this file is at [src/sys_verif/program_proof/demos/fibonacci_proof.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/program_proof/demos/fibonacci_proof.v).
 
-The code in [go/functional/functional.go](https://github.com/tchajed/sys-verif-fa24-proofs/blob/main/go/functional/functional.go) implements `func Fibonacci(n uint6) uint64`, computing the nth Fibonacci number.
+The code in [go/functional/functional.go](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/go/functional/functional.go) implements `func Fibonacci(n uint6) uint64`, computing the nth Fibonacci number.
 
 We prove this function correct, proving that the imperative, loop-based implementation Go is equivalent to a recursive, functional implementation in Gallina.
 

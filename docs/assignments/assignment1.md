@@ -22,7 +22,7 @@ I would recommend aiming to finish parts 0 and 1 by Tuesday, Sep 17th to be on t
 
 ## Part 0: setup
 
-The [assignment setup page](./setup) has instructions on getting the sys-verif-fa24-proofs repo and installing Coq. Follow those first.
+The [assignment setup page](./setup) has instructions on getting the sys-verif-fa25-proofs repo and installing Coq. Follow those first.
 
 ::: warning
 
@@ -34,7 +34,7 @@ You might run into unexpected difficulties with installing the software, so do i
 
 We'll use the free online textbook Software Foundations to learn the basics of using Coq to prove theorems. You'll read the three early chapters ([Basics](https://softwarefoundations.cis.upenn.edu/lf-current/Basics.html), [Induction](https://softwarefoundations.cis.upenn.edu/lf-current/Induction.html), and [Logic](https://softwarefoundations.cis.upenn.edu/lf-current/Logic.html)) and do (a selection of) the exercises in Coq. I also strongly encourage you to look at the [Polymorphism](https://softwarefoundations.cis.upenn.edu/lf-current/Poly.html) chapter, particularly if you haven't used generics.
 
-Software Foundations is written as a Coq file per chapter, with places for you to fill in your answers. You should do the exercises in the sys-verif-fa24-proofs repo by filling out the missing definitions and proofs in the three chapter files in `src/software_foundations/`, `Basics.v`, `Induction.v`, and `Logic.v`. You should also read the chapters, either online or within VS Code (the HTML version is a nice rendering of the Coq sources).
+Software Foundations is written as a Coq file per chapter, with places for you to fill in your answers. You should do the exercises in the sys-verif-fa25-proofs repo by filling out the missing definitions and proofs in the three chapter files in `src/software_foundations/`, `Basics.v`, `Induction.v`, and `Logic.v`. You should also read the chapters, either online or within VS Code (the HTML version is a nice rendering of the Coq sources).
 
 Most of these chapters is assigned (including the exercises marked "optional" in the text), but there are a few optional parts:
 

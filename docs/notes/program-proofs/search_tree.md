@@ -12,7 +12,7 @@ A binary search tree is a data structure for fast lookup, addition, and removal 
 
 We will verify a simple implementation of a binary search tree which only stores integer keys, with no associated values, and with no delete operation (though you may want to add one as a fun exercise).
 
-The full Go source is at [go/heap/search_tree.go](https://github.com/tchajed/sys-verif-fa24-proofs/blob/main/go/heap/search_tree.go) in the exercises repo for the class.
+The full Go source is at [go/heap/search_tree.go](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/go/heap/search_tree.go) in the exercises repo for the class.
 
 This is the Go data structure for a single node of the tree:
 

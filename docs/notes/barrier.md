@@ -9,7 +9,7 @@ pageInfo: ["Date", "Category", "Tag", "Word"]
 
 # Lecture 21 and 22: Specification and Proof of a Concurrent Barrier
 
-> Follow these notes in Coq at [src/sys_verif/program_proof/barrier.v](https://github.com/tchajed/sys-verif-fa24-proofs/blob/main/src/sys_verif/program_proof/barrier.v).
+> Follow these notes in Coq at [src/sys_verif/program_proof/barrier.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/program_proof/barrier.v).
 
 ## Learning outcomes
 

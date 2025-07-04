@@ -8,7 +8,7 @@ shortTitle: "Demo: barrier proof"
 
 # Demo: specifying and verifying a concurrent barrier
 
-> The Coq code for this file is at [src/sys_verif/program_proof/demos/barrier_proof.v](https://github.com/tchajed/sys-verif-fa24-proofs/blob/main/src/sys_verif/program_proof/demos/barrier_proof.v).
+> The Coq code for this file is at [src/sys_verif/program_proof/demos/barrier_proof.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/program_proof/demos/barrier_proof.v).
 
 The proof is divided into a few different logical phases:
 

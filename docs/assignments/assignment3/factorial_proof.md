@@ -8,7 +8,7 @@ shortTitle: "Assignment 3: factorial"
 
 # Assignment 3: verify factorial function
 
-The code in [go/functional/functional.go](https://github.com/tchajed/sys-verif-fa24-proofs/blob/main/go/functional/functional.go) implements `func Factorial(n uint6) uint64`.
+The code in [go/functional/functional.go](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/go/functional/functional.go) implements `func Factorial(n uint6) uint64`.
 
 Here, you'll prove this function correct, proving that the imperative, loop-based implementation Go is equivalent to a recursive, functional implementation in Gallina.
 

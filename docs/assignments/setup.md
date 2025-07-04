@@ -7,7 +7,7 @@ order: 1
 
 ## Assignment repo
 
-The programming assignments will be distributed in [sys-verif-fa24-proofs](https://github.com/tchajed/sys-verif-fa24-proofs). You'll need it as a git repository so you can get updates with `git pull`, since this is how assignments and demos in lecture will be released. (If you have trouble getting updates, please let me know.)
+The programming assignments will be distributed in [sys-verif-fa25-proofs](https://github.com/tchajed/sys-verif-fa25-proofs). You'll need it as a git repository so you can get updates with `git pull`, since this is how assignments and demos in lecture will be released. (If you have trouble getting updates, please let me know.)
 
 ::: danger Clone, don't fork
 
@@ -19,21 +19,21 @@ Instead, you can either clone and work locally, or follow the below instructions
 
 ::: details Creating a private GitHub repo for your work
 
-Create a new private repo called sys-verif-fa24-proofs (without any content). (As a student, you can get unlimited private repos with the [student pack](https://education.github.com/pack/join).) Follow these instructions to set it up (fill in your username in the first step):
+Create a new private repo called sys-verif-fa25-proofs (without any content). (As a student, you can get unlimited private repos with the [student pack](https://education.github.com/pack/join).) Follow these instructions to set it up (fill in your username in the first step):
 
 ```bash
 GH_USER=<username>
-git clone https://github.com/tchajed/sys-verif-fa24-proofs
-cd sys-verif-fa24-proofs
+git clone https://github.com/tchajed/sys-verif-fa25-proofs
+cd sys-verif-fa25-proofs
 git remote rename origin upstream
-git remote add origin git@github.com:$GH_USER/sys-verif-fa24-proofs.git
+git remote add origin git@github.com:$GH_USER/sys-verif-fa25-proofs.git
 git push --set-upstream origin main
 git submodule update --init --recursive
 ```
 
-You now have a copy of the repo, with the `main` branch tracking your private repo (using a remote called origin, as is typical in git), and with a second remote `upstream` pointing to the class repo. To get updates: run `git fetch upstream` to get new commits from the `tchajed/sys-verif-fa24-proofs` repo, then `git merge upstream/main` to pull in new changes into your own repo.
+You now have a copy of the repo, with the `main` branch tracking your private repo (using a remote called origin, as is typical in git), and with a second remote `upstream` pointing to the class repo. To get updates: run `git fetch upstream` to get new commits from the `tchajed/sys-verif-fa25-proofs` repo, then `git merge upstream/main` to pull in new changes into your own repo.
 
-You don't actually have to call your repo sys-verif-fa24-proofs, but that's how I'll refer to it. If you accidentally forked the course repo, don't panic; you can just delete the fork and re-create it.
+You don't actually have to call your repo sys-verif-fa25-proofs, but that's how I'll refer to it. If you accidentally forked the course repo, don't panic; you can just delete the fork and re-create it.
 
 :::
 
@@ -57,7 +57,7 @@ Install the [Dev Containers extension](https://marketplace.visualstudio.com/item
 
 The most important VS Code feature to learn is the Command Palette, accessed from View > Command Palette. The shortcut is worth learning (ctrl-shift-p, cmd-shift-p on macOS). The command palette gives search access to most editor functionality and shows keyboard shortcuts if you want to learn them.
 
-Once you have the dev container extension, use the "Dev Containers: Reopen in Container" command on the sys-verif-fa24-proofs repo. This will use Coq from the container while still running VS Code natively. You should now use the built-in VS Code terminal to run `make` to ensure your code compiles.
+Once you have the dev container extension, use the "Dev Containers: Reopen in Container" command on the sys-verif-fa25-proofs repo. This will use Coq from the container while still running VS Code natively. You should now use the built-in VS Code terminal to run `make` to ensure your code compiles.
 
 :::
 
@@ -83,6 +83,6 @@ If you don't use VS Code, you'll need to follow the [Iris editor setup instructi
 
 We'll use the course [Canvas page](https://canvas.wisc.edu/courses/425519) for submitting assignments (and not much else).
 
-You'll do all the programming in the sys-verif-fa24-proofs repo. To submit your code, run the script `./etc/prepare-submit` to generate `hw.tar.gz`. Then, go to the assignment's page on Canvas and submit that file. I'm having you submit all the code in the repo (not just for the relevant assignment) to simplify the setup for you.
+You'll do all the programming in the sys-verif-fa25-proofs repo. To submit your code, run the script `./etc/prepare-submit` to generate `hw.tar.gz`. Then, go to the assignment's page on Canvas and submit that file. I'm having you submit all the code in the repo (not just for the relevant assignment) to simplify the setup for you.
 
 For all assignments, you're **strongly encouraged** to submit early with partial progress, once a week. There aren't many assignments, but you should still be doing some work every week, and this will give me an idea of how far along you are in between due dates. If you want any specific feedback, please add a comment on Canvas so I take a look quickly and respond.

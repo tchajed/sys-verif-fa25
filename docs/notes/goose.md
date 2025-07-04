@@ -9,7 +9,7 @@ pageInfo: ["Date", "Category", "Tag", "Word"]
 
 # Lecture 11: Goose - Modeling and reasoning about Go
 
-> Follow these notes in Coq at [src/sys_verif/program_proof/goose.v](https://github.com/tchajed/sys-verif-fa24-proofs/blob/main/src/sys_verif/program_proof/goose.v).
+> Follow these notes in Coq at [src/sys_verif/program_proof/goose.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/program_proof/goose.v).
 
 ## Learning outcomes
 

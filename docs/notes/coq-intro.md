@@ -8,7 +8,7 @@ pageInfo: ["Date", "Category", "Tag", "Word"]
 
 # Lecture 2: Introduction to Coq
 
-> Follow these notes in Coq at [src/sys_verif/coq/intro.v](https://github.com/tchajed/sys-verif-fa24-proofs/blob/main/src/sys_verif/coq/intro.v).
+> Follow these notes in Coq at [src/sys_verif/coq/intro.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/coq/intro.v).
 
 In this lecture, we'll introduce Coq as a system, functional programming, and proving theorems about functional programs.
 
