@@ -5,12 +5,18 @@ icon: "circle-check"
 toc: false
 ---
 
+::: warning Under construction
+
+The website is still under construction! Some information is out-of-date and copied from last year. The schedule and assignments are all subject to change.
+
+:::
+
 This is a graduate-level class on _systems verification_: how to mathematically prove the correctness of programs with machine-checked proofs. A core technique throughout the class is _separation logic_, which we will use to reason about real-world programs written in Go, including using loop invariants, reasoning about slices, pointer-based data structures, and concurrency. Programming assignments will involve proving theorems with the Coq proof assistant.
 
 ::: info Course info
 
 **Instructor**: Tej Chajed &lsaquo;<chajed@wisc.edu>&rsaquo; \
-**Office**: CS 7361 \
+**Office**: Morgridge 7572 \
 **Office hours**: Tue/Thu 3-4pm \
 **Lecture**: Tue/Thu 1-2:15pm \
 **Classroom**: Morgridge Hall 2538

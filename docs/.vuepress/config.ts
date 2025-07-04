@@ -72,10 +72,10 @@ export default defineUserConfig({
   // The path to the hosted website from its domain. We deploy to GitHub pages
   // which automatically puts websites at <username>.github.io/<repo-name>,
   // unless using a custom domain.
-  base: "/sys-verif-fa24/",
+  base: "/sys-verif-fa25/",
 
   title: "CS 839",
-  description: "Systems Verification Fall 2024",
+  description: "Systems Verification Fall 2025",
 
   // .snippet.md files are usable as '@include' files but don't produce output
   // pages.
@@ -83,7 +83,7 @@ export default defineUserConfig({
 
   theme: hopeTheme({
     navbar: navbarConfig,
-    repo: "https://github.com/tchajed/sys-verif-fa24",
+    repo: "https://github.com/tchajed/sys-verif-fa25",
     toc: {
       levels: [2, 3],
     },

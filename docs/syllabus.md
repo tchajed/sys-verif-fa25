@@ -23,14 +23,14 @@ The class is divided into three sections:
 ## General identifying information
 
 - **Institution name:** University of Wisconsin-Madison
-- **Course number**: CS 839-007: Systems Verification
+- **Course number**: CS 839-002: Systems Verification
 - **Credits**: 3 credit hours
 - **Requisites**: mathematical maturity and programming experience (see [below](#prerequisites))
-- **Meeting time and location**: Monday/Wednesday 9:30-10:45am, Engineering Hall 2349
+- **Meeting time and location**: Tuesday/Thursday 1-2:15pm, Morgridge Hall 2538
 - **Instruction modality**: in-person
 - **Instructor contact info**: \
   Prof. Tej Chajed &lsaquo;<chajed@wisc.edu>&rsaquo; \
-  office hours: Monday/Wednesday 2-3pm in CS 7361
+  office hours: Tuesday/Thursday 3-4pm in Morgridge 7572
 
 ## Course learning outcomes
 
