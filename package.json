@@ -12,18 +12,18 @@
     "fmt": "prettier --write . --log-level error"
   },
   "devDependencies": {
-    "@vuepress/bundler-vite": "2.0.0-rc.22",
-    "@vuepress/plugin-google-analytics": "2.0.0-rc.103",
-    "@vuepress/plugin-search": "2.0.0-rc.102",
-    "@vuepress/plugin-shiki": "2.0.0-rc.105",
+    "@vuepress/bundler-vite": "2.0.0-rc.23",
+    "@vuepress/plugin-google-analytics": "2.0.0-rc.107",
+    "@vuepress/plugin-search": "^2.0.0-rc.107",
+    "@vuepress/plugin-shiki": "2.0.0-rc.110",
     "katex": "^0.16.22",
     "mathjax-full": "^3.2.2",
-    "mermaid": "^11.6.0",
-    "prettier": "^3.5.3",
-    "sass-embedded": "^1.89.0",
-    "vue": "^3.5.14",
-    "vuepress": "2.0.0-rc.22",
-    "vuepress-theme-hope": "2.0.0-rc.87"
+    "mermaid": "^11.8.0",
+    "prettier": "^3.6.2",
+    "sass-embedded": "^1.89.2",
+    "vue": "^3.5.17",
+    "vuepress": "2.0.0-rc.23",
+    "vuepress-theme-hope": "2.0.0-rc.92"
   },
-  "packageManager": "pnpm@10.11.0+sha512.6540583f41cc5f628eb3d9773ecee802f4f9ef9923cc45b69890fb47991d4b092964694ec3a4f738a420c918a333062c8b925d312f42e4f0c263eb603551f977"
+  "packageManager": "pnpm@10.12.4+sha512.5ea8b0deed94ed68691c9bad4c955492705c5eeb8a87ef86bc62c74a26b037b08ff9570f108b2e4dbd1dd1a9186fea925e527f141c648e85af45631074680184"
 }

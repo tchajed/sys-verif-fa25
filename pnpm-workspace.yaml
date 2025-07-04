@@ -1,0 +1,7 @@
+onlyBuiltDependencies:
+  - core-js
+  - esbuild
+  - fsevents
+  - highlight.js
+  - vue-demi
+  - vuepress
