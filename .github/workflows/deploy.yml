@@ -45,8 +45,7 @@ jobs:
   deploy:
     # runs only on main (skipped for PRs)
     needs: build
-    # disabled while still developing
-    if: false && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
