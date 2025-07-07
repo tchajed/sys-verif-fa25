@@ -24,7 +24,7 @@
     "sass-embedded": "^1.89.2",
     "vue": "^3.5.17",
     "vuepress": "2.0.0-rc.23",
-    "vuepress-theme-hope": "2.0.0-rc.92"
+    "vuepress-theme-hope": "2.0.0-rc.93"
   },
   "packageManager": "pnpm@10.12.4+sha512.5ea8b0deed94ed68691c9bad4c955492705c5eeb8a87ef86bc62c74a26b037b08ff9570f108b2e4dbd1dd1a9186fea925e527f141c648e85af45631074680184"
 }
