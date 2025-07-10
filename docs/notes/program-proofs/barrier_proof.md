@@ -29,13 +29,10 @@ The reason there is a separate (and more sophisticated) library is related to th
 
 ```coq
 From iris.base_logic.lib Require Import saved_prop.
-From Perennial.program_proof Require Import std_proof.
-
 From sys_verif.program_proof.concurrent Require Import auth_set.
+From sys_verif.program_proof Require Import prelude empty_ffi.
 
-From Goose.sys_verif_code Require Import concurrent.
-
-From sys_verif.program_proof Require Import prelude.
+From sys_verif.program_proof Require Import concurrent_init.
 
 Module barrier.
 Record barrier_names :=
@@ -57,7 +54,7 @@ Definition barrierΣ: gFunctors :=
 Proof. solve_inG. Qed.
 
 Section proof.
-  Context `{hG: heapGS Σ, !ffi_semantics _ _, !ext_types _}.
+  Context `{hG: !heapGS Σ} `{!goGlobalsGS Σ}.
   Context `{!barrierG Σ}.
 
 ```
@@ -114,15 +111,15 @@ Two extremes are worth thinking about here. First, once we've created all the `s
 
   Definition lock_inv (l: loc) (γ: barrier_names) : iProp Σ :=
     ∃ (numWaiting: w64),
-      "numWaiting" ∷ l ↦[Barrier :: "numWaiting"] #numWaiting ∗
+      "numWaiting" ∷ l ↦s[concurrent.Barrier :: "numWaiting"] numWaiting ∗
       "Hbar" ∷ own_barrier_ghost γ numWaiting.
 
   Definition is_barrier (l: loc) (γ: barrier_names): iProp Σ :=
     ∃ (mu_l cond_l: loc),
-      "#mu" ∷ l ↦[Barrier :: "mu"]□ #mu_l ∗
-      "#cond" ∷ l ↦[Barrier :: "cond"]□ #cond_l ∗
-      "#Hcond" ∷ is_cond cond_l (#mu_l) ∗
-      "#Hlock" ∷ is_lock nroot (#mu_l) (lock_inv l γ).
+      "#mu" ∷ l ↦s[concurrent.Barrier :: "mu"]□ mu_l ∗
+      "#cond" ∷ l ↦s[concurrent.Barrier :: "cond"]□ cond_l ∗
+      "#Hcond" ∷ is_Cond cond_l (interface.mk Mutex_type_id #mu_l) ∗
+      "#Hlock" ∷ is_Mutex (mu_l) (lock_inv l γ).
 
   #[global] Instance is_barrier_persistent l γ : Persistent (is_barrier l γ) := _.
 
@@ -214,11 +211,11 @@ This is the change used for `b.Add(1)`. Observe how it changes the `recvQ` to ap
     iExists _, _; rewrite /named; iFrame.
     iSplit.
     - iPureIntro.
-      rewrite size_union; [ | set_solver ].
+      rewrite size_union; [ set_solver | ].
       rewrite size_singleton.
       word.
     - rewrite /named.
-      rewrite big_sepS_union; [ | set_solver ].
+      rewrite big_sepS_union; [ set_solver | ].
       rewrite big_sepS_singleton.
       iIntros "[(%P' & #HPsaved & HP') Hpending]".
       iDestruct ("HrecvQ_wand" with "Hpending") as "$".
@@ -264,7 +261,7 @@ This is the update used for `b.Done()`. It consumes a `send γ P` and absorbs it
     iFrame "HsendNames_auth ∗".
     iSplit.
     - iPureIntro.
-      rewrite size_difference; [ | set_solver ].
+      rewrite size_difference; [ set_solver | ].
       rewrite size_singleton.
       assert (0 < uint.Z numWaiting); [ | word ].
       destruct (decide (size sendNames = 0))%nat as [Heq0|]; [ exfalso | lia ].
@@ -327,65 +324,64 @@ Finally, we do all the program proofs, the specifications for each function. The
 
 ```coq
   Lemma wp_NewBarrier :
-    {{{ True }}}
-      NewBarrier #()
+    {{{ is_pkg_init concurrent }}}
+      concurrent @ "NewBarrier" #()
     {{{ (l: loc) γ, RET #l; is_barrier l γ ∗ recv γ emp }}}.
   Proof.
     wp_start as "_".
     rewrite -wp_fupd.
-    wp_apply wp_new_free_lock. iIntros (mu_l) "Hlock".
-    wp_apply (wp_newCond' with "Hlock"). iIntros (cond_l) "[Hlock Hcond]".
+    wp_auto. wp_alloc mu_l as "Hlock". wp_auto.
+
+    wp_apply (wp_NewCond) as "%c His_cond".
     wp_alloc l as "Hbarrier".
     iApply struct_fields_split in "Hbarrier". iNamed "Hbarrier".
-    iMod (own_barrier_ghost_alloc) as (γ) "[Hbar Hrecv]".
-    iMod (alloc_lock nroot _ _ (lock_inv _ γ)
-           with "Hlock [$Hbar $numWaiting]") as "His_lock".
-    iMod (struct_field_pointsto_persist with "mu") as "mu".
-    iMod (struct_field_pointsto_persist with "cond") as "cond".
+    cbn [concurrent.Barrier.numWaiting' concurrent.Barrier.mu' concurrent.Barrier.cond'].
+    wp_auto.
 
+    iMod (own_barrier_ghost_alloc) as (γ) "[Hbar Hrecv]".
+    iMod (init_Mutex (lock_inv _ γ)
+           with "Hlock [$Hbar $HnumWaiting]") as "His_lock".
+    iPersist "Hmu Hcond".
     iModIntro.
     iApply "HΦ".
-    iFrame.
+    iFrame "#∗".
   Qed.
 
   Lemma wp_Barrier__Add1 (P: iProp Σ) (Q: iProp Σ) γ l :
-    {{{ is_barrier l γ ∗ recv γ Q }}}
-      Barrier__Add #l #(W64 1)
+    {{{ is_pkg_init concurrent ∗ is_barrier l γ ∗ recv γ Q }}}
+      l @ concurrent @ "Barrier'ptr" @ "Add" #(W64 1)
     {{{ RET #(); send γ P ∗ recv γ (Q ∗ P) }}}.
   Proof.
     wp_start as "[#Hbar Hrecv]".
     iNamed "Hbar".
-    wp_loadField.
-    wp_apply (wp_Mutex__Lock with "[$]"). iIntros "[Hlocked Hinv]".
+    wp_auto.
+    wp_apply (wp_Mutex__Lock with "[$Hlock]") as "[Hlocked Hinv]".
     iNamed "Hinv".
 
-    wp_pures.
-    wp_loadField.
+    wp_auto.
     wp_apply wp_SumAssumeNoOverflow. iIntros (Hno_overflow).
-    wp_storeField.
-    wp_loadField.
+    wp_auto.
 
     iMod (own_barrier_ghost_add1 P with "[$Hbar $Hrecv]") as "(Hbar & Hrecv & Hsend)".
     { word. }
 
     wp_apply (wp_Mutex__Unlock with "[$Hlock $Hlocked $Hbar $numWaiting]").
-    wp_pures.
-    iModIntro.
     iApply "HΦ". iFrame.
   Qed.
 
   Lemma wp_Barrier__Done γ l P :
-    {{{ is_barrier l γ ∗ send γ P ∗ P }}}
-      Barrier__Done #l
+    {{{ is_pkg_init concurrent ∗ is_barrier l γ ∗ send γ P ∗ P }}}
+      l @ concurrent @ "Barrier'ptr" @ "Done" #()
     {{{ RET #(); True }}}.
   Proof.
     wp_start as "(#Hbar & HsendP & HP)".
     iNamed "Hbar".
-    wp_loadField.
-    wp_apply (wp_Mutex__Lock with "[$]"). iIntros "[Hlocked Hinv]".
+    wp_auto.
+    wp_apply (wp_Mutex__Lock with "[$Hlock]") as "[Hlocked Hinv]".
     iNamed "Hinv".
-    wp_loadField.
-    wp_if_destruct.
+    wp_auto.
+    iPersist "b".
+    wp_if_destruct; try wp_auto.
     { (* The code checks if [numWaiting] is 0 and panics if so.
 
          In the proof we can show this is impossible using the ghost ownership,
@@ -393,61 +389,59 @@ Finally, we do all the program proofs, the specifications for each function. The
        of the API in unverified code (or code not yet verified). *)
       iDestruct (own_barrier_ghost_send_waiting with "[$Hbar $HsendP]") as %HnumWaiting_gt_0.
       exfalso. move: HnumWaiting_gt_0. word. }
-    wp_loadField. wp_storeField. wp_loadField.
     iAssert (|={⊤}=> lock_inv l γ)%I with "[-Hlocked HΦ]" as ">Hlinv".
     { iMod (own_barrier_ghost_send with "[$Hbar $HsendP $HP]") as "Hbar".
       iModIntro.
       iFrame. }
-    wp_if_destruct.
-    - wp_loadField. wp_apply (wp_Cond__Broadcast with "Hcond").
-      wp_loadField.
+    wp_if_destruct; try wp_auto.
+    - wp_apply (wp_Cond__Broadcast with "Hcond").
       wp_apply (wp_Mutex__Unlock with "[$Hlock $Hlocked $Hlinv]").
-      wp_pures.
-      iModIntro. iApply "HΦ". auto.
-    - wp_loadField.
-      wp_apply (wp_Mutex__Unlock with "[$Hlock $Hlocked $Hlinv]").
-      wp_pures.
-      iModIntro. iApply "HΦ". auto.
+      iApply "HΦ". auto.
+    - wp_apply (wp_Mutex__Unlock with "[$Hlock $Hlocked $Hlinv]").
+      iApply "HΦ". auto.
   Qed.
 
   Lemma wp_Barrier__Wait γ l Q :
-    {{{ is_barrier l γ ∗ recv γ Q }}}
-      Barrier__Wait #l
+    {{{ is_pkg_init concurrent ∗ is_barrier l γ ∗ recv γ Q }}}
+      l @ concurrent @ "Barrier'ptr" @ "Wait" #()
     {{{ RET #(); Q ∗ recv γ emp }}}.
   Proof.
     wp_start as "(#Hbar & HrecvQ)".
     iNamed "Hbar".
-    wp_loadField.
-    wp_apply (wp_Mutex__Lock with "[$]"). iIntros "[Hlocked Hinv]".
-    wp_pures.
-    wp_apply (wp_forBreak_cond (λ continue,
-                  "Hlocked" ∷ lock.locked #mu_l ∗
-                  "Hinv" ∷ lock_inv l γ ∗
-                  "HQ" ∷ if continue then recv γ Q else ▷ Q ∗ recv γ emp
-                )%I with "[] [$Hlocked $Hinv $HrecvQ]").
-    - clear Φ.
-      iModIntro.
-      wp_start as "H"; iNamed "H".
-      iNamed "Hinv".
-      wp_loadField; wp_pures.
-      wp_if_destruct.
-      + wp_pures. wp_loadField.
-        wp_apply (wp_Cond__Wait with "[-HΦ HQ]").
-        { iFrame "#∗". }
-        iIntros "[Hlocked Hinv]".
-        wp_pures. iModIntro. iApply "HΦ"; iFrame.
-      + iMod (own_barrier_ghost_recv with "[$Hbar $HQ]") as "(Hbar & Hrecv & HQ)".
-        { move: Heqb. word. }
+    wp_auto.
+    wp_apply (wp_Mutex__Lock with "[$Hlock]"). iIntros "[Hlocked Hinv]".
+    wp_auto.
 
-        iModIntro.
-        iApply "HΦ".
-        rewrite /named.
+    iAssert (
+          "Hlocked" ∷ own_Mutex mu_l ∗
+          "Hinv" ∷ lock_inv l γ ∗
+          "HQ" ∷ recv γ Q
+          )%I
+           with "[$Hlocked $Hinv $HrecvQ]" as "HI".
+    wp_for "HI".
+    - iNamed "Hinv".
+      wp_auto.
+      wp_if_destruct; try wp_auto.
+      + wp_apply (wp_Cond__Wait with "[Hlocked numWaiting Hbar]").
+        { iFrame "Hcond".
+          iSplit.
+          - iApply (Mutex_is_Locker with "[] Hlock").
+            iPkgInit.
+          - iFrame.
+        }
+        iIntros "[Hlocked Hinv]".
+        wp_auto.
+        wp_for_post.
         iFrame.
-    - iIntros "H"; iNamed "H". iDestruct "HQ" as "[HQ Hrecv_emp]".
-      wp_pures. wp_loadField.
-      wp_apply (wp_Mutex__Unlock with "[$Hlock $Hlocked $Hinv]").
-      wp_pures.
-      iModIntro. iApply "HΦ". iFrame.
+      + rewrite decide_False.
+        { inv 1. }
+        rewrite decide_True //; wp_auto.
+        iMod (own_barrier_ghost_recv with "[$Hbar $HQ]") as "(Hbar & Hrecv & HQ)".
+        { word. }
+        wp_apply (wp_Mutex__Unlock with "[$Hlock $Hlocked Hbar numWaiting]").
+        { iFrame. }
+        iApply "HΦ".
+        iFrame.
   Qed.
 
 End proof.

@@ -32,10 +32,10 @@ Then, we'll prove specifications based on this representation invariant.
 
 ```coq
 From sys_verif.program_proof Require Import prelude empty_ffi.
-From Goose.sys_verif_code Require Import heap.
+From sys_verif.program_proof Require Import heap_init.
 
 Section proof.
-Context `{hG: !heapGS Σ}.
+Context `{hG: !heapGS Σ} `{!goGlobalsGS Σ}.
 
 
 ```
@@ -48,9 +48,9 @@ See `own_tree_F` for the context of how this is used.
 Definition tree_root (own_tree: loc -d> gset w64 -d> iPropO Σ)
   (l: loc) (keys: gset w64) : iPropO Σ :=
   (∃ (key: w64) (left_l right_l: loc) (l_keys r_keys: gset w64),
-   "key" :: l ↦[SearchTree :: "key"] #key ∗
-   "left" :: l ↦[SearchTree :: "left"] #left_l ∗
-   "right" :: l ↦[SearchTree :: "right"] #right_l ∗
+   "key" :: l ↦s[heap.SearchTree :: "key"] key ∗
+   "left" :: l ↦s[heap.SearchTree :: "left"] left_l ∗
+   "right" :: l ↦s[heap.SearchTree :: "right"] right_l ∗
    (* the pointers in a tree themselves point to subtrees *)
    "Hleft" :: ▷ own_tree left_l l_keys ∗
    "Hright" :: ▷ own_tree right_l r_keys ∗
@@ -127,16 +127,12 @@ func NewSearchTree() *SearchTree {
 
 ```coq
 Lemma wp_NewSearchTree :
-  {{{ True }}}
-    NewSearchTree #()
+  {{{ is_pkg_init heap.heap }}}
+    heap.heap @ "NewSearchTree" #()
   {{{ (l: loc), RET #l; own_tree l ∅ }}}.
 Proof.
   wp_start as "_".
-  wp_apply wp_ref_of_zero.
-  { done. }
-  iIntros (ptr_l) "l".
-  wp_load.
-  iModIntro.
+  wp_auto.
   iApply "HΦ".
   iApply own_tree_null; done.
 Qed.
@@ -162,12 +158,10 @@ func (t *SearchTree) Contains(key uint64) bool {
 
 ```coq
 Lemma wp_SearchTree__Contains (needle: w64) l keys :
-  {{{ own_tree l keys }}}
-    SearchTree__Contains #l #needle
+  {{{ is_pkg_init heap.heap ∗ own_tree l keys }}}
+    l @ heap.heap @ "SearchTree'ptr" @ "Contains" #needle
   {{{ RET #(bool_decide (needle ∈ keys)); own_tree l keys }}}.
 Proof.
-  iIntros (Φ) "Htree HΦ".
-
 
 ```
 
@@ -178,8 +172,8 @@ Löb induction says `∀ P, (▷ P → P) → P`. This seems pretty magical: we 
 Note that we can't use this mechanism to prove a program's recursion eventually terminates, so it only works to prove properties about a function if it terminates.
 
 ```coq
-  iLöb as "IH" forall (l keys Φ).
-  wp_rec. wp_pures.
+  iLöb as "IH" forall (l keys).
+  wp_start as "Htree". wp_auto.
 ```
 
 :::: info Goal
@@ -187,26 +181,53 @@ Note that we can't use this mechanism to prove a program's recursion eventually 
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
+  goGlobalsGS0 : goGlobalsGS Σ
   needle : w64
   l : loc
   keys : gset w64
   Φ : val → iPropI Σ
+  t_ptr, key_ptr : loc
   ============================
-  "IH" : ∀ (l0 : loc) (keys0 : gset w64) (Φ0 : val → iPropI Σ),
-           own_tree l0 keys0 -∗
-           ▷ (own_tree l0 keys0 -∗ Φ0 #(bool_decide (needle ∈ keys0))) -∗
-           WP SearchTree__Contains #l0 #needle {{ v, Φ0 v }}
+  "IH" : ∀ (l0 : loc) (keys0 : gset w64) (x : val → iPropI Σ),
+           is_pkg_init heap ∗ own_tree l0 keys0 -∗
+           ▷ (own_tree l0 keys0 -∗ x (# (bool_decide (needle ∈ keys0)))) -∗
+           WP # (method_callv heap "SearchTree'ptr" "Contains" (# l0))
+                (# needle)
+           {{ v, x v }}
+  _ : is_pkg_init heap
   --------------------------------------□
   "Htree" : own_tree l keys
-  "HΦ" : own_tree l keys -∗ Φ #(bool_decide (needle ∈ keys))
+  "HΦ" : own_tree l keys -∗ Φ (# (bool_decide (needle ∈ keys)))
+  "t" : t_ptr ↦ l
+  "key" : key_ptr ↦ needle
   --------------------------------------∗
-  WP if: #(bool_decide (#l = #null)) then #false
-     else if: #needle = struct.loadF SearchTree "key" #l then #true
-          else if: struct.loadF SearchTree "key" #l > #needle
-               then SearchTree__Contains (struct.loadF SearchTree "left" #l)
-                      #needle
-               else SearchTree__Contains (struct.loadF SearchTree "right" #l)
-                      #needle
+  WP exception_do
+       ((if: # (bool_decide (l = null)) then return: # false else do: # ()) ;;;
+        (if: ![# uint64T] (# key_ptr) =
+             ![# uint64T] (struct.field_ref (# heap.SearchTree)
+                             (# "key"%go) ![# ptrT]
+                             (# t_ptr))
+         then return: # true else do: # ()) ;;;
+        (if: ![# uint64T] (struct.field_ref (# heap.SearchTree)
+                             (# "key"%go) ![# ptrT]
+                             (# t_ptr)) >
+             ![# uint64T] (# key_ptr)
+         then return: (let: "$a0" := ![# uint64T] (# key_ptr) in
+                       method_call (# heap) (# "SearchTree'ptr"%go)
+                         (# "Contains"%go)
+                         ![# ptrT] (struct.field_ref
+                                      (# heap.SearchTree)
+                                      (# "left"%go) ![
+                                      # ptrT] (# t_ptr))
+                         "$a0")
+         else do: # ()) ;;;
+        return: (let: "$a0" := ![# uint64T] (# key_ptr) in
+                 method_call (# heap) (# "SearchTree'ptr"%go)
+                   (# "Contains"%go)
+                   ![# ptrT] (struct.field_ref (# heap.SearchTree)
+                                (# "right"%go) ![# ptrT]
+                                (# t_ptr))
+                   "$a0"))
   {{ v, Φ v }}
 ```
 
@@ -215,36 +236,37 @@ Note that we can't use this mechanism to prove a program's recursion eventually 
 Notice that the ▷ in front of "IH" has disappeared because we've taken a step. We're now free to use it whenever there's a call to `SearchTree__Contains`.
 
 ```coq
-  wp_if_destruct.
-  {
-    (* If the root is nil, then the tree is empty. We need to prove that to show
+  wp_if_destruct; try wp_auto.
+  { (* If the root is nil, then the tree is empty. We need to prove that to show
        that returning false is the right thing to do. *)
-    iModIntro.
     (* we need to prove this before `iApply HΦ` since the proof requires
     "Htree" *)
     iAssert (⌜needle ∉ keys⌝)%I as %Hnotin.
     { iDestruct (own_tree_null with "Htree") as %Hkeys; subst.
       iPureIntro; set_solver. }
-    rewrite bool_decide_eq_false_2; [ | done ].
+    rewrite bool_decide_eq_false_2; [ done | ].
     iApply "HΦ". iFrame. }
 
   (* non-nil cases *)
   assert (l ≠ null) as Hnon_null by congruence.
   iDestruct (own_tree_non_null with "Htree") as "Htree"; [ done | ].
+  iRename "key" into "key_var".
   iNamed "Htree". subst keys.
-  wp_loadField. wp_pures. wp_if_destruct.
+  wp_auto.
+  wp_if_destruct.
   { (* found needle at root *)
-    iModIntro.
     rewrite bool_decide_eq_true_2.
-    - iApply "HΦ".
-      iApply own_tree_non_null; auto.
-      iFrame "key left right Hleft Hright %".
-      iPureIntro; set_solver.
-    - set_solver. }
+    { set_solver. }
+    iApply "HΦ".
+    iApply own_tree_non_null; auto.
+    iFrame "key left right Hleft Hright %".
+    iPureIntro; set_solver.
+  }
 
   (* else: didn't find at root *)
   assert (needle ≠ key) as Hnotkey by congruence.
-  repeat (wp_loadField || wp_if_destruct || wp_pures).
+  wp_auto.
+  wp_if_destruct; try wp_auto.
   - (* recursive subcall, to the left tree *)
     wp_apply ("IH" with "[$Hleft]").
     iIntros "Hleft".
@@ -257,6 +279,7 @@ Notice that the ▷ in front of "IH" has disappeared because we've taken a step.
     the whole tree. Intuitively, this is true because `needle ≠ key` and the
     binary search invariant guarantees that `needle` won't be found on the
     right. *)
+    wp_auto.
     iExactEq "HΦ".
     repeat f_equal.
     apply bool_decide_ext.
@@ -274,6 +297,7 @@ Notice that the ▷ in front of "IH" has disappeared because we've taken a step.
       iFrame "left right ∗%".
       done.
     }
+    wp_auto.
     iExactEq "HΦ".
     repeat f_equal.
     apply bool_decide_ext.
@@ -296,22 +320,23 @@ func singletonTree(key uint64) *SearchTree {
 
 ```coq
 Lemma wp_singletonTree (key: w64) :
-  {{{ True }}}
-    singletonTree #key
+  {{{ is_pkg_init heap.heap }}}
+    heap.heap @ "singletonTree" #key
   {{{ (l: loc), RET #l; own_tree l {[key]} }}}.
 Proof.
   wp_start as "_".
-  wp_apply wp_ref_of_zero; [ done | ]. iIntros (s_l) "Hs".
-  wp_load. wp_load.
+  wp_auto.
   wp_alloc t_l as "Hl".
-  iDestruct (struct_pointsto_not_null with "Hl") as %Hnot_null.
-  { simpl; lia. }
+  iDestruct (pointsto_not_null with "Hl") as %Hnot_null.
+  { reflexivity. }
   iApply struct_fields_split in "Hl". iNamed "Hl".
+  cbn [heap.SearchTree.key' heap.SearchTree.left' heap.SearchTree.right'].
+  wp_auto.
   iApply "HΦ".
   rewrite own_tree_unfold /own_tree_F.
   iRight.
   iSplit; [ done | ].
-  iFrame "key left right".
+  iFrame "Hkey Hleft Hright".
   iExists ∅, ∅. iFrame.
   rewrite own_tree_null.
   iPureIntro.
@@ -343,31 +368,31 @@ func (t *SearchTree) Insert(key uint64) *SearchTree {
 
 ```coq
 Lemma wp_SearchTree__Insert (new_key: w64) l keys :
-  {{{ own_tree l keys }}}
-    SearchTree__Insert #l #new_key
+  {{{ is_pkg_init heap.heap ∗ own_tree l keys }}}
+    l @ heap.heap @ "SearchTree'ptr" @ "Insert" #new_key
   {{{ (l': loc), RET #l'; own_tree l' (keys ∪ {[new_key]}) }}}.
 Proof.
-  iIntros (Φ) "Htree HΦ".
-  iLöb as "IH" forall (l keys Φ).
-  wp_rec; wp_pures.
-  wp_if_destruct.
+  iLöb as "IH" forall (l keys).
+  wp_start as "Htree".
+  wp_auto.
+  wp_if_destruct; try wp_auto.
   { wp_apply wp_singletonTree.
     iDestruct (own_tree_null with "Htree") as %Hkeys; subst. iClear "Htree".
     iIntros (l') "Htree".
+    wp_auto.
     iApply "HΦ".
     iExactEq "Htree".
     f_equal. set_solver. }
 
   assert (l ≠ null) as Hnot_null by congruence.
   iDestruct (own_tree_non_null with "Htree") as "Htree"; [ auto | ].
+  iRename "key" into "key_var".
   iNamed "Htree". subst keys.
-  wp_loadField.
-  wp_pures. wp_if_destruct.
-  { wp_loadField.
-    wp_apply ("IH" with "[$Hleft]").
+  wp_auto.
+  wp_if_destruct; try wp_auto.
+  { wp_apply ("IH" with "[$Hleft]").
     iIntros (left_l') "Hleft".
-    wp_storeField.
-    iModIntro.
+    wp_auto.
     iApply "HΦ".
     iApply own_tree_non_null; [ done | ].
     (* need to re-prove binay search invariant *)
@@ -377,12 +402,10 @@ Proof.
     - set_solver.
     - set_solver.
   }
-  wp_loadField. wp_pures. wp_if_destruct.
-  { wp_loadField.
-    wp_apply ("IH" with "[$Hright]").
+  wp_if_destruct; try wp_auto.
+  { wp_apply ("IH" with "[$Hright]").
     iIntros (right_l') "Hright".
-    wp_storeField.
-    iModIntro.
+    wp_auto.
     iApply "HΦ".
     iApply own_tree_non_null; [ done | ].
     iFrame "key left right Hleft Hright %".
@@ -393,8 +416,6 @@ Proof.
   }
   (* key was already present *)
   assert (key = new_key) by word; subst new_key.
-  wp_pures.
-  iModIntro.
   iApply "HΦ".
   iApply own_tree_non_null; [ auto | ].
   iFrame "key left right Hleft Hright %".

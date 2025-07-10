@@ -20,7 +20,8 @@ A secondary goal is for you to _understand_ this proof, so keep that in the back
 ```coq
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From iris.algebra Require Import ofe auth excl gmap.
-From Goose.sys_verif_code Require Import sharded_hashmap.
+From New.proof Require Import sync.
+From sys_verif.generatedproof.sys_verif_code Require Import sharded_hashmap.
 
 Open Scope Z_scope.
 Add Printing Coercion Z.of_nat.
@@ -162,8 +163,8 @@ There are no proofs for you to do in this section. These proofs are fairly techn
     rewrite -own_op.
     rewrite -auth_frag_op.
     rewrite gmap_op_union.
-    { rewrite map_fmap_union //. }
-    apply map_disjoint_fmap; auto.
+    { apply map_disjoint_fmap; auto. }
+    rewrite map_fmap_union //.
   Qed.
 
   Lemma auth_map_frag_split γ m1 m2 :
@@ -176,8 +177,8 @@ There are no proofs for you to do in this section. These proofs are fairly techn
     rewrite -own_op.
     rewrite -auth_frag_op.
     rewrite gmap_op_union.
-    { rewrite map_fmap_union. iIntros "$". }
-    apply map_disjoint_fmap; auto.
+    { apply map_disjoint_fmap; auto. }
+    rewrite map_fmap_union. iIntros "$".
   Qed.
 
   Lemma auth_map_frag_subset γ m m' :
@@ -192,11 +193,11 @@ There are no proofs for you to do in this section. These proofs are fairly techn
     apply (lookup_included_2 _ _ i) in Hin.
     rewrite !lookup_fmap Hgetm' /= in Hin.
     destruct (m !! i) eqn:Hgetm.
-    { rewrite Hgetm /= in Hin.
-      apply Excl_included in Hin.
+    { rewrite /= in Hin.
+      apply @Excl_included in Hin.
       congruence. }
     apply Some_included_is_Some in Hin.
-    rewrite Hgetm /= in Hin. destruct Hin; congruence.
+    rewrite /= in Hin. destruct Hin; congruence.
   Qed.
 
   Lemma auth_map_alloc1 k v γ m :
@@ -209,7 +210,7 @@ There are no proofs for you to do in this section. These proofs are fairly techn
     iApply (own_update with "Hauth").
     apply auth_update_alloc.
     rewrite !fmap_insert.
-    apply gmap.alloc_local_update; [ | done ].
+    apply @gmap.alloc_local_update; [ | done ].
     apply not_elem_of_dom.
     set_solver.
   Qed.
@@ -237,7 +238,7 @@ There are no proofs for you to do in this section. These proofs are fairly techn
     iApply (own_update with "H").
     apply auth_update.
     rewrite !fmap_insert !fmap_empty !insert_empty.
-    apply gmap.singleton_local_update_any.
+    apply @gmap.singleton_local_update_any.
     intros x Hget.
     fmap_Some in Hget.
     apply exclusive_local_update; done.
@@ -287,9 +288,12 @@ End lemmas.
 End auth_map.
 
 Section proof.
-Context `{hG: !heapGS Σ}.
+Context `{hG: !heapGS Σ} `{!goGlobalsGS Σ}.
 Context `{hG1: !auth_map.auth_mapG Σ w32 w64}.
 Context `{hG2: !auth_map.auth_mapG Σ Z (gset w32)}.
+
+#[global]
+Program Instance : IsPkgInit sharded_hashmap := ltac2:(build_pkg_init ()).
 
 ```
 
@@ -323,15 +327,12 @@ Definition hash_f (w: w32) : w32 :=
      (word.and (word.sru w (W32 24)) (W32 255))).
 
 Lemma wp_hash (w: w32) :
-  {{{ True }}}
-    hash #w
+  {{{ is_pkg_init sharded_hashmap }}}
+    sharded_hashmap @ "hash" #w
   {{{ RET #(hash_f w); True }}}.
 Proof.
   wp_start as "_".
-  wp_alloc h_l as "h".
-  wp_pures.
-  repeat (wp_load || wp_store).
-  iModIntro.
+  wp_auto.
   iApply "HΦ".
   done.
 Qed.
@@ -359,24 +360,49 @@ Definition own_shard (s_l: loc) (m: gmap w32 w64) : iProp Σ :=
   ∃ (m_l: loc) (m64: gmap w64 w64),
     "%Hvals" :: ⌜(∀ (k: w32) (v: w64),
                     m !! k = Some v ↔ m64 !! (W64 (uint.Z k)) = Some v)⌝ ∗
-    "m" :: s_l ↦[shard :: "m"] #m_l ∗
+    "m" :: s_l ↦s[sharded_hashmap.shard :: "m"] m_l ∗
     "Hm" :: own_map m_l (DfracOwn 1) m64.
 
 Lemma wp_newShard :
-  {{{ True }}}
-    newShard #()
+  {{{ is_pkg_init sharded_hashmap }}}
+    sharded_hashmap @ "newShard" #()
   {{{ (s_l: loc), RET #s_l; own_shard s_l ∅ }}}.
 Proof.
   wp_start as "_".
-  wp_apply (wp_NewMap).
-  iIntros (m_l) "Hm".
+  wp_apply (wp_map_make (K:=w64) (V:=w64)).
+  { reflexivity. }
+  iIntros (m_l) "Hmap".
+  wp_auto.
   wp_alloc s_l as "s".
   iApply struct_fields_split in "s". iNamed "s".
+  iSimpl in "Hm".
+  wp_auto.
   iApply "HΦ".
   iFrame.
   iPureIntro.
   intros.
   rewrite !lookup_empty. auto.
+Qed.
+
+Definition map_get `{!IntoVal V} `{!IntoValTyped V t} (v: option V) : V * bool :=
+  (default (default_val V) v, bool_decide (is_Some v)).
+
+Lemma map_get_true V (mv: option V) `{!IntoVal V} `{!IntoValTyped V t} v :
+  map_get mv = (v, true) ->
+  mv = Some v.
+Proof.
+  rewrite /map_get.
+  destruct mv; rewrite /=; congruence.
+Qed.
+
+Lemma map_get_false V (mv: option V) `{!IntoVal V} `{!IntoValTyped V t} v :
+  map_get mv = (v, false) ->
+  mv = None ∧ v = default_val V.
+Proof.
+  rewrite /map_get.
+  destruct mv; rewrite /=.
+  - congruence.
+  - intuition congruence.
 Qed.
 
 ```
@@ -385,24 +411,23 @@ Qed.
 
 ```coq
 Lemma wp_shard__Load (s_l: loc) (key: w32) (m: gmap w32 w64) :
-  {{{ own_shard s_l m }}}
-    shard__Load #s_l #key
+  {{{ is_pkg_init sharded_hashmap ∗ own_shard s_l m }}}
+    s_l @ sharded_hashmap @ "shard'ptr" @ "Load" #key
   {{{ (v: w64) (ok: bool), RET (#v, #ok);
       own_shard s_l m ∗
-      ⌜(v, ok) = map_get m key⌝
+      ⌜(v, ok) = map_get (m !! key)⌝
   }}}.
 Proof.
   wp_start as "H". iNamed "H".
-  wp_loadField.
-  wp_apply (wp_MapGet with "[$Hm]").
-  iIntros (v ok) "(%Hget & Hm)".
-  wp_pures.
-  iModIntro. iApply "HΦ". iFrame.
+  wp_auto.
+  wp_apply (wp_map_get with "[$Hm]").
+  iIntros "Hm".
+  wp_auto.
+  iApply "HΦ". iFrame.
   iPureIntro.
   split.
   - auto.
   - rewrite /map_get. simpl.
-    rewrite /map_get in Hget. simpl in Hget.
     destruct (m !! key) eqn:Hm.
 (* FILL IN HERE *)
     + admit.
@@ -410,20 +435,17 @@ Proof.
 Admitted.
 
 Lemma wp_shard__Store (s_l: loc) (key: w32) (val: w64) (m: gmap w32 w64) :
-  {{{ own_shard s_l m }}}
-    shard__Store #s_l #key #val
+  {{{ is_pkg_init sharded_hashmap ∗ own_shard s_l m }}}
+    s_l @ sharded_hashmap @ "shard'ptr" @ "Store" #key #val
   {{{ RET #();
       own_shard s_l (<[ key := val ]> m)
   }}}.
 Proof.
   wp_start as "H". iNamed "H".
-  wp_pures.
-  wp_loadField.
-  wp_apply (wp_MapInsert with "[$Hm]").
-  { eauto. }
+  wp_auto.
+  wp_apply (wp_map_insert with "[$Hm]").
   iIntros "Hm".
-  rewrite /typed_map.map_insert.
-  wp_pures. iModIntro. iApply "HΦ".
+  wp_auto. iApply "HΦ".
   rewrite /own_shard.
   iFrame.
   iPureIntro.
@@ -585,7 +607,7 @@ Proof.
   f_equal.
   rewrite /bucket_map.
   (* the basic idea is that the left-hand side is an insertion into a map constructed from a list, while the right-hand side appends to a list and then constructs a map; these do the same thing in a different order *)
-  rewrite seqZ_plus_one; [ | lia ].
+  rewrite -> seqZ_plus_one by lia.
   (* this just makes the goal more readable *)
   change (filter _ ∅) with (∅ : gset w32).
   replace (0 + num_buckets) with num_buckets by lia.
@@ -648,10 +670,10 @@ Lemma map_get_subset (m sub_m: gmap w32 w64) (numBuckets: Z) (idx: Z) (key: w32)
   dom sub_m =
     filter (λ k : w32, hash_bucket k numBuckets = idx)
       (dom m) →
-  map_get m key = map_get sub_m key.
+  map_get (m !! key) = map_get (sub_m !! key).
 Proof.
   intros Hbound Hsub Hidx Hsub_m.
-  destruct (map_get sub_m key) eqn:Hget.
+  destruct (map_get (sub_m !! key)) eqn:Hget.
   destruct b.
 Admitted.
 
@@ -663,7 +685,7 @@ This theorem captures the essence of why `Load` is correct. The hard work is all
 Lemma hashmap_auth_sub_get γ m max_buckets sub_m hash_idx key :
   hash_idx = hash_bucket key max_buckets →
   hashmap_auth γ max_buckets m ∗ hashmap_sub γ hash_idx sub_m -∗
-    ⌜map_get m key = map_get sub_m key⌝.
+    ⌜map_get (m !! key) = map_get (sub_m !! key)⌝.
 Proof.
   iIntros (Hidx) "[Hauth Hfrag]".
   iDestruct (hashmap_auth_sub_valid with "[$Hauth $Hfrag]") as %Hvalid;
@@ -700,11 +722,11 @@ Proof.
     f_equal.
     rewrite filter_union_L.
     rewrite filter_singleton_not_L.
-    + set_solver.
     + congruence.
+    + set_solver.
   - rewrite lookup_insert_ne.
-    + rewrite !bucket_map_lookup_None //.
     + word.
+    + rewrite !bucket_map_lookup_None //.
 Qed.
 
 ```
@@ -788,9 +810,9 @@ Definition lock_inv (γ: ghost_names) (hash_idx: Z) (map_l: loc): iProp Σ :=
 
 Definition is_bucket (γ: ghost_names) (l: loc) (hash_idx: Z) : iProp Σ :=
   ∃ (mu_l subMap_l: loc),
-  "#subMap" :: l ↦[bucket :: "subMap"]□ #subMap_l ∗
-  "#mu" :: l ↦[bucket :: "mu"]□ #mu_l ∗
-  "#Hlock" :: is_lock nroot (#mu_l) (lock_inv γ hash_idx subMap_l).
+  "#subMap" :: l ↦s[sharded_hashmap.bucket :: "subMap"]□ subMap_l ∗
+  "#mu" :: l ↦s[sharded_hashmap.bucket :: "mu"]□ mu_l ∗
+  "#Hlock" :: is_Mutex mu_l (lock_inv γ hash_idx subMap_l).
 
 ```
 
@@ -800,16 +822,16 @@ Since the hashmap isn't protected by one lock but by several, where do we put `P
 
 ```coq
 Definition is_hashmap (γ: ghost_names) (l: loc) (P: gmap w32 w64 → iProp Σ) :=
-  (∃ (b_s: Slice.t) (b_ls: list loc),
-  "#buckets" :: l ↦[HashMap :: "buckets"]□ b_s ∗
-  "#Hb_ls" :: own_slice_small b_s ptrT (DfracDiscarded) b_ls ∗
-  "%Hsz32" :: ⌜0 < uint.Z (Slice.sz b_s) < 2^32⌝ ∗
+  (∃ (b_s: slice.t) (b_ls: list loc),
+  "#buckets" :: l ↦s[sharded_hashmap.HashMap :: "buckets"]□ b_s ∗
+  "#Hb_ls" :: own_slice b_s (DfracDiscarded) b_ls ∗
+  "%Hsz32" :: ⌜0 < uint.Z (slice.len_f b_s) < 2^32⌝ ∗
   "His_buckets" :: ([∗ list] i↦bucket_l ∈ b_ls,
     is_bucket γ bucket_l (Z.of_nat i)
   ) ∗
   "#His_inv" :: inv nroot (∃ (m: gmap w32 w64),
       "HP" :: P m ∗
-      "Hauth" :: hashmap_auth γ (uint.Z (Slice.sz b_s)) m
+      "Hauth" :: hashmap_auth γ (uint.Z (slice.len_f b_s)) m
   ))%I.
 
 ```
@@ -824,32 +846,33 @@ It turns out initializing the hashmap is a huge pain, both dealing with the loop
 
 ```coq
 Lemma wp_newBucket (hash_idx: Z) (γ: ghost_names) :
-  {{{ hashmap_sub γ hash_idx ∅ }}}
-    newBucket #()
+  {{{ is_pkg_init sharded_hashmap ∗ hashmap_sub γ hash_idx ∅ }}}
+    sharded_hashmap @ "newBucket" #()
   {{{ (b_l: loc), RET #b_l; is_bucket γ b_l hash_idx }}}.
 Proof.
   wp_start as "Hfrag".
-  rewrite -wp_fupd.
-  wp_apply (wp_new_free_lock). iIntros (m_l) "Hlock".
+  wp_alloc m_l as "mu".
+  wp_auto.
   wp_apply wp_newShard. iIntros (s_l) "Hshard".
+  wp_auto.
   wp_alloc b_l as "H". iApply struct_fields_split in "H". iNamed "H".
-  iMod (struct_field_pointsto_persist with "subMap") as "subMap".
-  iMod (struct_field_pointsto_persist with "mu") as "mu".
-  iMod (alloc_lock nroot _ _ (lock_inv γ hash_idx s_l) with
-         "[$Hlock] [Hfrag Hshard]") as "Hlock".
+  iSimpl in "Hmu HsubMap".
+  iPersist "Hmu HsubMap".
+  iMod (init_Mutex (lock_inv γ hash_idx s_l) with
+         "mu [Hfrag Hshard]") as "Hlock".
   { iModIntro. rewrite /lock_inv.
     iExists (∅). iFrame. }
-  iModIntro. iApply "HΦ". iFrame.
+  wp_auto. iApply "HΦ". iFrame "#∗".
 Qed.
 
 Lemma wp_createNewBuckets (γ: ghost_names) (newSize: w32) :
-  {{{ ⌜0 < uint.Z newSize⌝ ∗
+  {{{ is_pkg_init sharded_hashmap ∗ ⌜0 < uint.Z newSize⌝ ∗
       hashmap_pre_auth γ 0
   }}}
-    createNewBuckets #newSize
-  {{{ (s: Slice.t) (b_ls: list loc), RET (slice_val s);
+    sharded_hashmap @ "createNewBuckets" #newSize
+  {{{ (s: slice.t) (b_ls: list loc), RET #s;
       "Hauth" :: hashmap_pre_auth γ (uint.Z newSize) ∗
-      "Hbuckets" :: own_slice_small s ptrT (DfracOwn 1) b_ls ∗
+      "Hown_buckets" :: own_slice s (DfracOwn 1) b_ls ∗
       "His_buckets" :: ([∗ list] i↦bucket_l ∈ b_ls,
         is_bucket γ bucket_l (Z.of_nat i)
       ) ∗
@@ -857,52 +880,58 @@ Lemma wp_createNewBuckets (γ: ghost_names) (newSize: w32) :
   }}}.
 Proof.
   wp_start as "(%Hpos & Hauth)".
-  wp_apply wp_NewSlice_0. iIntros (s) "Hbuckets".
-  wp_alloc newBuckets_l as "newBuckets".
-  wp_alloc i_l as "i".
-  wp_pures.
-  wp_apply (wp_forUpto (λ i, ∃ (s: Slice.t) (b_ls: list loc),
+  wp_auto.
+  iPersist "numBuckets newSize".
+  iAssert (∃ (i: w64) (s: slice.t) (b_ls: list loc),
+                  "i" :: i_ptr ↦ i ∗
+                  "%Hi_bound" :: ⌜0 ≤ uint.Z i ≤ uint.Z newSize⌝ ∗
                   "Hauth" :: hashmap_pre_auth γ (uint.Z i) ∗
-                  "newBuckets" :: newBuckets_l ↦[slice.T ptrT] s ∗
-                  "Hbuckets" :: own_slice s ptrT (DfracOwn 1) b_ls ∗
+                  "newBuckets" :: newBuckets_ptr ↦ s ∗
+                  "Hown_buckets" :: s ↦* b_ls ∗
+                  "Hbucket_cap" :: own_slice_cap loc s ∗
                   "%Hi" :: ⌜length b_ls = uint.nat i⌝ ∗
                   "His_buckets" :: ([∗ list] i'↦bucket_l ∈ b_ls,
-                    is_bucket γ bucket_l (Z.of_nat i')
-                  )
-              )%I
-             with "[] [$i $newBuckets $Hbuckets $Hauth]").
-  { word. }
-  {
-    iIntros (i). wp_start as "(I & i & %Hi)". iNamed "I".
+                    is_bucket γ bucket_l (Z.of_nat i'))
+              )%I with "[$i $newBuckets $Hauth]" as "HI".
+  { iExists [].
+    iDestruct (own_slice_nil) as "$".
+    iDestruct (own_slice_cap_nil) as "$".
+    simpl.
+    iPureIntro. word.
+  }
+  wp_for "HI".
+  wp_if_destruct.
+  { wp_auto.
     iMod (hashmap_pre_auth_alloc_bucket with "[$Hauth]") as "[Hauth Hsub]".
     wp_apply (wp_newBucket (uint.Z i) with "[$Hsub]").
     iIntros (b_l) "Hbucket".
-    wp_load.
-    wp_apply (wp_SliceAppend with "[$Hbuckets]").
-    iIntros (s') "Hbuckets".
-    wp_store.
-    iModIntro. iApply "HΦ". iFrame.
+    wp_auto.
+    wp_apply wp_slice_literal. iIntros (s') "Hnew_bucket".
+    wp_auto.
+    wp_apply (wp_slice_append with "[Hown_buckets $Hbucket_cap Hnew_bucket]").
+    { iFrame. }
+    iIntros (s'') "(Hown_buckets & Hbucket_cap & Hnew_bucket)".
+    wp_auto.
+    wp_for_post.
+    iFrame "HΦ".
+    iFrame "i".
     replace (uint.Z (word.add i (W64 1))) with (uint.Z i + 1) by word.
+    replace (uint.Z (W64 (uint.Z newSize))) with (uint.Z newSize) in * by word.
     iFrame "Hauth".
+    iFrame "newBuckets Hown_buckets Hbucket_cap".
     simpl.
+    iSplit.
+    { iPureIntro. word. }
+    iSplit.
+    { iPureIntro. len. }
+    rewrite big_sepL_app /=.
     replace (Z.of_nat (length b_ls + 0)) with (uint.Z i) by word.
-    iFrame "Hbucket".
-    iPureIntro. rewrite length_app /=. word.
+    iFrame "His_buckets Hbucket".
   }
-  {
-    (* prove loop invariant holds initially *)
-    simpl.
-    iFrame.
-    iPureIntro. done.
-  }
-  iIntros "(IH & i)". iNamed "IH".
-  assert (length b_ls = uint.nat newSize) by word.
-  wp_load.
-  iModIntro.
+  wp_auto.
   iApply "HΦ".
   iFrame.
-  iDestruct (own_slice_split with "Hbuckets") as "[$ _Hcap]".
-  replace (uint.Z (W64 (uint.Z newSize))) with (uint.Z newSize) by word.
+  replace (uint.Z i) with (uint.Z newSize) by word.
   iFrame "Hauth".
   iPureIntro. word.
 Qed.
@@ -926,14 +955,14 @@ You'll need to replace `H1 H2 H3` with whatever hypotheses are needed to prove t
 
 ```coq
 Lemma wp_NewHashmap (hm_l: loc) (size: w32) P :
-  {{{ ⌜0 < uint.Z size⌝ ∗ P ∅ }}}
-    NewHashMap #size
+  {{{ is_pkg_init sharded_hashmap ∗ ⌜0 < uint.Z size⌝ ∗ P ∅ }}}
+    sharded_hashmap @ "NewHashMap" #size
   {{{ (hm_l: loc) (γ: ghost_names), RET #hm_l;
       is_hashmap γ hm_l P
   }}}.
 Proof.
   wp_start as "[%Hpos HP]".
-  rewrite -wp_fupd.
+  wp_auto.
   iMod (auth_map.auth_map_init (K:=w32) (A:=w64)) as (map_γ) "Hmap_auth".
   iMod (auth_map.auth_map_init (K:=Z) (A:=gset w32)) as (bucket_γ) "Hbucket_auth".
   (* `set` creates a variable just for the rest of the proof (notice it's in the context including its definition) *)
@@ -941,16 +970,18 @@ Proof.
 Admitted.
 
 Lemma wp_bucketIdx (key: w32) (numBuckets: w64) :
-  {{{ ⌜0 < uint.Z numBuckets < 2^32⌝ }}}
-    bucketIdx #key #numBuckets
+  {{{ is_pkg_init sharded_hashmap ∗ ⌜0 < uint.Z numBuckets < 2^32⌝ }}}
+    sharded_hashmap @ "bucketIdx" #key #numBuckets
   {{{ (idx: w64), RET #idx; ⌜uint.Z idx = hash_bucket key (uint.Z numBuckets)⌝ }}}.
 Proof.
   wp_start as "%Hnonzero".
-  wp_apply wp_hash. wp_pures.
-  iModIntro.
+  wp_auto.
+  wp_apply wp_hash.
   iApply "HΦ".
   iPureIntro.
   rewrite /hash_bucket.
+  rewrite -> word.unsigned_modu_nowrap by word.
+  replace (uint.Z (W32 (uint.Z numBuckets))) with (uint.Z numBuckets) by word.
   word.
 Qed.
 
@@ -972,39 +1003,41 @@ Another solution is to have the update look like `∀ m, ▷ P m -∗ |==> ▷ P
 
 ```coq
 Lemma wp_HashMap__Load (hm_l: loc) γ (key: w32) P Q {Htimeless: ∀ m, Timeless (P m)} :
-  {{{ is_hashmap γ hm_l P ∗
-      (∀ m, P m -∗ |==> P m ∗ Q (map_get m key))
+  {{{ is_pkg_init sharded_hashmap ∗ is_hashmap γ hm_l P ∗
+      (∀ m, P m -∗ |==> P m ∗ Q (map_get (m !! key)))
   }}}
-    HashMap__Load #hm_l #key
+    hm_l @ sharded_hashmap @ "HashMap'ptr" @ "Load" #key
   {{{ (v: w64) (ok: bool), RET (#v, #ok); Q (v, ok) }}}.
 Proof.
   wp_start as "[#Hm Hupd]". iNamed "Hm".
-  wp_loadField.
-  iDestruct (own_slice_small_sz with "Hb_ls") as %Hsz.
-  wp_pures.
-  wp_apply wp_slice_len.
+  wp_auto.
+  wp_alloc buckets_ptr as "Hbuckets".
+  wp_auto.
+  iDestruct (own_slice_len with "Hb_ls") as %Hlen.
   wp_apply wp_bucketIdx.
   { iPureIntro. word. }
   iIntros (idx Hidx).
   list_elem b_ls (uint.nat idx) as bi_l.
-  wp_apply (wp_SliceGet with "[$Hb_ls]").
-  { iPureIntro. eauto. }
+  wp_auto.
+  wp_pure.
+  { word. }
+  wp_apply (wp_load_slice_elem with "[$Hb_ls]").
+  { eauto. }
   iIntros "_".
-  wp_pures.
+  wp_auto.
   iDestruct (big_sepL_lookup _ _ (uint.nat idx) with "His_buckets") as "Hidx".
   { eauto. }
   replace (Z.of_nat (uint.nat idx)) with (uint.Z idx) by word.
   iNamed "Hidx".
-  wp_loadField.
+  wp_auto.
   wp_apply (wp_Mutex__Lock with "[$Hlock]").
   iIntros "[locked Hlinv]". iNamed "Hlinv".
 
   (* start of critical section *)
-  wp_loadField.
+  wp_auto.
   wp_apply (wp_shard__Load with "[$HsubMap]").
   iIntros (v ok) "[HsubMap %Hget]".
-  wp_pures.
-  wp_loadField.
+  wp_auto.
 
   (* use user's ghost update on abstract state *)
 
@@ -1028,6 +1061,7 @@ We need to use `iApply fupd_wp` to make `iInv` open at a single point rather tha
 ```txt title="goal diff"
   Σ : gFunctors
   hG : heapGS Σ
+  goGlobalsGS0 : goGlobalsGS Σ
   hG1 : auth_map.auth_mapG Σ w32 w64
   hG2 : auth_map.auth_mapG Σ Z (gset w32)
   hm_l : loc
@@ -1037,44 +1071,61 @@ We need to use `iApply fupd_wp` to make `iInv` open at a single point rather tha
   Q : w64 * bool → iPropI Σ
   Htimeless : ∀ m : gmap w32 w64, Timeless (P m)
   Φ : val → iPropI Σ
-  b_s : Slice.t
+  b_s : slice.t
   b_ls : list loc
-  Hsz32 : 0 < uint.Z (Slice.sz b_s) < 2 ^ 32
-  Hsz : length b_ls = uint.nat (Slice.sz b_s)
+  Hsz32 : 0 < uint.Z (slice.len_f b_s) < 2 ^ 32
+  hm_ptr, key_ptr, buckets_ptr, b_ptr : loc
+  Hlen : length b_ls = uint.nat (slice.len_f b_s)
   idx : w64
-  Hidx : uint.Z idx = hash_bucket key (uint.Z (Slice.sz b_s))
+  Hidx : uint.Z idx = hash_bucket key (uint.Z (slice.len_f b_s))
   bi_l : loc
   Hbi_l_lookup : b_ls !! uint.nat idx = Some bi_l
   mu_l, subMap_l : loc
   sub_m : gmap w32 w64
+  ok_ptr, x_ptr : loc
   v : w64
   ok : bool
-  Hget : (v, ok) = map_get sub_m key
+  Hget : (v, ok) = map_get (sub_m !! key)
   ============================
-  "buckets" : hm_l ↦[HashMap::"buckets"]□ b_s
-  "Hb_ls" : own_slice_small b_s ptrT DfracDiscarded b_ls
+  _ : is_pkg_init sharded_hashmap
+  "buckets" : hm_l ↦s[sharded_hashmap.HashMap :: "buckets"]□ b_s
+  "Hb_ls" : b_s ↦*□ b_ls
   "His_buckets" : [∗ list] i↦bucket_l ∈ b_ls, is_bucket γ bucket_l
                                                 (Z.of_nat i)
   "His_inv" : inv nroot
                 (∃ m : gmap w32 w64, "HP" ∷ P m ∗
-                   "Hauth" ∷ hashmap_auth γ (uint.Z (Slice.sz b_s)) m)
-  "subMap" : bi_l ↦[bucket::"subMap"]□ #subMap_l
-  "mu" : bi_l ↦[bucket::"mu"]□ #mu_l
-  "Hlock" : is_lock nroot #mu_l (lock_inv γ (uint.Z idx) subMap_l)
+                   "Hauth" ∷ hashmap_auth γ (uint.Z (slice.len_f b_s)) m)
+  "subMap" : bi_l ↦s[sharded_hashmap.bucket :: "subMap"]□ subMap_l
+  "mu" : bi_l ↦s[sharded_hashmap.bucket :: "mu"]□ mu_l
+  "Hlock" : is_Mutex mu_l (lock_inv γ (uint.Z idx) subMap_l)
   --------------------------------------□
-  "Hupd" : ∀ m : gmap w32 w64, P m ==∗ P m ∗ Q (map_get m key)
-  "HΦ" : ∀ (v0 : w64) (ok0 : bool), Q (v0, ok0) -∗ Φ (#v0, #ok0)%V
-  "locked" : lock.locked #mu_l
+  "Hupd" : ∀ m : gmap w32 w64, P m ==∗ P m ∗ Q (map_get (m !! key))
+  "HΦ" : ∀ (v0 : w64) (ok0 : bool), Q (v0, ok0) -∗ Φ (v0 ::= # ok0)%V
+  "hm" : hm_ptr ↦ hm_l
+  "key" : key_ptr ↦ key
+  "Hbuckets" : buckets_ptr ↦ b_s
+  "b" : b_ptr ↦ bi_l
+  "locked" : own_Mutex mu_l
   "Hfrag" : hashmap_sub γ (uint.Z idx) sub_m
+  "ok" : ok_ptr ↦ ok
+  "x" : x_ptr ↦ v
   "HsubMap" : own_shard subMap_l sub_m
   "Hinv" : ∃ m : gmap w32 w64, "HP" ∷ P m ∗ // [!code ++]
-             "Hauth" ∷ hashmap_auth γ (uint.Z (Slice.sz b_s)) m // [!code ++]
+             "Hauth" ∷ hashmap_auth γ (uint.Z (slice.len_f b_s)) m // [!code ++]
   --------------------------------------∗
-  |={⊤}=> WP Mutex__Unlock #mu_l;; (#v, #ok) {{ v, Φ v }} // [!code --]
+  |={⊤}=> // [!code --]
+    WP exception_do // [!code --]
+         ((do: # (method_callv sync "Mutex'ptr" "Unlock" (# mu_l)) (# ())) ;;; // [!code --]
+          return: (![# uint64T] (# x_ptr), ![# boolT] (# ok_ptr))) // [!code --]
+    {{ v, Φ v }} // [!code --]
   |={⊤ ∖ ↑nroot}=> // [!code ++]
     ▷ (∃ m : gmap w32 w64, "HP" ∷ P m ∗ // [!code ++]
-         "Hauth" ∷ hashmap_auth γ (uint.Z (Slice.sz b_s)) m) ∗ // [!code ++]
-    (|={⊤}=> WP Mutex__Unlock #mu_l;; (#v, #ok) {{ v, Φ v }}) // [!code ++]
+         "Hauth" ∷ hashmap_auth γ (uint.Z (slice.len_f b_s)) m) ∗ // [!code ++]
+    (|={⊤}=> // [!code ++]
+       WP exception_do // [!code ++]
+            ((do: # (method_callv sync "Mutex'ptr" "Unlock" (# mu_l)) (# ())) ;;; // [!code ++]
+             return: (![# uint64T] (# x_ptr), ![# boolT] (# ok_ptr))) // [!code ++]
+       {{ v, Φ v }}) // [!code ++]
 ```
 
 ::::
@@ -1098,8 +1149,6 @@ Finally, we can proceed with the rest of the program proof after doing our work 
   iModIntro.
 
   wp_apply (wp_Mutex__Unlock with "[$locked $Hlock $Hfrag $HsubMap]").
-  wp_pures.
-  iModIntro.
   iApply "HΦ".
   rewrite -Hget. iFrame.
 Qed.
@@ -1112,10 +1161,10 @@ The code and proof for `Store` are very similar to that of `Load` so you should 
 
 ```coq
 Lemma wp_HashMap__Store (hm_l: loc) γ (key: w32) (v: w64) P Q {Htimeless: ∀ m, Timeless (P m)} :
-  {{{ is_hashmap γ hm_l P ∗
+  {{{ is_pkg_init sharded_hashmap ∗ is_hashmap γ hm_l P ∗
       (∀ m, P m -∗ |==> P (<[key := v]> m) ∗ Q m)
   }}}
-    HashMap__Store #hm_l #key #v
+    hm_l @ sharded_hashmap @ "HashMap'ptr" @ "Store" #key #v
   {{{ m0, RET #(); Q m0 }}}.
 Proof.
 Admitted.

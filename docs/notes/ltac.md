@@ -6,9 +6,12 @@ order: -2
 # Ltac reference
 
 ```coq
-From sys_verif Require Import options.
 From Perennial.Helpers Require Import ListLen.
 From stdpp Require Import gmap.
+
+From sys_verif Require Import options.
+
+Close Scope Z_scope.
 
 ```
 
@@ -265,6 +268,8 @@ Proof.
 :::: note Output
 
 ```txt title="coq output"
+List.lookup_snoc:
+  ∀ {A : Type} (l : list A) (x : A), (l ++ [x]) !! length l = Some x
 lookup_app_l:
   ∀ {A : Type} (l1 l2 : list A) (i : nat),
     i < length l1 → (l1 ++ l2) !! i = l1 !! i

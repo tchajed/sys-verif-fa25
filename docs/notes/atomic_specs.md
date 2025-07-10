@@ -54,7 +54,7 @@ func (i *AtomicInt) Inc(y uint64) {
 
 Let's remember what the spec would look like without concurrency, if there were no locks but also the integer didn't need to be shared between threads.
 
-We would start with a predicate `int_rep (l: loc) (x: w64) : iProp Σ` that related a pointer to an integer in GooseLang to an abstract value. We choose to use `w64` as the abstract value, but it could also be `Z`; this spec has the advantage that it automatically guarantees the value of the integer is less than $2^{64}$. The predicate would be very simple: `int_rep l x := l ↦[uint64T] #x` would be enough.
+We would start with a predicate `int_rep (l: loc) (x: w64) : iProp Σ` that related a pointer to an integer in GooseLang to an abstract value. We choose to use `w64` as the abstract value, but it could also be `Z`; this spec has the advantage that it automatically guarantees the value of the integer is less than $2^{64}$. The predicate would be very simple: `int_rep l x := l ↦ x` would be enough.
 
 Then the specification `wp_AtomicInt__Inc` would say
 
@@ -96,12 +96,11 @@ Let's see how this is realized in Coq for this example.
 
 ```coq
 From sys_verif.program_proof Require Import prelude empty_ffi.
-From Perennial.program_proof Require std_proof.
-From Goose.sys_verif_code Require Import concurrent.
+From sys_verif.program_proof Require Import concurrent_init.
 
 Module atomic_int.
 Section proof.
-Context `{hG: !heapGS Σ}.
+Context `{hG: !heapGS Σ} `{!goGlobalsGS Σ}.
 
 ```
 
@@ -110,7 +109,7 @@ This entire specification is based on an _representation predicate_ `P: w64 → 
 ```coq
 #[local] Definition lock_inv (l: loc) (P: w64 → iProp Σ) : iProp _ :=
   ∃ (x: w64),
-      "x" ∷ l ↦[AtomicInt :: "x"] #x ∗
+      "Hx" ∷ l ↦s[concurrent.AtomicInt :: "x"] x ∗
       "HP" ∷ P x.
 
 (* The namespace of the lock invariant is only relevant when the lock is
@@ -120,41 +119,39 @@ Definition N: namespace := nroot.
 
 Definition is_atomic_int (l: loc) (P: w64 → iProp Σ): iProp _ :=
   ∃ (mu_l: loc),
-  "mu" ∷ l ↦[AtomicInt :: "mu"]□ #mu_l ∗
-  "Hlock" ∷ is_lock N (#mu_l) (lock_inv l P).
+  "mu" ∷ l ↦s[concurrent.AtomicInt :: "mu"]□ mu_l ∗
+  "Hlock" ∷ is_Mutex mu_l (lock_inv l P).
 
 (* This proof is automatic; we just assert it here. *)
 #[global] Instance is_atomic_int_persistent l P : Persistent (is_atomic_int l P).
 Proof. apply _. Qed.
 
 Lemma wp_NewAtomicInt (P: w64 → iProp Σ) :
-  {{{ P (W64 0) }}}
-    NewAtomicInt #()
+  {{{ is_pkg_init concurrent ∗ P (W64 0) }}}
+    concurrent @ "NewAtomicInt" #()
   {{{ (l: loc), RET #l; is_atomic_int l P }}}.
 Proof.
   wp_start as "HP".
-  (* we'll need to do some ghost updates before applying [HΦ], but the
-  modality is lost (it seems like the modality is only added by wp_pures and
-  not wp_apply) *)
-  rewrite -wp_fupd.
 ```
+
+TODO: probably need to revise this in light of better support for mutex values.
 
 In the previous lecture, we saw how `wp_new_free_lock` and `alloc_lock` split up the work of `wp_newMutex` into two steps: creating the memory for the lock and deciding on a lock invariant.
 
 In the code for this library, the struct `AtomicInt` has a mutex and an integer. The mutex protects the memory for the integer field _of the same struct_. Thus we have almost no choice but to create the mutex before what it protects (the only other solution would be to create the struct with a `nil` mutex, then fill it in later, but this is rather unnatural code).
 
 ```coq
-  wp_apply wp_new_free_lock. iIntros (mu_l) "Hlock".
+  wp_alloc mu_ptr as "mu".
+  wp_auto.
   wp_alloc l as "Hint".
   iApply struct_fields_split in "Hint".
   iNamed "Hint".
-  iMod (struct_field_pointsto_persist with "mu") as "mu".
-  iMod (alloc_lock N _ _ (lock_inv l P)
-          with "Hlock [HP x]") as "Hlock".
-  { iFrame. }
-  iModIntro.
+  cbn [concurrent.AtomicInt.x' concurrent.AtomicInt.mu'].
+  iPersist "Hmu".
+  iMod (init_Mutex (lock_inv l P) with "mu [$HP $Hx]") as "Hlock".
+  wp_auto.
   iApply "HΦ".
-  iFrame.
+  iFrame "#∗".
 Qed.
 
 ```
@@ -169,33 +166,30 @@ There is one thing missing from this specification: if you only look at the spec
 
 ```coq
 Lemma wp_AtomicInt__Inc_demo l (P: w64 → iProp _) (y: w64) :
-  {{{ is_atomic_int l P ∗
+  {{{ is_pkg_init concurrent ∗ is_atomic_int l P ∗
         (∀ x, P x -∗ |={⊤}=> P (word.add x y)) }}}
-    AtomicInt__Inc #l #y
+    l @ concurrent @ "AtomicInt'ptr" @ "Inc" #y
   {{{ RET #(); True }}}.
 Proof.
   wp_start as "[#Hint Hfupd]".
   iNamed "Hint".
-  wp_loadField.
+  wp_auto.
   wp_apply (wp_Mutex__Lock with "[$Hlock]").
   iIntros "[Hlocked Hinv]". iNamed "Hinv".
 
   (* critical section *)
-  wp_loadField.
-  wp_storeField.
+  wp_auto.
 
-  wp_loadField.
   (* before we release the lock, we "fire" the user's fupd *)
   iMod ("Hfupd" with "HP") as "HP".
 
-  wp_apply (wp_Mutex__Unlock with "[$Hlock $Hlocked HP x]").
+  wp_apply (wp_Mutex__Unlock with "[$Hlock $Hlocked HP Hx]").
   { (* re-prove the lock invariant; this only works because the fupd changed
         [P] to [P (word.add x y)], and this matches the physical state of the
         variable. *)
     iFrame. }
 
   wp_pures.
-  iModIntro.
   iApply "HΦ".
   done.
 Qed.
@@ -208,29 +202,25 @@ This specification will undoubtedly be hard to read at first: you need to follow
 
 ```coq
 Lemma wp_AtomicInt__Get l (P: w64 → iProp _) (Q: w64 → iProp Σ) :
-  {{{ is_atomic_int l P ∗ (∀ x, P x -∗ |={⊤}=> Q x ∗ P x) }}}
-    AtomicInt__Get #l
+  {{{ is_pkg_init concurrent ∗
+        is_atomic_int l P ∗ (∀ x, P x -∗ |={⊤}=> Q x ∗ P x) }}}
+    l @ concurrent @ "AtomicInt'ptr" @ "Get" #()
   {{{ (x: w64), RET #x; Q x }}}.
 Proof.
   wp_start as "[#Hint Hfupd]".
   iNamed "Hint".
-  wp_loadField.
+  wp_auto.
   wp_apply (wp_Mutex__Lock with "[$Hlock]").
   iIntros "[Hlocked Hinv]". iNamed "Hinv".
-  (* This load can be done with [wp_loadField] but I want to highlight that
-  this is the critical section where we load the x field protected by the
-  lock. *)
-  wp_apply (wp_loadField with "x"). iIntros "x".
-  wp_loadField.
+  wp_auto.
 
   (* before we release the lock, we need to "fire" the user's fupd *)
   iMod ("Hfupd" with "HP") as "[HQ HP]".
 
-  wp_apply (wp_Mutex__Unlock with "[$Hlock $Hlocked HP x]").
+  wp_apply (wp_Mutex__Unlock with "[$Hlock $Hlocked HP Hx]").
   { iFrame. }
 
   wp_pures.
-  iModIntro.
   iApply "HΦ".
   iFrame.
 Qed.
@@ -249,29 +239,25 @@ The postcondition looks much like for `Get`, in that it has `∃ x, Q x` for a c
 
 ```coq
 Lemma wp_AtomicInt__Inc l (P: w64 → iProp _) (Q: w64 → iProp Σ) (y: w64) :
-  {{{ is_atomic_int l P ∗
+  {{{ is_pkg_init concurrent ∗ is_atomic_int l P ∗
         (∀ x, P x -∗ |={⊤}=> Q x ∗ P (word.add x y)) }}}
-    AtomicInt__Inc #l #y
+    l @ concurrent @ "AtomicInt'ptr" @ "Inc" #y
   {{{ (x: w64), RET #(); Q x }}}.
 Proof.
   wp_start as "[#Hint Hfupd]".
   iNamed "Hint".
-  wp_loadField.
+  wp_auto.
   wp_apply (wp_Mutex__Lock with "[$Hlock]").
   iIntros "[Hlocked Hinv]". iNamed "Hinv".
 
-  wp_loadField.
-  wp_storeField.
+  wp_auto.
 
-  wp_loadField.
   (* before we release the lock, we "fire" the user's fupd *)
   iMod ("Hfupd" with "HP") as "[HQ HP]".
 
-  wp_apply (wp_Mutex__Unlock with "[$Hlock $Hlocked HP x]").
+  wp_apply (wp_Mutex__Unlock with "[$Hlock $Hlocked HP Hx]").
   { iFrame. }
 
-  wp_pures.
-  iModIntro.
   iApply "HΦ".
   iFrame.
 Qed.
@@ -315,7 +301,7 @@ However, it is important that the locking that makes the integer atomic is all h
 
 ```coq
 Section proof.
-Context `{hG: !heapGS Σ}.
+Context `{hG: !heapGS Σ} `{!goGlobalsGS Σ}.
 Context `{ghost_varG0: ghost_varG Σ Z}.
 
 ```
@@ -331,12 +317,12 @@ As in the proof we saw before for `ParallelAdd3`, this proof will use two ghost 
     "%Hsum" ∷ ⌜x1 ≤ 2 ∧ x2 ≤ 2 ∧ uint.Z x = (x1 + x2)%Z⌝)%I.
 
 Lemma wp_ParallelAdd1 :
-  {{{ True }}}
-    ParallelAdd1 #()
+  {{{ is_pkg_init concurrent }}}
+    concurrent @ "ParallelAdd1" #()
   {{{ (x: w64), RET #x; ⌜uint.Z x = 4⌝ }}}.
 Proof using ghost_varG0.
-  iIntros (Φ) "_ HΦ".
-  wp_rec.
+  wp_start as "_".
+  wp_auto.
   (* Create the ghost variables first, since they are part of the atomic int's
   predicate. *)
   iMod (ghost_var_alloc 0) as (γ1) "[Hv1_1 Hx1_2]".
@@ -349,13 +335,15 @@ Proof using ghost_varG0.
     split; [ lia | ].
     reflexivity. }
   iIntros (l) "#Hint".
+  wp_auto.
+  iPersist "i".
 
   (* This postcondition is the same. *)
-  wp_apply (std_proof.wp_Spawn (ghost_var γ1 (1/2) 2) with "[Hx1_2]").
+  wp_apply (std.wp_Spawn (ghost_var γ1 (1/2) 2) with "[Hx1_2]").
   { clear Φ.
     iRename "Hx1_2" into "Hx".
     iIntros (Φ) "HΦ".
-    wp_pures.
+    wp_auto.
 
 ```
 
@@ -373,15 +361,19 @@ This is the most interesting part of the proof. We need to supply a postconditio
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
+  goGlobalsGS0 : goGlobalsGS Σ
   ghost_varG0 : ghost_varG Σ Z
+  i_ptr : loc
   γ1, γ2 : gname
-  l : loc
+  l, h1_ptr : loc
   Φ : val → iPropI Σ
   x : w64
   x1, x2 : Z
   Hsum : x1 ≤ 2 ∧ x2 ≤ 2 ∧ uint.Z x = x1 + x2
   ============================
+  _ : is_pkg_init concurrent
   "Hint" : atomic_int.is_atomic_int l (int_rep γ1 γ2)
+  "i" : i_ptr ↦□ l
   --------------------------------------□
   "Hx" : ghost_var γ1 (1 / 2) 0
   "Hx1" : ghost_var γ1 (1 / 2) x1
@@ -403,14 +395,15 @@ This is the most interesting part of the proof. We need to supply a postconditio
       split; [ lia | ].
       word. }
     iIntros (_) "Hx". wp_pures.
-    iModIntro. iApply "HΦ". iFrame. }
+    iApply "HΦ". iFrame. }
   iIntros (h1) "Hh1".
+  wp_auto.
 
-  wp_apply (std_proof.wp_Spawn (ghost_var γ2 (1/2) 2) with "[Hx2_2]").
+  wp_apply (std.wp_Spawn (ghost_var γ2 (1/2) 2) with "[Hx2_2]").
   { clear Φ.
     iRename "Hx2_2" into "Hx".
     iIntros (Φ) "HΦ".
-    wp_pures.
+    wp_auto.
     wp_apply (atomic_int.wp_AtomicInt__Inc _ _
                 (λ _, ghost_var γ2 (1/2) 2) with "[$Hint Hx]").
     { iIntros (x) "Hrep".
@@ -425,13 +418,15 @@ This is the most interesting part of the proof. We need to supply a postconditio
       split; [ lia | ].
       word. }
     iIntros (_) "Hx". wp_pures.
-    iModIntro. iApply "HΦ". iFrame. }
+    iApply "HΦ". iFrame. }
   iIntros (h2) "Hh2".
-  wp_apply (std_proof.wp_JoinHandle__Join with "Hh1").
+  wp_auto.
+  wp_apply (std.wp_JoinHandle__Join with "[$Hh1]").
   iIntros "Hx1_2".
-  wp_apply (std_proof.wp_JoinHandle__Join with "Hh2").
+  wp_auto.
+  wp_apply (std.wp_JoinHandle__Join with "[$Hh2]").
   iIntros "Hx2_2".
-  wp_pures.
+  wp_auto.
   wp_apply (atomic_int.wp_AtomicInt__Get _ _
               (λ x, ⌜uint.Z x = 4⌝)%I
             with "[$Hint Hx1_2 Hx2_2]").
@@ -444,6 +439,7 @@ This is the most interesting part of the proof. We need to supply a postconditio
       iPureIntro.
       repeat split; try word. }
     iIntros (x Hx).
+    wp_auto.
     iApply "HΦ".
     auto.
 Qed.

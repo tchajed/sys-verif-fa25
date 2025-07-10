@@ -38,53 +38,42 @@ Here's what its goose translation looks like. Notice every load and store is ann
 ```coq
 Definition Swap: val :=
     rec: <> "x" "y" :=
-      let: "old_y" := ![uint64T] "y" in
-      "y" <-[uint64T] ![uint64T] "x";;
-      "x" <-[uint64T] "old_y";; #().
+      let: "old_y" := ![#uint64T] "y" in
+      "y" <-[#uint64T] ![#uint64T] "x";;
+      "x" <-[#uint64T] "old_y";; #().
 
 ```
 
-What is `uint64T`? It has type `ty`, which is a Coq definition modeling a small subset of the Go type system:
+What is `uint64T`? It has type `go_type`, which is a Coq definition modeling a small subset of the Go type system:
 
 ```coq
-Print ty.
+Print go_type.
 ```
 
 :::: note Output
 
 ```txt title="coq output"
-Inductive ty (val_tys : val_types) : Type :=
-    baseT : typing.base_ty → ty
-  | prodT : ty → ty → ty
-  | listT : ty → ty
-  | sumT : ty → ty → ty
-  | arrowT : ty → ty → ty
-  | arrayT : ty → ty
-  | ptrT : ty
-  | structRefT : list ty → ty
-  | mapValT : ty → ty → ty
-  | chanValT : ty → ty
-  | extT : ext_tys → ty
-  | prophT : ty.
+Inductive go_type : Type :=
+    boolT : go_type
+  | uint8T : go_type
+  | uint16T : go_type
+  | uint32T : go_type
+  | uint64T : go_type
+  | stringT : go_type
+  | arrayT : w64 → go_type → go_type
+  | sliceT : go_type
+  | interfaceT : go_type
+  | structT : list (go_string * go_type) → go_type
+  | ptrT : go_type
+  | funcT : go_type.
 
-Arguments ty {val_tys}
-Arguments baseT {val_tys} t
-Arguments prodT {val_tys} (t1 t2)%heap_type
-Arguments listT {val_tys} t1%heap_type
-Arguments sumT {val_tys} (t1 t2)%heap_type
-Arguments arrowT {val_tys} (t1 t2)%heap_type
-Arguments arrayT {val_tys} t%heap_type
-Arguments ptrT {val_tys}
-Arguments structRefT {val_tys} ts%list_scope
-Arguments mapValT {val_tys} (kt vt)%heap_type
-Arguments chanValT {val_tys} vt%heap_type
-Arguments extT {val_tys} x
-Arguments prophT {val_tys}
+Arguments arrayT n elem
+Arguments structT decls%_list_scope%_struct_scope
 ```
 
 ::::
 
-`uint64T` itself is an example of a `baseT`. Types are being used in this translation as part of the _behavior_ or _semantics_ of this program. Typically types are part of what is formally called a _type system_: types as well as a way of checking that a program's type annotations are correct. The primary goal of a type system is to catch bugs before running your code (and beyond that, a sound type system can also give a _soundness guarantee_ about programs that type check, but that isn't covered in this class). There are some secondary benefits we won't talk about here, such as better performance from compiled code, and information hiding.
+Types are being used in this translation as part of the _behavior_ or _semantics_ of this program. Typically types are part of what is formally called a _type system_: types as well as a way of checking that a program's type annotations are correct. The primary goal of a type system is to catch bugs before running your code (and beyond that, a sound type system can also give a _soundness guarantee_ about programs that type check, but that isn't covered in this class). There are some secondary benefits we won't talk about here, such as better performance from compiled code, and information hiding.
 
 We do not have a type system that relates GooseLang expressions to these `ty`s. Instead, their main purpose is related to handling structs in memory, which we'll introduce next.
 
@@ -101,17 +90,7 @@ type Pair struct {
 }
 ```
 
-What goose translates this struct to is a struct _descriptor_, which is a list of fields and types for the struct.
-
-```coq
-Definition Pair := struct.decl [
-  "x" :: uint64T;
-  "y" :: uint64T
-].
-
-```
-
-TODO: oops, this is getting too much into the motivation. Explain axiomatically starting from what a struct points-to is.
+TODO: rewrite this to focus on what a user needs. In new goose this requires some explanation of how to use the generated outputs. The explanation below is not needed except for understanding the implementation of the Goose model in terms of GooseLang.
 
 How is `Pair` represented as a value in GooseLang? To keep the language as simple as possible, it doesn't have a notion of a "struct value" or even fields. A `Pair` is actually represented as a tuple, with a `#()` tacked on at the end (don't worry about why - it just makes the recursive code that deals with struct fields easier). So what in Go would be `Pair { x: 2, y: 6 }` will be the value `(#2, (#6, #()))` in GooseLang.
 

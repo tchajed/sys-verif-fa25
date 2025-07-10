@@ -15,10 +15,10 @@ This is a stack used to implement a queue (using two stacks).
 
 ```coq
 From sys_verif.program_proof Require Import prelude empty_ffi.
-From Goose.sys_verif_code Require Import heap.
+From sys_verif.program_proof Require Import heap_init.
 
 Section proof.
-Context `{hG: !heapGS Σ}.
+Context `{hG: !heapGS Σ} `{!goGlobalsGS Σ}.
 
 ```
 
@@ -28,40 +28,45 @@ Understanding this is not needed to use these specifications (by design, you do 
 
 ```coq
 Definition stack_rep (l: loc) (xs: list w64): iProp Σ :=
-  ∃ (s: Slice.t),
-    "elements" ∷ l ↦[Stack :: "elements"] (slice_val s) ∗
+  ∃ (s: slice.t),
+    "elements" ∷ l ↦s[heap.Stack :: "elements"] s ∗
     (* The code appends because this is both easier and more efficient, thus the
     code elements are reversed compared to the abstract state. *)
-    "Hels" ∷ own_slice s uint64T (DfracOwn 1) (reverse xs).
+    "Hels" ∷ own_slice s (DfracOwn 1) (reverse xs) ∗
+    "Hels_cap" ∷ own_slice_cap w64 s.
 
 Lemma wp_NewStack :
-  {{{ True }}}
-    NewStack #()
+  {{{ is_pkg_init heap.heap }}}
+    heap.heap @ "NewStack" #()
   {{{ l, RET #l; stack_rep l [] }}}.
 Proof.
   wp_start as "_".
-  wp_apply wp_NewSlice_0; iIntros (s) "Hels".
   wp_alloc l as "H".
-  iApply struct_fields_split in "H". iNamed "H".
+  wp_auto.
+  iApply struct_fields_split in "H". iNamed "H". cbn [heap.Stack.elements'].
   iApply "HΦ".
   iFrame.
+  iSplitL.
+  - iApply own_slice_nil.
+  - iApply own_slice_cap_nil.
 Qed.
 
 Lemma wp_Stack__Push l xs (x: w64) :
-  {{{ stack_rep l xs }}}
-    Stack__Push #l #x
+  {{{ is_pkg_init heap.heap ∗ stack_rep l xs }}}
+    l @ heap.heap @ "Stack'ptr" @ "Push" #x
   {{{ RET #(); stack_rep l (x :: xs) }}}.
 Proof.
   wp_start as "Hstack".
   iNamed "Hstack".
-  wp_loadField.
-  wp_apply (wp_SliceAppend with "Hels"). iIntros (s') "Hs".
-  wp_storeField.
-  iModIntro.
+  wp_auto.
+  wp_apply (wp_slice_literal) as "%s_tmp Hs_tmp".
+  wp_apply (wp_slice_append with "[$Hels $Hels_cap $Hs_tmp]").
+  iIntros (s') "(Hels & Hels_cap & Hs_tmp)".
+  wp_auto.
   iApply "HΦ".
-  iFrame "elements".
+  iFrame "elements Hels_cap".
   rewrite reverse_cons.
-  iFrame "Hs".
+  iFrame.
 Qed.
 
 (* It's convenient to factor out the spec for stack a bit, to deal with the way
@@ -86,21 +91,18 @@ Qed.
 Hint Rewrite @length_reverse : len.
 
 Lemma wp_Stack__Pop l xs :
-  {{{ stack_rep l xs }}}
-    Stack__Pop #l
+  {{{ is_pkg_init heap.heap ∗ stack_rep l xs }}}
+    l @ heap.heap @ "Stack'ptr" @ "Pop" #()
   {{{ (x: w64) (ok: bool) xs', RET (#x, #ok);
       stack_rep l xs' ∗
       ⌜(x, ok, xs') = stack_pop xs⌝
   }}}.
 Proof.
   wp_start as "Hstack". iNamed "Hstack".
-  wp_loadField.
-  iDestruct (own_slice_sz with "Hels") as %Hlen.
-  wp_apply wp_slice_len.
+  wp_auto.
+  iDestruct (own_slice_len with "Hels") as %Hlen.
   wp_if_destruct.
   {
-    wp_pures.
-    iModIntro.
     iApply "HΦ".
     iFrame.
     iPureIntro.
@@ -108,31 +110,25 @@ Proof.
     assert (xs = []).
     { destruct xs; auto.
       autorewrite with len in Hlen.
-      apply (f_equal uint.Z) in Heqb.
-      move: Heqb.
       word.
     }
     subst. auto.
   }
-  wp_loadField.
+  wp_auto.
   assert (0 < length xs).
   { rewrite length_reverse in Hlen. word. }
-  wp_apply wp_slice_len.
-  wp_loadField.
-  list_elem (reverse xs) (uint.nat (Slice.sz s) - 1)%nat as x_last.
+  wp_pure.
   { word. }
-  iDestruct (own_slice_split with "Hels") as "[Hels Hcap]".
-  wp_apply (wp_SliceGet with "[$Hels]").
-  { iPureIntro.
-    replace (uint.nat (word.sub (Slice.sz s) (W64 1))) with (uint.nat (Slice.sz s) - 1)%nat by word.
+  list_elem (reverse xs) (uint.nat (slice.len_f s) - 1)%nat as x_last.
+  { word. }
+  wp_apply (wp_load_slice_elem with "[$Hels]").
+  { replace (uint.nat (word.sub (slice.len_f s) (W64 1))) with (uint.nat (slice.len_f s) - 1)%nat by word.
     eauto. }
   iIntros "Hels".
-  wp_pures.
-  wp_loadField.
-  iDestruct (own_slice_split with "[$Hels $Hcap]") as "Hels".
+  wp_auto.
   iDestruct (own_slice_wf with "Hels") as %Hcap.
-  wp_apply wp_slice_len.
-  wp_loadField.
+  (* TODO: need wp for slice.slice *)
+  (*
   wp_apply (wp_SliceTake_full with "Hels").
   { word. }
   iIntros "Hels".
@@ -163,7 +159,8 @@ Proof.
       in Hget by lia.
     simpl in Hget.
     congruence.
-Qed.
+*)
+Admitted.
 
 End proof.
 ```

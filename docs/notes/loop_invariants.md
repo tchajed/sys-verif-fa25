@@ -63,13 +63,13 @@ The informal description above describes a "continue condition" and "break condi
 
 ```coq
 From sys_verif.program_proof Require Import prelude empty_ffi.
-From Perennial.program_proof Require Import std_proof.
-From Goose.sys_verif_code Require heap functional.
+From sys_verif.program_proof Require Import heap_init functional_init.
 
 #[local] Ltac Zify.zify_post_hook ::= Z.div_mod_to_equations.
 
 Section goose.
 Context `{hG: !heapGS Σ}.
+Context `{!goGlobalsGS Σ}.
 
 ```
 
@@ -93,31 +93,28 @@ This implementation might overflow a 64-bit number. This specification handles t
 
 ```coq
 Lemma wp_SumNrec (n: w64) :
-  {{{ ⌜uint.Z n * (uint.Z n + 1) / 2 < 2^64⌝ }}}
-    functional.SumNrec #n
+  {{{ is_pkg_init functional ∗
+      ⌜uint.Z n * (uint.Z n + 1) / 2 < 2^64⌝ }}}
+    functional @ "SumNrec" #n
   {{{ (m: w64), RET #m; ⌜uint.Z m = uint.Z n * (uint.Z n + 1) / 2⌝ }}}.
 Proof.
-  iIntros (Φ) "Hpre HΦ". iDestruct "Hpre" as %Hoverflow.
-  iLöb as "IH" forall (n Hoverflow Φ).
-  wp_rec. wp_pures.
+  iLöb as "IH" forall (n).
+  wp_start as "%Hoverflow".
+  wp_auto.
   wp_if_destruct.
-  - iModIntro.
-    iApply "HΦ".
+  - iApply "HΦ".
     iPureIntro.
     word.
-  - wp_pures.
+  - wp_auto. wp_pures.
     wp_apply "IH".
-    { iPureIntro.
+    { (* [word] doesn't work on its own here. It's helpful to know how to do some of the work it does manually, to help it along. *)
+      (* FIXME: word bug? *)
+      rewrite -> !word.unsigned_sub_nowrap by word.
       word. }
     iIntros (m Hm).
     wp_pures.
-    iModIntro.
     iApply "HΦ".
-    iPureIntro.
-    (* [word] doesn't work on its own here. It's helpful to know how to do some of the work it does manually, to help it along. *)
-    rewrite word.unsigned_add_nowrap.
-    + rewrite Hm. word.
-    + rewrite Hm. word.
+    word.
 Qed.
 
 ```
@@ -148,119 +145,32 @@ This is a problem of not having a strong enough loop invariant. The loop invaria
 
 ```coq
 Lemma wp_SumN_failed (n: w64) :
-  {{{ True }}}
-    functional.SumN #n
+  {{{ is_pkg_init functional }}}
+    functional @ "SumN" #n
   {{{ (m: w64), RET #m; ⌜uint.Z m = uint.Z n * (uint.Z n + 1) / 2⌝ }}}.
 Proof.
   wp_start as "_".
-  wp_alloc sum_l as "sum".
-  wp_alloc i_l as "i".
-  wp_pures.
+  wp_auto.
+  (* n doesn't change, so persist its points-to assertion *)
+  iPersist "n".
 
 
 ```
 
-Supplying loop invariants is a bit of a syntax jumble in Goose. It's things you've seen, but all in one place.
-
-The overall structure here is `wp_apply (wp_forBreak I with "[] [sum i]")`. `wp_forBreak I` just passes the desired invariant to `wp_forBreak`; the lemma works for any invariant, and it can't be guessed from context, so we have to write it down. Due to limitations in Ltac, you need `%I` (a notation scope annotation) for this to be parsed with the separation logic notations, otherwise you'll get an error "Unknown interpretation for notation `_ ∗ _`".
-
-`wp_forBreak` looks like this (somewhat loosely), expanding the continuation passing style and written as math ($I_t$ is `I true` and $I_f$ is `I false`):
-
-$$
-% the \phantom{x} below are to get the binary operator spacing around \wand to be correct
-\begin{aligned}
-& \hoare{I_t}{\mathrm{body} \, ()}{I} \wand \phantom{x} \\
-& \forall Φ.\, I_t \wand \phantom{x} \\
-& (I_f \wand Φ) \wand \phantom{x} \\
-& \wp(\mathrm{For} \, \mathrm{body}, Φ)
-\end{aligned}
-$$
-
-There are three premises, which you can line up with the obligations for loop invariants: the invariant is preserved by the body, the invariant holds initially, and the rest of the proof assuming the invariant holds (after the loop).
-
-In Coq, `with "[] [sum i]"` is a specialization pattern which decides how the hypothesis should be divided among these three premises. The first one gets nothing (we don't need any of the current facts to prove the loop body's Hoare triple), and the second one gets `"sum"` and `"i"`, since we need the points-to facts for proving the invariant initially. The rest are available for the rest of the proof.
-
-This is a lot to figure out from first principles. You should be able to do so, but it's also fine to use this example as a reference, or see the obligations in Coq and then go back and figure out how to divide up your hypotheses.
+TODO: describe the new way we supply loop invariants.
 
 ```coq
-  wp_apply (wp_forBreak
-              (λ continue,
-                ∃ (sum i: w64),
-                  "sum" :: sum_l ↦[uint64T] #sum ∗
-                  "i" :: i_l ↦[uint64T] #i)%I
-             with "[] [sum i]").
-```
-
-:::: info Goals
-
-```txt title="goal 1"
-  Σ : gFunctors
-  hG : heapGS Σ
-  n : w64
-  Φ : val → iPropI Σ
-  sum_l, i_l : loc
-  ============================
-  --------------------------------------∗
-  {{{ ∃ sum i : w64, "sum" ∷ sum_l ↦[uint64T] #sum ∗ "i" ∷ i_l ↦[uint64T] #i }}}
-    (λ: <>,
-       if: ![uint64T] #i_l > #n then Break
-       else #sum_l <-[uint64T] std.SumAssumeNoOverflow ![uint64T] #sum_l
-                                 ![uint64T] #i_l;;
-            #i_l <-[uint64T] ![uint64T] #i_l + #(W64 1);; Continue)%V #()
-  {{{ (r : bool), RET #r;
-      ∃ sum i : w64, "sum" ∷ sum_l ↦[uint64T] #sum ∗ "i" ∷ i_l ↦[uint64T] #i }}}
-```
-
-```txt title="goal 2"
-  Σ : gFunctors
-  hG : heapGS Σ
-  n : w64
-  Φ : val → iPropI Σ
-  sum_l, i_l : loc
-  ============================
-  "sum" : sum_l ↦[uint64T] #(W64 0)
-  "i" : i_l ↦[uint64T] #(W64 1)
-  --------------------------------------∗
-  ∃ sum i : w64, "sum" ∷ sum_l ↦[uint64T] #sum ∗ "i" ∷ i_l ↦[uint64T] #i
-```
-
-```txt title="goal 3"
-  Σ : gFunctors
-  hG : heapGS Σ
-  n : w64
-  Φ : val → iPropI Σ
-  sum_l, i_l : loc
-  ============================
-  "HΦ" : ∀ m : w64, ⌜uint.Z m = (uint.Z n * (uint.Z n + 1)) `div` 2⌝ -∗ Φ #m
-  --------------------------------------∗
-  (∃ sum i : w64, "sum" ∷ sum_l ↦[uint64T] #sum ∗ "i" ∷ i_l ↦[uint64T] #i) -∗
-  WP #();; ![uint64T] #sum_l {{ v, Φ v }}
-```
-
-::::
-
-```coq
-  - (* This goal might look a bit weird: that's because we're proving a Hoare triple as a separation logic `iProp` rather than a `Prop`, hence why it's below a `------*` line (with no separation logic premises). The distinction isn't important for `For` but will be more interesting when we see a proof of a Go higher-order function (that is, a Go function that takes another function as an input). *)
-    wp_start as "IH".
-    iNamed "IH".
-    wp_load.
-    wp_pures. wp_if_destruct.
-    + iModIntro.
-      iApply "HΦ".
-      iFrame.
-    + wp_load. wp_load.
-      wp_apply wp_SumAssumeNoOverflow.
-      iIntros (Hoverflow).
-      wp_store. wp_load. wp_store.
-      iModIntro.
-      iApply "HΦ".
-      iFrame.
-  - iFrame.
-  - iIntros "IH". iNamed "IH".
-    wp_load.
-    iModIntro.
+  iAssert (∃ (sum i: w64),
+              "sum" :: sum_ptr ↦ sum ∗
+              "i" :: i_ptr ↦ i)%I
+          with "[$sum $i]" as "HI".
+  wp_for "HI".
+  wp_if_destruct.
+  - iApply wp_for_post_break.
+    wp_auto.
     iApply "HΦ".
-    (* oops, didn't prove anything about sum *)
+    iPureIntro.
+    (* oops, don't know anything about sum *)
 Abort.
 
 ```
@@ -283,56 +193,38 @@ Here is a proof with the right loop invariant.
 
 ```coq
 Lemma wp_SumN (n: w64) :
-  {{{ ⌜uint.Z n < 2^64-1⌝ }}}
-    functional.SumN #n
-  {{{ (m: w64), RET #m; ⌜uint.Z m = uint.Z n * (uint.Z n + 1) / 2⌝ }}}.
+  {{{ is_pkg_init functional ∗ ⌜uint.Z n < 2^64-1⌝ }}}
+    functional @ "SumN" #n
+  {{{ (m: w64), RET #m;
+      ⌜uint.Z m = uint.Z n * (uint.Z n + 1) / 2⌝ }}}.
 Proof.
   wp_start as "%Hn_bound".
-  wp_alloc sum_l as "sum".
-  wp_alloc i_l as "i".
-  wp_pures.
-  wp_apply (wp_forBreak
-              (λ continue,
-                ∃ (sum i: w64),
-                  "sum" :: sum_l ↦[uint64T] #sum ∗
-                  "i" :: i_l ↦[uint64T] #i ∗
-                  "%i_bound" :: ⌜uint.Z i ≤ uint.Z n + 1⌝ ∗
-                  "%Hsum_ok" :: ⌜uint.Z sum = (uint.Z i-1) * (uint.Z i) / 2⌝ ∗
-              "%Hcontinue" :: ⌜continue = false → uint.Z i = (uint.Z n + 1)%Z⌝)%I
-             with "[] [sum i]").
-  - wp_start as "IH".
-    iNamed "IH".
-    wp_load.
-    wp_pures. wp_if_destruct.
-    + iModIntro.
-      iApply "HΦ".
-      iFrame.
-      iPureIntro.
-      split_and!.
-      * word.
-      * word.
-      * intros. word.
-    + wp_load. wp_load.
-      wp_apply wp_SumAssumeNoOverflow.
-      iIntros (Hoverflow).
-      wp_store. wp_load. wp_store.
-      iModIntro.
-      iApply "HΦ".
-      iFrame.
-      iPureIntro.
-      split_and!.
-      * word.
-      * word.
-      * word.
-  - iFrame.
-    iPureIntro.
-    split; word.
-  - iIntros "IH". iNamed "IH".
-    wp_load.
-    iModIntro.
+  wp_auto.
+  iPersist "n".
+
+  iAssert (∃ (sum i: w64),
+              "sum" :: sum_ptr ↦ sum ∗
+              "i" :: i_ptr ↦ i ∗
+              "%i_bound" :: ⌜uint.Z i ≤ uint.Z n + 1⌝ ∗
+              "%Hsum_ok" :: ⌜uint.Z sum = (uint.Z i-1) * (uint.Z i) / 2⌝)%I
+         with "[$sum $i]" as "HI".
+  { iPureIntro. split; word. }
+  wp_for "HI".
+  wp_if_destruct.
+  - iApply wp_for_post_break. wp_auto.
     iApply "HΦ".
     iPureIntro.
-    rewrite Hsum_ok.
+    assert (uint.Z i = (uint.Z n + 1)%Z) by word.
+    word.
+  - wp_auto.
+    wp_apply wp_SumAssumeNoOverflow.
+    iIntros (Hoverflow).
+    wp_auto.
+    iApply wp_for_post_do; wp_auto.
+    iFrame.
+    iPureIntro.
+    split_and!; try word.
+    rewrite -> !word.unsigned_add_nowrap by word.
     word.
 Qed.
 
@@ -391,26 +283,25 @@ Definition is_sorted (xs: list w64) :=
                   xs !! j = Some x2 →
                   uint.Z x1 < uint.Z x2.
 
-Lemma wp_BinarySearch (s: Slice.t) (xs: list w64) (needle: w64) :
-  {{{ own_slice_small s uint64T (DfracOwn 1) xs ∗ ⌜is_sorted xs⌝ }}}
-    heap.BinarySearch s #needle
+Lemma wp_BinarySearch (s: slice.t) (xs: list w64) (needle: w64) :
+  {{{ is_pkg_init heap.heap ∗
+        own_slice s (DfracOwn 1) xs ∗ ⌜is_sorted xs⌝ }}}
+    heap.heap @ "BinarySearch" #s #needle
   {{{ (i: w64) (ok: bool), RET (#i, #ok);
-      own_slice_small s uint64T (DfracOwn 1) xs ∗
+      own_slice s (DfracOwn 1) xs ∗
       ⌜ok = true → xs !! uint.nat i = Some needle⌝
   }}}.
 Proof.
   wp_start as "[Hs %Hsorted]".
-  wp_pures.
-  wp_alloc i_l as "i".
-  iDestruct (own_slice_small_sz with "Hs") as %Hsz.
-  wp_apply (wp_slice_len).
-  wp_alloc j_l as "j".
-  wp_pures.
-  wp_apply (wp_forBreak_cond
-           (λ continue, ∃ (i j: w64),
-               "Hs" :: own_slice_small s uint64T (DfracOwn 1) xs ∗
-               "i" :: i_l ↦[uint64T] #i ∗
-               "j" :: j_l ↦[uint64T] #j ∗
+  wp_auto.
+  iDestruct (own_slice_len with "Hs") as %Hsz.
+  iPersist "needle s".
+
+  iAssert (
+      ∃ (i j: w64),
+               "Hs" :: own_slice s (DfracOwn 1) xs ∗
+               "i" :: i_ptr ↦ i ∗
+               "j" :: j_ptr ↦ j ∗
                "%Hij" :: ⌜uint.Z i ≤ uint.Z j ≤ Z.of_nat (length xs)⌝ ∗
                "%H_low" :: ⌜∀ (i': nat),
                             i' < uint.nat i →
@@ -419,31 +310,31 @@ Proof.
                "%H_hi" :: ⌜∀ (j': nat),
                             uint.nat j ≤ j' →
                             ∀ (y: w64), xs !! j' = Some y →
-                                uint.Z needle < uint.Z y⌝ ∗
-               "%Hbreak" ∷ ⌜continue = false → i = j⌝
-           )%I
-           with "[] [Hs i j]").
-  - wp_start as "IH".
-    iNamed "IH".
-    wp_load. wp_load.
-    wp_pures.
-    wp_if_destruct.
-    + wp_pures.
-      wp_load. wp_load. wp_load. wp_pures.
+                                uint.Z needle ≤ uint.Z y⌝
+    )%I with "[Hs i j]" as "HI".
+  { iFrame. iPureIntro.
+    split_and!.
+    - word.
+    - word.
+    - intros. word.
+    - intros ??? Hget.
+      apply lookup_lt_Some in Hget.
+      word.
+  }
+  wp_for "HI".
+  - wp_if_destruct; try wp_auto.
+    + wp_pure.
+      { word. }
       set (mid := word.add i (word.divu (word.sub j i) (W64 2)) : w64).
       assert (uint.Z mid = (uint.Z i + uint.Z j) / 2) as Hmid_ok.
       { subst mid.
         word. }
       list_elem xs (uint.nat mid) as x_mid.
-      wp_apply (wp_SliceGet with "[$Hs]").
+      wp_apply (wp_load_slice_elem with "[$Hs]") as "Hs".
       { eauto. }
-      iIntros "Hs".
-      simpl to_val.
-      wp_pures.
       wp_if_destruct.
-      * wp_store.
-        iModIntro.
-        iApply "HΦ".
+      * wp_auto.
+        iApply wp_for_post_do; wp_auto.
         iFrame.
         iPureIntro.
         split_and!; try word.
@@ -451,30 +342,51 @@ Proof.
           (* the [revert H] is a bit of black magic here; it [word] operate on H
           by putting it into the goal *)
           assert (i' ≤ uint.nat mid)%nat by (revert H; word).
-          admit.
+          (* handle the equal case specially (we need a strict inequality to
+          make use of [is_sorted]) *)
+          destruct (decide (i' = uint.nat mid)).
+          { subst.
+            assert (x = x_mid) by congruence; subst.
+            assumption. }
+          assert (i' < uint.nat mid)%nat as Hi'_lt by word.
+          assert (uint.Z x < uint.Z x_mid).
+          { apply (Hsorted i' (uint.nat mid)); auto; word. }
+          lia.
         }
-        (* You might ask, why is this super easy? A: we didn't change any relevant variables *)
+        (* This is easy because we didn't change any relevant variables *)
         eauto.
-      * wp_store.
-        iModIntro.
-        iApply "HΦ".
+      * wp_auto.
+        iApply wp_for_post_do; wp_auto.
         iFrame.
         iPureIntro.
         split_and!; try word.
         { auto. }
-        admit. (* TODO: fill in based on earlier proof *)
-    + iModIntro.
-      iApply "HΦ".
-      iFrame.
-      iPureIntro.
-      split_and!; try word; auto.
-      intros.
-      word.
-  - iFrame.
-    admit.
-  - iIntros "Hpost".
-    admit.
-Admitted.
+        intros.
+        destruct (decide (j' = uint.nat mid)).
+        { subst.
+          assert (y = x_mid) by congruence; subst.
+          word. }
+        assert (uint.nat mid < j') as Hj'_gt by word.
+        assert (uint.Z x_mid < uint.Z y).
+        { apply (Hsorted (uint.nat mid) j'); auto; word. }
+        lia.
+    + wp_if_destruct.
+      * wp_auto.
+        list_elem xs i as x_i.
+        wp_apply (wp_load_slice_elem with "[$Hs]") as "Hs".
+        { eauto. }
+        iApply "HΦ".
+        iFrame.
+        iPureIntro.
+        intros Heq.
+        apply bool_decide_eq_true_1 in Heq. subst.
+        auto.
+      * wp_auto.
+        iApply "HΦ".
+        iFrame.
+        iPureIntro.
+        congruence.
+Qed.
 
 ```
 

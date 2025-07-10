@@ -193,13 +193,13 @@ This section shows some examples of specifications and proofs.
 
 ```coq
 From sys_verif.program_proof Require Import prelude empty_ffi.
-From Perennial.program_proof Require Import std_proof.
-From Goose.sys_verif_code Require heap functional.
+From sys_verif.program_proof Require Import heap_init functional_init.
 
 #[local] Ltac Zify.zify_post_hook ::= Z.div_mod_to_equations.
 
 Section goose.
 Context `{hG: !heapGS Σ}.
+Context `{!goGlobalsGS Σ}.
 
 ```
 
@@ -213,13 +213,12 @@ func Add(a uint64, b uint64) uint64 {
 
 ```coq
 Lemma wp_Add (n m: w64) :
-  {{{ ⌜uint.Z n + uint.Z m < 2^64⌝ }}}
-    functional.Add #n #m
+  {{{ is_pkg_init functional ∗ ⌜uint.Z n + uint.Z m < 2^64⌝ }}}
+    functional @ "Add" #n #m
   {{{ (y: w64), RET #y; ⌜(uint.Z y = uint.Z n + uint.Z m)%Z⌝ }}}.
 Proof.
   wp_start as "%Hoverflow".
-  wp_pures.
-  iModIntro.
+  wp_auto.
   iApply "HΦ".
   iPureIntro.
   word.
@@ -238,14 +237,12 @@ func StackEscape() *uint64 {
 
 ```coq
 Lemma wp_StackEscape :
-  {{{ True }}}
-    heap.StackEscape #()
-  {{{ (l: loc), RET #l; l ↦[uint64T] #(W64 42) }}}.
+  {{{ is_pkg_init heap.heap }}}
+    heap.heap @ "StackEscape" #()
+  {{{ (l: loc), RET #l; l ↦ (W64 42) }}}.
 Proof.
-  wp_start as "_".
-  wp_alloc x as "x".
-  wp_pures.
-  iModIntro.
+  wp_start as "#init". iNamed "init".
+  wp_auto.
   iApply "HΦ".
   iFrame.
 Qed.

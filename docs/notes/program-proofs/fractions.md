@@ -11,25 +11,25 @@ Going into this document, I assume you have some familiarity with separation log
 
 ## Setup: normal permissions
 
-In GooseLang, the "basic points-to fact" is written with a type (the reasons are explained separately), but this doesn't affect the discussion here. We'll show examples only using the uint64 type. The `l ↦[uint64T] #x` permission allows both reads and writes.
+In GooseLang, the "basic points-to fact" is written with a type (the reasons are explained separately), but this doesn't affect the discussion here. We'll show examples only using the uint64 type. The `l ↦ x` permission allows both reads and writes.
 
 ```coq
 Lemma read_spec (l: loc) (x: w64) :
-  {{{ l ↦[uint64T] #x }}}
-    ![uint64T] #l
-  {{{ RET #x; l ↦[uint64T] #x }}}.
+  {{{ l ↦ x }}}
+    ![#uint64T] #l
+  {{{ RET #x; l ↦ x }}}.
 Proof.
-  wp_start as "H". wp_load.
-  iModIntro. iApply "HΦ". iFrame.
+  wp_start as "H". wp_apply (wp_load_ty with "H"). (* NOTE: needed to strip later *)
+  iIntros "H". iApply "HΦ". iFrame.
 Qed.
 
 Lemma write_spec (l: loc) (x x': w64) :
-  {{{ l ↦[uint64T] #x }}}
-    #l <-[uint64T] #x'
-  {{{ RET #(); l ↦[uint64T] #x' }}}.
+  {{{ l ↦ x }}}
+    #l <-[#uint64T] #x'
+  {{{ RET #(); l ↦ x' }}}.
 Proof.
-  wp_start as "H". wp_store.
-  iModIntro. iApply "HΦ". iFrame.
+  wp_start as "H". wp_apply (wp_store_ty with "H"). (* NOTE: needed to strip later *)
+  iIntros "H". iApply "HΦ". iFrame.
 Qed.
 
 ```
@@ -42,7 +42,7 @@ The idea is to index every points-to fact with a fraction `q ∈ (0, 1]`, writte
 
 - A permission can be split into fractional parts, `l ↦[uint64T]{#1} #x ⊣⊢ l ↦[uint64T]{#1/2} #x ∗ l ↦[uint64T]{#1/2} #x` (recall `⊣⊢` is like "if and only if").
 - `l ↦[uint64T]{q} #x` is enough to read (note that `q > 0`, which is required for this setup to work!)
-- `l ↦[uint64T]{1} #x` is written `l ↦[uint64T] #x` and gives read and write permission.
+- `l ↦[uint64T]{1} #x` is written `l ↦ x` and gives read and write permission.
 
 Let's see these principles in action in Perennial.
 
@@ -50,7 +50,7 @@ This proof shows some features integrated into the IPM related to fractions. Mos
 
 ```coq
 Lemma fraction_split l (x: w64) :
-  l ↦[uint64T]{#1} #x ⊣⊢ l ↦[uint64T]{#(1/2)} #x ∗ l ↦[uint64T]{#(1/2)} #x.
+  l ↦{#1} x ⊣⊢ l ↦{#(1/2)} x ∗ l ↦{#(1/2)} x.
 Proof.
   iSplit.
   - iIntros "H".
@@ -66,11 +66,11 @@ Proof.
   l : loc
   x : w64
   ============================
-  "H" : l ↦[uint64T] #x // [!code --]
-  "H1" : l ↦[uint64T]{#1 / 2} #x // [!code ++]
-  "H2" : l ↦[uint64T]{#1 / 2} #x // [!code ++]
+  "H" : l ↦ x // [!code --]
+  "H1" : l ↦{#1 / 2} x // [!code ++]
+  "H2" : l ↦{#1 / 2} x // [!code ++]
   --------------------------------------∗
-  l ↦[uint64T]{#1 / 2} #x ∗ l ↦[uint64T]{#1 / 2} #x
+  l ↦{#1 / 2} x ∗ l ↦{#1 / 2} x
 ```
 
 ::::
@@ -91,11 +91,11 @@ Proof.
   l : loc
   x : w64
   ============================
-  "H1" : l ↦[uint64T]{#1 / 2} #x // [!code --]
-  "H2" : l ↦[uint64T]{#1 / 2} #x // [!code --]
-  "H" : l ↦[uint64T] #x // [!code ++]
+  "H1" : l ↦{#1 / 2} x // [!code --]
+  "H2" : l ↦{#1 / 2} x // [!code --]
+  "H" : l ↦ x // [!code ++]
   --------------------------------------∗
-  l ↦[uint64T] #x
+  l ↦ x
 ```
 
 ::::
@@ -110,12 +110,12 @@ I said a fraction was `q ∈ (0, 1]`. This is realized with a custom type in Coq
 
 ```coq
 Lemma read_frac_spec l (x: w64) (q: Qp) :
-  {{{ l ↦[uint64T]{#q} #x }}}
-    ![uint64T] #l
-  {{{ RET #x; l ↦[uint64T]{#q} #x }}}.
+  {{{ l ↦{#q} x }}}
+    ![#uint64T] #l
+  {{{ RET #x; l ↦{#q} x }}}.
 Proof.
-  wp_start as "H". wp_load.
-  iModIntro. iApply "HΦ". iFrame.
+  wp_start as "H". wp_apply (wp_load_ty with "H"). iIntros "H".
+  iApply "HΦ". iFrame.
 Qed.
 
 ```
@@ -126,7 +126,7 @@ This is a case where we have to put `%I` to parse this using all the Iris notati
 
 ```coq
 Lemma frac_1_abbreviation (l: loc) (x: w64) :
-  (l ↦[uint64T]{#1} #x)%I = (l ↦[uint64T] #x)%I.
+  (l ↦{#1} x)%I = (l ↦ x)%I.
 Proof.
 ```
 
@@ -138,7 +138,7 @@ Proof.
   l : loc
   x : w64
   ============================
-  (l ↦[uint64T] #x)%I = (l ↦[uint64T] #x)%I
+  (l ↦ x)%I = (l ↦ x)%I
 ```
 
 ::::
@@ -176,8 +176,8 @@ Third, discarding the fraction involves an Iris "update", a change in ghost stat
 ```coq
 Lemma alloc_ro_spec (x: w64) :
   {{{ True }}}
-    ref_to uint64T #x
-  {{{ (l: loc), RET (#l: val); l ↦[uint64T]□ #x }}}.
+    alloc #x
+  {{{ (l: loc), RET #l; l ↦□ x }}}.
 Proof.
   (* This proof is a bit odd because it's just a single allocation, so the
   tactics don't quite do the right thing. We'll need to do the work of
@@ -185,14 +185,14 @@ Proof.
   when needed.  |*)
   iIntros (Φ) "_ HΦ".
   rewrite -wp_fupd.
-  wp_alloc l as "H".
+  wp_apply wp_alloc. iIntros (l) "H".
 
 ```
 
 This is the step where we persist the points-to permission and turn it into a persistent, read-only fact. Also notice that the output (renamed to "Hro" for clarity) is put into the persistent context.
 
 ```coq
-  iMod (struct_pointsto_persist with "H") as "#Hro".
+  iPersist "H" as "#Hro".
 ```
 
 :::: info Goal diff
@@ -204,12 +204,12 @@ This is the step where we persist the points-to permission and turn it into a pe
   Φ : val → iPropI Σ
   l : loc
   ============================
-  "Hro" : l ↦[uint64T]□ #x // [!code ++]
+  "Hro" : l ↦□ x // [!code ++]
   --------------------------------------□ // [!code ++]
-  "HΦ" : ∀ l0 : loc, l0 ↦[uint64T]□ #x -∗ Φ #l0
-  "H" : l ↦[uint64T] #x // [!code --]
+  "HΦ" : ∀ l0 : loc, l0 ↦□ x -∗ Φ (# l0)
+  "H" : l ↦ x // [!code --]
   --------------------------------------∗
-  |={⊤}=> Φ #l
+  |={⊤}=> Φ (# l)
 ```
 
 ::::
@@ -226,12 +226,12 @@ With a persistent permission, it's reasonable (and expected) that the permission
 
 ```coq
 Lemma read_discarded_spec (l: loc) (x: w64) :
-  {{{ l ↦[uint64T]□ #x }}}
-    ![uint64T] #l
+  {{{ l ↦□ x }}}
+    ![#uint64T] #l
   {{{ RET #x; True }}}.
 Proof.
   wp_start as "#H".
-  wp_apply (wp_LoadAt with "H"). iIntros "_".
+  wp_apply (wp_load_ty with "H"). iIntros "_".
   iApply "HΦ". auto.
 Qed.
 

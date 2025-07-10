@@ -15,12 +15,12 @@ You should start by reading the Go code.
 The idea of this proof is similar to what you saw in Assignment 2's exercise 5, but with the code written in Go (and thus using nil pointers rather than an inductive data type) and with the proof written in Coq (so you have the Iris Proof Mode rather than writing a proof outline).
 
 ```coq
-From sys_verif.program_proof Require Import prelude.
-From Goose.sys_verif_code Require Import heap.
+From sys_verif.program_proof Require Import prelude empty_ffi.
+From sys_verif.program_proof Require Import heap_init.
 
 
 Section proof.
-Context `{hG: heapGS Σ, !ffi_semantics _ _, !ext_types _}.
+Context `{hG: !heapGS Σ} `{!goGlobalsGS Σ}.
 
 (* We abbreviate "linked list" to "ll" in some of these definitions to keep
 specs and other theorem statements concise. *)
@@ -34,8 +34,8 @@ Fixpoint ll_rep (l: loc) (xs: list w64) : iProp Σ :=
   match xs with
   | nil => "%Heq" :: ⌜l = null⌝
   | cons x xs' => (∃ (next_l: loc),
-      "elem" :: l ↦[Node :: "elem"] #x ∗
-      "next" :: l ↦[Node :: "next"] #next_l ∗
+      "elem" :: l ↦s[heap.Node :: "elem"] x ∗
+      "next" :: l ↦s[heap.Node :: "next"] next_l ∗
       "Hnext_l" :: ll_rep next_l xs')%I
   end.
 
@@ -44,19 +44,20 @@ Fixpoint ll_rep (l: loc) (xs: list w64) : iProp Σ :=
 The proofs will work by analysis on `xs`, but the code checks if `l` is `nil` or not. We relate the two with the following two lemmas (note that the Gallina `null` is the model of the Go `nil` pointer).
 
 ```coq
-Definition ll_rep_null l :
+Lemma ll_rep_null l :
   ll_rep l [] -∗ ⌜l = null⌝.
 Proof.
   simpl. auto.
 Qed.
 
-Definition ll_rep_non_null l x xs :
+Lemma ll_rep_non_null l x xs :
   ll_rep l (x::xs) -∗ ⌜l ≠ null⌝.
 Proof.
   simpl. iIntros "H". iNamed "H".
-  iDestruct (struct_field_pointsto_not_null with "elem") as %Hnot_null.
+  iDestruct (pointsto_not_null with "elem") as %Hnot_null.
   { reflexivity. }
-  { simpl. lia. }
+  rewrite struct.field_ref_f_unseal /struct.field_ref_f_def in Hnot_null.
+  rewrite loc_add_0 in Hnot_null.
   auto.
 Qed.
 
@@ -66,8 +67,8 @@ Prove this specification.
 
 ```coq
 Lemma wp_NewList :
-  {{{ True }}}
-    NewList #()
+  {{{ is_pkg_init heap.heap }}}
+    heap.heap @ "NewList" #()
   {{{ (l: loc), RET #l; ll_rep l [] }}}.
 Proof.
 Admitted.
@@ -79,8 +80,8 @@ Fill in a postcondition here and prove this specification.
 
 ```coq
 Lemma wp_Node__Insert (l: loc) (xs: list w64) (elem: w64) :
-  {{{ ll_rep l xs }}}
-    Node__Insert #l #elem
+  {{{ is_pkg_init heap.heap ∗ ll_rep l xs }}}
+    l @ heap.heap @ "Node'ptr" @ "Insert" #elem
   {{{ (l': loc), RET #l';
       False  }}}.
 Proof.
@@ -92,8 +93,8 @@ Prove this specification.
 
 ```coq
 Lemma wp_Node__Pop (l: loc) (xs: list w64) :
-  {{{ ll_rep l xs }}}
-    Node__Pop #l
+  {{{ is_pkg_init heap.heap ∗ ll_rep l xs }}}
+    l @ heap.heap @ "Node'ptr" @ "Pop" #()
   {{{ (x: w64) (l': loc) (ok: bool), RET (#x, #l', #ok);
       if ok then ∃ xs', ⌜xs = cons x xs'⌝ ∗
                         ll_rep l' xs'
@@ -111,8 +112,9 @@ A general structure is provided for the proof (which you are allowed to change i
 
 ```coq
 Lemma wp_Node__Append l1 xs1 l2 xs2 :
-  {{{ ll_rep l1 xs1 ∗ ll_rep l2 xs2 }}}
-    Node__Append #l1 #l2
+  {{{ is_pkg_init heap.heap ∗
+      ll_rep l1 xs1 ∗ ll_rep l2 xs2 }}}
+    l1 @ heap.heap @ "Node'ptr" @ "Append" #l2
   {{{ (l2': loc), RET #l2';
       False  }}}.
 Proof.
@@ -121,9 +123,11 @@ Proof.
   generalize dependent l1.
   induction xs1 as [|x1 xs1 IH_wp_Append].
   - intros l1 l2 xs2. wp_start as "[Hl1 Hl2]".
+    wp_auto.
     iDestruct (ll_rep_null with "Hl1") as %Hnull.
     admit.
   - intros l1 l2 xs2. wp_start as "[Hl1 Hl2]".
+    wp_auto.
     (* Notice the hypothesis `IH_wp_Append`, which is available due to the use
     of `induction`. You'll need it to reason about the recursive call. *)
     iDestruct (ll_rep_non_null with "Hl1") as %Hnull.

@@ -11,10 +11,11 @@ These exercises should help you get started with doing program proofs with Goose
 
 ```coq
 From sys_verif.program_proof Require Import prelude empty_ffi.
-From Goose.sys_verif_code Require Import functional heap.
+From sys_verif.program_proof Require Import functional_init heap_init.
 
 Section proof.
 Context `{!heapGS Σ}.
+Context `{!goGlobalsGS Σ}.
 
 ```
 
@@ -141,8 +142,8 @@ You'll need to find the right lemma to use here.
 ```coq
 Lemma ex_pure_impl s q (bs: list w8) :
   length bs = 3%nat →
-  own_slice_small s byteT q bs -∗
-  ⌜Slice.sz s = 3%Z⌝ ∗ own_slice_small s byteT q bs.
+  s ↦*{q} bs -∗
+  ⌜slice.len_f s = 3%Z⌝ ∗ s ↦*{q} bs.
 Proof.
 Admitted.
 
@@ -154,9 +155,9 @@ Read about [structs](../../notes/ownership.md#proofs-using-structs) (in particul
 
 ```coq
 Lemma ex_split_struct l s :
-  l ↦[struct.t S1] (#(W64 3), (s, #())) -∗
-  l ↦[S1 :: "a"] #(W64 3) ∗
-  l ↦[S1 :: "b"] s.
+  l ↦ heap.S1.mk (W64 3) s -∗
+  l ↦s[heap.S1 :: "a"] W64 3 ∗
+  l ↦s[heap.S1 :: "b"] s.
 Proof.
 Admitted.
 
@@ -177,6 +178,7 @@ Proof.
 ```txt title="goal diff"
   Σ : gFunctors
   heapGS0 : heapGS Σ
+  goGlobalsGS0 : goGlobalsGS Σ
   P : iProp Σ
   ============================
   "HP" : P
@@ -218,16 +220,21 @@ Here is a worked example. It demonstrates a number of tactics:
 
 ```coq
 Lemma wp_Swap (l1 l2: loc) (x y: w64) :
-  {{{ l1 ↦[uint64T] #x ∗ l2 ↦[uint64T] #y }}}
-    Swap #l1 #l2
-  {{{ RET #(); l1 ↦[uint64T] #y ∗ l2 ↦[uint64T] #x }}}.
+  {{{ is_pkg_init heap.heap ∗ l1 ↦ x ∗ l2 ↦ y }}}
+    heap.heap @ "Swap" #l1 #l2
+  {{{ RET #(); l1 ↦ y ∗ l2 ↦ x }}}.
 Proof.
-  wp_start as "[Hx Hy]".
+  wp_start as "(Hx & Hy)".
+
+  (* The next instruction to run is to allocate a pointer for the function
+  parameter y. *)
+  wp_alloc y_l as "y". wp_pures.
+  (* we can automate some of that work, using the variable name *)
+  wp_alloc_auto. wp_pures. wp_alloc_auto.
   wp_pures.
 
-  (* The next instruction to run is a load from [l2]. *)
-  wp_bind (![_] #l2)%E.
-  iApply (wp_LoadAt with "[Hy]").
+  wp_bind (![_] #y_l)%E.
+  iApply (@wp_load_ty with "[y]").
   { iFrame. }
   iModIntro. (* remove the ▷ ("later") modality from the goal - you can ignore
   this *)
@@ -235,23 +242,22 @@ Proof.
   duration of the call, then returns it in the postcondition. It does this in
   the form of an implication, so we have to use [iIntros] to put the hypothesis
   back in the context. *)
-  iIntros "Hy".
+  iIntros "y".
 
   (* [wp_apply] automates the process of finding where to apply the spec, so we
   don't have to use [wp_bind]. It also automatically removes the ▷ from the
   resulting goal. *)
-  wp_apply (wp_LoadAt with "[$Hx]"). iIntros "Hx".
+  wp_apply (@wp_load_ty with "[$Hy]"). iIntros "Hy".
 
   (* Loading and storing variables is common enough that there's a tactic
   [wp_load] which automates the work of [wp_bind], finding the right hypothesis
-  with a points-to fact (that is, something like [l2 ↦[uint64T] #y]), and also
-  re-introducing the hypothesis after using the [wp_LoadAt] or [wp_StoreAt]
+  with a points-to fact (that is, something like [l2 ↦ y]), and also
+  re-introducing the hypothesis after using the [wp_load_ty] or [wp_store_ty]
   lemma. *)
 
-  wp_store.
-  wp_store.
+  wp_pures. wp_store.
+  wp_auto.
 
-  iModIntro.
   iApply "HΦ".
   iFrame.
 Qed.
@@ -264,9 +270,9 @@ Re-do above proof, but with the automation tactics.
 
 ```coq
 Lemma wp_Swap_ex (l1 l2: loc) (x y: w64) :
-  {{{ l1 ↦[uint64T] #x ∗ l2 ↦[uint64T] #y }}}
-    Swap #l1 #l2
-  {{{ RET #(); l1 ↦[uint64T] #y ∗ l2 ↦[uint64T] #x }}}.
+  {{{ is_pkg_init heap.heap ∗ l1 ↦ x ∗ l2 ↦ y }}}
+    heap.heap @ "Swap" #l1 #l2
+  {{{ RET #(); l1 ↦ y ∗ l2 ↦ x }}}.
 Proof.
 Admitted.
 
@@ -280,15 +286,15 @@ Prove it using the IPM. You may need to find the specification for `Assert` usin
 
 ```coq
 Lemma wp_IgnoreOneLocF (x_l y_l: loc) :
-  {{{ x_l ↦[uint64T] #(W64 0) }}}
-    IgnoreOneLocF #x_l #y_l
-  {{{ RET #(); x_l ↦[uint64T] #(W64 42) }}}.
+  {{{ is_pkg_init heap.heap ∗ x_l ↦ W64 0 }}}
+    heap.heap @ "IgnoreOneLocF" #x_l #y_l
+  {{{ RET #(); x_l ↦ W64 42 }}}.
 Proof.
 Admitted.
 
 Lemma wp_UseIgnoreOneLocOwnership :
-  {{{ True }}}
-    UseIgnoreOneLocOwnership #()
+  {{{ is_pkg_init heap.heap }}}
+    heap.heap @ "UseIgnoreOneLocOwnership" #()
   {{{ RET #(); True }}}.
 Proof.
 Admitted.
@@ -301,20 +307,14 @@ The `(x_l: loc)` in the postcondition should be read as "there exists (x_l: loc)
 
 ```coq
 Lemma example_stack_escape :
-  {{{ True }}}
-    StackEscape #()
-  {{{ (x_l: loc), RET #x_l; x_l ↦[uint64T] #(W64 42) }}}.
+  {{{ is_pkg_init heap.heap }}}
+    heap.heap @ "StackEscape" #()
+  {{{ (x_l: loc), RET #x_l; x_l ↦ W64 42 }}}.
 Proof.
   wp_start as "_".
-
-```
-
-`wp_alloc` is a helper for using the allocation specifications, much like `wp_load` and `wp_store`.
-
-```coq
-  wp_alloc x_l as "Hx".
-  wp_pures.
-  iModIntro. iApply "HΦ". iFrame.
+  wp_auto.
+  iApply "HΦ".
+  iFrame.
 Qed.
 
 End proof.

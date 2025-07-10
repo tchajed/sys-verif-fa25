@@ -63,12 +63,12 @@ Qed.
 
 Definition own_foo l: iProp Σ :=
   ∃ (p r: w64),
-  "HP" :: l ↦[uint64T] #p ∗
-  "HR" :: (l +ₗ 2) ↦[uint64T] #r ∗
+  "HP" :: l ↦ p ∗
+  "HR" :: (l +ₗ 2) ↦ r ∗
   "%Hbound" :: ⌜uint.Z p < uint.Z r⌝.
 
 Lemma own_foo_read_P l :
-  own_foo l -∗ ∃ (p: w64), l ↦[uint64T] #p.
+  own_foo l -∗ ∃ (p: w64), l ↦ p.
 Proof.
   iIntros "H".
   iNamed "H".
@@ -84,11 +84,11 @@ Proof.
   Hbound : uint.Z p < uint.Z r // [!code ++]
   ============================
   "H" : own_foo l // [!code --]
-  "HP" : l ↦[uint64T] #p // [!code ++]
-  "HR" : (l +ₗ 2) ↦[uint64T] #r // [!code ++]
+  "HP" : l ↦ p // [!code ++]
+  "HR" : (l +ₗ 2) ↦ r // [!code ++]
   --------------------------------------∗
-  ∃ p : w64, l ↦[uint64T] #p // [!code --]
-  ∃ p0 : w64, l ↦[uint64T] #p0 // [!code ++]
+  ∃ p : w64, l ↦ p // [!code --]
+  ∃ p0 : w64, l ↦ p0 // [!code ++]
 ```
 
 ::::

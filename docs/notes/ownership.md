@@ -237,10 +237,12 @@ Goose has a nice set of reasoning principles for structs, which extend the basic
 ```coq
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From Coq Require Import Strings.String.
-From Goose.sys_verif_code Require heap.
+From sys_verif.program_proof Require Import heap_init.
 
 Section goose.
 Context `{hG: !heapGS Σ}.
+Context `{!goGlobalsGS Σ}.
+Context `{!heap.GlobalAddrs}.
 
 ```
 
@@ -252,50 +254,33 @@ Notice also that there's an extra unit value at the end; this makes the recursiv
 
 ```coq
 Lemma wp_ExamplePerson :
-  {{{ True }}}
-    heap.ExamplePerson #()
-  {{{ RET (#"Ada", (#"Lovelace", (#25, #()))); True }}}.
+  {{{ is_pkg_init heap.heap }}}
+    heap.heap @ "ExamplePerson" #()
+  {{{ RET #(heap.Person.mk "Ada" "Lovelace" (W64 25)); True }}}.
 Proof.
   wp_start as "_".
-  wp_pures.
-  iModIntro.
   iApply "HΦ".
   done.
 Qed.
 
-Lemma String_app_empty_l s :
-  "" +:+ s = s.
+Lemma wp_Person__Name (firstName lastName: go_string) (age: w64) :
+  {{{ is_pkg_init heap.heap }}}
+    heap.Person__Name
+      #(heap.Person.mk firstName lastName age) #()
+  {{{ RET #(firstName ++ " " ++ lastName)%go; True }}}.
 Proof.
-  unfold String.app.
-  reflexivity.
-Qed.
-
-(* shockingly, this is not in the standard library *)
-Lemma String_app_assoc (s1 s2 s3: string) :
-  (s1 +:+ s2) +:+ s3 = s1 +:+ s2 +:+ s3.
-Proof.
-  induction s1; simpl.
-  - rewrite !String_app_empty_l //.
-  - rewrite !String_append.
-    congruence.
-Qed.
-
-Lemma wp_Person__Name (firstName lastName: string) (age: w64) :
-  {{{ True }}}
-    heap.Person__Name (#firstName, (#lastName, (#age, #())))
-  {{{ RET #(str (firstName ++ " " ++ lastName)); True }}}.
-Proof.
-  wp_start as "_".
-  wp_pures.
-  wp_rec. wp_pures.
-  iModIntro.
+  wp_start as "#init".
+  wp_call.
+  wp_alloc p_l as "p". wp_pures.
+  iApply struct_fields_split in "p". iNamed "p".
+  cbn [heap.Person.FirstName' heap.Person.LastName' heap.Person.Age'].
+  wp_auto.
   iDestruct ("HΦ" with "[]") as "HΦ".
   { done. }
   iExactEq "HΦ".
   f_equal.
   f_equal.
-  f_equal.
-  rewrite String_app_assoc //.
+  rewrite -app_assoc //.
 Qed.
 
 ```
@@ -312,103 +297,58 @@ func ExamplePersonRef() *Person {
 }
 ```
 
-The postcondition of the following spec introduces the _struct field points-to_. `l ↦[heap.Person :: "Age"] #(W64 25)` combines calculating an offset from `l` for the Age field of Person (that is, computing `l +ₗ #2`) with asserting that the value at that location is `#25`.
+The postcondition of the following spec introduces the _struct field points-to_. `l ↦s[heap.Person :: "Age"] (W64 25)` combines calculating an offset from `l` for the Age field of Person (that is, computing `l +ₗ #2`) with asserting that the value at that location is `#25`.
 
 ```coq
 Lemma wp_ExamplePersonRef :
-  {{{ True }}}
-    heap.ExamplePersonRef #()
+  {{{ is_pkg_init heap.heap }}}
+    heap @ "ExamplePersonRef" #()
   {{{ (l: loc), RET #l;
-      l ↦[heap.Person :: "FirstName"] #(str "Ada") ∗
-      l ↦[heap.Person :: "LastName"] #(str "Lovelace") ∗
-      l ↦[heap.Person :: "Age"] #(W64 25)
+      l ↦s[heap.Person :: "FirstName"] "Ada"%go ∗
+      l ↦s[heap.Person :: "LastName"] "Lovelace"%go ∗
+      l ↦s[heap.Person :: "Age"] W64 25
   }}}.
 Proof.
-  wp_start as "_".
-  wp_apply wp_allocStruct.
-  { val_ty. }
-  iIntros (p) "Hperson".
+  wp_start as "#init".
+  wp_alloc l as "p".
+
 ```
-
-:::: info Goal
-
-```txt title="goal 1"
-  Σ : gFunctors
-  hG : heapGS Σ
-  Φ : val → iPropI Σ
-  p : loc
-  ============================
-  "HΦ" : ∀ l : loc,
-           l ↦[heap.Person::"FirstName"] #(str "Ada") ∗
-           l ↦[heap.Person::"LastName"] #(str "Lovelace") ∗
-           l ↦[heap.Person::"Age"] #(W64 25) -∗ Φ #l
-  "Hperson" : p ↦[struct.t heap.Person] (#(str "Ada"),
-                                         (#(str "Lovelace"), (#(W64 25), #())))
-  --------------------------------------∗
-  Φ #p
-```
-
-::::
 
 Notice in the goal above how the struct allocation produced a `p ↦[struct.t heap.Person] v` assertion. This is actually the same as the points-to assertion we've been using all along, albeit with a more complex type. This assertion actually says that `v` is a tuple with the right structure to be a `Person` struct, and its three values are laid out in memory starting at `p`.
 
 Now look at what the following line of proof does to the goal.
 
 ```coq
-  iApply struct_fields_split in "Hperson"; iNamed "Hperson".
+  iApply struct_fields_split in "p". iNamed "p".
+  cbn [heap.Person.FirstName' heap.Person.LastName' heap.Person.Age'].
+
 ```
-
-:::: info Goal diff
-
-```txt title="goal diff"
-  Σ : gFunctors
-  hG : heapGS Σ
-  Φ : val → iPropI Σ
-  p : loc
-  ============================
-  "HΦ" : ∀ l : loc,
-           l ↦[heap.Person::"FirstName"] #(str "Ada") ∗
-           l ↦[heap.Person::"LastName"] #(str "Lovelace") ∗
-           l ↦[heap.Person::"Age"] #(W64 25) -∗ Φ #l
-  "Hperson" : p ↦[struct.t heap.Person] (#(str "Ada"), // [!code --]
-                                         (#(str "Lovelace"), (#(W64 25), #()))) // [!code --]
-  "FirstName" : p ↦[heap.Person::"FirstName"] #(str "Ada") // [!code ++]
-  "LastName" : p ↦[heap.Person::"LastName"] #(str "Lovelace") // [!code ++]
-  "Age" : p ↦[heap.Person::"Age"] #(W64 25) // [!code ++]
-  --------------------------------------∗
-  Φ #p
-```
-
-::::
 
 The theorem `struct_fields_split` gives a way to take any points-to assertion with a struct type and split it into its component field points-to assertions, which is what the postcondition of this spec gives.
 
 ```coq
+  wp_pures.
   iApply "HΦ".
   iFrame.
 Qed.
 
-Lemma wp_Older (firstName lastName: string) (age: w64) (p: loc) (delta: w64) :
-  {{{ p ↦[heap.Person :: "FirstName"] #firstName ∗
-      p ↦[heap.Person :: "LastName"] #lastName ∗
-      p ↦[heap.Person :: "Age"] #age
+Lemma wp_Person__Older (firstName lastName: byte_string) (age: w64) (p: loc) (delta: w64) :
+  {{{ is_pkg_init heap.heap ∗
+      p ↦s[heap.Person :: "FirstName"] firstName ∗
+      p ↦s[heap.Person :: "LastName"] lastName ∗
+      p ↦s[heap.Person :: "Age"] age
   }}}
-    heap.Person__Older #p #delta
+    p @ heap.heap @ "Person'ptr" @ "Older" #delta
   {{{ RET #();
-      p ↦[heap.Person :: "FirstName"] #firstName ∗
-      p ↦[heap.Person :: "LastName"] #lastName ∗
+      p ↦s[heap.Person :: "FirstName"] firstName ∗
+      p ↦s[heap.Person :: "LastName"] lastName ∗
       (* we avoid overflow reasoning by saying the resulting integer is just
       [word.add age delta], which will wrap at 2^64  *)
-      p ↦[heap.Person :: "Age"] #(LitInt (word.add age delta))
+      p ↦s[heap.Person :: "Age"] word.add age delta
   }}}.
 Proof.
-  wp_start as "H".
-  iDestruct "H" as "(first & last & age)".
-  wp_pures.
-  (* there's a tactic to struct field loads/stores as well *)
-  wp_loadField.
-  wp_storeField.
-  iModIntro.
+  wp_start as "(first & last & age)".
+  wp_auto.
   iApply "HΦ".
   iFrame.
 Qed.
@@ -418,26 +358,24 @@ Qed.
 Here is one spec for `GetAge`, which results in breaking off the age field into its points-to assertion.
 
 ```coq
-Lemma wp_GetAge (firstName lastName: string) (age: w64) (p: loc) (delta: w64) :
-  {{{ "first" :: p ↦[heap.Person :: "FirstName"] #firstName ∗
-      "last" :: p ↦[heap.Person :: "LastName"] #lastName ∗
-      "age" :: p ↦[heap.Person :: "Age"] #age
+Lemma wp_GetAge (firstName lastName: byte_string) (age: w64) (p: loc) (delta: w64) :
+  {{{ is_pkg_init heap.heap ∗
+      "first" :: p ↦s[heap.Person :: "FirstName"] firstName ∗
+      "last" :: p ↦s[heap.Person :: "LastName"] lastName ∗
+      "age" :: p ↦s[heap.Person :: "Age"] age
   }}}
-    heap.Person__GetAge #p
+    p @ heap.heap @ "Person'ptr" @ "GetAge" #()
   {{{ (age_l: loc), RET #age_l;
-      p ↦[heap.Person :: "FirstName"] #firstName ∗
-      p ↦[heap.Person :: "LastName"] #lastName ∗
-      age_l ↦[uint64T] #age
+      p ↦s[heap.Person :: "FirstName"] firstName ∗
+      p ↦s[heap.Person :: "LastName"] lastName ∗
+      age_l ↦ age
   }}}.
 Proof.
   wp_start as "H". iNamed "H".
-  wp_apply wp_struct_fieldRef.
-  { simpl. auto. }
+  wp_auto.
+  (* this works pleasantly well, even with complicated struct references *)
   iApply "HΦ".
   iFrame.
-  iExactEq "age".
-  rewrite struct_field_pointsto_eq.
-  reflexivity.
 Qed.
 
 ```
@@ -470,17 +408,17 @@ About own_slice.
 
 ```txt title="coq output"
 own_slice :
-∀ {ext : ffi_syntax} {ffi : ffi_model} {ffi_interp0 : ffi_interp ffi}
-  {Σ : gFunctors},
+∀ {H : ffi_syntax} {ffi : ffi_model} {H0 : ffi_interp ffi} {Σ : gFunctors},
   heapGS Σ
-  → ∀ {ext_ty : ext_types ext} {V : Type},
-      IntoVal V → Slice.t → ty → dfrac → list V → iProp Σ
+  → ∀ {V : Type} {IntoVal0 : IntoVal V} {t : go_type},
+      IntoValTyped V t → slice.t → dfrac → list V → iProp Σ
 
 own_slice is not universe polymorphic
-Arguments own_slice {ext ffi ffi_interp0 Σ heapGS0 ext_ty}
-  {V}%type_scope {IntoVal0} s t%heap_type q vs%list_scope
+Arguments own_slice {H ffi H0 Σ heapGS0} {V}%_type_scope
+  {IntoVal0 t IntoValTyped0} s dq vs%_list_scope
 own_slice is transparent
-Expands to: Constant Perennial.goose_lang.lib.slice.typed_slice.own_slice
+Expands to: Constant New.golang.theory.slice.own_slice
+Declared in library New.golang.theory.slice, line 34, characters 19-28
 ```
 
 ::::
@@ -496,23 +434,46 @@ You can ignore this whole string of parameters, which are related to Goose suppo
 
 Getting and setting slice elements have reasonable specifications:
 
+TODO: fix the written explanation in this lecture: slice operations are now based on getting a reference and using it, not `SliceGet` and `SliceSet`
+
 ```coq
-Check wp_SliceGet.
+Check wp_load_slice_elem.
 ```
 
 :::: note Output
 
 ```txt title="coq output"
-wp_SliceGet
-     : ∀ (stk : stuckness) (E : coPset) (s : Slice.t)
-         (t : ty) (q : dfrac) (vs : list ?V) (i : w64)
-         (v0 : ?V) (Φ : val → iPropI Σ),
-         own_slice_small s t q vs ∗ ⌜vs !! uint.nat i = Some v0⌝ -∗
-         ▷ (own_slice_small s t q vs -∗ Φ (to_val v0)) -∗
-         WP SliceGet t s #i @ stk; E {{ v, Φ v }}
+wp_load_slice_elem
+     : ∀ (s : slice.t) (i : w64) (vs : list ?V) (dq : dfrac)
+         (v : ?V) (Φ : val → iPropI Σ),
+         s ↦*{dq} vs ∗ ⌜vs !! uint.nat i = Some v⌝ -∗
+         ▷ (s ↦*{dq} vs -∗ Φ (# v)) -∗
+         WP ![# ?t] (# (slice.elem_ref_f s ?t i)) {{ v, Φ v }}
 where
-?V : [Σ : gFunctors  hG : heapGS Σ |- Type]
-?IntoVal0 : [Σ : gFunctors  hG : heapGS Σ |- IntoVal ?V]
+?V :
+  [Σ : gFunctors
+   hG : heapGS Σ
+   goGlobalsGS0 : goGlobalsGS Σ
+   H : heap.GlobalAddrs
+  |- Type]
+?IntoVal0 :
+  [Σ : gFunctors
+   hG : heapGS Σ
+   goGlobalsGS0 : goGlobalsGS Σ
+   H : heap.GlobalAddrs
+  |- IntoVal ?V]
+?t :
+  [Σ : gFunctors
+   hG : heapGS Σ
+   goGlobalsGS0 : goGlobalsGS Σ
+   H : heap.GlobalAddrs
+  |- go_type]
+?IntoValTyped0 :
+  [Σ : gFunctors
+   hG : heapGS Σ
+   goGlobalsGS0 : goGlobalsGS Σ
+   H : heap.GlobalAddrs
+  |- IntoValTyped ?V ?t]
 ```
 
 ::::
@@ -520,28 +481,6 @@ where
 We got this specification using `Check` rather than copying it from the Perennial source code. Notice that the Hoare triple notation is not used here (I'm not entirely sure why, possibly a bug in the notations). You should still be able to read this specification, if you understood the "continuation-passing style" encoding of Hoare triple used in Iris.
 
 The one complication with this particular specification is that its precondition requires the caller to pass the value `v0` that is in the slice. `SliceGet` itself requires `i` to be in-bounds (otherwise `s[i]` panics in Go), and `vs !! uint.nat i = Some v0` has the side of enforcing this obligation, and the postcondition then uses the same value `v0`.
-
-```coq
-Check wp_SliceSet.
-```
-
-:::: note Output
-
-```txt title="coq output"
-wp_SliceSet
-     : ∀ (stk : stuckness) (E : coPset) (s : Slice.t) (t : ty),
-         IntoValForType ?V t
-         → ∀ (vs : list ?V) (i : w64) (v : ?V) (Φ : val → iPropI Σ),
-             own_slice_small s t (DfracOwn 1) vs ∗
-             ⌜is_Some (vs !! uint.nat i)⌝ -∗
-             ▷ (own_slice_small s t (DfracOwn 1) (<[uint.nat i:=v]> vs) -∗
-                Φ #()) -∗ WP SliceSet t s #i (to_val v) @ stk; E {{ v, Φ v }}
-where
-?V : [Σ : gFunctors  hG : heapGS Σ |- Type]
-?IntoVal0 : [Σ : gFunctors  hG : heapGS Σ |- IntoVal ?V]
-```
-
-::::
 
 Storing into a slice requires a proof `is_Some (vs !! uint.nat i)`, which similarly guarantees that `i` is in-bounds, but the original value is not needed. The postcondition uses `<[uint.nat i := v]> vs` which is a Gallina implementation of updating one index of a list (it's notation for the function `insert` from std++).
 

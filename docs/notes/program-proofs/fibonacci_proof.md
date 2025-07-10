@@ -17,10 +17,11 @@ We prove this function correct, proving that the imperative, loop-based implemen
 
 ```coq
 From sys_verif.program_proof Require Import prelude empty_ffi.
-From Goose.sys_verif_code Require Import functional.
+From sys_verif.program_proof Require Import functional_init.
 
 Section proof.
 Context `{hG: !heapGS Σ}.
+Context `{!goGlobalsGS Σ}.
 
 Fixpoint fibonacci (n: nat): nat :=
   match n with
@@ -65,6 +66,34 @@ Proof.
   - simpl in *; lia.
 Qed.
 
+Lemma if_decide_bool_decide_eq_true (P: Prop) `{!Decision P}
+  {A} (x y: A) :
+  (if decide (# (bool_decide P) = #true) then x else y) =
+  if decide P then x else y.
+Proof.
+  destruct (decide P).
+  - rewrite decide_True //.
+    rewrite bool_decide_eq_true_2 //.
+  - rewrite decide_False //.
+    rewrite bool_decide_eq_false_2 //.
+    rewrite to_val_unseal /to_val_def /=.
+    congruence.
+Qed.
+
+Lemma if_decide_bool_decide_eq_false (P: Prop) `{!Decision P}
+  {A} (x y: A) :
+  (if decide (# (bool_decide P) = #false) then x else y) =
+  if decide P then y else x.
+Proof.
+  destruct (decide P).
+  - rewrite decide_False //.
+    rewrite bool_decide_eq_true_2 //.
+    rewrite to_val_unseal /to_val_def /=.
+    congruence.
+  - rewrite decide_True //.
+    rewrite bool_decide_eq_false_2 //.
+Qed.
+
 ```
 
 Here is the statement of what it means for `Fibonacci` (the Go function) to be correct.
@@ -72,75 +101,68 @@ Here is the statement of what it means for `Fibonacci` (the Go function) to be c
 ```coq
 Lemma wp_Fibonacci (n: w64) :
   {{{ ⌜Z.of_nat (fibonacci (uint.nat n)) < 2^64⌝ }}}
-    Fibonacci #n
+    functional.Fibonacci #n
   {{{ (c: w64), RET #c; ⌜uint.nat c = fibonacci (uint.nat n)⌝ }}}.
 Proof.
-  wp_start as "%Hoverflow".
-  wp_pures.
+  wp_start as "%Hoverflow". wp_call.
+  wp_alloc n_l as "n"; wp_auto.
   wp_if_destruct.
-  { iModIntro.
-    iApply "HΦ".
+  { iApply "HΦ".
     iPureIntro.
     reflexivity.
   }
-  wp_alloc fib_prev as "fib_prev".
-  wp_alloc fib_cur as "fib_cur".
-  wp_alloc i_l as "i".
-  wp_pures.
+  wp_auto.
 
 ```
 
 The core of the proof's argument is this loop invariant about the `prev` and `cur` variables.
 
 ```coq
-  wp_apply (wp_forUpto'
-            (λ i, ∃ (prev cur: w64),
-              "fib_prev" ∷ fib_prev ↦[uint64T] #prev ∗
-              "fib_cur" ∷ fib_cur ↦[uint64T] #cur ∗
-              "%Hi_ge" ∷ ⌜1 ≤ uint.Z i⌝ ∗
+  iAssert (∃ (i prev cur: w64),
+              "fib_prev" ∷ fib_prev_ptr ↦ prev ∗
+              "fib_cur" ∷ fib_cur_ptr ↦ cur ∗
+              "i" ∷ i_ptr ↦ i ∗
+              "%Hi_ge" ∷ ⌜1 ≤ uint.Z i ≤ uint.Z n⌝ ∗
               "%Hprev" ∷ ⌜uint.nat prev = fibonacci (uint.nat i - 1)⌝ ∗
               "%Hcur" ∷ ⌜uint.nat cur = fibonacci (uint.nat i)⌝
             )%I
-            with "[$i $fib_prev $fib_cur]").
-  - iPureIntro.
-    split.
-    { word. }
+            with "[$i $fib_prev $fib_cur]" as "IH".
+  { iPureIntro.
     split.
     { word. }
     split.
     { reflexivity. }
-    reflexivity.
-  - clear Φ.
-    iIntros "!>" (i Φ) "[IH (i & %Hle)] HΦ".
-    iNamed "IH".
-    wp_pures.
-    repeat (wp_load || wp_store || wp_pures).
-    iModIntro.
-    iApply "HΦ".
-    iFrame.
-    iPureIntro.
-    split.
-    + word.
-    + split.
-      { rewrite Hcur. f_equal; word. }
-      replace (uint.nat (word.add i (W64 1))) with
-        (S (uint.nat i)) by word.
-      rewrite fibonacci_S; [ | word ].
-      (* we need to show the [word.add] doesn't overflow to finish the proof *)
-      assert (uint.Z cur + uint.Z prev < 2^64) as Hsum.
-      {
-        (* to prove this, we'll use the fact that [uint.nat cur + uint.nat
+    reflexivity. }
+  wp_for; iNamed "IH"; wp_auto.
+  - rewrite if_decide_bool_decide_eq_true //.
+    destruct (decide _); try wp_auto.
+    + iApply wp_for_post_do. wp_auto.
+      iFrame.
+      iPureIntro.
+      split.
+      * word.
+      * split.
+        { rewrite Hcur. f_equal; word. }
+        replace (uint.nat (word.add i (W64 1))) with
+          (S (uint.nat i)) by word.
+        rewrite fibonacci_S; [ word | ].
+        (* we need to show the [word.add] doesn't overflow to finish the proof *)
+        assert (uint.Z cur + uint.Z prev < 2^64) as Hsum.
+        {
+          (* to prove this, we'll use the fact that [uint.nat cur + uint.nat
       prev = fibonacci (S i)], and that [fibonacci] is monotonic. We know that
       [i < n] as part of the loop invariant. *)
-        pose proof (fibonacci_monotonic (S (uint.nat i)) (uint.nat n)) as Hi_n.
-        rewrite -> fibonacci_S in Hi_n by word.
-        word. }
-      word.
-  - iIntros "[IH i]". iNamed "IH".
-    wp_load.
-    iModIntro.
-    iApply "HΦ".
-    auto.
+          pose proof (fibonacci_monotonic (S (uint.nat i)) (uint.nat n)) as Hi_n.
+          rewrite -> fibonacci_S in Hi_n by word.
+          word. }
+        word.
+    + rewrite if_decide_bool_decide_eq_false //.
+      destruct (decide _); try wp_auto.
+      { word. }
+      iApply "HΦ".
+      iPureIntro.
+      assert (uint.Z i = uint.Z n) by word.
+      congruence.
 Qed.
 
 End proof.

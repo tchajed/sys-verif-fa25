@@ -16,10 +16,11 @@ Before starting, **you should read the [fibonacci demo](/notes/program-proofs/fi
 
 ```coq
 From sys_verif.program_proof Require Import prelude empty_ffi.
-From Goose.sys_verif_code Require Import functional.
+From sys_verif.program_proof Require Import functional_init.
 
 Section proof.
 Context `{hG: !heapGS Σ}.
+Context `{!goGlobalsGS Σ}.
 
 ```
 
@@ -53,8 +54,8 @@ Qed.
 proof, which the `word` tactic will not (currently) do automatically. *)
 
 Lemma wp_Factorial (n: w64) :
-  {{{ ⌜Z.of_nat (fact (uint.nat n)) < 2^64⌝ }}}
-    Factorial #n
+  {{{ is_pkg_init functional ∗ ⌜Z.of_nat (fact (uint.nat n)) < 2^64⌝ }}}
+    functional @ "Factorial" #n
   {{{ (c: w64), RET #c; ⌜uint.nat c = fact (uint.nat n)⌝ }}}.
 Proof.
 Admitted.

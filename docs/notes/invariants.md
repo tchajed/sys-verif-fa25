@@ -69,31 +69,34 @@ Let's see this in action.
 
 ```coq
 From sys_verif.program_proof Require Import prelude empty_ffi.
-From Goose.sys_verif_code Require Import concurrent.
+From New.proof Require Import sync std.
+From sys_verif.program_proof Require Import concurrent_init.
 
 Section goose.
 Context `{hG: !heapGS Σ}.
+Context `{!goGlobalsGS Σ}.
 
 Let N := nroot .@ "lock".
 
 Lemma wp_SetX (x_l: loc) (x: w64) :
-  {{{ x_l ↦[uint64T] #x }}}
-    SetX #x_l
-  {{{ RET #(); x_l ↦[uint64T] #(W64 1) }}}.
+  {{{ is_pkg_init concurrent ∗ x_l ↦ x }}}
+    concurrent @ "SetX" #x_l
+  {{{ RET #(); x_l ↦ (W64 1) }}}.
 Proof.
   wp_start as "x".
-  wp_store.
-  iModIntro. iApply "HΦ". iFrame.
+  wp_alloc x_l' as "x2".
+  wp_auto.
+  iApply "HΦ".
+  iFrame.
 Qed.
 
 Lemma wp_NoGo :
-  {{{ True }}}
-    NoGo #()
+  {{{ is_pkg_init concurrent }}}
+    concurrent @ "NoGo" #()
   {{{ RET #(); True }}}.
 Proof.
-  wp_start as "_".
-  wp_alloc x_l as "x".
-  wp_pures.
+  wp_start as "#init".
+  wp_auto.
   wp_apply (wp_SetX with "[$x]").
   iIntros "x".
 ```
@@ -103,35 +106,42 @@ Proof.
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
+  goGlobalsGS0 : goGlobalsGS Σ
   N := nroot.@"lock" : namespace
   Φ : val → iPropI Σ
-  x_l : loc
+  x_ptr : loc
   ============================
-  "HΦ" : True -∗ Φ #()
-  "x" : x_l ↦[uint64T] #(W64 1)
+  _ : is_pkg_init concurrent
+  "init" : emp
+  --------------------------------------□
+  "HΦ" : True -∗ Φ (# ())
+  "x" : x_ptr ↦ W64 1
   --------------------------------------∗
-  WP #();; #() {{ v, Φ v }}
+  WP exception_do ((do: # ()) ;;;
+                   return: # ()) {{ v, Φ v }}
 ```
 
 ::::
 
 ```coq
   wp_pures.
-  iModIntro. iApply "HΦ". done.
+  iApply "HΦ". done.
 Qed.
 
 Lemma wp_FirstGo :
-  {{{ True }}}
-    FirstGo #()
+  {{{ is_pkg_init concurrent }}}
+    concurrent @ "FirstGo" #()
   {{{ RET #(); True }}}.
 Proof.
-  wp_start as "_".
-  wp_alloc x_l as "x".
+  wp_start as "#init".
+  wp_auto.
   (* The actual GooseLang construct for creating threads is called Fork. The
   specification for Fork is equivalent to the wp-spawn above, but is written in
   continuation-passing style. *)
-  wp_apply (wp_fork with "[x]").
+  wp_bind (Fork _).
+  iApply (wp_fork with "[x]").
   { iModIntro.
+    wp_pures.
     wp_apply (wp_SetX with "[$x]"). iIntros "x".
 ```
 
@@ -140,22 +150,29 @@ Proof.
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
+  goGlobalsGS0 : goGlobalsGS Σ
   N := nroot.@"lock" : namespace
   Φ : val → iPropI Σ
-  x_l : loc
+  x_ptr : loc
   ============================
-  "x" : x_l ↦[uint64T] #(W64 1)
+  _ : is_pkg_init concurrent
+  "init" : emp
+  --------------------------------------□
+  "x" : x_ptr ↦ W64 1
   --------------------------------------∗
-  True
+  WP exception_do ((do: # ()) ;;;
+                   return: # ()) {{ _, True }}
 ```
 
 ::::
 
 ```coq
+    wp_pures.
     done.
   }
+  iModIntro.
   wp_pures.
-  iModIntro. iApply "HΦ". done.
+  iApply "HΦ". done.
 Qed.
 
 ```
@@ -169,6 +186,8 @@ new(sync.Mutex) // to create a new lock
 func (m *sync.Mutex) Lock()
 func (m *sync.Mutex) Unlock()
 ```
+
+TODO: update explanation since init_Mutex fupd is now required
 
 We can use mutexes (also commonly called locks) to ensure that critical sections of our code run atomically.
 
@@ -221,19 +240,20 @@ Let's try a first proof that just shows this code is safe. Even with no interest
 
 ```coq
 Lemma wp_FirstLock_v1 :
-  {{{ True }}}
-    FirstLock #()
+  {{{ is_pkg_init concurrent }}}
+    concurrent @ "FirstLock" #()
   {{{ (y: w64), RET #y; True }}}.
 Proof.
   wp_start as "_".
-  wp_alloc x_l as "x". wp_pures.
-  wp_apply (wp_newMutex N _ (∃ (y: w64), x_l ↦[uint64T] #y)%I
-           with "[x]").
-  { iFrame. }
-  iIntros (m_l) "#Hlock".
-  wp_pures.
-  wp_apply wp_fork.
-  { wp_apply (wp_Mutex__Lock).
+  wp_alloc_auto; wp_pures.
+  wp_alloc_auto; wp_pures.
+  wp_alloc r0_l as "r0". wp_auto.
+  iMod (init_Mutex (∃ (y: w64), x_ptr ↦ y)%I with "r0 [$x]") as "#Hlock".
+  iPersist "m".
+  wp_bind (Fork _).
+  iApply wp_fork.
+  { iModIntro. wp_auto.
+    wp_apply wp_Mutex__Lock.
     { iExact "Hlock". }
     iIntros "[Hlocked Hinv]".
 ```
@@ -243,16 +263,27 @@ Proof.
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
+  goGlobalsGS0 : goGlobalsGS Σ
   N := nroot.@"lock" : namespace
   Φ : val → iPropI Σ
-  x_l, m_l : loc
+  x_ptr, m_ptr, r0_l : loc
   ============================
-  "Hlock" : is_lock N #m_l (∃ y : w64, x_l ↦[uint64T] #y)
+  _ : is_pkg_init concurrent
+  "Hlock" : is_Mutex r0_l (∃ y : w64, x_ptr ↦ y)
+  "m" : m_ptr ↦□ r0_l
   --------------------------------------□
-  "Hlocked" : lock.locked #m_l
-  "Hinv" : ∃ y : w64, x_l ↦[uint64T] #y
+  "Hlocked" : own_Mutex r0_l
+  "Hinv" : ∃ y : w64, x_ptr ↦ y
   --------------------------------------∗
-  WP #();; #x_l <-[uint64T] #(W64 1);; Mutex__Unlock #m_l {{ _, True }}
+  WP exception_do
+       ((do: # ()) ;;;
+        let: "$r0" := # (W64 1) in
+        (do: # x_ptr <-[# uint64T] "$r0") ;;;
+        (do: method_call (# sync) (# "Mutex'ptr"%go)
+               (# "Unlock"%go) ![# ptrT] (# m_ptr)
+               (# ())) ;;;
+        return: # ())
+  {{ _, True }}
 ```
 
 ::::
@@ -261,7 +292,7 @@ After calling Lock, the lock invariant appears in our hypotheses.
 
 ```coq
     iNamed "Hinv".
-    wp_store.
+    wp_auto.
     wp_apply (wp_Mutex__Unlock with "[Hlocked Hinv]").
     { iFrame "Hlock Hlocked".
 
@@ -278,16 +309,19 @@ To call Unlock, we need to prove the same lock invariant.
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
+  goGlobalsGS0 : goGlobalsGS Σ
   N := nroot.@"lock" : namespace
   Φ : val → iPropI Σ
-  x_l, m_l : loc
+  x_ptr, m_ptr, r0_l : loc
   y : w64
   ============================
-  "Hlock" : is_lock N #m_l (∃ y0 : w64, x_l ↦[uint64T] #y0)
+  _ : is_pkg_init concurrent
+  "Hlock" : is_Mutex r0_l (∃ y0 : w64, x_ptr ↦ y0)
+  "m" : m_ptr ↦□ r0_l
   --------------------------------------□
-  "Hinv" : x_l ↦[uint64T] #(W64 1)
+  "Hinv" : x_ptr ↦ W64 1
   --------------------------------------∗
-  ∃ y0 : w64, x_l ↦[uint64T] #y0
+  ∃ y0 : w64, x_ptr ↦ y0
 ```
 
 ::::
@@ -295,50 +329,53 @@ To call Unlock, we need to prove the same lock invariant.
 ```coq
       iFrame. }
     done. }
-  wp_pures.
-  wp_apply (wp_Mutex__Lock with "[$Hlock]"). iIntros "[Hlocked Hinv]". iNamed "Hinv".
-  wp_load.
-  wp_apply (wp_Mutex__Unlock with "[$Hlock $Hlocked $Hinv]").
-  wp_pures.
   iModIntro.
+  wp_auto.
+  wp_apply (wp_Mutex__Lock with "[$Hlock]"). iIntros "[Hlocked Hinv]". iNamed "Hinv".
+  wp_auto.
+  wp_apply (wp_Mutex__Unlock with "[$Hlock $Hlocked $Hinv]").
   iApply "HΦ". done.
 Qed.
 
 Lemma wp_FirstLock_v2 :
-  {{{ True }}}
-    FirstLock #()
+  {{{ is_pkg_init concurrent }}}
+    concurrent @ "FirstLock" #()
   {{{ (y: w64), RET #y; ⌜uint.Z y = 0 ∨ uint.Z y = 1⌝ }}}.
 Proof.
   wp_start as "_".
-  wp_alloc x_l as "x". wp_pures.
-  wp_apply (wp_newMutex N _ (∃ (y: w64),
-                  "x" :: x_l ↦[uint64T] #y ∗
+  wp_alloc_auto; wp_pures.
+  wp_alloc_auto; wp_pures.
+  wp_alloc m_l as "Hm". wp_auto.
+  iMod (init_Mutex (∃ (y: w64),
+                  "x" :: x_ptr ↦ y ∗
                   "%Hx" :: ⌜uint.Z y = 0 ∨ uint.Z y = 1⌝)%I
-           with "[x]").
-  { iFrame. iPureIntro. left; word. }
-  iIntros (m_l) "#Hlock".
-  wp_pures.
-  wp_apply wp_fork.
-  { wp_apply (wp_Mutex__Lock).
+         with "Hm [x]") as "#Hlock".
+  { iModIntro. iFrame.
+    iPureIntro. left; auto.
+  }
+  iPersist "m".
+  wp_bind (Fork _).
+  iApply wp_fork.
+  { iModIntro. wp_auto.
+    wp_apply wp_Mutex__Lock.
     { iExact "Hlock". }
     iIntros "[Hlocked Hinv]".
     iNamed "Hinv".
-    wp_store.
+    wp_auto.
     wp_apply (wp_Mutex__Unlock with "[Hlocked x]").
     { iFrame "Hlock Hlocked".
       iModIntro.
       iFrame.
-      iPureIntro. right; word. }
+      iPureIntro. right; word.
+    }
     done. }
-  wp_pures.
+  iModIntro.
+  wp_auto.
   wp_apply (wp_Mutex__Lock with "[$Hlock]"). iIntros "[Hlocked Hinv]". iNamed "Hinv".
-  wp_load.
-  wp_pures.
+  wp_auto.
   wp_apply (wp_Mutex__Unlock with "[$Hlock $Hlocked $x]").
   { iPureIntro. auto. }
-  wp_pures.
-  iModIntro.
-  iApply "HΦ". iPureIntro. done.
+  iApply "HΦ". done.
 Qed.
 
 End goose.

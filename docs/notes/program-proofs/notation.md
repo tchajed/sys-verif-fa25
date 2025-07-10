@@ -157,9 +157,10 @@ About takes_nat_scope.
 takes_nat_scope : ∀ {A : Type}, A → A
 
 takes_nat_scope is not universe polymorphic
-Arguments takes_nat_scope {A} x%nat_scope
+Arguments takes_nat_scope {A} x%_nat_scope
 takes_nat_scope is transparent
 Expands to: Constant __input.takes_nat_scope
+Declared in library __input, line 42, characters 11-26
 ```
 
 ::::

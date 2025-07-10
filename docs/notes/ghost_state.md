@@ -130,14 +130,19 @@ Let's look at some examples of ghost variables and their updates in Coq.
 
 ```coq
 From sys_verif.program_proof Require Import prelude empty_ffi.
+From New.proof Require Import std sync.
+From sys_verif.generatedproof.sys_verif_code Require Import concurrent.
 From Perennial.algebra Require Import ghost_var.
-From Perennial.program_proof Require Import std_proof.
-From Goose.sys_verif_code Require Import concurrent.
 
 Section goose.
 Context `{hG: !heapGS Σ}.
+Context `{!goGlobalsGS Σ}.
 Context `{ghost_varG0: ghost_varG Σ Z}.
 Open Scope Z_scope.
+
+Program Instance : IsPkgInit concurrent :=
+  ltac2:(build_pkg_init ()).
+Final Obligation. apply _. Qed.
 
 ```
 
@@ -160,7 +165,7 @@ ghost_var.ghost_var_def =
      : ∀ {Σ : gFunctors} {A : Type},
          ghost_varG Σ A → gname → dfrac → A → iProp Σ
 
-Arguments ghost_var.ghost_var_def {Σ} {A}%type_scope {ghost_varG0} γ dq a
+Arguments ghost_var.ghost_var_def {Σ} {A}%_type_scope {ghost_varG0} γ dq a
 ```
 
 ::::
@@ -297,70 +302,24 @@ Definition lock_inv γ1 γ2 l : iProp _ :=
   ∃ (x: w64) (x1 x2: Z),
     "Hx1" :: ghost_var γ1 (DfracOwn (1/2)) x1 ∗
     "Hx2" :: ghost_var γ2 (DfracOwn (1/2)) x2 ∗
-    "x" ∷ l ↦[uint64T] #x ∗
+    "x" ∷ l ↦ x ∗
     "%Hsum" ∷ ⌜x1 ≤ 2 ∧ x2 ≤ 2 ∧ uint.Z x = (x1 + x2)%Z⌝.
 
 Lemma wp_ParallelAdd3 :
-  {{{ True }}}
-    ParallelAdd3 #()
+  {{{ is_pkg_init concurrent }}}
+    concurrent @ "ParallelAdd3" #()
   {{{ (x: w64), RET #x; ⌜uint.Z x = 4⌝ }}}.
 Proof using All.
   wp_start as "_".
   iMod (ghost_var_alloc 0) as (γ1) "[Hv1_1 Hx1_2]".
   iMod (ghost_var_alloc 0) as (γ2) "[Hv2_1 Hx2_2]".
-
-
-```
-
-This proof illustrates one more thing, incidentally. The code creates a mutex before the variable `x` that it protects. This turns out not to be an issue; the Goose mutex specifications support this use case. What we do is first create a "free lock", which is a lock without a lock invariant (yet).
-
-```coq
-  wp_apply wp_new_free_lock; iIntros (mu_l) "Hlock".
-```
-
-:::: info Goal
-
-```txt title="goal 1"
-  Σ : gFunctors
-  hG : heapGS Σ
-  ghost_varG0 : ghost_varG Σ Z
-  Φ : val → iPropI Σ
-  γ1, γ2 : gname
-  mu_l : loc
-  ============================
-  "HΦ" : ∀ x : w64, ⌜uint.Z x = 4⌝ -∗ Φ #x
-  "Hv1_1" : ghost_var γ1 (DfracOwn (1 / 2)) 0
-  "Hx1_2" : ghost_var γ1 (DfracOwn (1 / 2)) 0
-  "Hv2_1" : ghost_var γ2 (DfracOwn (1 / 2)) 0
-  "Hx2_2" : ghost_var γ2 (DfracOwn (1 / 2)) 0
-  "Hlock" : is_free_lock mu_l
-  --------------------------------------∗
-  WP let: "m" := #mu_l in
-     let: "i" := ref_to uint64T #(W64 0) in
-     let: "h1" := std.Spawn
-                    (λ: <>,
-                       Mutex__Lock "m";;
-                       "i" <-[uint64T] ![uint64T] "i" + #(W64 2);;
-                       Mutex__Unlock "m";; #()) in
-     let: "h2" := std.Spawn
-                    (λ: <>,
-                       Mutex__Lock "m";;
-                       "i" <-[uint64T] ![uint64T] "i" + #(W64 2);;
-                       Mutex__Unlock "m";; #()) in
-     std.JoinHandle__Join "h1";;
-     std.JoinHandle__Join "h2";;
-     Mutex__Lock "m";; let: "y" := ![uint64T] "i" in Mutex__Unlock "m";; "y"
-  {{ v, Φ v }}
-```
-
-::::
-
-```coq
-  wp_alloc x_l as "x".
-  iMod (alloc_lock nroot _ _ (lock_inv γ1 γ2 x_l)
-         with "Hlock [$x $Hv1_1 $Hv2_1]") as "#Hlock".
-  { iPureIntro. done. }
-  wp_pures.
+  wp_auto.
+  wp_alloc m_l as "Hm".
+  wp_auto.
+  iMod (init_Mutex (lock_inv γ1 γ2 i_ptr)
+         with "Hm [$i $Hv1_1 $Hv2_1]") as "#Hlock".
+  { iPureIntro. word. }
+  try wp_auto.
 ```
 
 :::: info Goal
@@ -368,65 +327,123 @@ This proof illustrates one more thing, incidentally. The code creates a mutex be
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
+  goGlobalsGS0 : goGlobalsGS Σ
   ghost_varG0 : ghost_varG Σ Z
   Φ : val → iPropI Σ
   γ1, γ2 : gname
-  mu_l, x_l : loc
+  m_ptr, m_l, i_ptr, h1_ptr : loc
   ============================
-  "Hlock" : is_lock nroot #mu_l (lock_inv γ1 γ2 x_l)
+  _ : is_pkg_init concurrent
+  "Hlock" : is_Mutex m_l (lock_inv γ1 γ2 i_ptr)
   --------------------------------------□
-  "HΦ" : ∀ x : w64, ⌜uint.Z x = 4⌝ -∗ Φ #x
+  "HΦ" : ∀ x : w64, ⌜uint.Z x = 4⌝ -∗ Φ (# x)
   "Hx1_2" : ghost_var γ1 (DfracOwn (1 / 2)) 0
   "Hx2_2" : ghost_var γ2 (DfracOwn (1 / 2)) 0
+  "m" : m_ptr ↦ m_l
+  "h1" : h1_ptr ↦ default_val loc
   --------------------------------------∗
-  WP let: "h1" := std.Spawn
-                    (λ: <>,
-                       Mutex__Lock #mu_l;;
-                       #x_l <-[uint64T] ![uint64T] #x_l + #(W64 2);;
-                       Mutex__Unlock #mu_l;; #())%V in
-     let: "h2" := std.Spawn
-                    (λ: <>,
-                       Mutex__Lock #mu_l;;
-                       #x_l <-[uint64T] ![uint64T] #x_l + #(W64 2);;
-                       Mutex__Unlock #mu_l;; #()) in
-     std.JoinHandle__Join "h1";;
-     std.JoinHandle__Join "h2";;
-     Mutex__Lock #mu_l;;
-     let: "y" := ![uint64T] #x_l in Mutex__Unlock #mu_l;; "y"
+  WP exception_do
+       (let: "$r0" := # (func_callv std "Spawn")
+                        (#
+                           {|
+                             func.f := <>;
+                             func.x := <>;
+                             func.e :=
+                               exception_do
+                                 ((do: method_call
+                                         (# sync)
+                                         (# "Mutex'ptr"%go)
+                                         (# "Lock"%go) ![
+                                         # ptrT] (# m_ptr)
+                                         (# ())) ;;;
+                                  (do: # i_ptr <-[
+                                       # uint64T]
+                                       ![# uint64T]
+                                       (# i_ptr) +
+                                       # (W64 2)) ;;;
+                                  (do: method_call
+                                         (# sync)
+                                         (# "Mutex'ptr"%go)
+                                         (# "Unlock"%go) ![
+                                         # ptrT] (# m_ptr)
+                                         (# ())) ;;;
+                                  return: # ())
+                           |}) in
+        (do: # h1_ptr <-[# ptrT] "$r0") ;;;
+        let: "h2" := alloc (type.zero_val (# ptrT)) in
+        let: "$r0" := let: "$a0" := λ: <>,
+                                      exception_do
+                                        ((do: method_call
+                                                (# sync)
+                                                (# "Mutex'ptr"%go)
+                                                (# "Lock"%go)
+                                                ![
+                                                # ptrT]
+                                                (# m_ptr)
+                                                (# ())) ;;;
+                                         (do: # i_ptr <-[
+                                              # uint64T]
+                                              ![# uint64T]
+                                              (# i_ptr) +
+                                              # (W64 2)) ;;;
+                                         (do: method_call
+                                                (# sync)
+                                                (# "Mutex'ptr"%go)
+                                                (# "Unlock"%go)
+                                                ![
+                                                # ptrT]
+                                                (# m_ptr)
+                                                (# ())) ;;;
+                                         return: # ()) in
+                      func_call (# std) (# "Spawn"%go) "$a0" in
+        (do: "h2" <-[# ptrT] "$r0") ;;;
+        (do: method_call (# std) (# "JoinHandle'ptr"%go)
+               (# "Join"%go) ![# ptrT] (# h1_ptr)
+               (# ())) ;;;
+        (do: method_call (# std) (# "JoinHandle'ptr"%go)
+               (# "Join"%go) ![# ptrT] "h2" (# ())) ;;;
+        (do: method_call (# sync) (# "Mutex'ptr"%go)
+               (# "Lock"%go) ![# ptrT] (# m_ptr) (# ())) ;;;
+        let: "y" := alloc (type.zero_val (# uint64T)) in
+        let: "$r0" := ![# uint64T] (# i_ptr) in
+        (do: "y" <-[# uint64T] "$r0") ;;;
+        (do: method_call (# sync) (# "Mutex'ptr"%go)
+               (# "Unlock"%go) ![# ptrT] (# m_ptr)
+               (# ())) ;;;
+        return: ![# uint64T] "y")
   {{ v, Φ v }}
 ```
 
 ::::
 
-Observe here that the `alloc_lock` above has consumed the `is_free_lock` and associated it with a chosen lock invariant. Importantly, we couldn't actually use the `wp_Mutex__Lock` specification before using `alloc_lock`.
+Observe here that the `init_Mutex` above has consumed the plain mutex value and associated it with a chosen lock invariant. Importantly, we couldn't actually use the `wp_Mutex__Lock` specification before using `init_Mutex`.
 
 ```coq
-  wp_apply (std_proof.wp_Spawn (ghost_var γ1 (DfracOwn (1/2)) 2) with "[Hx1_2]").
-  {
-    clear Φ.
+  iPersist "m".
+
+  wp_apply (wp_Spawn (ghost_var γ1 (DfracOwn (1/2)) 2) with "[Hx1_2]").
+  { clear Φ.
     iIntros (Φ) "HΦ".
-    wp_pures.
+    wp_auto.
     wp_apply (wp_Mutex__Lock with "[$Hlock]"). iIntros "[locked Hinv]". iNamed "Hinv".
-    wp_load.
-    wp_store.
+    wp_auto.
     iDestruct (ghost_var_agree with "Hx1_2 Hx1") as %Heq; subst.
     iMod (ghost_var_update_2 2 with "Hx1_2 Hx1") as "[Hx1_2 Hx1]".
     { rewrite dfrac_op_own Qp.half_half //. }
     wp_apply (wp_Mutex__Unlock with "[-HΦ Hx1_2 $Hlock $locked]").
-    { iFrame.
-      iPureIntro. split_and!; try word. }
-    wp_pures.
-    iApply "HΦ". iFrame. done.
+    { iFrame. iPureIntro. split_and!; try word. }
+    iApply "HΦ". iFrame.
   }
-  iIntros (h_1) "h1".
-  wp_apply (std_proof.wp_Spawn (ghost_var γ2 (DfracOwn (1/2)) 2) with "[Hx2_2]").
-  {
-    clear Φ.
+
+  iIntros (h_1) "#Hjh1".
+  wp_auto.
+
+  wp_apply (wp_Spawn (ghost_var γ2 (DfracOwn (1/2)) 2) with "[Hx2_2]").
+  { clear Φ.
     iIntros (Φ) "HΦ".
-    wp_pures.
+    wp_auto.
     wp_apply (wp_Mutex__Lock with "[$Hlock]"). iIntros "[locked Hinv]". iNamed "Hinv".
-    wp_load.
-    wp_store.
+    wp_auto.
     iDestruct (ghost_var_agree with "Hx2_2 Hx2") as %Heq; subst.
     iMod (ghost_var_update_2 2 with "Hx2_2 Hx2") as "[Hx2_2 Hx2]".
     { rewrite dfrac_op_own Qp.half_half //. }
@@ -434,20 +451,21 @@ Observe here that the `alloc_lock` above has consumed the `is_free_lock` and ass
     { iFrame.
       iPureIntro. split_and!; try word. }
     wp_pures.
-    iApply "HΦ". iFrame. done.
+    iApply "HΦ". iFrame.
   }
-  iIntros (h_2) "h2".
-  wp_pures.
-  wp_apply (wp_JoinHandle__Join with "[$h1]"). iIntros "Hx1_2".
-  wp_apply (wp_JoinHandle__Join with "[$h2]"). iIntros "Hx2_2".
+  iIntros (h_2) "#Hjh2".
+  wp_auto.
+  wp_apply (wp_JoinHandle__Join with "[$Hjh1]").
+  iIntros "Hx1_2". wp_auto.
+
+  wp_apply (wp_JoinHandle__Join with "[$Hjh2]").
+  iIntros "Hx2_2". wp_auto.
   wp_apply (wp_Mutex__Lock with "[$Hlock]"). iIntros "[locked Hinv]". iNamed "Hinv".
   iDestruct (ghost_var_agree with "Hx1_2 Hx1") as %Heq; subst.
   iDestruct (ghost_var_agree with "Hx2_2 Hx2") as %Heq; subst.
-  wp_load.
+  wp_auto.
   wp_apply (wp_Mutex__Unlock with "[$locked $Hlock Hx1 Hx2 x]").
   { iFrame. iPureIntro. split_and!; word. }
-  wp_pures.
-  iModIntro.
   iApply "HΦ".
   iPureIntro. word.
 Qed.

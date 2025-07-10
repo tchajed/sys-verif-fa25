@@ -83,7 +83,7 @@ Now let's see how these look in Coq. First, we need to do some setup:
 ```coq
 From sys_verif.program_proof Require Import prelude.
 From sys_verif.program_proof Require Import empty_ffi.
-From Goose.sys_verif_code Require heap.
+From sys_verif.program_proof Require heap_init.
 
 Section ipm.
 (* Ignore this Σ variable; it's part of Iris. *)
@@ -508,7 +508,7 @@ One more commonly used intro pattern is used for pure facts `⌜φ⌝` that show
 (Ignore the `{hG: !heapGS Σ}` part, this is needed to use ↦ in this example.)
 
 ```coq
-Lemma pure_intro_pattern `{hG: !heapGS Σ} (t a b: val) (x y: loc) :
+Lemma pure_intro_pattern `{hG: !heapGS Σ} (t a b: w64) (x y: loc) :
   ⌜t = a⌝ ∗ x ↦ b ∗ y ↦ t -∗ x ↦ b ∗ y ↦ a.
 Proof.
 
@@ -528,7 +528,7 @@ Qed.
 Here's a different way to move something into the pure context:
 
 ```coq
-Lemma pure_intro_pattern_v2 `{hG: !heapGS Σ} (t a b: val) (x y: loc) :
+Lemma pure_intro_pattern_v2 `{hG: !heapGS Σ} (t a b: w64) (x y: loc) :
   ⌜t = a⌝ ∗ x ↦ b ∗ y ↦ t -∗ x ↦ b ∗ y ↦ a.
 Proof.
   iIntros "(Heq & Hx & Hy)".
@@ -645,8 +645,9 @@ The IPM has some tactics for weakest precondition reasoning specifically. It's a
 All of these are easiest understood by seeing them in context; read on for an example.
 
 ```coq
-Import Goose.sys_verif_code.heap.
+Import sys_verif.program_proof.heap_init.
 Context `{hG: !heapGS Σ}.
+Context `{!goGlobalsGS Σ}.
 
 ```
 
@@ -662,27 +663,28 @@ The Go code for $f$ looks like this, although we won't cover its proof and will 
 
 ```go
 func IgnoreOneLocF(x *uint64, y *uint64) {
-	primitive.Assert( *x == 0 )
+	std.Assert( *x == 0 )
 	*x = 42
 }
 ```
 
-where `primitive.Assert` is a function provided by the Goose standard library.
+where `std.Assert` is a function provided by the Goose standard library.
 
 ```coq
 Lemma wp_IgnoreOneLocF (l l': loc) :
-  {{{ l ↦[uint64T] #(W64 0) }}}
-    IgnoreOneLocF #l #l'
-  {{{ RET #(); l ↦[uint64T] #(W64 42) }}}.
+  {{{ is_pkg_init heap.heap ∗ l ↦ (W64 0) }}}
+    heap.heap @ "IgnoreOneLocF" #l #l'
+  {{{ RET #(); l ↦ (W64 42) }}}.
 Proof.
   (* skip over this proof for now and focus on its usage (the next lemma) *)
   wp_start as "Hl".
-  wp_pures.
-  wp_load.
+  wp_alloc_auto; wp_pures.
+  wp_alloc_auto; wp_pures.
+  wp_load; wp_pures.
+  wp_load; wp_pures.
   wp_apply (wp_Assert).
   { rewrite bool_decide_eq_true_2 //. }
-  wp_store.
-  iModIntro.
+  wp_pures.
   iApply "HΦ".
   iFrame.
 Qed.
@@ -698,7 +700,7 @@ func UseIgnoreOneLocOwnership() {
 	var x = uint64(0)
 	var y = uint64(42)
 	IgnoreOneLocF(&x, &y)
-	primitive.Assert(x == y)
+	std.Assert(x == y)
 }
 ```
 
@@ -716,8 +718,8 @@ $$
 
 ```coq
 Lemma wp_UseIgnoreOneLocOwnership :
-  {{{ True }}}
-    UseIgnoreOneLocOwnership #()
+  {{{ is_pkg_init heap }}}
+    heap.heap @ "UseIgnoreOneLocOwnership" #()
   {{{ RET #(); True }}}.
 Proof.
   wp_start as "Hpre". (* precondition is trivial, but we'll name it anyway *)
@@ -728,26 +730,43 @@ Proof.
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
+  goGlobalsGS0 : goGlobalsGS Σ
   Φ : val → iPropI Σ
   ============================
-  "Hpre" : True
-  "HΦ" : True -∗ Φ #()
+  _ : is_pkg_init heap
+  "Hpre" : emp
+  --------------------------------------□
+  "HΦ" : True -∗ Φ (# ())
   --------------------------------------∗
-  WP let: "x" := ref_to uint64T #(W64 0) in
-     let: "y" := ref_to uint64T #(W64 42) in
-     IgnoreOneLocF "x" "y";;
-     impl.Assert (![uint64T] "x" = ![uint64T] "y");; #()
+  WP exception_do
+       (let: "x" := alloc (zero_val uint64T) in
+        let: "$r0" := # (W64 0) in
+        (do: "x" <-[# uint64T] "$r0") ;;;
+        let: "y" := alloc (type.zero_val (# uint64T)) in
+        let: "$r0" := # (W64 42) in
+        (do: "y" <-[# uint64T] "$r0") ;;;
+        (do: (let: "$a0" := "x" in
+              let: "$a1" := "y" in
+              func_call (# heap) (# "IgnoreOneLocF"%go) "$a0" "$a1")) ;;;
+        (do: (let: "$a0" := ![# uint64T] "x" = ![# uint64T] "y" in
+              func_call (# std) (# "Assert"%go) "$a0")) ;;;
+        return: # ())
   {{ v, Φ v }}
 ```
 
 ::::
+
+```coq
+  rewrite -default_val_eq_zero_val.
+
+```
 
 The next step in the proof outline is this call to `ref_to`, which allocates.
 
 Formally, the proof proceeds by applying the bind rule (to split the program into `ref_to uint64T #(W64 0)` and the rest of the code that uses this value). We can use an IPM tactic to automate this process, in particular identifying the context `K` in the bind rule.
 
 ```coq
-  wp_bind (ref_to uint64T #(W64 0))%E.
+  wp_bind (alloc #(default_val w64))%E.
 ```
 
 :::: info Goal
@@ -755,17 +774,29 @@ Formally, the proof proceeds by applying the bind rule (to split the program int
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
+  goGlobalsGS0 : goGlobalsGS Σ
   Φ : val → iPropI Σ
   ============================
-  "Hpre" : True
-  "HΦ" : True -∗ Φ #()
+  _ : is_pkg_init heap
+  "Hpre" : emp
+  --------------------------------------□
+  "HΦ" : True -∗ Φ (# ())
   --------------------------------------∗
-  WP ref_to uint64T #(W64 0)
+  WP alloc (# (default_val w64))
   {{ v,
-     WP let: "x" := v in
-        let: "y" := ref_to uint64T #(W64 42) in
-        IgnoreOneLocF "x" "y";;
-        impl.Assert (![uint64T] "x" = ![uint64T] "y");; #()
+     WP exception_do
+          (let: "x" := v in
+           let: "$r0" := # (W64 0) in
+           (do: "x" <-[# uint64T] "$r0") ;;;
+           let: "y" := alloc (type.zero_val (# uint64T)) in
+           let: "$r0" := # (W64 42) in
+           (do: "y" <-[# uint64T] "$r0") ;;;
+           (do: (let: "$a0" := "x" in
+                 let: "$a1" := "y" in
+                 func_call (# heap) (# "IgnoreOneLocF"%go) "$a0" "$a1")) ;;;
+           (do: (let: "$a0" := ![# uint64T] "x" = ![# uint64T] "y" in
+                 func_call (# std) (# "Assert"%go) "$a0")) ;;;
+           return: # ())
      {{ v, Φ v }} }}
 ```
 
@@ -776,19 +807,30 @@ Take a moment to read this goal: it says we need to prove a specification for ju
 The next step you'd expect is that we need to use the rule of consequence to prove this goal from the existing specification for `ref`:
 
 ```coq
-  Check wp_ref_to.
+  Check wp_alloc.
 ```
 
 :::: note Output
 
 ```txt title="coq output"
-wp_ref_to
-     : ∀ (t : ty) (stk : stuckness) (E : coPset) (v : val),
-         val_ty v t
-         → {{{ True }}}
-             ref_to t v
-           @ stk; E
-           {{{ (l : loc), RET #l; l ↦[t] v }}}
+wp_alloc
+     : ∀ (v : ?V) (stk : stuckness) (E : coPset) (Φ0 : val → iPropI Σ),
+         True -∗
+         ▷ (∀ l : loc, l ↦ v -∗ Φ0 (# l)) -∗
+         WP alloc (# v) @ stk; E {{ v, Φ0 v }}
+where
+?V :
+  [Σ : gFunctors
+   hG : heapGS Σ
+   goGlobalsGS0 : goGlobalsGS Σ
+   Φ : val → iPropI Σ
+  |- Type]
+?IntoVal0 :
+  [Σ : gFunctors
+   hG : heapGS Σ
+   goGlobalsGS0 : goGlobalsGS Σ
+   Φ : val → iPropI Σ
+  |- IntoVal ?V]
 ```
 
 ::::
@@ -796,10 +838,8 @@ wp_ref_to
 We do _not_ end up needing the rule of consequence. The reason is that the meaning of `{{{ P }}} e {{{ RET v; Q }}}` in Iris already has consequence built-in.
 
 ```coq
-  iApply wp_ref_to.
-  { (* typing-related: ignore for now *)
-    auto. }
-  { (* the (trivial) precondition in wp_ref_to *)
+  iApply wp_alloc.
+  { (* the (trivial) precondition in wp_alloc *)
     auto. }
 
   iModIntro. (* don't worry about this for now *)
@@ -819,20 +859,32 @@ At this point there is a `let:` binding which we need to apply the pure-step rul
 ```txt title="goal diff"
   Σ : gFunctors
   hG : heapGS Σ
+  goGlobalsGS0 : goGlobalsGS Σ
   Φ : val → iPropI Σ
   x : loc
   ============================
-  "Hpre" : True
-  "HΦ" : True -∗ Φ #()
-  "Hx" : x ↦[uint64T] #(W64 0)
+  _ : is_pkg_init heap
+  "Hpre" : emp
+  --------------------------------------□
+  "HΦ" : True -∗ Φ (# ())
+  "Hx" : x ↦ default_val w64
   --------------------------------------∗
-  WP let: "x" := #x in // [!code --]
-     let: "y" := ref_to uint64T #(W64 42) in // [!code --]
-     IgnoreOneLocF "x" "y";;  // [!code --]
-     impl.Assert (![uint64T] "x" = ![uint64T] "y");; #() // [!code --]
-  WP let: "y" := ref_to uint64T #(W64 42) in // [!code ++]
-     IgnoreOneLocF #x "y";;  // [!code ++]
-     impl.Assert (![uint64T] #x = ![uint64T] "y");; #() // [!code ++]
+  WP exception_do
+       (let: "x" := # x in // [!code --]
+        let: "$r0" := # (W64 0) in // [!code --]
+        (do: "x" <-[# uint64T] "$r0") ;;; // [!code --]
+       ((do: # x <-[# uint64T] # (W64 0)) ;;; // [!code ++]
+        let: "y" := alloc (type.zero_val (# uint64T)) in
+        let: "$r0" := # (W64 42) in
+        (do: "y" <-[# uint64T] "$r0") ;;;
+        (do: (let: "$a0" := "x" in // [!code --]
+        (do: (let: "$a0" := # x in // [!code ++]
+              let: "$a1" := "y" in
+              func_call (# heap) (# "IgnoreOneLocF"%go) "$a0" "$a1")) ;;;
+        (do: (let: "$a0" := ![# uint64T] "x" = ![# uint64T] "y" in // [!code --]
+        (do: (let: "$a0" := ![# uint64T] (# x) = ![# uint64T] "y" in // [!code ++]
+              func_call (# std) (# "Assert"%go) "$a0")) ;;;
+        return: # ())
   {{ v, Φ v }}
 ```
 
@@ -841,9 +893,11 @@ At this point there is a `let:` binding which we need to apply the pure-step rul
 The IPM can automate all of the above for allocation, load, and store:
 
 ```coq
+  wp_store. wp_pures.
   wp_alloc y as "Hy".
   wp_pures.
-  wp_bind (IgnoreOneLocF _ _). (* make the goal easier to understand *)
+  wp_store. wp_pures.
+  wp_bind (heap @ "IgnoreOneLocF" _ _)%E. (* make the goal easier to understand *)
 ```
 
 :::: info Goal
@@ -851,17 +905,25 @@ The IPM can automate all of the above for allocation, load, and store:
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
+  goGlobalsGS0 : goGlobalsGS Σ
   Φ : val → iPropI Σ
   x, y : loc
   ============================
-  "Hpre" : True
-  "HΦ" : True -∗ Φ #()
-  "Hx" : x ↦[uint64T] #(W64 0)
-  "Hy" : y ↦[uint64T] #(W64 42)
+  _ : is_pkg_init heap
+  "Hpre" : emp
+  --------------------------------------□
+  "HΦ" : True -∗ Φ (# ())
+  "Hx" : x ↦ W64 0
+  "Hy" : y ↦ W64 42
   --------------------------------------∗
-  WP IgnoreOneLocF #x #y
+  WP # (func_callv heap "IgnoreOneLocF") (# x) (# y)
   {{ v,
-     WP v;; impl.Assert (![uint64T] #x = ![uint64T] #y);; #() {{ v, Φ v }} }}
+     WP exception_do
+          ((do: v) ;;;
+           (do: (let: "$a0" := ![# uint64T] (# x) = ![# uint64T] (# y) in
+                 func_call (# std) (# "Assert"%go) "$a0")) ;;;
+           return: # ())
+     {{ v, Φ v }} }}
 ```
 
 ::::
@@ -877,26 +939,37 @@ You might think we should do `iApply wp_IgnoreOneLocF`. Let's see what happens i
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
+  goGlobalsGS0 : goGlobalsGS Σ
   Φ : val → iPropI Σ
   x, y : loc
   ============================
-  --------------------------------------∗
-  x ↦[uint64T] #(W64 0)
+  _ : is_pkg_init heap
+  "Hpre" : emp
+  --------------------------------------□
+  is_pkg_init heap ∗ x ↦ W64 0
 ```
 
 ```txt title="goal 2"
   Σ : gFunctors
   hG : heapGS Σ
+  goGlobalsGS0 : goGlobalsGS Σ
   Φ : val → iPropI Σ
   x, y : loc
   ============================
-  "Hpre" : True
-  "HΦ" : True -∗ Φ #()
-  "Hx" : x ↦[uint64T] #(W64 0)
-  "Hy" : y ↦[uint64T] #(W64 42)
+  _ : is_pkg_init heap
+  "Hpre" : emp
+  --------------------------------------□
+  "HΦ" : True -∗ Φ (# ())
+  "Hx" : x ↦ W64 0
+  "Hy" : y ↦ W64 42
   --------------------------------------∗
-  ▷ (x ↦[uint64T] #(W64 42) -∗
-     WP #();; impl.Assert (![uint64T] #x = ![uint64T] #y);; #() {{ v, Φ v }})
+  ▷ (x ↦ W64 42 -∗
+     WP exception_do
+          ((do: # ()) ;;;
+           (do: (let: "$a0" := ![# uint64T] (# x) = ![# uint64T] (# y) in
+                 func_call (# std) (# "Assert"%go) "$a0")) ;;;
+           return: # ())
+     {{ v, Φ v }})
 ```
 
 ::::
@@ -923,18 +996,22 @@ The IPM provides several mechanisms for deciding on these splits. A _specializat
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
+  goGlobalsGS0 : goGlobalsGS Σ
   Φ : val → iPropI Σ
   x, y : loc
   ============================
-  "Hx" : x ↦[uint64T] #(W64 0)
+  _ : is_pkg_init heap
+  "Hpre" : emp
+  --------------------------------------□
+  "Hx" : x ↦ W64 0
   --------------------------------------∗
-  x ↦[uint64T] #(W64 0)
+  is_pkg_init heap ∗ x ↦ W64 0
 ```
 
 ::::
 
 ```coq
-  { iFrame. }
+  { iFrame. iPkgInit. (* normally the use of [wp_apply] would have handled this for us *) }
 
   iModIntro.
   (* this re-introduces the postcondition in `wp_IgnoreOneLocF` *)
@@ -949,10 +1026,10 @@ We'll now breeze through the rest of the proof:
   wp_pures.
   wp_load.
   wp_load.
+  wp_pures.
   wp_apply (wp_Assert).
   { rewrite bool_decide_eq_true_2 //. }
   wp_pures.
-  iModIntro.
   iApply "HΦ". done.
 Qed.
 

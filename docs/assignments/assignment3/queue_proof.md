@@ -17,19 +17,18 @@ This part of the assignment intentionally provides you with almost nothing: you'
 ```coq
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From sys_verif.program_proof Require Import heap_proof.stack_proof.
-From Goose.sys_verif_code Require Import heap.
+From sys_verif.program_proof Require Import heap_init.
 
 Section proof.
-Context `{hG: !heapGS Σ}.
+Context `{hG: !heapGS Σ} `{!goGlobalsGS Σ}.
 
-Definition queue_rep (v: val) (els: list w64): iProp Σ :=
+Definition queue_rep (v: heap.Queue.t) (els: list w64): iProp Σ :=
   False.
 Hint Rewrite @length_reverse : len.
 
 Lemma wp_NewQueue : False.
 Proof.
 Admitted.
-
 Lemma wp_Queue__Push : False.
 Proof.
 Admitted.
