@@ -15,11 +15,12 @@ This is a graduate-level class on _systems verification_: how to mathematically 
 
 ::: info Course info
 
-**Instructor**: Tej Chajed &lsaquo;<chajed@wisc.edu>&rsaquo; \
-**Office**: Morgridge 7572 \
-**Office hours**: Tue/Thu 3-4pm \
+**Instructor**: Tej Chajed &lsaquo;<chajed@wisc.edu>&rsaquo;
+
 **Lecture**: Tue/Thu 1-2:15pm \
 **Classroom**: Morgridge Hall 2538
+
+**Office hours**: Tue/Thu 3-4pm, in Morgridge 7572
 
 :::
 
