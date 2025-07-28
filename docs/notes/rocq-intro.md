@@ -6,30 +6,36 @@ order: 2
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
-# Lecture 2: Introduction to Coq
+# Lecture 2: Introduction to Rocq
 
-> Follow these notes in Coq at [src/sys_verif/coq/intro.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/coq/intro.v).
+> Follow these notes in Rocq at [src/sys_verif/coq/intro.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/coq/intro.v).
 
-In this lecture, we'll introduce Coq as a system, functional programming, and proving theorems about functional programs.
+In this lecture, we'll introduce Rocq as a system, functional programming, and proving theorems about functional programs.
 
 ## Learning outcomes
 
 By the end of this lecture, you should be able to
 
-1. Interact with Coq
+1. Interact with Rocq
 2. Implement functions with pattern matching and recursion
 3. Prove simple theorems about functions
 
-## Coq as an interactive theorem prover
+## Rocq as an interactive theorem prover
 
-Coq is a lot like a programming language, but it is fundamentally _interactive_ in a way that is unlike programming languages you've used. The interaction is necessary to write theorems, but understanding the interaction model is an important part of how you will write definitions, find already proven lemmas, and debug type errors.
+The Rocq prover is a lot like a programming language, but it is fundamentally _interactive_ in a way that is unlike programming languages you've used. The interaction is necessary to write theorems, but understanding the interaction model is an important part of how you will write definitions, find already proven lemmas, and debug type errors.
+
+::: info Rocq vs Coq
+
+Rocq was formerly called Coq, with the name change implemented around January 2025. You will still see references to Coq, in particular in Software Foundations, but all of these will eventually change.
+
+:::
 
 Three programming languages: terms, vernacular, tactics
 
 - Calculus of inductive constructions is the theory behind the term language.
 - Due to dependent types, there is no distinction between terms and types; it's all the same language.
-- Vernacular is a sequence of stateful commands. They create definitions, change attributes. They can also be queries which don't affect the state but help you write code. When you use Coq interactively, you've executed a prefix of the vernacular commands. You can move forward and backward, undoing commands.
-- When you are done with a development, you generally re-run Coq in "batch mode" like a compiler, which runs the same vernacular commands and produces a compiled output file. This is needed to make sure everything gets checked, and because Coq uses those outputs when it needs to import another file.
+- Vernacular is a sequence of stateful commands. They create definitions, change attributes. They can also be queries which don't affect the state but help you write code. When you use Rocq interactively, you've executed a prefix of the vernacular commands. You can move forward and backward, undoing commands.
+- When you are done with a development, you generally re-run Rocq in "batch mode" like a compiler, which runs the same vernacular commands and produces a compiled output file. This is needed to make sure everything gets checked, and because Rocq uses those outputs when it needs to import another file.
 - Vernacular commands create new types, definitions, and start proofs. Creating new types is especially interesting.
 - Tactics are used to prove theorems. This is yet another language (quite different from both vernacular and terms) that is stateful. At any point in a proof, you have N goals left. Tactics make progress or solve goals. Once a theorem is proven, you can generally ignore how it was proven; only the statement matters. However, the tactics are also code that is subject to maintenance as definitions/theorems change.
 
@@ -66,7 +72,7 @@ Definition next_weekday (d: day) : day :=
 
 ```
 
-Coq has a number of commands for interacting with the system while it's running. The first one we'll see is `Compute` below, which allows us to manually check the behavior of the function we just defined.
+Rocq has a number of commands for interacting with the system while it's running. The first one we'll see is `Compute` below, which allows us to manually check the behavior of the function we just defined.
 
 ```coq
 Compute (next_weekday friday).
@@ -81,7 +87,7 @@ Compute (next_weekday friday).
 
 ::::
 
-The main use of Coq is to prove theorems - it is a proof assistant after all. We'll get to more interesting theorems shortly, but for now let's prove a "unit test" theorem.
+The main use of Rocq is to prove theorems - it is a proof assistant after all. We'll get to more interesting theorems shortly, but for now let's prove a "unit test" theorem.
 
 NOTE: Theorem/Lemma/Example are all synonyms. In this class we'll try to stick to Lemma.
 
@@ -152,7 +158,7 @@ Definition andb' (b1 b2: bool) : bool :=
 
 ```
 
-Note on `if`: since booleans aren't built-in, and we just defined `bool` above, Coq's `if` expression works for any type with two constructors. Just to convince you `andb'` has the same behavior as `andb` above.
+Note on `if`: since booleans aren't built-in, and we just defined `bool` above, Rocq's `if` expression works for any type with two constructors. Just to convince you `andb'` has the same behavior as `andb` above.
 
 ```coq
 Lemma andb'_eq_andb : forall b1 b2, andb' b1 b2 = andb b1 b2.
@@ -206,7 +212,7 @@ Inductive bit : Type :=
 
 ```
 
-A single constructor with multiple parameters creates a "tuple" type (in PL called a "product" type). Coq has syntactic sugar for "record types" that extend this feature slightly.
+A single constructor with multiple parameters creates a "tuple" type (in PL called a "product" type). Rocq has syntactic sugar for "record types" that extend this feature slightly.
 
 ```coq
 Inductive nybble : Type :=
@@ -293,7 +299,7 @@ End NatPlayground.
 
 We'll do another exercise to get you thinking about how to approach a proof.
 
-You will always have two challenges in completing a proof in this class: (1) why is the theorem true?, and (2) how do we turn that into a Coq proof?. It's extremely helpful to understand the distinction to be able to develop these skills independently.
+You will always have two challenges in completing a proof in this class: (1) why is the theorem true?, and (2) how do we turn that into a Rocq proof?. It's extremely helpful to understand the distinction to be able to develop these skills independently.
 
 Let's go back to our `day` type.
 
@@ -326,7 +332,7 @@ Qed.
 
 Now let's prove something more interesting: every day has a previous day.
 
-Think-pair-share and come up with an informal proof strategy. Then I'll show how to translate it to a Coq proof.
+Think-pair-share and come up with an informal proof strategy. Then I'll show how to translate it to a Rocq proof.
 
 ```coq
 Lemma every_day_has_prev : forall d, exists d', next_day d' = d.
@@ -369,7 +375,7 @@ Here are some functions you can define on `option`. There are good motivations f
 
 ```
 
-Notice the extra type argument we had to provide to `Some`, and the somewhat odd `_` in the pattern match. To make it easier to work with polymorphic functions, Coq has a feature called _implicit arguments_. These commands modify how type inference treats `Some` and `None`, making the type argument implicit (that's what the curly braces mean). Don't worry about the syntax; you won't need to do this yourself.
+Notice the extra type argument we had to provide to `Some`, and the somewhat odd `_` in the pattern match. To make it easier to work with polymorphic functions, Rocq has a feature called _implicit arguments_. These commands modify how type inference treats `Some` and `None`, making the type argument implicit (that's what the curly braces mean). Don't worry about the syntax; you won't need to do this yourself.
 
 ```coq
   Arguments Some {A} x.
@@ -378,7 +384,7 @@ Notice the extra type argument we had to provide to `Some`, and the somewhat odd
 
 ```
 
-We'll now define `return_` (it should be called `return` but that's a Coq keyword) and `bind`. These make `option` into a _Monad_ but you don't need to understand that, just read the definitions.
+We'll now define `return_` (it should be called `return` but that's a Rocq keyword) and `bind`. These make `option` into a _Monad_ but you don't need to understand that, just read the definitions.
 
 ```coq
   Definition return_ {A} (x: A) : option A := Some x.
@@ -445,7 +451,7 @@ Qed.
 
 This proof uses `intros` and `rewrite`.
 
-Coq allows you to write `intros` without arguments, in which case it will automatically select names. We strongly recommend in this class to always give names, since it makes your proof easier to read and modify, as well as making it easier to read the context while you're developing a proof.
+Rocq allows you to write `intros` without arguments, in which case it will automatically select names. We strongly recommend in this class to always give names, since it makes your proof easier to read and modify, as well as making it easier to read the context while you're developing a proof.
 
 ```coq
 Lemma eq_add_O_2 n m :
@@ -501,7 +507,7 @@ Qed.
 
 ```
 
-This lemma is a proof of a disequality, a "not equals". Even this isn't built-in to Coq but built from simpler primitives.
+This lemma is a proof of a disequality, a "not equals". Even this isn't built-in to Rocq but built from simpler primitives.
 
 ```coq
 Lemma neq_succ_0 n :

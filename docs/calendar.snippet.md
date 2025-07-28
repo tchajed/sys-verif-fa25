@@ -4,7 +4,7 @@
 | --: | --- | --- |
 | 1 | Thu Sep 4 | [Introduction](./notes/lec1.md) |
 |  |  | **Part 1: Functional programs** |
-| 2 | Tue Sep 9 | [Coq introduction](./notes/coq-intro.md) |
+| 2 | Tue Sep 9 | [Rocq introduction](./notes/rocq-intro.md) |
 | 3 | Thu Sep 11 | [Induction](./notes/induction.md) |
 | 4 | Tue Sep 16 | [ADT specification](./notes/adt_specs.md) |
 | 5 | Thu Sep 18 | [ADTs with invariants](./notes/adt_invariants.md) |
