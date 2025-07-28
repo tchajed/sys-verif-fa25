@@ -8,7 +8,7 @@ pageInfo: ["Date", "Category", "Tag", "Word"]
 
 # Lecture 2: Introduction to Rocq
 
-> Follow these notes in Rocq at [src/sys_verif/coq/intro.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/coq/intro.v).
+> Follow these notes in Rocq at [src/sys_verif/rocq/intro.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/rocq/intro.v).
 
 In this lecture, we'll introduce Rocq as a system, functional programming, and proving theorems about functional programs.
 
@@ -16,13 +16,13 @@ In this lecture, we'll introduce Rocq as a system, functional programming, and p
 
 By the end of this lecture, you should be able to
 
-1. Interact with the Rocq prover
+1. Interact with Rocq
 2. Implement functions with pattern matching and recursion
 3. Prove simple theorems about functions
 
 ## Rocq as an interactive theorem prover
 
-The Rocq prover is a lot like a programming language, but it is fundamentally _interactive_ in a way that is unlike programming languages you've used. The interaction is necessary to write theorems, but understanding the interaction model is an important part of how you will write definitions, find already proven lemmas, and debug type errors.
+Rocq is a lot like a programming language, but it is fundamentally _interactive_ in a way that is unlike programming languages you've used. The interaction is necessary to write theorems, but understanding the interaction model is an important part of how you will write definitions, find already proven lemmas, and debug type errors.
 
 ::: info Rocq vs Coq
 

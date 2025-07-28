@@ -17,7 +17,7 @@ I suggest you do a quick skim over everything to understand the ideas and intuit
 
 A secondary goal is for you to _understand_ this proof, so keep that in the back of your mind. After understanding the proof, how would you use it to explain to someone how per-bucket locking works? What changed from your previous explanation? **Exercise:** Write this down in a Coq comment in your solution. _(10 points)_
 
-```coq
+```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From iris.algebra Require Import ofe auth excl gmap.
 From New.proof Require Import sync.
@@ -50,7 +50,7 @@ End set_solver_auto.
 
 The ghost state for this proof uses an auth map RA. The definition of the RA uses constructions from Iris (hence there is no definition of composition or validity here). What this library does is wraps up this RA in nice definitions, hiding the direct `own` predicates from the user.
 
-```coq
+```rocq
 Module auth_map.
 
 
@@ -58,7 +58,7 @@ Module auth_map.
 
 A good deal of boilerplate is needed to create a resource algebra. The interesting parts are just `auth_mapR` (this is the algebraic structure, defined using existing structures), `auth_map_auth_def`, and `auth_map_frag_def`.
 
-```coq
+```rocq
   Definition auth_mapR K `{Countable K} A : ucmra :=
     authUR (gmapUR K (exclR (leibnizO A))).
 
@@ -129,7 +129,7 @@ The basic idea is that there is only one `auth_map_auth γ m`, controlling some 
 
 There are no proofs for you to do in this section. These proofs are fairly technical and you can often do a proof by composing existing ghost state libraries, rather than writing your own. (Even this library was probably not necessary in retrospect.)
 
-```coq
+```rocq
   Lemma auth_map_init :
     ⊢ |==> ∃ γ, auth_map_auth γ (∅: gmap K A).
   Proof.
@@ -303,7 +303,7 @@ Program Instance : IsPkgInit sharded_hashmap := ltac2:(build_pkg_init ()).
 
 The first thing we need to take care of is deal with the hash function. Goose doesn't support any proper hash function (yet), so we implement a fairly bad one by hand for this example. We need it to be a function from `w32 → w32` (it doesn't matter which one), and for the proof we actually need to write down that function explicitly since it's important that it be a fixed one.
 
-```coq
+```rocq
 (* This was derived from seeing the expression in the proof of [wp_hash]. It is
 important that there be a fixed hash function, but it's not important for
 correctness what it is. *)
@@ -341,7 +341,7 @@ Qed.
 
 We will not need to use the definition of `hash_f` at all, and for performance reasons it helps to make it opaque.
 
-```coq
+```rocq
 Typeclasses Opaque hash_f.
 Opaque hash_f.
 
@@ -355,7 +355,7 @@ This hashmap has a fixed number of buckets, each of which is a _shard_ of the ov
 
 We also deal with the fact that Goose only supports maps from `uint64` but we want one from `uint32` here.
 
-```coq
+```rocq
 Definition own_shard (s_l: loc) (m: gmap w32 w64) : iProp Σ :=
   ∃ (m_l: loc) (m64: gmap w64 w64),
     "%Hvals" :: ⌜(∀ (k: w32) (v: w64),
@@ -409,7 +409,7 @@ Qed.
 
 **Exercise:** finish up the proofs of `wp_shard__Load` and `wp_shard__Store` _(10 points)_
 
-```coq
+```rocq
 Lemma wp_shard__Load (s_l: loc) (key: w32) (m: gmap w32 w64) :
   {{{ is_pkg_init sharded_hashmap ∗ own_shard s_l m }}}
     s_l @ sharded_hashmap @ "shard'ptr" @ "Load" #key
@@ -468,7 +468,7 @@ Admitted.
 
 The next development is to develop a theory for how the keyspace is divided among hash buckets.
 
-```coq
+```rocq
 Definition hash_bucket (key: w32) (max_buckets: Z) : Z :=
   uint.Z (hash_f key) `mod` max_buckets.
 
@@ -487,7 +487,7 @@ Qed.
 
 The way this is defined is a bit complicated, but the theorems `bucket_map_lookup_None` and `bucket_map_lookup_Some` are fairly easy to use.
 
-```coq
+```rocq
 Definition bucket_map (m: gset w32) (max_buckets: Z) : gmap Z (gset w32) :=
   list_to_map ((λ (i: Z),
                (i, filter (λ k, hash_bucket k max_buckets = i) m)
@@ -521,7 +521,7 @@ Qed.
 
 **Exercise:** Prove this theorem using the two above. _(5 points)_
 
-```coq
+```rocq
 Lemma bucket_map_lookup_Some_iff m max_buckets (i: Z) s :
   bucket_map m max_buckets !! i = Some s →
   s = filter (λ k, hash_bucket k max_buckets = i) m.
@@ -545,7 +545,7 @@ The hashmap predicates will use `γ: ghost_names`, which is actually a record of
 - `map_name` is of type `auth_mapR w32 w64`. The authoritative part is the global map contents, while the fragments represent the shards for each bucket.
 - `buckets_name` is of type `auth_mapR Z (gset w32)`. The fragment `{[idx := s]}` asserts that bucket index `idx` holds keys `s` from the global map; these will all have `hash(k) % max_buckets = idx`. The authoritative part tracks the full assignment of keys to buckets, which is calculated by applying `bucket_map` to the global map in `hashmap_auth`.
 
-```coq
+```rocq
 Record ghost_names := mkNames {
     map_name : gname;
     buckets_name : gname;
@@ -564,7 +564,7 @@ Definition hashmap_sub (γ: ghost_names) (hash_idx: Z) (sub_m: gmap w32 w64) : i
 
 We initialize the hashmap state via the intermediate assertion `hashmap_pre_auth`, which is almost `hashmap_auth` but doesn't require non-zero buckets (so we can start out with an empty list of buckets).
 
-```coq
+```rocq
 Definition hashmap_pre_auth (γ: ghost_names) (num_buckets: Z): iProp Σ :=
   "%Hpos" :: ⌜0 ≤ num_buckets⌝ ∗
   "Hmap_auth" :: auth_map.auth_map_auth (map_name γ) (∅: gmap w32 w64) ∗
@@ -662,7 +662,7 @@ I used these theorems:
 
 I also used `contradict H` where `H: k ∉ dom m` to switch to proving `k ∈ dom m` (thus doing a proof by contradiction).
 
-```coq
+```rocq
 Lemma map_get_subset (m sub_m: gmap w32 w64) (numBuckets: Z) (idx: Z) (key: w32) :
   0 < numBuckets < 2^32 →
   sub_m ⊆ m →
@@ -681,7 +681,7 @@ Admitted.
 
 This theorem captures the essence of why `Load` is correct. The hard work is all in `map_get_subset`.
 
-```coq
+```rocq
 Lemma hashmap_auth_sub_get γ m max_buckets sub_m hash_idx key :
   hash_idx = hash_bucket key max_buckets →
   hashmap_auth γ max_buckets m ∗ hashmap_sub γ hash_idx sub_m -∗
@@ -698,7 +698,7 @@ Qed.
 
 This proof captures some details of how the bucket assignment changes when we insert into the map. Since the buckets only hold keys actually in the map (as opposed to all $2^{32}$ possible keys) this is non-trivial.
 
-```coq
+```rocq
 Lemma bucket_map_insert (m : gmap w32 w64) (max_buckets : Z) (sub_m : gmap w32 w64)
     (hash_idx : Z) (key : w32) :
   0 < max_buckets →
@@ -739,7 +739,7 @@ To complete this proof you should read the partial proof provided and understand
 
 This is probably the hardest part of the assignment.
 
-```coq
+```rocq
 Lemma hashmap_auth_sub_insert γ m max_buckets sub_m hash_idx key v :
   hash_bucket key max_buckets = hash_idx →
   hashmap_auth γ max_buckets m ∗ hashmap_sub γ hash_idx sub_m ==∗
@@ -758,7 +758,7 @@ Proof.
 
 Case 1: updating a key already in the map, and hence in sub_m (due to its hash bucket). First, insert it into the map ghost variable.
 
-```coq
+```rocq
     rewrite /hashmap_auth /hashmap_sub.
     iFrame (Hoverflow).
     iMod (auth_map.auth_map_insert_map key v with "[$Hmap_auth $Hmap_frag]") as "[Hmap_auth Hmap_frag]".
@@ -787,7 +787,7 @@ Case 2: inserting a new key.
 
 The first part of this proof (updating the map variable) mirrors the other case. In the second part you'll need to also update the bucket ghost variable.
 
-```coq
+```rocq
     rewrite /hashmap_auth /hashmap_sub.
     iFrame (Hoverflow).
 
@@ -802,7 +802,7 @@ Admitted.
 
 Finally we get to the abstract representation relation, the predicate `is_hashmap` that connects the state of the code to the logical state of the hashmap. We will use the HOCAP style of specification developed in class, so `is_hashmap` takes a `P: gmap w32 w64 → iProp Σ`.
 
-```coq
+```rocq
 Definition lock_inv (γ: ghost_names) (hash_idx: Z) (map_l: loc): iProp Σ :=
   ∃ (sub_m: gmap w32 w64),
     "HsubMap" :: own_shard map_l sub_m ∗
@@ -820,7 +820,7 @@ One of the most interesting parts of this definition is how we use `P`. That's h
 
 Since the hashmap isn't protected by one lock but by several, where do we put `P`? It turns out we need a new idea. Instead of a _lock invariant_, we'll use an _invariant_. `inv N P` is an assertion that `P` is an invariant (ignore the namespace `N` for now). An invariant isn't related to a lock; instead, `P` simply needs to hold at all intermediate points of the program, full stop (remember that a lock invariant only holds when the lock is free). Invariants are a key feature of Iris.
 
-```coq
+```rocq
 Definition is_hashmap (γ: ghost_names) (l: loc) (P: gmap w32 w64 → iProp Σ) :=
   (∃ (b_s: slice.t) (b_ls: list loc),
   "#buckets" :: l ↦s[sharded_hashmap.HashMap :: "buckets"]□ b_s ∗
@@ -844,7 +844,7 @@ With all that theory and abstraction relation setup done, we can finally start v
 
 It turns out initializing the hashmap is a huge pain, both dealing with the loops and setting up all this ghost state. You'll only verify a small part of it.
 
-```coq
+```rocq
 Lemma wp_newBucket (hash_idx: Z) (γ: ghost_names) :
   {{{ is_pkg_init sharded_hashmap ∗ hashmap_sub γ hash_idx ∅ }}}
     sharded_hashmap @ "newBucket" #()
@@ -953,7 +953,7 @@ You'll need to create the invariant above. Use the theorem `inv_alloc` with the 
 
 You'll need to replace `H1 H2 H3` with whatever hypotheses are needed to prove the invariant initially. The invariant needs to match what's in `is_hashmap` so I've given it to you above, it's only a small hint.
 
-```coq
+```rocq
 Lemma wp_NewHashmap (hm_l: loc) (size: w32) P :
   {{{ is_pkg_init sharded_hashmap ∗ ⌜0 < uint.Z size⌝ ∗ P ∅ }}}
     sharded_hashmap @ "NewHashMap" #size
@@ -1001,7 +1001,7 @@ Another solution is to have the update look like `∀ m, ▷ P m -∗ |==> ▷ P
 
 :::
 
-```coq
+```rocq
 Lemma wp_HashMap__Load (hm_l: loc) γ (key: w32) P Q {Htimeless: ∀ m, Timeless (P m)} :
   {{{ is_pkg_init sharded_hashmap ∗ is_hashmap γ hm_l P ∗
       (∀ m, P m -∗ |==> P m ∗ Q (map_get (m !! key)))
@@ -1049,7 +1049,7 @@ There is one other possibility, which we don't need here: it's allowed to open a
 
 We need to use `iApply fupd_wp` to make `iInv` open at a single point rather than across the next program step.
 
-```coq
+```rocq
   iApply fupd_wp.
   (* the use of `>Hinv` rather than `Hinv` is a technicality related to the ▷
   modality *)
@@ -1138,7 +1138,7 @@ Next, `I` is now in the goal since to proceed we need to close the invariant by 
 
 Finally, we can proceed with the rest of the program proof after doing our work with the invariant, and possibly do more ghost updates.
 
-```coq
+```rocq
   iNamed "Hinv".
   iMod ("Hupd" with "HP") as "[HP HQ]".
   iDestruct (hashmap_auth_sub_get with "[$Hauth $Hfrag]") as %Hget'.
@@ -1159,7 +1159,7 @@ Qed.
 
 The code and proof for `Store` are very similar to that of `Load` so you should be able to figure this out from reading the proof above.
 
-```coq
+```rocq
 Lemma wp_HashMap__Store (hm_l: loc) γ (key: w32) (v: w64) P Q {Htimeless: ∀ m, Timeless (P m)} :
   {{{ is_pkg_init sharded_hashmap ∗ is_hashmap γ hm_l P ∗
       (∀ m, P m -∗ |==> P (<[key := v]> m) ∗ Q m)

@@ -22,7 +22,7 @@ We know that separation logic propositions are generally not duplicable ($P \nvd
 
 Before getting into modalities, let's revisit the mechanisms in Coq for read-only pointers.
 
-```coq
+```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From New.proof Require Import std.
 From sys_verif.generatedproof.sys_verif_code Require Import memoize.
@@ -47,7 +47,7 @@ We can see splitting at work in this example, which first splits the assertion `
 
 Fractions also support _combining_ to recover full ownership and go back to being able to write to the pointer.
 
-```coq
+```rocq
 Lemma split_fraction_example (l: loc) (x: w64) :
   {{{ l ↦ x ∗ ⌜uint.Z x < 100⌝ }}}
     let: "y" := ![#uint64T] #l in
@@ -82,7 +82,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   wp_auto.
   iCombine "Hx1 Hx2" as "Hx".
 ```
@@ -108,7 +108,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   wp_store.
   wp_auto.
   iApply "HΦ".
@@ -139,7 +139,7 @@ As usual, there is a Coq context above everything. The separation logic part has
 
 So what propositions are persistent? First, the pure propositions are persistent - but they can be put into the Coq context, so they aren't so interesting. The first "real" example we'll see is the persistent points-to, `l ↦□ v`.
 
-```coq
+```rocq
 Lemma alloc_ro_spec (x: w64) :
   {{{ True }}}
     alloc #x
@@ -153,7 +153,7 @@ Proof.
 
 This is the step where we persist the points-to permission and turn it into a persistent, read-only fact. Using `struct_pointsto_persist` requires the `iMod` tactic, which we will cover later when we talk about concurrency; for now think of it as a variation on `iDestruct`.
 
-```coq
+```rocq
   iPersist "H" as "Hro".
 ```
 
@@ -181,7 +181,7 @@ Notice from the goal diff that the output (renamed to "Hro" for clarity) is put 
 
 To obtain the persistent points-to assertion, we have to give up the regular fractional assertion, and this operation is _not_ reversible - the persistence relies on the location never being written to.
 
-```coq
+```rocq
   wp_pures.
   iModIntro.
   iApply "HΦ".
@@ -192,7 +192,7 @@ Qed.
 
 With a persistent permission, it's reasonable (and expected) that the permission need not be returned in the postcondition.
 
-```coq
+```rocq
 Lemma read_discarded_spec (l: loc) (x: w64) :
   {{{ l ↦□ x }}}
     ![#uint64T] #l
@@ -271,7 +271,7 @@ To give a specification to the memoization library, we will require that the use
 
 The core of the proof is the representation invariant for a `*MockMemoize`. The most interesting part of that invariant is how we say that `f_code` implements `f: w64 → w64`.
 
-```coq
+```rocq
 Definition fun_implements (f_code: func.t) (f: w64 → w64) : iProp Σ :=
   ∀ (x:w64), {{{ True }}} #f_code #x {{{ RET #(f x); True }}}.
 
@@ -298,7 +298,7 @@ There are several interesting things in the representation function `own_mock_me
 - The `□` in `m ↦[MockMemoize :: "f"]□ f_code` makes this a persistent, read-only field points-to fact.
 - The names "#Hf" and "#Hf_spec" have a # which means they will be added to the Iris Proof Mode's persistent context when introduced.
 
-```coq
+```rocq
 Definition own_mock_memoize (m: loc) (f: w64 → w64) : iProp Σ :=
    ∃ (f_code: func.t),
      "#Hf" :: m ↦s[memoize.MockMemoize :: "f"]□ f_code ∗
@@ -338,7 +338,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   (* NOTE: [wp_apply] will lose the |==> (update) modality here, but we can add
   it ourselves with this rewrite. *)
   rewrite -wp_fupd.
@@ -376,7 +376,7 @@ Proof.
 
 The use of `iPersist` above has turned our regular points-to (for a struct field) into a persistent fact. We can never write to that field again in the proof, but in exchange the assertion is persistent.
 
-```coq
+```rocq
   iModIntro. iApply "HΦ".
   (* `iFrame` doesn't use the persistent context by default (for performance
   reasons primarily), but we can ask it to by passing `#` as an argument. *)
@@ -387,7 +387,7 @@ Qed.
 
 Once an `own_mock_memoize` is set up, using it is very straightforward.
 
-```coq
+```rocq
 Lemma wp_MockMemoize__Call l f (x0: w64) :
   {{{ is_pkg_init memoize ∗ own_mock_memoize l f }}}
     l @ memoize @ "MockMemoize'ptr" @ "Call" #x0
@@ -426,7 +426,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   wp_auto.
 
 ```
@@ -435,7 +435,7 @@ Observe how in the next line we use a Hoare triple that comes _from the persiste
 
 (Unfolding `fun_implements` isn't required, it's only there to show you the definition in the goal.)
 
-```coq
+```rocq
   rewrite /fun_implements. wp_apply "Hf_spec".
 ```
 
@@ -467,7 +467,7 @@ Observe how in the next line we use a Hoare triple that comes _from the persiste
 
 ::::
 
-```coq
+```rocq
   iApply "HΦ". done.
 Qed.
 
@@ -477,7 +477,7 @@ Qed.
 
 Now we'll provide the same interface, but with actual memoization.
 
-```coq
+```rocq
 Definition own_memoize (m: memoize.Memoize.t) (f: w64 → w64) : iProp Σ :=
    ∃ (f_code: func.t) (m_ref: loc) (results: gmap w64 w64),
      (* Notice that the map is modeled as a location. This reflects how Go maps
@@ -525,7 +525,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   wp_auto.
   wp_apply (wp_map_make) as "%m_ref Hm".
   { auto. }
@@ -610,7 +610,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   wp_auto.
   cbn [memoize.Memoize.results'].
   wp_apply (wp_map_get with "Hm") as "Hm".
@@ -643,7 +643,7 @@ It helps to see what it looks like to use this specification (what we call a "cl
 
 The code has two such examples: `UseMemoize1` memoizes a straightforward function, while `UseMemoize2` is a bit more complicated. Both implementations internally use `std.Assert`, so we will simply prove the postcondition `True`, which shows those assertions succeed and nothing else.
 
-```coq
+```rocq
 Lemma wp_UseMemoize1 :
   {{{ is_pkg_init memoize }}}
     memoize @ "UseMemoize1" #()
@@ -656,7 +656,7 @@ Proof.
 
 Setting up the memoization is the most interesting part of the proof. To use the spec, we have to both supply a pure function that the function implements (it's `λ x, word.mul x x` in this case) and prove that it actually implements that function (the proof that immediately follows in curly braces).
 
-```coq
+```rocq
   wp_apply (wp_NewMemoize (λ x, word.mul x x)).
   {
     rewrite /fun_implements.
@@ -692,7 +692,7 @@ Setting up the memoization is the most interesting part of the proof. To use the
 
 It's somewhat subtle but the proof at this point is a Hoare triple inside separation logic (you can tell because of the `------∗` line). `wp_start` knows how to handle this so you can use it in the same way.
 
-```coq
+```rocq
     wp_start as "_".
     wp_auto.
     iApply "HΦ". done.
@@ -722,7 +722,7 @@ To prove the Hoare triple we will need to make the slice read-only. This will tu
 
 Think about what would happen we didn't make the slice read-only. When we call `NewMemoize` we can prove the function sums the list `[x1; x2; x3]`, since that's the initial value of the slice elements. If the slice were read-write, after `NewMemoize`, we could then change the slice, at which point it would no longer sum `[x1; x2; x3]`, and `Call` would no longer work as specified above.
 
-```coq
+```rocq
 (* don't worry too much about how this is defined; it's standard functional programming list stuff (read up on [foldl] and [foldr] if you're interested) *)
 Definition list_w64_sum : list w64 → w64 :=
   foldl word.add (W64 0).
@@ -813,7 +813,7 @@ Notice how the slice is available in the persistent context for this Hoare tripl
 
 The rest of this proof is general loop and slice reasoning and not related to this specific example.
 
-```coq
+```rocq
     wp_start as "_".
     wp_auto.
     wp_if_destruct.
@@ -848,7 +848,7 @@ The rest of this proof is general loop and slice reasoning and not related to th
 
 The little proof pattern below of using `iExactEq` is sometimes useful - it allows you to use any `"H": P` to prove `Q` if you can prove `P = Q`. This often has to be paired with `repeat f_equal` since you'll otherwise have `#(...) = #(...)` and you generally want to get rid of the `#` function in front of both sides.
 
-```coq
+```rocq
       iDestruct ("HΦ" with "[]") as "HΦ".
       { done. }
       iExactEq "HΦ"; repeat f_equal.
@@ -951,7 +951,7 @@ The little proof pattern below of using `iExactEq` is sometimes useful - it allo
 
 Here we come back from calling `NewMemoize`. As in `UseMemoize1`, all the hard work is done and calling the new object is easy.
 
-```coq
+```rocq
   wp_auto.
   wp_apply (wp_Memoize__Call with "[$Hm]") as "Hm".
   wp_apply (wp_Memoize__Call with "[$Hm]") as "Hm".

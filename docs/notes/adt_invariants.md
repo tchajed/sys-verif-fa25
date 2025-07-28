@@ -9,7 +9,7 @@ pageInfo: ["Date", "Category", "Tag", "Word"]
 
 ## Lecture 5: ADT specification with invariants
 
-> Follow these notes in Coq at [src/sys_verif/coq/adt_invariants.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/coq/adt_invariants.v).
+> Follow these notes in Coq at [src/sys_verif/rocq/adt_invariants.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/rocq/adt_invariants.v).
 
 ### Learning outcomes
 
@@ -69,7 +69,7 @@ We've seen only one type of abstract model, but two specification styles for rel
 
 ## Proven example: binary search tree
 
-```coq
+```rocq
 Inductive search_tree :=
 | leaf
 | node (el: Z) (l r: search_tree).
@@ -80,7 +80,7 @@ This example's proofs illustrate use of the `gset` type from std++. In the futur
 
 On a first pass you can read this example ignoring the proofs - just read the code, abstraction function, invariant, and spec _theorem statements_.
 
-```coq
+```rocq
 Fixpoint st_rep (t: search_tree) : gset Z :=
   match t with
   | leaf => ∅
@@ -91,7 +91,7 @@ Fixpoint st_rep (t: search_tree) : gset Z :=
 
 The binary search tree invariant references the abstraction function, which happens to be the easiest way in this case to find all the elements in the left and right subtrees.
 
-```coq
+```rocq
 Fixpoint st_inv (t: search_tree) : Prop :=
   match t with
   | leaf => True
@@ -132,7 +132,7 @@ Fixpoint st_find (t: search_tree) (x: Z) : bool :=
 
 With an invariant, it's important to prove it holds at initialization time.
 
-```coq
+```rocq
 Lemma empty_spec :
   st_rep st_empty = ∅ ∧ st_inv st_empty.
 Proof.
@@ -148,7 +148,7 @@ Look at the specifications below to see how we incorporate the invariant.
 
 It has two goals, one about the new abstract state, and the other showing the invariant is preserved: in both cases we can assume `st_inv t` from the previous operation, specifically because (1) the invariant starts out true for every constructor, and (2) every operation comes with a proof that the invariant is preserved.
 
-```coq
+```rocq
 Lemma insert_spec t x :
   st_inv t →
   st_rep (st_insert t x) = st_rep t ∪ {[x]} ∧
@@ -182,7 +182,7 @@ Qed.
 
 The invariant is crucially needed to prove that `find` is correct - a binary search tree doesn't work if the nodes have arbitrary values, because then it wouldn't always search the correct path. The work we've done above has mainly been so we can assume `st_inv` here.
 
-```coq
+```rocq
 Lemma find_spec t x :
   st_inv t →
   st_find t x = bool_decide (x ∈ st_rep t).
@@ -244,7 +244,7 @@ The danger of equational or algebraic specifications is that it's harder to thin
 
 Here is an ADT implementing maps that we'll prove equational properties for, rather than relating it to `gmap`. Think of this as what you would do if _implementing_ `gmap`, except we'll discuss later how `gmap` has a more complicated implementation to make it easier to use.
 
-```coq
+```rocq
 Definition list_map (K: Type) {H: EqDecision K} (V: Type) :=
   list (K * V).
 
@@ -252,7 +252,7 @@ Definition list_map (K: Type) {H: EqDecision K} (V: Type) :=
 
 Sections are a way of writing a bunch of definitions that need to take the same types, like the `K`, `H: EqDecision K`, and `V` parameters for `list_map`.
 
-```coq
+```rocq
 Section list_map.
 
 (* To understand the code below, all you need to know is that `K` and `V` are
@@ -276,7 +276,7 @@ Definition update (x : K) (v: V) (m: list_map K V) : list_map K V :=
 
 What equations might we want? One idea is that we should prove something about any combinations of `find` and `update` we can think of (that type check).
 
-```coq
+```rocq
 Lemma find_empty_list_map x :
   find x empty_list_map = None.
 Proof. reflexivity. Qed.
@@ -302,7 +302,7 @@ Qed.
 
 At this point, have we proven all the equations that might be needed? I believe so, but it's hard to be sure, and the situation is worse when we have many operations that can interact with each other.
 
-```coq
+```rocq
 End list_map.
 
 ```
@@ -315,7 +315,7 @@ One reason you would want this is that the most obvious specification or model h
 
 Another direction you might want to think about how we could add non-determinism to both the code operations and the spec operations, although this will take us away from functional programs so we won't consider it just yet.
 
-```coq
+```rocq
 Module stat_db.
   Unset Printing Records.
 
@@ -326,7 +326,7 @@ We use `Record` here to create an inductive type, which defines a constructor `m
 
 Records in Coq have some special associated syntax for constructors and projections, but we're not using it (and disable printing with that syntax as well).
 
-```coq
+```rocq
   Record database :=
     mkDb { db_sum : Z; db_num : Z; }.
 

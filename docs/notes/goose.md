@@ -191,7 +191,7 @@ Next, do you believe this is a correct model of `for` loops?
 
 This section shows some examples of specifications and proofs.
 
-```coq
+```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From sys_verif.program_proof Require Import heap_init functional_init.
 
@@ -211,7 +211,7 @@ func Add(a uint64, b uint64) uint64 {
 }
 ```
 
-```coq
+```rocq
 Lemma wp_Add (n m: w64) :
   {{{ is_pkg_init functional ∗ ⌜uint.Z n + uint.Z m < 2^64⌝ }}}
     functional @ "Add" #n #m
@@ -235,7 +235,7 @@ func StackEscape() *uint64 {
 }
 ```
 
-```coq
+```rocq
 Lemma wp_StackEscape :
   {{{ is_pkg_init heap.heap }}}
     heap.heap @ "StackEscape" #()

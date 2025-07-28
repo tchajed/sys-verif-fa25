@@ -9,7 +9,7 @@ shortTitle: "Assignment 3: intro"
 
 These exercises should help you get started with doing program proofs with Goose. They're split into two parts: using the Iris Proof Mode for proving $P ⊢ Q$ with separation logic assertions (without any proofs about programs), and proving specifications using the weakest precondition tactics and lemmas.
 
-```coq
+```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From sys_verif.program_proof Require Import functional_init heap_init.
 
@@ -23,7 +23,7 @@ Context `{!goGlobalsGS Σ}.
 
 Here is a detailed proof of a simple separation logic entailment in the IPM, one small step at a time.
 
-```coq
+```rocq
 Lemma example_sep_comm_v1 (P Q: iProp Σ) :
   P ∗ Q -∗ Q ∗ P.
 Proof.
@@ -37,7 +37,7 @@ Qed.
 
 Now let's see the same proof more concisely.
 
-```coq
+```rocq
 Lemma example_sep_comm_v2 (P Q: iProp Σ) :
   P ∗ Q -∗ Q ∗ P.
 Proof.
@@ -46,7 +46,7 @@ Proof.
 
 We can use a destruct pattern right away when doing an `iIntros`, without naming the intermediate result.
 
-```coq
+```rocq
   iIntros "[HP HQ]".
   iSplitL "HQ".
   - iFrame.
@@ -67,7 +67,7 @@ One easy thing to miss is that `P ∗ Q` (separating conjunction) requires you t
 
 ::::
 
-```coq
+```rocq
 Lemma example_sep_comm_v3 (P Q: iProp Σ) :
   P ∗ Q -∗ Q ∗ P.
 Proof.
@@ -77,7 +77,7 @@ Proof.
 
 Using `iFrame` here is more than just more concise: `iFrame` automatically decides the split so we don't have to.
 
-```coq
+```rocq
   iFrame.
 Qed.
 
@@ -85,7 +85,7 @@ Qed.
 
 **Exercise:** complete the proof
 
-```coq
+```rocq
 Lemma ex_rearrange_1 (P Q R: iProp Σ) :
   R -∗ Q ∗ P -∗ P ∗ Q ∗ R.
 Proof.
@@ -95,7 +95,7 @@ Admitted.
 
 In this example we use a Coq-level implication. In this case, it comes from a premise in the lemma, but it will often be a previously proven lemma; using such a lemma looks the same as this use of a hypothesis in the lemma.
 
-```coq
+```rocq
 Lemma example_pure_impl_v1 (P Q R: iProp Σ) :
   (P -∗ Q) →
   P ∗ R -∗ Q ∗ R.
@@ -117,7 +117,7 @@ There is also `iDestruct (HPQ with "HP")`. This is similar to `iDestruct (HPQ wi
 
 The previous proof was in _forward_ style (working from the hypotheses). We can also do a backward proof.
 
-```coq
+```rocq
 Lemma example_pure_impl_v2 (P Q R: iProp Σ) :
   (P -∗ Q) →
   P ∗ R -∗ Q ∗ R.
@@ -128,7 +128,7 @@ Proof.
 
 In this proof, the `R` part of the proof can be handled separately; we don't need `R` any more.
 
-```coq
+```rocq
   iFrame.
   iApply HPQ. iFrame.
 Qed.
@@ -139,7 +139,7 @@ Qed.
 
 You'll need to find the right lemma to use here.
 
-```coq
+```rocq
 Lemma ex_pure_impl s q (bs: list w8) :
   length bs = 3%nat →
   s ↦*{q} bs -∗
@@ -153,7 +153,7 @@ Admitted.
 
 Read about [structs](../../notes/ownership.md#proofs-using-structs) (in particular `wp_ExamplePersonRef`) to see how to do this.
 
-```coq
+```rocq
 Lemma ex_split_struct l s :
   l ↦ heap.S1.mk (W64 3) s -∗
   l ↦s[heap.S1 :: "a"] W64 3 ∗
@@ -165,7 +165,7 @@ Admitted.
 
 You will need `iModIntro` to "introduce" the `▷P` (later) and `|==> P` (update) modalities. The update modality in particular is often needed at the end of a program proof, before proving the postcondition.
 
-```coq
+```rocq
 Lemma example_update_modality (P: iProp Σ) :
   P -∗ |==> P.
 Proof.
@@ -189,7 +189,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   iApply "HP".
 Qed.
 
@@ -201,7 +201,7 @@ Nonetheless you will want to be able to switch from proving `▷P` to `P`, using
 
 **Exercise:** complete the proof
 
-```coq
+```rocq
 Lemma ex_later_modality (P Q: iProp Σ) :
   P ∗ (P -∗ Q) -∗ ▷ Q.
 Proof.
@@ -218,7 +218,7 @@ Here is a worked example. It demonstrates a number of tactics:
 - `wp_apply`
 - `wp_load` and `wp_store`
 
-```coq
+```rocq
 Lemma wp_Swap (l1 l2: loc) (x y: w64) :
   {{{ is_pkg_init heap.heap ∗ l1 ↦ x ∗ l2 ↦ y }}}
     heap.heap @ "Swap" #l1 #l2
@@ -268,7 +268,7 @@ Qed.
 
 Re-do above proof, but with the automation tactics.
 
-```coq
+```rocq
 Lemma wp_Swap_ex (l1 l2: loc) (x y: w64) :
   {{{ is_pkg_init heap.heap ∗ l1 ↦ x ∗ l2 ↦ y }}}
     heap.heap @ "Swap" #l1 #l2
@@ -284,7 +284,7 @@ Compare this specification to the one we saw in the separation logic notes.
 
 Prove it using the IPM. You may need to find the specification for `Assert` using `Search` (or you can guess what it's called).
 
-```coq
+```rocq
 Lemma wp_IgnoreOneLocF (x_l y_l: loc) :
   {{{ is_pkg_init heap.heap ∗ x_l ↦ W64 0 }}}
     heap.heap @ "IgnoreOneLocF" #x_l #y_l
@@ -305,7 +305,7 @@ Admitted.
 
 The `(x_l: loc)` in the postcondition should be read as "there exists (x_l: loc), ..." where the ... is the rest of the postcondition. Special syntax is used so that `x_l` can be used in the `RET` clause itself.
 
-```coq
+```rocq
 Lemma example_stack_escape :
   {{{ is_pkg_init heap.heap }}}
     heap.heap @ "StackEscape" #()

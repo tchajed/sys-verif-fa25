@@ -8,7 +8,7 @@ shortTitle: decide
 
 What is this `if decide` thing? And what is `bool_decide`? And how do I do proofs involving them?
 
-```coq
+```rocq
 From stdpp Require Import numbers.
 From sys_verif Require Import options.
 From Coq.Arith Require Import Peano_dec.
@@ -21,7 +21,7 @@ This explanation gives you a terse overview of how `decide` works and how to do 
 
 If your goal involves `decide`, one thing you can do is `destruct (decide P)`, which will split into two cases:
 
-```coq
+```rocq
 (* this theorem is obviously false, it's just a demo of the proof tactics *)
 Lemma example_destruct_1 (x y: Z) :
   (if decide (x = y) then (x+1) else (y-2)) = 7.
@@ -49,7 +49,7 @@ Proof.
 
 Notice the `x ≠ y` hypothesis in the second goal. This is how `~(x = y)` is printed. You will see `~(x < y)` if you destruct an inequality; `lia` and `word` know how to deal with that.
 
-```coq
+```rocq
 Abort.
 
 Lemma example_destruct_2 (x y: Z) :
@@ -84,7 +84,7 @@ Here's a cheatsheet:
 
 First of all, you don't want to do `destruct (bool_decide P)` like we did above.
 
-```coq
+```rocq
 Lemma bad_bool_decide_destruct (x y: Z) :
   3 ≤ (if bool_decide (x < 3) then 3 else x).
 Proof.
@@ -107,7 +107,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   - lia.
   - (* not provable: we have nothing about `~(x < 3)` *)
 Abort.
@@ -136,7 +136,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   - lia.
   - (* this is provable *)
     lia.
@@ -170,7 +170,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   - lia.
   - rewrite //.
 Qed.
@@ -181,7 +181,7 @@ Qed.
 
 The second thing you may encounter is that sometimes, `decide P` won't type check because of a missing `Decision P` instance:
 
-```coq
+```rocq
 Inductive color := red | green | blue.
 Fail Definition failed_color_dec (c: color) :=
   if decide (c = red) then true else false.
@@ -189,7 +189,7 @@ Fail Definition failed_color_dec (c: color) :=
 
 :::: note Output
 
-```txt title="coq output"
+```txt title="rocq output"
 
 ```
 
@@ -201,7 +201,7 @@ The reason this fails is that `Decision P` says that there's a _function_ that d
 
 `decide` is just looking up this function using typeclasses, but the actual function doesn't get implemented for us automatically. We can provide an instance of equality between arbitrary colors; here's a manual version of that which we'll abandon in favor of using the powerful `solve_decision` automation tactic.
 
-```coq
+```rocq
 Instance color_eq_dec : ∀ (c1 c2: color), Decision (c1 = c2).
 Proof.
   intros c1 c2. rewrite /Decision.
@@ -237,7 +237,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   - left. auto.
   - right. congruence.
   (* Yikes, this looks tedious. *)
@@ -250,7 +250,7 @@ Proof. solve_decision. Qed.
 
 Now Coq will use the instance we just defined when we write `decide`.
 
-```coq
+```rocq
 Definition use_color_dec (c: color) := if decide (c = red) then true else false.
 
 ```
@@ -259,7 +259,7 @@ Definition use_color_dec (c: color) := if decide (c = red) then true else false.
 
 The implementation (which comes from std++) is actually very short, so let's show that.
 
-```coq
+```rocq
 Module decide_playground.
   (* `decide` is the single member of a type class `Decision P` *)
   Class Decision (P : Prop) := decide : {P} + {~P}.
@@ -269,7 +269,7 @@ Module decide_playground.
 
 What is that type for `decide`? `{P} + {~P}` is notation for `sumbool` from the Coq standard library, which has the following definition:
 
-```coq
+```rocq
   Inductive sumbool (A B : Prop): Type :=
   | left (H: A)
   | right (H: B).
@@ -281,6 +281,6 @@ This definition says `sumbool A B` has either an element of `A` or a proof of `B
 
 The definition of `sumbool` is actually the same as `or P Q` (always written `P ∨ Q`), except that it is annotated as `{P} + {Q} : Type` whereas `P   ∨ Q : Prop`. The difference is that we can do computations with something in `Type`, while facts in `Prop` can only be used in proofs.
 
-```coq
+```rocq
 End decide_playground.
 ```

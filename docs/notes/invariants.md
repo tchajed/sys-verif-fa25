@@ -67,7 +67,7 @@ The resources $P$ need to be proven right away, unlike if we were verifying $e; 
 
 Let's see this in action.
 
-```coq
+```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From New.proof Require Import sync std.
 From sys_verif.program_proof Require Import concurrent_init.
@@ -123,7 +123,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   wp_pures.
   iApply "HΦ". done.
 Qed.
@@ -166,7 +166,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
     wp_pures.
     done.
   }
@@ -238,7 +238,7 @@ func FirstLock() uint64 {
 
 Let's try a first proof that just shows this code is safe. Even with no interesting postcondition, the GooseLang model requires us to prove in this example that there are no race conditions on `x`; due to weak memory considerations, it isn't quite sound to model loads and stores of even a single variable as being atomic. The mutex in this example ensures the absence of races.
 
-```coq
+```rocq
 Lemma wp_FirstLock_v1 :
   {{{ is_pkg_init concurrent }}}
     concurrent @ "FirstLock" #()
@@ -290,7 +290,7 @@ Proof.
 
 After calling Lock, the lock invariant appears in our hypotheses.
 
-```coq
+```rocq
     iNamed "Hinv".
     wp_auto.
     wp_apply (wp_Mutex__Unlock with "[Hlocked Hinv]").
@@ -300,7 +300,7 @@ After calling Lock, the lock invariant appears in our hypotheses.
 
 To call Unlock, we need to prove the same lock invariant.
 
-```coq
+```rocq
       iModIntro.
 ```
 
@@ -326,7 +326,7 @@ To call Unlock, we need to prove the same lock invariant.
 
 ::::
 
-```coq
+```rocq
       iFrame. }
     done. }
   iModIntro.

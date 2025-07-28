@@ -14,7 +14,7 @@ Here, you'll prove this function correct, proving that the imperative, loop-base
 
 Before starting, **you should read the [fibonacci demo](/notes/program-proofs/fibonacci_proof.md)**, which has a very similar structure to this proof.
 
-```coq
+```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From sys_verif.program_proof Require Import functional_init.
 
@@ -34,7 +34,7 @@ Fixpoint fact (n: nat): nat :=
   end.
 ```
 
-```coq
+```rocq
 Lemma fact_monotonic (n m: nat) :
   (n ≤ m)%nat →
   (fact n ≤ fact m)%nat.

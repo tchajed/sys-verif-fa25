@@ -128,7 +128,7 @@ On the other hand, $(1/2, v) \mupd (1/2, v')$ is _not_ a frame-preserving update
 
 Let's look at some examples of ghost variables and their updates in Coq.
 
-```coq
+```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From New.proof Require Import std sync.
 From sys_verif.generatedproof.sys_verif_code Require Import concurrent.
@@ -152,13 +152,13 @@ The first example we'll see is so-called "plain" ghost variables. These aren't q
 
 The library hides the literal `own` construct in Iris behind some sealing machinery. Despite this, we can still print its definition with the following:
 
-```coq
+```rocq
 Print ghost_var.ghost_var_def.
 ```
 
 :::: note Output
 
-```txt title="coq output"
+```txt title="rocq output"
 ghost_var.ghost_var_def =
 λ (Σ : gFunctors) (A : Type) (ghost_varG0 : ghost_varG Σ A)
   (γ : gname) (dq : dfrac) (a : A), own γ (dfrac_agree.to_dfrac_agree dq a)
@@ -174,7 +174,7 @@ The actual value passed to `own` uses `dfrac_agree.to_frac_agree`, which constru
 
 ---
 
-```coq
+```rocq
 Lemma ghost_var_change_ex1 γ :
   ghost_var γ (DfracOwn 1) 7%Z -∗ |==> ghost_var γ (DfracOwn 1) 23%Z.
 Proof.
@@ -193,13 +193,13 @@ Qed.
 
 Here's a special case allocation lemma for this particular type of ghost state. (I'm using `@ghost_var_alloc Σ` rather than `ghost_var_alloc` to reduce some noise in the output.)
 
-```coq
+```rocq
 Check (@ghost_var_alloc Σ).
 ```
 
 :::: note Output
 
-```txt title="coq output"
+```txt title="rocq output"
 @ghost_var_alloc Σ
      : ∀ (A : Type) (ghost_varG0 : ghost_varG Σ A) (a : A),
          ⊢ |==> ∃ γ : gname, ghost_var γ (DfracOwn 1) a
@@ -213,13 +213,13 @@ For our second example of an RA and its ghost variables, let's look at _discarda
 
 Discardable fractions are like fractions between 0 and 1 (excluding 0, including 1), with the addition of a special $ε$ value, called `DfracDiscarded`. You can see a more complete description in the RA lecture's [discardable fractions section](./resource-algebra#discardable-fractions), or look at the definition of dfrac in Iris for actually all of the details:
 
-```coq
+```rocq
 Print dfrac_op_instance.
 ```
 
 :::: note Output
 
-```txt title="coq output"
+```txt title="rocq output"
 dfrac_op_instance =
 λ dq dp : dfrac,
   match dq with
@@ -254,13 +254,13 @@ For this discussion there are two salient aspects of dfrac composition:
 
 The first is the "discard" part of discardable fractions, and it means we have the following ghost update:
 
-```coq
+```rocq
 Check (@ghost_var_persist Σ).
 ```
 
 :::: note Output
 
-```txt title="coq output"
+```txt title="rocq output"
 @ghost_var_persist Σ
      : ∀ (A : Type) (ghost_varG0 : ghost_varG Σ A)
          (γ : gname) (q : Qp) (a : A),
@@ -271,13 +271,13 @@ Check (@ghost_var_persist Σ).
 
 The second property about persistence is what makes discardable fractions especially useful:
 
-```coq
+```rocq
 Check (@ghost_var_persistent Σ).
 ```
 
 :::: note Output
 
-```txt title="coq output"
+```txt title="rocq output"
 @ghost_var_persistent Σ
      : ∀ (A : Type) (ghost_varG0 : ghost_varG Σ A) (γ : gname) (a : A),
          Persistent (ghost_var γ DfracDiscarded a)
@@ -297,7 +297,7 @@ The lock invariant also connects all of this ghost state back to the physical st
 
 We also maintain that both ghost variables are less than 2 so that we can prove the additions don't overflow.
 
-```coq
+```rocq
 Definition lock_inv γ1 γ2 l : iProp _ :=
   ∃ (x: w64) (x1 x2: Z),
     "Hx1" :: ghost_var γ1 (DfracOwn (1/2)) x1 ∗
@@ -418,7 +418,7 @@ Proof using All.
 
 Observe here that the `init_Mutex` above has consumed the plain mutex value and associated it with a chosen lock invariant. Importantly, we couldn't actually use the `wp_Mutex__Lock` specification before using `init_Mutex`.
 
-```coq
+```rocq
   iPersist "m".
 
   wp_apply (wp_Spawn (ghost_var γ1 (DfracOwn (1/2)) 2) with "[Hx1_2]").

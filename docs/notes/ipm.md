@@ -80,7 +80,7 @@ To recap: both representations have a _context_ with _named hypotheses_ and a _c
 
 Now let's see how these look in Coq. First, we need to do some setup:
 
-```coq
+```rocq
 From sys_verif.program_proof Require Import prelude.
 From sys_verif.program_proof Require Import empty_ffi.
 From sys_verif.program_proof Require heap_init.
@@ -101,7 +101,7 @@ In both Coq and the IPM, we will state the original goal using an implication ra
 
 For separation logic, we will use the _separating implication_ or wand.
 
-```coq
+```rocq
 Lemma ipm_context_ex P Q :
   P ∗ Q -∗ Q ∗ P.
 Proof.
@@ -123,12 +123,12 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   iFrame.
 Qed.
 ```
 
-```coq
+```rocq
 Lemma coq_context_ex φ ψ :
   φ ∧ ψ → ψ ∧ φ.
 Proof.
@@ -148,7 +148,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   auto.
 Qed.
 
@@ -164,7 +164,7 @@ To prove theorems in Coq, we use tactics to manipulate the proof state. The IPM 
 
 ### Analogy to the Coq proof mode
 
-```coq
+```rocq
 Lemma and_exist_ex A (P Q: Prop) (R: A → Prop) :
   P ∧ (∃ a, R a) ∧ Q → ∃ a, R a ∧ P.
 Proof.
@@ -180,7 +180,7 @@ Qed.
 
 Now a very similar proof, in the IPM with separating conjunction:
 
-```coq
+```rocq
 Lemma sep_exist_ex A (P Q: iProp Σ) (R: A → iProp Σ) :
   P ∗ (∃ a, R a) ∗ Q -∗ ∃ a, R a ∗ P.
 Proof.
@@ -196,7 +196,7 @@ Qed.
 
 Here's the same thing, but with the goals shown:
 
-```coq
+```rocq
 Lemma sep_exist_ex_v2 A (P Q: iProp Σ) (R: A → iProp Σ) :
   P ∗ (∃ a, R a) ∗ Q -∗ ∃ a, R a ∗ P.
 Proof.
@@ -221,7 +221,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   iDestruct "HR" as (x) "HR".
 ```
 
@@ -244,7 +244,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   iExists (x).
 ```
 
@@ -267,7 +267,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   iSplitL "HR".
 ```
 
@@ -300,7 +300,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   - iAssumption.
   - iAssumption.
 Qed.
@@ -319,7 +319,7 @@ There are a few more tactics with behavior specific to separation logic.
 - `iDestruct` is similar to `iApply` but for forward reasoning. It can also be used with Coq lemmas.
 - `iFrame` automates the process of proving something like `P1 ∗ P3 ∗ P2 ⊢ P1 ∗ P2 ∗ P3` by lining up hypotheses to the goal and "canceling" them out.
 
-```coq
+```rocq
 Lemma apply_simple_ex P Q :
   (P -∗ Q) ∗ P -∗ Q.
 Proof.
@@ -340,7 +340,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   iAssumption.
 Qed.
 
@@ -348,7 +348,7 @@ Qed.
 
 Applying is a little trickier when there are multiple hypotheses. Just like with `iSplit` we have to decide how hypotheses are divided up. We also see an example below where the wand comes from a Coq-level assumption; more realistically imagine that this is a lemma.
 
-```coq
+```rocq
 Lemma apply_split_ex P1 P2 P3 Q :
   ((P1 ∗ P3) -∗ P2 -∗ Q) →
   P1 ∗ P2 ∗ P3 -∗ Q.
@@ -377,7 +377,7 @@ At this point `iApply HQ` needs to produce two subgoals: one for `P1 ∗ P3` and
 
 Instead, we will use a _specialization pattern_ `with "[H1 H3]"` to divide the premises up.
 
-```coq
+```rocq
   iApply (HQ with "[H1 H3]").
   - (* This is a perfect use case for `iFrame`, which spares us from carefully
     splitting this goal up. *)
@@ -389,7 +389,7 @@ Qed.
 
 We did the proof "backward" with `iApply`. Let's see a forward proof with `iDestruct`;
 
-```coq
+```rocq
 Lemma destruct_ex P1 P2 P3 Q :
   ((P1 ∗ P3) -∗ P2 -∗ Q) →
   P1 ∗ P2 ∗ P3 -∗ Q.
@@ -428,7 +428,7 @@ Proof.
 
 The first goal is the premise of `HQ` (using the hypotheses we made available using `with "[H1 H3]"`). The second goal has `HQ`.
 
-```coq
+```rocq
   { iFrame. }
 
 
@@ -436,7 +436,7 @@ The first goal is the premise of `HQ` (using the hypotheses we made available us
 
 "H2" and "HQ" are lost after this tactic, which is actually required because of separation logic; the wand is "used up" in proving `Q`, in the same ay that "H1" and "H3" were used in the premise of `HQ`.
 
-```coq
+```rocq
   iDestruct ("HQ" with "[H2]") as "HQ".
   { iFrame. }
 
@@ -447,7 +447,7 @@ Qed.
 
 All of these calls to `iFrame` are tedious. The IPM provides some features in specialization patterns and intro patterns to automate things better. Here's a quick demo, but see the documentation to learn more.
 
-```coq
+```rocq
 Lemma destruct_more_framing_ex P1 P2 P3 Q :
   ((P1 ∗ P3) -∗ P2 -∗ Q) →
   P1 ∗ P2 ∗ P3 -∗ Q.
@@ -460,7 +460,7 @@ Proof.
 
 `$H1` in a specialization pattern frames that hypothesis right away. We don't do the same with `"H3"` only for illustration purposes.
 
-```coq
+```rocq
   iDestruct (HQ with "[$H1 H3]") as "HQ".
 ```
 
@@ -489,7 +489,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   { iFrame "H3". }
 
 
@@ -497,7 +497,7 @@ Proof.
 
 `as "$"` is an introduction pattern that does not name the resulting hypothesis but instead immediately frames it with something in the goal. In this case that finishes the proof.
 
-```coq
+```rocq
   iDestruct ("HQ" with "[$H2]") as "$".
 Qed.
 
@@ -507,7 +507,7 @@ One more commonly used intro pattern is used for pure facts `⌜φ⌝` that show
 
 (Ignore the `{hG: !heapGS Σ}` part, this is needed to use ↦ in this example.)
 
-```coq
+```rocq
 Lemma pure_intro_pattern `{hG: !heapGS Σ} (t a b: w64) (x y: loc) :
   ⌜t = a⌝ ∗ x ↦ b ∗ y ↦ t -∗ x ↦ b ∗ y ↦ a.
 Proof.
@@ -516,7 +516,7 @@ Proof.
 
 The `%Heq` intro pattern moves the hypothesis into the Coq context (sometimes called the "pure" context). It is unusual in that `Heq` appears in a string but turns into a Coq identifier.
 
-```coq
+```rocq
   iIntros "(%Heq & Hx & Hy)".
   iFrame.
   rewrite Heq.
@@ -527,7 +527,7 @@ Qed.
 
 Here's a different way to move something into the pure context:
 
-```coq
+```rocq
 Lemma pure_intro_pattern_v2 `{hG: !heapGS Σ} (t a b: w64) (x y: loc) :
   ⌜t = a⌝ ∗ x ↦ b ∗ y ↦ t -∗ x ↦ b ∗ y ↦ a.
 Proof.
@@ -542,7 +542,7 @@ One last tactic: you will need to use `iModIntro` in a couple situations. What's
 
 `iModIntro` "introduces a modality". You'll use it for the _later modality_ `▷ P` (rarely) and for the _fancy update modality_ `|==> P` (often pronounced "fup-d", or "update").
 
-```coq
+```rocq
 Lemma iModIntro_later P :
   P -∗ ▷ P.
 Proof.
@@ -564,7 +564,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   iAssumption.
 Qed.
 
@@ -589,7 +589,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   iAssumption.
 Qed.
 
@@ -644,7 +644,7 @@ The IPM has some tactics for weakest precondition reasoning specifically. It's a
 
 All of these are easiest understood by seeing them in context; read on for an example.
 
-```coq
+```rocq
 Import sys_verif.program_proof.heap_init.
 Context `{hG: !heapGS Σ}.
 Context `{!goGlobalsGS Σ}.
@@ -670,7 +670,7 @@ func IgnoreOneLocF(x *uint64, y *uint64) {
 
 where `std.Assert` is a function provided by the Goose standard library.
 
-```coq
+```rocq
 Lemma wp_IgnoreOneLocF (l l': loc) :
   {{{ is_pkg_init heap.heap ∗ l ↦ (W64 0) }}}
     heap.heap @ "IgnoreOneLocF" #l #l'
@@ -716,7 +716,7 @@ $$
 \end{aligned}
 $$
 
-```coq
+```rocq
 Lemma wp_UseIgnoreOneLocOwnership :
   {{{ is_pkg_init heap }}}
     heap.heap @ "UseIgnoreOneLocOwnership" #()
@@ -756,7 +756,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   rewrite -default_val_eq_zero_val.
 
 ```
@@ -765,7 +765,7 @@ The next step in the proof outline is this call to `ref_to`, which allocates.
 
 Formally, the proof proceeds by applying the bind rule (to split the program into `ref_to uint64T #(W64 0)` and the rest of the code that uses this value). We can use an IPM tactic to automate this process, in particular identifying the context `K` in the bind rule.
 
-```coq
+```rocq
   wp_bind (alloc #(default_val w64))%E.
 ```
 
@@ -806,13 +806,13 @@ Take a moment to read this goal: it says we need to prove a specification for ju
 
 The next step you'd expect is that we need to use the rule of consequence to prove this goal from the existing specification for `ref`:
 
-```coq
+```rocq
   Check wp_alloc.
 ```
 
 :::: note Output
 
-```txt title="coq output"
+```txt title="rocq output"
 wp_alloc
      : ∀ (v : ?V) (stk : stuckness) (E : coPset) (Φ0 : val → iPropI Σ),
          True -∗
@@ -837,7 +837,7 @@ where
 
 We do _not_ end up needing the rule of consequence. The reason is that the meaning of `{{{ P }}} e {{{ RET v; Q }}}` in Iris already has consequence built-in.
 
-```coq
+```rocq
   iApply wp_alloc.
   { (* the (trivial) precondition in wp_alloc *)
     auto. }
@@ -850,7 +850,7 @@ We do _not_ end up needing the rule of consequence. The reason is that the meani
 
 At this point there is a `let:` binding which we need to apply the pure-step rule to. Thankfully, the IPM has automation to handle this for us.
 
-```coq
+```rocq
   wp_pures.
 ```
 
@@ -892,7 +892,7 @@ At this point there is a `let:` binding which we need to apply the pure-step rul
 
 The IPM can automate all of the above for allocation, load, and store:
 
-```coq
+```rocq
   wp_store. wp_pures.
   wp_alloc y as "Hy".
   wp_pures.
@@ -930,7 +930,7 @@ The IPM can automate all of the above for allocation, load, and store:
 
 You might think we should do `iApply wp_IgnoreOneLocF`. Let's see what happens if we do that:
 
-```coq
+```rocq
   iApply wp_IgnoreOneLocF.
 ```
 
@@ -986,7 +986,7 @@ Unlike `apply`, we need to prove the two subgoals from whatever premises we have
 
 The IPM provides several mechanisms for deciding on these splits. A _specialization pattern_ (spat) is the simplest one: we'll list in square brackets the hypotheses that should go into the first subgoal, the precondition, and the remainder will be left for the second subgoal (which is the rest of the code and proof).
 
-```coq
+```rocq
   Undo 1.
   iApply (wp_IgnoreOneLocF with "[Hx]").
 ```
@@ -1010,7 +1010,7 @@ The IPM provides several mechanisms for deciding on these splits. A _specializat
 
 ::::
 
-```coq
+```rocq
   { iFrame. iPkgInit. (* normally the use of [wp_apply] would have handled this for us *) }
 
   iModIntro.
@@ -1022,7 +1022,7 @@ The IPM provides several mechanisms for deciding on these splits. A _specializat
 
 We'll now breeze through the rest of the proof:
 
-```coq
+```rocq
   wp_pures.
   wp_load.
   wp_load.
@@ -1035,6 +1035,6 @@ Qed.
 
 ```
 
-```coq
+```rocq
 End ipm.
 ```

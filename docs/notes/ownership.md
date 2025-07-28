@@ -234,7 +234,7 @@ The other Gallina functions in this example, `struct.loadF` and `struct.storeF` 
 
 Goose has a nice set of reasoning principles for structs, which extend the basic points-to assertion we've been using for heap locations. Let's see what specifications for the code above look like.
 
-```coq
+```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From Coq Require Import Strings.String.
 From sys_verif.program_proof Require Import heap_init.
@@ -252,7 +252,7 @@ In practical use, we typically define a Gallina record and relate these records 
 
 Notice also that there's an extra unit value at the end; this makes the recursive functions for accessing fields much simpler.
 
-```coq
+```rocq
 Lemma wp_ExamplePerson :
   {{{ is_pkg_init heap.heap }}}
     heap.heap @ "ExamplePerson" #()
@@ -299,7 +299,7 @@ func ExamplePersonRef() *Person {
 
 The postcondition of the following spec introduces the _struct field points-to_. `l ↦s[heap.Person :: "Age"] (W64 25)` combines calculating an offset from `l` for the Age field of Person (that is, computing `l +ₗ #2`) with asserting that the value at that location is `#25`.
 
-```coq
+```rocq
 Lemma wp_ExamplePersonRef :
   {{{ is_pkg_init heap.heap }}}
     heap @ "ExamplePersonRef" #()
@@ -318,7 +318,7 @@ Notice in the goal above how the struct allocation produced a `p ↦[struct.t he
 
 Now look at what the following line of proof does to the goal.
 
-```coq
+```rocq
   iApply struct_fields_split in "p". iNamed "p".
   cbn [heap.Person.FirstName' heap.Person.LastName' heap.Person.Age'].
 
@@ -326,7 +326,7 @@ Now look at what the following line of proof does to the goal.
 
 The theorem `struct_fields_split` gives a way to take any points-to assertion with a struct type and split it into its component field points-to assertions, which is what the postcondition of this spec gives.
 
-```coq
+```rocq
   wp_pures.
   iApply "HΦ".
   iFrame.
@@ -357,7 +357,7 @@ Qed.
 
 Here is one spec for `GetAge`, which results in breaking off the age field into its points-to assertion.
 
-```coq
+```rocq
 Lemma wp_GetAge (firstName lastName: byte_string) (age: w64) (p: loc) (delta: w64) :
   {{{ is_pkg_init heap.heap ∗
       "first" :: p ↦s[heap.Person :: "FirstName"] firstName ∗
@@ -400,13 +400,13 @@ The basic assertion for working with slices is `own_slice s t dq xs`. `s` is a `
 
 This abstraction uses typeclasses so the type of `xs` can vary, so for example we can use `list w64` for a slice of integers. You can see this in the type signature for `own_slice`, where there are parameters `V: Type` and `IntoVal V`:
 
-```coq
+```rocq
 About own_slice.
 ```
 
 :::: note Output
 
-```txt title="coq output"
+```txt title="rocq output"
 own_slice :
 ∀ {H : ffi_syntax} {ffi : ffi_model} {H0 : ffi_interp ffi} {Σ : gFunctors},
   heapGS Σ
@@ -436,13 +436,13 @@ Getting and setting slice elements have reasonable specifications:
 
 TODO: fix the written explanation in this lecture: slice operations are now based on getting a reference and using it, not `SliceGet` and `SliceSet`
 
-```coq
+```rocq
 Check wp_load_slice_elem.
 ```
 
 :::: note Output
 
-```txt title="coq output"
+```txt title="rocq output"
 wp_load_slice_elem
      : ∀ (s : slice.t) (i : w64) (vs : list ?V) (dq : dfrac)
          (v : ?V) (Φ : val → iPropI Σ),
@@ -563,6 +563,6 @@ Fractional permissions are an approach to reasoning about read-only access in se
 
 This concept is explained as part of the Program Proofs guide in [fractional permissions](./program-proofs/fractions.md).
 
-```coq
+```rocq
 End goose.
 ```

@@ -4,7 +4,7 @@ tags:
   - literate
 ---
 
-```coq
+```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
 
 ```
@@ -31,7 +31,7 @@ See the documentation in the source code at [named_props.v](https://github.com/t
 
 You may see a use of `iNamed 1`, which is just `iIntros "Hfresh"; iNamed "Hfresh"`; if the goal is `foo -∗ ...` it applied the named struct to `foo` after introducing it. (This syntax may seem mysterious but it mirrors a Coq feature where `destruct 1` will destruct the first premise if the goal is `P → ...`.)
 
-```coq
+```rocq
 Section goose.
 Context `{!heapGS Σ}.
 
@@ -57,7 +57,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   iExact "HP".
 Qed.
 
@@ -93,7 +93,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   iFrame.
 Qed.
 

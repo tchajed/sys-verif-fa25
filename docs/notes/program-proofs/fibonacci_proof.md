@@ -15,7 +15,7 @@ The code in [go/functional/functional.go](https://github.com/tchajed/sys-verif-f
 
 We prove this function correct, proving that the imperative, loop-based implementation Go is equivalent to a recursive, functional implementation in Gallina.
 
-```coq
+```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From sys_verif.program_proof Require Import functional_init.
 
@@ -35,7 +35,7 @@ Fixpoint fibonacci (n: nat): nat :=
 
 We will need some helper lemmas. These are only required because the specification will assume that the final result doesn't overflow, and we will use that to show that the intermediate results also don't overflow.
 
-```coq
+```rocq
 Lemma fibonacci_S i :
   (1 ≤ i)%nat →
   fibonacci (S i) = (fibonacci i + fibonacci (i-1))%nat.
@@ -98,7 +98,7 @@ Qed.
 
 Here is the statement of what it means for `Fibonacci` (the Go function) to be correct.
 
-```coq
+```rocq
 Lemma wp_Fibonacci (n: w64) :
   {{{ ⌜Z.of_nat (fibonacci (uint.nat n)) < 2^64⌝ }}}
     functional.Fibonacci #n
@@ -117,7 +117,7 @@ Proof.
 
 The core of the proof's argument is this loop invariant about the `prev` and `cur` variables.
 
-```coq
+```rocq
   iAssert (∃ (i prev cur: w64),
               "fib_prev" ∷ fib_prev_ptr ↦ prev ∗
               "fib_cur" ∷ fib_cur_ptr ↦ cur ∗

@@ -10,7 +10,7 @@ shortTitle: "Assignment 3: infer specs"
 
 For each `Example` function in [go/heap/exercises.go](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/go/heap/exercises.go), come up with a general specification of the snippet's behavior, state it in Coq, and prove it correct. A specification for `ExampleA` is provided below as an example.
 
-```coq
+```rocq
 From sys_verif Require Import prelude empty_ffi.
 From sys_verif.program_proof Require Import heap_init.
 
@@ -30,7 +30,7 @@ Admitted.
 
 Lemma wp_ExampleB :
   {{{ True }}}
-    ExampleB #()
+    heap.heap @ "ExampleB" #()
   {{{ RET #(); True }}}.
 Proof.
   (* FILL IN HERE *)
@@ -38,7 +38,7 @@ Admitted.
 
 Lemma wp_ExampleC :
   {{{ True }}}
-    ExampleC #()
+    heap.heap @ "ExampleC" #()
   {{{ RET #(); True }}}.
 Proof.
   (* FILL IN HERE *)
@@ -48,10 +48,10 @@ Admitted.
 
 **Warning**: this one is a bit harder than the rest in both specification and proof.
 
-```coq
+```rocq
 Lemma wp_ExampleD :
   {{{ True }}}
-    ExampleD #()
+    heap.heap @ "ExampleD" #()
   {{{ RET #(); True }}}.
 Proof.
   (* FILL IN HERE *)
@@ -59,12 +59,10 @@ Admitted.
 
 Lemma wp_ExampleE :
   {{{ True }}}
-    ExampleE #()
+    heap.heap @ "ExampleE" #()
   {{{ RET #(); True }}}.
 Proof.
   (* FILL IN HERE *)
 Admitted.
-(* NOTE: ExampleG should be dropped, was too hard anyway *)
-
 End goose.
 ```

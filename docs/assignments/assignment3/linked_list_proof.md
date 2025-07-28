@@ -14,7 +14,7 @@ You should start by reading the Go code.
 
 The idea of this proof is similar to what you saw in Assignment 2's exercise 5, but with the code written in Go (and thus using nil pointers rather than an inductive data type) and with the proof written in Coq (so you have the Iris Proof Mode rather than writing a proof outline).
 
-```coq
+```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From sys_verif.program_proof Require Import heap_init.
 
@@ -29,7 +29,7 @@ specs and other theorem statements concise. *)
 
 After reading the code, read the definition of `ll_rep` and understand how it relates a list pointer (which will be a `n *Node`) to a list of values `xs: list w64`.
 
-```coq
+```rocq
 Fixpoint ll_rep (l: loc) (xs: list w64) : iProp Σ :=
   match xs with
   | nil => "%Heq" :: ⌜l = null⌝
@@ -43,7 +43,7 @@ Fixpoint ll_rep (l: loc) (xs: list w64) : iProp Σ :=
 
 The proofs will work by analysis on `xs`, but the code checks if `l` is `nil` or not. We relate the two with the following two lemmas (note that the Gallina `null` is the model of the Go `nil` pointer).
 
-```coq
+```rocq
 Lemma ll_rep_null l :
   ll_rep l [] -∗ ⌜l = null⌝.
 Proof.
@@ -65,7 +65,7 @@ Qed.
 
 Prove this specification.
 
-```coq
+```rocq
 Lemma wp_NewList :
   {{{ is_pkg_init heap.heap }}}
     heap.heap @ "NewList" #()
@@ -78,7 +78,7 @@ Admitted.
 
 Fill in a postcondition here and prove this specification.
 
-```coq
+```rocq
 Lemma wp_Node__Insert (l: loc) (xs: list w64) (elem: w64) :
   {{{ is_pkg_init heap.heap ∗ ll_rep l xs }}}
     l @ heap.heap @ "Node'ptr" @ "Insert" #elem
@@ -91,7 +91,7 @@ Admitted.
 
 Prove this specification.
 
-```coq
+```rocq
 Lemma wp_Node__Pop (l: loc) (xs: list w64) :
   {{{ is_pkg_init heap.heap ∗ ll_rep l xs }}}
     l @ heap.heap @ "Node'ptr" @ "Pop" #()
@@ -110,7 +110,7 @@ Fill in this specification. (You should read the code to see what it does and ho
 
 A general structure is provided for the proof (which you are allowed to change if you find it helpful); fill in the rest of the proof.
 
-```coq
+```rocq
 Lemma wp_Node__Append l1 xs1 l2 xs2 :
   {{{ is_pkg_init heap.heap ∗
       ll_rep l1 xs1 ∗ ll_rep l2 xs2 }}}

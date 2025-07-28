@@ -14,7 +14,7 @@ To simplify the code and the proof, the stack has been factored out into its own
 
 This part of the assignment intentionally provides you with almost nothing: you'll write a representation invariant, the specifications, and the proofs. **I suggest starting this part early**, since you will likely need to go back and forth between `queue_rep`, the specifications, the loop invariants, and the proofs; working on later parts of this sequence will cause you to discover bugs in earlier parts.
 
-```coq
+```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From sys_verif.program_proof Require Import heap_proof.stack_proof.
 From sys_verif.program_proof Require Import heap_init.

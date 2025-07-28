@@ -6,7 +6,7 @@ shortTitle: Integers
 
 # Integers in GooseLang
 
-```coq
+```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From New.code.sys_verif_code Require Import functional.
 Section goose.
@@ -22,21 +22,21 @@ Next, the type `w64` represents a 64-bit integer value. This is used both in Goo
 
 In GooseLang, to use a w64 we have to turn it into a value. This is almost always written `#x`. Technically, this produces the term `LitV (LitInt x)`, but `LitInt` is inserted implicitly (this is the Coq's coercions feature) and `#` is notation for `LitV`.
 
-```coq
+```rocq
 Set Printing Coercions. Unset Printing Notations.
 Eval simpl in (fun (x: w64) => #x).
 ```
 
 :::: note Output
 
-```txt title="coq output"
+```txt title="rocq output"
      = fun x : w64 => to_val x
      : forall _ : w64, val
 ```
 
 ::::
 
-```coq
+```rocq
 Unset Printing Coercions. Set Printing Notations.
 
 
@@ -64,7 +64,7 @@ We need `%Z` in the postcondition to force parsing using the Z notations (`+` is
 
 This style of postcondition is common with integers: we say there exists a `z: w64` that is returned, and then describe `uint.Z z`. This avoids having to specifically write down how the word itself is constructed, and we can just use operations on Z.
 
-```coq
+```rocq
 Lemma wp_Add_bounded (x y: w64) :
   {{{ ⌜uint.Z x + uint.Z y < 2^64⌝ }}}
     functional.Add #x #y
@@ -97,7 +97,7 @@ Proof.
 
 You can see in this goal that the specific word being returned is `word.add x y`.
 
-```coq
+```rocq
   iApply "HΦ".
   iPureIntro.
 ```
@@ -119,7 +119,7 @@ You can see in this goal that the specific word being returned is `word.add x y`
 
 This goal is only true because the sum doesn't overflow - in general `uint.Z (word.add x y) = (uint.Z x + uint.Z y) % 2^64`.
 
-```coq
+```rocq
   word.
 Qed.
 
@@ -127,7 +127,7 @@ Qed.
 
 If for whatever reason you want to just specify the exact word being returned, you can use `word.add` directly, but it's not common to want this.
 
-```coq
+```rocq
 Lemma wp_Add_general (x y: w64) :
   {{{ True }}}
     functional.Add #x #y

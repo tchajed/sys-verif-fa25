@@ -5,7 +5,7 @@ order: -2
 
 # Ltac reference
 
-```coq
+```rocq
 From Perennial.Helpers Require Import ListLen.
 From stdpp Require Import gmap.
 
@@ -25,7 +25,7 @@ Both styles are valid and you should be aware of each; which you use in each cas
 
 A "backwards" proof, working from the goal to the premises.
 
-```coq
+```rocq
 Lemma propositional_demo_1 (P Q R : Prop) :
   (P -> Q) -> (Q -> R) -> P -> R.
 Proof.
@@ -47,7 +47,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   apply HPQ.
   apply HP.
 Qed.
@@ -56,7 +56,7 @@ Qed.
 
 A "forwards" proof, working from the premises to the goal.
 
-```coq
+```rocq
 Lemma propositional_demo_2 (P Q R : Prop) :
   (P -> Q) -> (Q -> R) -> P -> R.
 Proof.
@@ -78,7 +78,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   apply HQR in HP.
   assumption.
 Qed.
@@ -87,7 +87,7 @@ Qed.
 
 `destruct` on a hypothesis of the form `A ∨ B` produces two goals, one for `A` and one for `B`. Below we also use `as [HP | HQ]` to name the hypothesis in each goal.
 
-```coq
+```rocq
 Lemma propositional_demo_or (P Q : Prop) :
   (Q -> P) ->
   (P ∨ Q) -> P.
@@ -103,7 +103,7 @@ Qed.
 
 ## Computation: `simpl`, `reflexivity`
 
-```coq
+```rocq
 Inductive play := rock | paper | scissors.
 Definition beats (p1 p2: play) : bool :=
   match p1, p2 with
@@ -119,7 +119,7 @@ Definition beats (p1 p2: play) : bool :=
 
 `reflexivity` solves a goal of the form `a = a` or fails. It also solves `a = b` if `a` and `b` compute to the same thing (so `simpl` is unnecessary in the proof below).
 
-```coq
+```rocq
 Lemma beats_ex_1 : beats paper rock = true.
 Proof.
   simpl.
@@ -134,7 +134,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
  reflexivity.
 Qed.
 
@@ -142,7 +142,7 @@ Qed.
 
 ## `destruct` for inductive datatype
 
-```coq
+```rocq
 Lemma beats_irrefl (p: play) : beats p p = false.
 Proof.
   destruct p.
@@ -157,7 +157,7 @@ Qed.
 
 `t1; t2` runs `t1`, then `t2` on every subgoal generated from `t1`. This can be used to shorten proofs, like this one (compare to `beats_irrefl` above):
 
-```coq
+```rocq
 Lemma beats_irrefl' (p: play) : beats p p = false.
 Proof.
   (* we don't need to repeat [reflexivity] three times *)
@@ -172,7 +172,7 @@ Qed.
 
 This generalizes to more than two with `t1; [t2 | t3 | t4]` and so on.
 
-```coq
+```rocq
 Lemma add_0_r (n: nat) :
   n + 0 = n.
 Proof.
@@ -190,7 +190,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   (* note that we already ran `simpl` in this goal *)
   rewrite IHn. reflexivity.
 Qed.
@@ -203,7 +203,7 @@ Qed.
 
 `subst` repeatedly finds an equality of the form `x = ...` and substitutes `x` for the right-hand side: it rewrites the lemma everywhere, then removes `x` from the context (since it is no longer used). Useful to clean up the context.
 
-```coq
+```rocq
 Lemma subst_example (a b c: nat) (f: nat → nat) :
   a = b →
   b = c →
@@ -228,7 +228,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   reflexivity.
 Qed.
 
@@ -243,7 +243,7 @@ You'll mainly use list lemmas together with the general tactics `apply`, `apply 
 
 We have two useful tactics: `autorewrite with len` simplifies `length (...)` for various list functions, and `list_elem` is best explaining by the demo below.
 
-```coq
+```rocq
 Lemma list_reasoning_demo (l1 l2: list Z) (i: nat) (x: Z) :
   l1 `prefix_of` l2 →
   l1 !! i = Some x →
@@ -261,13 +261,13 @@ Proof.
 
 ::::: details Output of Search lookup app
 
-```coq
+```rocq
   Search lookup app.
 ```
 
 :::: note Output
 
-```txt title="coq output"
+```txt title="rocq output"
 List.lookup_snoc:
   ∀ {A : Type} (l : list A) (x : A), (l ++ [x]) !! length l = Some x
 lookup_app_l:
@@ -312,7 +312,7 @@ lookup_app_Some:
 
 :::::
 
-```coq
+```rocq
   rewrite lookup_app_l.
   { (* [apply ... in] applies the tactic to a premise, working forward from the
        hypotheses. (In this case the result exactly matches the goal, but this
@@ -326,7 +326,7 @@ Qed.
 
 `list_elem l i as x` takes a list `l`, an index `i`, and produces a variable `x` and a hypothesis `Hx_lookup : l !! i = Some x`. As a side condition, you must prove `i < length l` (required for such an `x` to exist); some automation tries to prove this fact for you, though.
 
-```coq
+```rocq
 Lemma list_elem_demo (l1 l2: list Z) (i: nat) :
   (i < length l1 + length l2)%nat →
   ∃ x, (l1 ++ l2) !! i = Some x.
@@ -345,7 +345,7 @@ Rewriting is the act of using `a = b` to replace `a` with `b`. It's a powerful a
 
 Let's first see a simple example:
 
-```coq
+```rocq
 Lemma rewriting_demo1 (n1 n2 x: nat) :
   n1 = n2 →
   n1 + x = n2 + x.
@@ -368,7 +368,7 @@ Proof.
 
 It's a seemingly small change but the left and right-hand sides are now equal!
 
-```coq
+```rocq
   reflexivity.
 Qed.
 
@@ -377,7 +377,7 @@ Qed.
 
 Here are some more examples, which require a little setup:
 
-```coq
+```rocq
 Module rewriting.
 
 (* some arbitrary type for map values *)
@@ -399,7 +399,7 @@ Proof. apply lookup_delete_ne. Qed.
 
 ### rewrite
 
-```coq
+```rocq
 Lemma lookup_delete_ex1 m k v :
   delete k (<[k := v]> m) !! k = delete k m !! k.
 Proof.
@@ -419,7 +419,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   rewrite gmap_lookup_delete.
   done.
 Qed.
@@ -428,7 +428,7 @@ Qed.
 
 ### rewrite !
 
-```coq
+```rocq
 Lemma lookup_delete_ex2 m k v :
   delete k (<[k := v]> m) !! k = delete k m !! k.
 Proof.
@@ -437,7 +437,7 @@ Proof.
 
 `rewrite !lem` rewrites `lem` one or more times (fails if it never applies)
 
-```coq
+```rocq
   rewrite !gmap_lookup_delete.
 ```
 
@@ -453,7 +453,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   done.
 Qed.
 
@@ -461,7 +461,7 @@ Qed.
 
 ### rewrite //
 
-```coq
+```rocq
 Lemma lookup_delete_ex3  m k v :
   delete k (<[k := v]> m) !! k = delete k m !! k.
 Proof.
@@ -470,7 +470,7 @@ Proof.
 
 The `//` is an _action_ that tries to prove "trivial" goals (or subgoals from rewrite side conditions). We can use it to give a one-line proof.
 
-```coq
+```rocq
   rewrite !gmap_lookup_delete //.
 Qed.
 
@@ -478,7 +478,7 @@ Qed.
 
 ### rewrite side conditions
 
-```coq
+```rocq
 Lemma lookup_delete_ne_ex1 m k v k' :
   k ≠ k' →
   delete k (<[k := v]> m) !! k' = delete k m !! k'.
@@ -489,7 +489,7 @@ Proof.
 
 This lemma to rewrite with has a premise or _side condition_: it only applies if the two keys involved are not equal. By default, `rewrite` creates a subgoal for every side condition, so we are left with the modified goal and the side condition.
 
-```coq
+```rocq
   rewrite gmap_lookup_delete_ne.
 ```
 
@@ -517,7 +517,7 @@ This lemma to rewrite with has a premise or _side condition_: it only applies if
 
 ::::
 
-```coq
+```rocq
   (* We could now write a structured proof with `{ proof1. } proof2.` or
   bullets. *)
 
@@ -527,7 +527,7 @@ Abort.
 
 Let's demonstrate something else for this kind of simple side condition.
 
-```coq
+```rocq
 Lemma lookup_delete_ne_ex2 m k v k' :
   k ≠ k' →
   delete k (<[k := v]> m) !! k' = delete k m !! k'.
@@ -540,7 +540,7 @@ Proof.
 
 Unfortunately Coq actually has two `rewrite` tactics: one from the standard library and one from a library called SSReflect; the latter is what we're using because it has some other useful features, but `rewrite ... by t` is only in the standard one. We can use the standard rewrite with `rewrite ->`.
 
-```coq
+```rocq
   rewrite -> gmap_lookup_delete_ne by done.
 ```
 
@@ -561,7 +561,7 @@ Unfortunately Coq actually has two `rewrite` tactics: one from the standard libr
 
 It's more cumbersome but we can still assert that the side condition is proven with SSReflect's rewrite. The syntax here is `t; [ t1 | ]`, which runs `t2` only on the first goal from `t`. (You can also do `t; [ | t2 ]` or even `t; [ t1 |t2 ]`).
 
-```coq
+```rocq
   rewrite gmap_lookup_delete_ne; [ done | ].
 ```
 
@@ -582,14 +582,14 @@ It's more cumbersome but we can still assert that the side condition is proven w
 
 Another trick is to use `rewrite lem //`, and then only proceed if this leaves one goal. This won't work when you want a tactic more powerful than `done`.
 
-```coq
+```rocq
   rewrite lookup_insert_ne //.
 Qed.
 ```
 
 If you're only going to remember one of these, I would use the first whenever you have a side condition. Hopefully someday the SSReflect `rewrite` supports a `by` clause...
 
-```coq
+```rocq
 End rewriting.
 
 ```
@@ -598,7 +598,7 @@ End rewriting.
 
 `lia` solves goals involving arithmetic (with `nat` or `Z`).
 
-```coq
+```rocq
 Lemma lia_example x y z :
   x + y - 3 < z →
   z - y <= 2 ->
@@ -613,7 +613,7 @@ Proof. lia. Qed.
 
 **Note**: the tactic name `intuition`, confusingly, does not refer to an obvious or instinctive proof, but to _intuitionistic logic_. This is a version of logic in which doesn't use _classical logic_'s "excluded middle", which says that `∀ P, P ∨ ¬P` holds. For the most part you can ignore this distinction (if you ever need it, Coq does also support adding excluded middle as an axiom and working in classical logic.)
 
-```coq
+```rocq
 Lemma propositional_demo_3 (P Q R : Prop) :
   (P -> Q) ∧ (Q -> R) -> P -> R.
 Proof.

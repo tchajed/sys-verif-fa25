@@ -13,7 +13,7 @@ Going into this document, I assume you have some familiarity with separation log
 
 In GooseLang, the "basic points-to fact" is written with a type (the reasons are explained separately), but this doesn't affect the discussion here. We'll show examples only using the uint64 type. The `l ↦ x` permission allows both reads and writes.
 
-```coq
+```rocq
 Lemma read_spec (l: loc) (x: w64) :
   {{{ l ↦ x }}}
     ![#uint64T] #l
@@ -48,7 +48,7 @@ Let's see these principles in action in Perennial.
 
 This proof shows some features integrated into the IPM related to fractions. Most of the proofs in this file aren't that interesting, but this one has some non-obvious tricks.
 
-```coq
+```rocq
 Lemma fraction_split l (x: w64) :
   l ↦{#1} x ⊣⊢ l ↦{#(1/2)} x ∗ l ↦{#(1/2)} x.
 Proof.
@@ -75,7 +75,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
     iFrame.
   - iIntros "[H1 H2]".
     (* [iCombine] is a tactic that does the opposite of [iDestruct] - not often
@@ -100,7 +100,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
     iFrame.
 Qed.
 
@@ -108,7 +108,7 @@ Qed.
 
 I said a fraction was `q ∈ (0, 1]`. This is realized with a custom type in Coq, `Qp` (the name is supposed to evoke "positive rational").
 
-```coq
+```rocq
 Lemma read_frac_spec l (x: w64) (q: Qp) :
   {{{ l ↦{#q} x }}}
     ![#uint64T] #l
@@ -124,7 +124,7 @@ The left and right hand sides of this equality parse to the same term.
 
 This is a case where we have to put `%I` to parse this using all the Iris notation.
 
-```coq
+```rocq
 Lemma frac_1_abbreviation (l: loc) (x: w64) :
   (l ↦{#1} x)%I = (l ↦ x)%I.
 Proof.
@@ -143,7 +143,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   reflexivity.
 Qed.
 
@@ -173,7 +173,7 @@ Third, discarding the fraction involves an Iris "update", a change in ghost stat
 
 ## Discardable fractions in proofs
 
-```coq
+```rocq
 Lemma alloc_ro_spec (x: w64) :
   {{{ True }}}
     alloc #x
@@ -191,7 +191,7 @@ Proof.
 
 This is the step where we persist the points-to permission and turn it into a persistent, read-only fact. Also notice that the output (renamed to "Hro" for clarity) is put into the persistent context.
 
-```coq
+```rocq
   iPersist "H" as "#Hro".
 ```
 
@@ -214,7 +214,7 @@ This is the step where we persist the points-to permission and turn it into a pe
 
 ::::
 
-```coq
+```rocq
   iModIntro.
   iApply "HΦ".
   iFrame "Hro".
@@ -224,7 +224,7 @@ Qed.
 
 With a persistent permission, it's reasonable (and expected) that the permission need not be returned in the postcondition.
 
-```coq
+```rocq
 Lemma read_discarded_spec (l: loc) (x: w64) :
   {{{ l ↦□ x }}}
     ![#uint64T] #l

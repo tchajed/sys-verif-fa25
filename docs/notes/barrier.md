@@ -261,7 +261,7 @@ The basic idea of using the specification is that we will create `recv Î³ (P1 âˆ
 
 ## Using the barrier spec
 
-```coq
+```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
 
 From sys_verif.program_proof Require Import concurrent_init.

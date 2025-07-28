@@ -13,7 +13,7 @@ This is a stack used to implement a queue (using two stacks).
 
 ---
 
-```coq
+```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From sys_verif.program_proof Require Import heap_init.
 
@@ -26,7 +26,7 @@ The stack representation invariant has one interesting detail: when we "push" to
 
 Understanding this is not needed to use these specifications (by design, you do not need to read the definition of `stack_rep` to understand how to use it). However, for the purposes of the class it's important you understand the difference between the physical state and the abstract representation and why it's okay to have this `reverse` here.
 
-```coq
+```rocq
 Definition stack_rep (l: loc) (xs: list w64): iProp Σ :=
   ∃ (s: slice.t),
     "elements" ∷ l ↦s[heap.Stack :: "elements"] s ∗

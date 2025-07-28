@@ -27,7 +27,7 @@ The reason there is a separate (and more sophisticated) library is related to th
 
 :::
 
-```coq
+```rocq
 From iris.base_logic.lib Require Import saved_prop.
 From sys_verif.program_proof.concurrent Require Import auth_set.
 From sys_verif.program_proof Require Import prelude empty_ffi.
@@ -75,7 +75,7 @@ The barrier uses two ghost variables, whose names are stored in γ:
 
 `γ.(send_names_name)` is an `auth_set gname` tracking a _set of ghost names_, each of which records a proposition in a `send γ P` that we've handed out (_not_ the `γ` itself, which is about which barrier this `send` is for; you might want to skip ahead to read the definition of `send`). Only the sends that we're still waiting for our in this set; as those threads call `b.Done()`, the corresponding name is removed from the `auth_set`.
 
-```coq
+```rocq
   Definition own_barrier_ghost (γ: barrier_names) (num_waiting: w64)
     : iProp Σ :=
     (* The values of all the ghost state are existentially quantified since the
@@ -87,13 +87,13 @@ The barrier uses two ghost variables, whose names are stored in γ:
 
 This ghost ownership owns only half of `γ.(recv_prop_name)`; the other half is controlled by `recv γ Q`. This division into two halves, one in a lock invariant and one owned by a thread, is a common pattern; we already saw it in the ParallelAdd example's ghost variables.
 
-```coq
+```rocq
     "recvQ" ∷ saved_prop_own γ.(recv_prop_name) (DfracOwn (1/2)) recvQ ∗
 ```
 
 The number of `send` names (and thus number of predicates) is the number of waiting threads. An important consequence is that if `num_waiting = W64 0`, then there are no sendNames, and thus all threads have finished.
 
-```coq
+```rocq
     "%HnumWaiting" ∷ ⌜size sendNames = uint.nat num_waiting⌝ ∗
     "HsendNames_auth" ∷ auth_set_auth γ.(send_names_name) sendNames ∗
 ```
@@ -104,7 +104,7 @@ The effect of writing `∃ P, saved_prop_own γS DfracDiscarded P` is to "read" 
 
 Two extremes are worth thinking about here. First, once we've created all the `send γ P` assertions, this wand says that the conjunction of those `P`s implies `recvQ`; this checks out since when we create `P` we add it onto the current `recv γ Q`. Second, when all the sends are complete (all threads have finished and called `b.Done()`), then the left-hand side of this wand will be simply `emp` and the lock invariant will own `recvQ`. That's exactly how we'll produce `Q` as the postcondition in `b.Done()` once `num_waiting = W64 0`.
 
-```coq
+```rocq
     "HrecvQ_wand" ∷ (([∗ set] γS ∈ sendNames,
                         ∃ P, saved_prop_own γS DfracDiscarded P ∗ ▷ P) -∗
                       ▷ recvQ).
@@ -154,7 +154,7 @@ Two extremes are worth thinking about here. First, once we've created all the `s
 
 In this section we show how the custom ghost state defined for this library is updated, in ways that correspond to the physical operations. Its good for proof organization to factor this reasoning out to lemmas and separate it from reasoning about the code.
 
-```coq
+```rocq
   Lemma own_barrier_ghost_alloc :
     ⊢ |={⊤}=> ∃ γ, own_barrier_ghost γ (W64 0) ∗ recv γ emp.
   Proof.
@@ -176,7 +176,7 @@ In this section we show how the custom ghost state defined for this library is u
 
 This is the change used for `b.Add(1)`. Observe how it changes the `recvQ` to append `∗ P`, and can create a new send name because we increment `num_waiting`.
 
-```coq
+```rocq
   Lemma own_barrier_ghost_add1 P γ Q num_waiting :
     uint.Z num_waiting + 1 < 2^64 →
     own_barrier_ghost γ num_waiting ∗ recv γ Q ={⊤}=∗
@@ -247,7 +247,7 @@ This is the change used for `b.Add(1)`. Observe how it changes the `recvQ` to ap
 
 This is the update used for `b.Done()`. It consumes a `send γ P` and absorbs it into the ghost state along with `P`. What's happening here is that `HrecvQ_wand` is obtaining ownership over the `P` so that it can prove `recvQ` even with fewer send names on the left-hand side. (This is probably the most conceptually complicated part of the proof.)
 
-```coq
+```rocq
   Lemma own_barrier_ghost_send γ numWaiting P :
     own_barrier_ghost γ numWaiting ∗ send γ P ∗ P ={⊤}=∗
     own_barrier_ghost γ (word.sub numWaiting (W64 1)).
@@ -279,7 +279,7 @@ This is the update used for `b.Done()`. It consumes a `send γ P` and absorbs it
 
 This is the update for `b.Done()`. We know `recvQ` in the invariant is `Q`, and need to return it. The `HrecvQ_wand` part of the lock invariant must be a proof of `recvQ`, because we know we're not waiting for any more threads. The only remaining complication is how to extract that `Q`. We use a common trick in concurrency proofs: we simultaneously change the receive predicate to the trivial `emp` and extract `▷Q`.
 
-```coq
+```rocq
   Lemma own_barrier_ghost_recv γ numWaiting Q :
     uint.Z numWaiting = 0 →
     own_barrier_ghost γ numWaiting ∗ recv γ Q ={⊤}=∗
@@ -313,7 +313,7 @@ This is the update for `b.Done()`. We know `recvQ` in the invariant is `Q`, and 
 
 With these ghost updates proven, we can treat [own_barrier_ghost] as opaque for the last section.
 
-```coq
+```rocq
   Typeclasses Opaque own_barrier_ghost send recv.
 
 ```
@@ -322,7 +322,7 @@ With these ghost updates proven, we can treat [own_barrier_ghost] as opaque for 
 
 Finally, we do all the program proofs, the specifications for each function. The hard work has all been done in the definition of the predicates and the lemmas for the ghost updates, so these proofs are mostly boilerplate.
 
-```coq
+```rocq
   Lemma wp_NewBarrier :
     {{{ is_pkg_init concurrent }}}
       concurrent @ "NewBarrier" #()

@@ -9,7 +9,7 @@ pageInfo: ["Date", "Category", "Tag", "Word"]
 
 # Lecture 4: Model-based specifications for functional programs
 
-> Follow these notes in Coq at [src/sys_verif/coq/adt_specs.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/coq/adt_specs.v).
+> Follow these notes in Coq at [src/sys_verif/rocq/adt_specs.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/rocq/adt_specs.v).
 
 ## Learning outcomes
 
@@ -30,7 +30,7 @@ The basic idea is that when you have something called an Abstract Data Type (ADT
 
 Suppose we want to represent numbers of arbitrary size. One way to do this is with a list of digits, using the built-in `list` type.
 
-```coq
+```rocq
 Definition digit := Z.
 Definition big_int := list digit.
 
@@ -38,7 +38,7 @@ Definition big_int := list digit.
 
 Now we need some operations to do things with `big_int`s.
 
-```coq
+```rocq
 Definition zero : big_int := [].
 (* This is only intended to work when `0 ≤ x < 10`. *)
 Definition from_digit (x: digit) : big_int := [x].
@@ -47,7 +47,7 @@ Definition from_digit (x: digit) : big_int := [x].
 
 The next operation that will be part of the "public interface" is `big_int_add`, but defining that operation requires some helper functions.
 
-```coq
+```rocq
 Definition digit_sum_carry (d1 d2: digit): (digit * digit) :=
   (d1 + d2 `mod` 10, d1 + d2 `div` 10).
 
@@ -76,7 +76,7 @@ Definition big_int_add (b1 b2 : big_int) : big_int :=
 
 Finally, we'll provide a comparison function for big integers:
 
-```coq
+```rocq
 Definition big_int_le (b1 b2: big_int) : bool.
 Admitted. (* exercise for the reader *)
 
@@ -101,7 +101,7 @@ The core idea of a _model-based specification_ is to relate this code to a spec 
 
 The specification needs to pick a consistent way to relate a `big_int` to the abstract `Z` it represents, which we call an _abstraction function_. The function uses the suffix `_rep` for "representation" since it gives what a `i: big_int` represents in the abstract model.
 
-```coq
+```rocq
 Definition rep_type := Z.
 Fixpoint big_int_rep (i: big_int) : rep_type :=
   match i with
@@ -113,7 +113,7 @@ Fixpoint big_int_rep (i: big_int) : rep_type :=
 
 After picking an abstraction function, we relate all of the code to specifications using `Z` and its related functions. The pattern might be easiest to pick out from the example, but we'll shortly present it generically as well.
 
-```coq
+```rocq
 Lemma zero_spec : big_int_rep zero = 0.
 Proof. reflexivity. Qed.
 
@@ -135,7 +135,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
  lia.
 Qed.
 
@@ -196,7 +196,7 @@ These ought to be captured by proving that every abstract `database_model` that 
 
 ### Example 2: map with deletions
 
-```coq
+```rocq
 (* This Module just groups the definitions so we can use short names inside. *)
 Module deleteMap.
 

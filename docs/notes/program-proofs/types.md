@@ -15,7 +15,7 @@ This is still very much a work-in-progress.
 
 GooseLang pervasively uses types when interacting with memory (eg, loads, stores, pointers, slices). Here we explain how those types work.
 
-```coq
+```rocq
 (* enables defining structs with nice notation, something typically only done in
 auto-generated code *)
 Open Scope struct_scope.
@@ -35,7 +35,7 @@ func Swap(x *uint64, y *uint64) {
 
 Here's what its goose translation looks like. Notice every load and store is annotated with its type, here `uint64T` for all four load/stores.
 
-```coq
+```rocq
 Definition Swap: val :=
     rec: <> "x" "y" :=
       let: "old_y" := ![#uint64T] "y" in
@@ -46,13 +46,13 @@ Definition Swap: val :=
 
 What is `uint64T`? It has type `go_type`, which is a Coq definition modeling a small subset of the Go type system:
 
-```coq
+```rocq
 Print go_type.
 ```
 
 :::: note Output
 
-```txt title="coq output"
+```txt title="rocq output"
 Inductive go_type : Type :=
     boolT : go_type
   | uint8T : go_type

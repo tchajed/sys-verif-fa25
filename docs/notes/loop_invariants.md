@@ -61,7 +61,7 @@ The informal description above describes a "continue condition" and "break condi
 1. Reformulate `wp_forBreak` so that it takes a regular loop invariant and a break condition as separate arguments, to more closely match the principle above. That, state a different theorem (let's call it `wp_for_breakCondition`) for proving a specification about that same expression `(for: (λ: <>, #true)%V ; (λ: <>, Skip)%V := body)`.
 2. Prove your new `wp_for_breakCondition` using `wp_forBreak`. You should replace the `-∗` in the theorem statement with a `→` (we will discuss what difference this creates later when we talk about something called the _persistently modality_).
 
-```coq
+```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From sys_verif.program_proof Require Import heap_init functional_init.
 
@@ -91,7 +91,7 @@ func SumNrec(n uint64) uint64 {
 
 This implementation might overflow a 64-bit number. This specification handles this case by assuming the result doesn't overflow.
 
-```coq
+```rocq
 Lemma wp_SumNrec (n: w64) :
   {{{ is_pkg_init functional ∗
       ⌜uint.Z n * (uint.Z n + 1) / 2 < 2^64⌝ }}}
@@ -143,7 +143,7 @@ The first proof we'll attempt for this function has a minimal loop invariant tha
 
 This is a problem of not having a strong enough loop invariant. The loop invariant is an invariant: we can prove it holds initially and that it is preserved by the loop. However, it's hopelessly weak for proving that `return sum` is correct after the loop - it only shows that `sum` is an integer.
 
-```coq
+```rocq
 Lemma wp_SumN_failed (n: w64) :
   {{{ is_pkg_init functional }}}
     functional @ "SumN" #n
@@ -159,7 +159,7 @@ Proof.
 
 TODO: describe the new way we supply loop invariants.
 
-```coq
+```rocq
   iAssert (∃ (sum i: w64),
               "sum" :: sum_ptr ↦ sum ∗
               "i" :: i_ptr ↦ i)%I
@@ -191,7 +191,7 @@ I _strongly_ recommend being fairly confident in your answer before reading the 
 
 Here is a proof with the right loop invariant.
 
-```coq
+```rocq
 Lemma wp_SumN (n: w64) :
   {{{ is_pkg_init functional ∗ ⌜uint.Z n < 2^64-1⌝ }}}
     functional @ "SumN" #n
@@ -276,7 +276,7 @@ Can you see how this invariant relates to the one below? Notice how we had to be
 
 A note on Go function names: Go makes a global decision that function calls always use the package name, so other than within the standard library's sort package, the function will be invoked as `sort.Find`. That is how I'll refer to it from now on.
 
-```coq
+```rocq
 Definition is_sorted (xs: list w64) :=
   ∀ (i j: nat), (i < j)%nat →
          ∀ (x1 x2: w64), xs !! i = Some x1 →
@@ -398,6 +398,6 @@ What is Go's `sort.Find` assuming and promising? Translate the prose specificati
 
 Proving the real `sort.Find` with Goose is also a possibility, with minor tweaks to the code due to Goose translation limitations. A tricky part is that `Find` is a higher-order function: it takes a function as an argument. We already saw one such function, `For`, but this was only in GooseLang; now we have to deal with one coming from Go.
 
-```coq
+```rocq
 End goose.
 ```

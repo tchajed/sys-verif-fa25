@@ -30,7 +30,7 @@ Then, we'll prove specifications based on this representation invariant.
 
 ---
 
-```coq
+```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From sys_verif.program_proof Require Import heap_init.
 
@@ -44,7 +44,7 @@ Context `{hG: !heapGS Σ} `{!goGlobalsGS Σ}.
 
 See `own_tree_F` for the context of how this is used.
 
-```coq
+```rocq
 Definition tree_root (own_tree: loc -d> gset w64 -d> iPropO Σ)
   (l: loc) (keys: gset w64) : iPropO Σ :=
   (∃ (key: w64) (left_l right_l: loc) (l_keys r_keys: gset w64),
@@ -69,7 +69,7 @@ The representation of a tree relates a `loc` for the root pointer (to a `SearchT
 
 This is using an Iris mechanism to write recursive definitions. We won't go into the details here, but you do need to be able to read the definition `own_tree_F`. Notice that `own_tree_F` takes a predicate `own_tree` as an argument. What `own_tree_unfold` proves is that `own_tree` is equal to `own_tree_F` applied to the original `own_tree` - this is what's called a "fixpoint" of `own_tree_F` because `own_tree_F own_tree = own_tree`.
 
-```coq
+```rocq
 Definition own_tree_F (own_tree: loc -d> gset w64 -d> iPropO Σ) :
   loc -d> gset w64 -d> iPropO Σ :=
   (λ l keys,
@@ -125,7 +125,7 @@ func NewSearchTree() *SearchTree {
 }
 ```
 
-```coq
+```rocq
 Lemma wp_NewSearchTree :
   {{{ is_pkg_init heap.heap }}}
     heap.heap @ "NewSearchTree" #()
@@ -156,7 +156,7 @@ func (t *SearchTree) Contains(key uint64) bool {
 }
 ```
 
-```coq
+```rocq
 Lemma wp_SearchTree__Contains (needle: w64) l keys :
   {{{ is_pkg_init heap.heap ∗ own_tree l keys }}}
     l @ heap.heap @ "SearchTree'ptr" @ "Contains" #needle
@@ -171,7 +171,7 @@ Löb induction says `∀ P, (▷ P → P) → P`. This seems pretty magical: we 
 
 Note that we can't use this mechanism to prove a program's recursion eventually terminates, so it only works to prove properties about a function if it terminates.
 
-```coq
+```rocq
   iLöb as "IH" forall (l keys).
   wp_start as "Htree". wp_auto.
 ```
@@ -235,7 +235,7 @@ Note that we can't use this mechanism to prove a program's recursion eventually 
 
 Notice that the ▷ in front of "IH" has disappeared because we've taken a step. We're now free to use it whenever there's a call to `SearchTree__Contains`.
 
-```coq
+```rocq
   wp_if_destruct; try wp_auto.
   { (* If the root is nil, then the tree is empty. We need to prove that to show
        that returning false is the right thing to do. *)
@@ -318,7 +318,7 @@ func singletonTree(key uint64) *SearchTree {
 }
 ```
 
-```coq
+```rocq
 Lemma wp_singletonTree (key: w64) :
   {{{ is_pkg_init heap.heap }}}
     heap.heap @ "singletonTree" #key
@@ -366,7 +366,7 @@ func (t *SearchTree) Insert(key uint64) *SearchTree {
 }
 ```
 
-```coq
+```rocq
 Lemma wp_SearchTree__Insert (new_key: w64) l keys :
   {{{ is_pkg_init heap.heap ∗ own_tree l keys }}}
     l @ heap.heap @ "SearchTree'ptr" @ "Insert" #new_key
@@ -428,6 +428,6 @@ Qed.
 
 ```
 
-```coq
+```rocq
 End proof.
 ```

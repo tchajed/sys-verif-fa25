@@ -13,7 +13,7 @@ For more details beyond this document you can read the Coq reference manual docu
 
 Let's start with an example; we'll write our own list type `List` and give it notations with a slightly different syntax than the `[1; 2; 3]` notation for normal `list`s. Ignore the 6 commands of setup for now and look at the overall effect in the examples.
 
-```coq
+```rocq
 Inductive List {A:Type} :=
 | Nil
 | Cons (x: A) (l: List).
@@ -32,7 +32,7 @@ Notation "<< x ; y ; .. ; z >>" := (Cons x (Cons y .. (Cons z Nil) .. ))
 
 The notations have extended Coq's syntax:
 
-```coq
+```rocq
 Definition ex1: List bool := <>.
 Definition ex2: List Z := << 1; 34; 4; 7 >>.
 
@@ -40,13 +40,13 @@ Definition ex2: List Z := << 1; 34; 4; 7 >>.
 
 Not only that, but Coq will use these notations in _reverse_ for printing as well:
 
-```coq
+```rocq
 Print ex2.
 ```
 
 :::: note Output
 
-```txt title="coq output"
+```txt title="rocq output"
 ex2 = <<1; 34; 4; 7>>
      : List Z
 ```
@@ -55,13 +55,13 @@ ex2 = <<1; 34; 4; 7>>
 
 The notations are truly being used for printing; it's not just that printing `ex2` shows how the term was defined. Here's an example where we write a list without the notation but it gets printed with it:
 
-```coq
+```rocq
 Check (Cons 1 (Cons 3 (Cons 7 Nil))).
 ```
 
 :::: note Output
 
-```txt title="coq output"
+```txt title="rocq output"
 <<1; 3; 7>>
      : List Z
 ```
@@ -76,7 +76,7 @@ A typical example is the numeric notations, where the notation for `nat` numbers
 
 Currently, due to the import of Zarith at the top of the file, numbers are parsed as `Z`. The syntax `e%nat` parses `e` but with `nat` as the first scope, which allows us to override the default temporarily to parse a literal as a `nat`.
 
-```coq
+```rocq
 Check 3 : Z.
 Check 3%nat : nat.
 
@@ -84,7 +84,7 @@ Check 3%nat : nat.
 
 Unfortunately this override mechanism requires yet another concept of a **scope delimiting key**. The above command `Delimit Scope angle_list_scope with A` says that `%A` should be used for `angle_list_scope`; similarly `%nat` is used for `nat_scope` and `%Z` is used for `%Z_scope`. If we didn't have `angle_list_scope` open, we could still use it with the delimiting key:
 
-```coq
+```rocq
 Close Scope angle_list_scope.
 
 Fail Definition ex3 := << 3 >>.
@@ -116,21 +116,21 @@ Coq has some features that allow controlling the notation scope without requirin
 
 The first is that notation scopes can be attached to types. This has already been done for `nat`, but here's the command that does it:
 
-```coq
+```rocq
 Bind Scope nat_scope with nat.
 
 ```
 
 Now, if an argument to a function is known to be of type nat (because of the function's type), then the expression we put there will be parsed in `nat_scope`. In the following example, the constant `3` would normally be parsed as a Z except for the type of `Nat.add` and the scope binding.
 
-```coq
+```rocq
 Definition use_nat_add (x: nat) := Nat.add x 3.
 
 ```
 
 This example uses the same feature in a slightly different way. The notation `x + y` is ambiguous (it could be `Z.add` or `Nat.add`), and `Z.add` is the default. Because of the return type annotation here, `x + y` gets parsed as a `nat` addition.
 
-```coq
+```rocq
 Definition use_nat_plus (x y: nat): nat := x + y.
 ```
 
@@ -138,7 +138,7 @@ In Iris specifically this is commonly why we write `: iProp Σ` for proposition 
 
 As one last scope control feature, it's also possible to associate a notation scope to each argument of a definition, regardless of the types involved. If you ever need to see what these are, you can use `About` which includes scope info.
 
-```coq
+```rocq
 Definition takes_nat_scope {A: Type} (x: A) := x.
 Arguments takes_nat_scope {A} x%nat.
 Check takes_nat_scope 3 : nat.
@@ -147,13 +147,13 @@ Check takes_nat_scope 3 : nat.
 
 The relevant part of the About output is `Arguments takes_nat_scope {A} x%nat_scope`, in which `x%nat_scope` means that argument will be parsed in `nat_scope`.
 
-```coq
+```rocq
 About takes_nat_scope.
 ```
 
 :::: note Output
 
-```txt title="coq output"
+```txt title="rocq output"
 takes_nat_scope : ∀ {A : Type}, A → A
 
 takes_nat_scope is not universe polymorphic

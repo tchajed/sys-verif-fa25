@@ -94,7 +94,7 @@ The situation may seem somewhat hopeless, but remember that there aren't actuall
 
 Let's see how this is realized in Coq for this example.
 
-```coq
+```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From sys_verif.program_proof Require Import concurrent_init.
 
@@ -106,7 +106,7 @@ Context `{hG: !heapGS Σ} `{!goGlobalsGS Σ}.
 
 This entire specification is based on an _representation predicate_ `P: w64 → iProp Σ`. The key to the spec is that `P` is chosen by the user at initialization time (see how in `wp_NewAtomicInt` the choice of `P` is left to the caller), then maintained by the specs for all the operations. At any given time `P x` will hold for the "current" value of the integer.
 
-```coq
+```rocq
 #[local] Definition lock_inv (l: loc) (P: w64 → iProp Σ) : iProp _ :=
   ∃ (x: w64),
       "Hx" ∷ l ↦s[concurrent.AtomicInt :: "x"] x ∗
@@ -140,7 +140,7 @@ In the previous lecture, we saw how `wp_new_free_lock` and `alloc_lock` split up
 
 In the code for this library, the struct `AtomicInt` has a mutex and an integer. The mutex protects the memory for the integer field _of the same struct_. Thus we have almost no choice but to create the mutex before what it protects (the only other solution would be to create the struct with a `nil` mutex, then fill it in later, but this is rather unnatural code).
 
-```coq
+```rocq
   wp_alloc mu_ptr as "mu".
   wp_auto.
   wp_alloc l as "Hint".
@@ -164,7 +164,7 @@ The ghost update is a wand, and thus can only be used once by this specification
 
 There is one thing missing from this specification: if you only look at the specification, it could be proven by an implementation that does nothing! We will see a solution to this in the real specification for `Inc`.
 
-```coq
+```rocq
 Lemma wp_AtomicInt__Inc_demo l (P: w64 → iProp _) (y: w64) :
   {{{ is_pkg_init concurrent ∗ is_atomic_int l P ∗
         (∀ x, P x -∗ |={⊤}=> P (word.add x y)) }}}
@@ -200,7 +200,7 @@ The specification for `Get` doesn't need to change `P`. Instead, the user suppli
 
 This specification will undoubtedly be hard to read at first: you need to follow the path of all this higher-order code and track what the user of the specification is doing versus what this proof is doing.
 
-```coq
+```rocq
 Lemma wp_AtomicInt__Get l (P: w64 → iProp _) (Q: w64 → iProp Σ) :
   {{{ is_pkg_init concurrent ∗
         is_atomic_int l P ∗ (∀ x, P x -∗ |={⊤}=> Q x ∗ P x) }}}
@@ -237,7 +237,7 @@ To wrap up the AtomicInt spec we give the real specification for `Inc`, which co
 
 The postcondition looks much like for `Get`, in that it has `∃ x, Q x` for a caller-supplied `Q`. Unlike `Get`, that value `x` isn't returned, because that's not how this code works. But it's no issue for the proof to learn the value of the integer, even if the code doesn't have it.
 
-```coq
+```rocq
 Lemma wp_AtomicInt__Inc l (P: w64 → iProp _) (Q: w64 → iProp Σ) (y: w64) :
   {{{ is_pkg_init concurrent ∗ is_atomic_int l P ∗
         (∀ x, P x -∗ |={⊤}=> Q x ∗ P (word.add x y)) }}}
@@ -299,7 +299,7 @@ This code is similar to what we saw in [ghost state](./ghost_state.md#proof-of-t
 
 However, it is important that the locking that makes the integer atomic is all hidden in the `AtomicInt` library, and you will see that this proof does not involve any lock invariant. In fact, if we used atomic operations in Go's `sync/atomic` to implement the `AtomicInt` library, this proof would be none the wiser. This abstraction is really important when what we're hiding isn't a trivial library like `AtomicInt` but something complicated like a hash map or concurrent queue.
 
-```coq
+```rocq
 Section proof.
 Context `{hG: !heapGS Σ} `{!goGlobalsGS Σ}.
 Context `{ghost_varG0: ghost_varG Σ Z}.
@@ -308,7 +308,7 @@ Context `{ghost_varG0: ghost_varG Σ Z}.
 
 As in the proof we saw before for `ParallelAdd3`, this proof will use two ghost variables, with the same meaning: $γ_1$ is the contribution from the first thread, while $γ_2$ is the contribution from the second. We'll relate them to the logical value of the atomic int with the abstraction predicate `int_rep γ1 γ2`; that is, where we saw `P` in the specs above, we'll now specialize to `int_rep γ1 γ2`.
 
-```coq
+```rocq
 #[local] Definition int_rep γ1 γ2 : w64 → iProp Σ :=
   λ x,
     (∃ (x1 x2: Z),
@@ -349,7 +349,7 @@ Proof using ghost_varG0.
 
 This is the most interesting part of the proof. We need to supply a postcondition `Q` here for what we expect the result of incrementing to be. Because we already own `ghost_var γ1 (1/2) 0`, we know that afterward we'll be able to increment that variable and obtain `ghost_var γ1 (1/2) 2`. To prove the ghost update in the Inc precondition, we'll supply a `with` clause that includes half ownership of `γ1`; this is required so that we have full ownership of `γ1` in order to change its value.
 
-```coq
+```rocq
     wp_apply (atomic_int.wp_AtomicInt__Inc _ _
                 (λ _, ghost_var γ1 (1/2) 2) with "[$Hint Hx]").
     { iIntros (x) "Hrep".
@@ -384,7 +384,7 @@ This is the most interesting part of the proof. We need to supply a postconditio
 
 ::::
 
-```coq
+```rocq
       iDestruct (ghost_var_agree with "Hx1 Hx") as %->.
       iMod (ghost_var_update_2 2 with "Hx1 Hx") as "[Hx1 Hx]".
       { rewrite Qp.half_half //. }
