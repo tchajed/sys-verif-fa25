@@ -136,6 +136,9 @@ export default defineUserConfig({
       highlighter: {
         type: "shiki",
         langs: [dafnyLang, smtLang, "coq", "go", "bash", "asm"],
+        langAlias: {
+          rocq: "coq",
+        },
         // customized from one-light and one-dark-pro
         themes: {
           light: "catppuccin-latte",

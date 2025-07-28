@@ -16,7 +16,7 @@ In this lecture, we'll introduce Rocq as a system, functional programming, and p
 
 By the end of this lecture, you should be able to
 
-1. Interact with Rocq
+1. Interact with the Rocq prover
 2. Implement functions with pattern matching and recursion
 3. Prove simple theorems about functions
 
@@ -26,7 +26,7 @@ The Rocq prover is a lot like a programming language, but it is fundamentally _i
 
 ::: info Rocq vs Coq
 
-Rocq was formerly called Coq, with the name change implemented around January 2025. You will still see references to Coq, in particular in Software Foundations, but all of these will eventually change.
+Rocq was formerly called Coq, with the name change implemented around January 2025. See the [note on the Rocq website](https://rocq-prover.org/about#Name). You will still see references to Coq, in particular in Software Foundations.
 
 :::
 
@@ -43,7 +43,7 @@ Three programming languages: terms, vernacular, tactics
 
 To write functional programs, we'll start by defining some data types for our functions to operate on. This is an "enumerated type". It defines `day`, and seven constructors for that type.
 
-```coq
+```rocq
 Inductive day : Type :=
 | monday
 | tuesday
@@ -57,7 +57,7 @@ Inductive day : Type :=
 
 Now what we have `day`, we can define functions on days:
 
-```coq
+```rocq
 (** next_weekday is a simple example of a function operating on [day] *)
 Definition next_weekday (d: day) : day :=
   match d with
@@ -74,13 +74,13 @@ Definition next_weekday (d: day) : day :=
 
 Rocq has a number of commands for interacting with the system while it's running. The first one we'll see is `Compute` below, which allows us to manually check the behavior of the function we just defined.
 
-```coq
+```rocq
 Compute (next_weekday friday).
 ```
 
 :::: note Output
 
-```txt title="coq output"
+```txt title="rocq output"
      = monday
      : day
 ```
@@ -91,7 +91,7 @@ The main use of Rocq is to prove theorems - it is a proof assistant after all. W
 
 NOTE: Theorem/Lemma/Example are all synonyms. In this class we'll try to stick to Lemma.
 
-```coq
+```rocq
 Lemma next_weekday_test : next_weekday (next_weekday friday) = tuesday.
 Proof.
   simpl.
@@ -106,7 +106,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   reflexivity.
 Qed.
 
@@ -114,7 +114,7 @@ Qed.
 
 ## Booleans and the usual functions
 
-```coq
+```rocq
 Module BooleanPlayground.
 
 Inductive bool : Type :=
@@ -150,7 +150,7 @@ Proof. simpl. reflexivity. Qed.
 
 Note `if` is an _expression_ and not a _statement_ (there are no statements). Like Rust but not C or Go. Python has both (`if:` vs `e1 if b else e2`).
 
-```coq
+```rocq
 Definition negb' (b: bool) : bool :=
   if b then false else true.
 Definition andb' (b1 b2: bool) : bool :=
@@ -160,7 +160,7 @@ Definition andb' (b1 b2: bool) : bool :=
 
 Note on `if`: since booleans aren't built-in, and we just defined `bool` above, Rocq's `if` expression works for any type with two constructors. Just to convince you `andb'` has the same behavior as `andb` above.
 
-```coq
+```rocq
 Lemma andb'_eq_andb : forall b1 b2, andb' b1 b2 = andb b1 b2.
 Proof.
   intros b1 b2.
@@ -174,7 +174,7 @@ Qed.
 
 Think about these two errors on your own and try to explain how they were produced. What is needed to fix each?
 
-```coq
+```rocq
 Fail Definition complex_expr1 (b1 b2 b3: bool) :=
   orb (andb' b2 false) (andb (orb (b1)) (b3)) b2.
 (*
@@ -203,7 +203,7 @@ End BooleanPlayground.
 
 ## Tuple types
 
-```coq
+```rocq
 Module TuplePlayground.
 
 Inductive bit : Type :=
@@ -214,7 +214,7 @@ Inductive bit : Type :=
 
 A single constructor with multiple parameters creates a "tuple" type (in PL called a "product" type). Rocq has syntactic sugar for "record types" that extend this feature slightly.
 
-```coq
+```rocq
 Inductive nybble : Type :=
   | bits (b0 b1 b2 b3 : bit).
 Check (bits B1 B0 B1 B0)
@@ -230,41 +230,41 @@ Compute (all_zero (bits B1 B0 B1 B0)).
 
 :::: note Output
 
-```txt title="coq output"
+```txt title="rocq output"
      = false
      : bool
 ```
 
 ::::
 
-```coq
+```rocq
 Compute (all_zero (bits B0 B0 B0 B0)).
 ```
 
 :::: note Output
 
-```txt title="coq output"
+```txt title="rocq output"
      = true
      : bool
 ```
 
 ::::
 
-```coq
+```rocq
 End TuplePlayground.
 
 ```
 
 ## Natural numbers
 
-```coq
+```rocq
 Module NatPlayground.
 
 ```
 
 So far, every type has finitely many values. For infinite types, we need something more.
 
-```coq
+```rocq
 Inductive nat : Type :=
 | O
 | S (n: nat).
@@ -279,7 +279,7 @@ Second, this _defines_ `nat`, `O : nat`, and `S : nat -> nat`, but doesn't give 
 
 Another definition of numbers that we could use to mean the same thing:
 
-```coq
+```rocq
 Inductive otherNat : Type :=
   | stop
   | tick (foo : otherNat).
@@ -303,7 +303,7 @@ You will always have two challenges in completing a proof in this class: (1) why
 
 Let's go back to our `day` type.
 
-```coq
+```rocq
 Definition next_day (d: day) : day :=
   match d with
   | monday => tuesday
@@ -319,7 +319,7 @@ Definition next_day (d: day) : day :=
 
 Proving an [exists] is complicated and we'll have more to say, but try to think through this intuitively for now.
 
-```coq
+```rocq
 Lemma wednesday_has_prev_day : exists d, next_day d = wednesday.
 Proof.
   exists tuesday.
@@ -334,7 +334,7 @@ Now let's prove something more interesting: every day has a previous day.
 
 Think-pair-share and come up with an informal proof strategy. Then I'll show how to translate it to a Rocq proof.
 
-```coq
+```rocq
 Lemma every_day_has_prev : forall d, exists d', next_day d' = d.
 Proof.
   (* Goal is a forall, so introduce it. *)
@@ -347,7 +347,7 @@ Abort.
 
 This section introduces two more core features of functional programming: polymorphic types (also called "generics" in other languages) and "higher-order functions" (functions that take other functions as parameters).
 
-```coq
+```rocq
 Module Option.
 
 
@@ -355,7 +355,7 @@ Module Option.
 
 `option` is a polymorphic type: it takes a type `A` as an argument, and (maybe) contains a value of that arbitrary type. `option A` is the simplest "container" type.
 
-```coq
+```rocq
   Inductive option (A: Type) :=
   | Some (x: A)
   | None.
@@ -365,7 +365,7 @@ Module Option.
 
 Here are some functions you can define on `option`. There are good motivations for _why_ you should define these particular ones, but we won't get into that (and it isn't all that important for this class). For now, just try to understand the behavior. `map` runs `f` "inside" the optional value.
 
-```coq
+```rocq
   Definition map {A B} (ma: option A) (f: A -> B) : option B :=
     match ma with
     | Some _ x => Some B (f x)
@@ -377,7 +377,7 @@ Here are some functions you can define on `option`. There are good motivations f
 
 Notice the extra type argument we had to provide to `Some`, and the somewhat odd `_` in the pattern match. To make it easier to work with polymorphic functions, Rocq has a feature called _implicit arguments_. These commands modify how type inference treats `Some` and `None`, making the type argument implicit (that's what the curly braces mean). Don't worry about the syntax; you won't need to do this yourself.
 
-```coq
+```rocq
   Arguments Some {A} x.
   Arguments None {A}.
 
@@ -386,7 +386,7 @@ Notice the extra type argument we had to provide to `Some`, and the somewhat odd
 
 We'll now define `return_` (it should be called `return` but that's a Rocq keyword) and `bind`. These make `option` into a _Monad_ but you don't need to understand that, just read the definitions.
 
-```coq
+```rocq
   Definition return_ {A} (x: A) : option A := Some x.
 
   Definition bind {A B} (ma: option A) (f: A -> option B) : option B :=
@@ -400,7 +400,7 @@ We'll now define `return_` (it should be called `return` but that's a Rocq keywo
 
 These are some properties of `return_` and `bind` (again, good reason for these but not relevant here).
 
-```coq
+```rocq
   Lemma return_left_id {A B} (x: A) (f: A -> option B) :
     bind (return_ x) f = f x.
   Proof. reflexivity. Qed.
@@ -419,7 +419,7 @@ End Option.
 
 ## More proof tactics
 
-```coq
+```rocq
 Module MoreNatProofs.
 
 Lemma add_0_l n :
@@ -433,7 +433,7 @@ Qed.
 
 The above proof is a "proof by computation" which followed from the definition of `add`. We'll now go through some "propositional" proofs that follow from the rules for manipulating logical AND (`∧`) and OR (`∨`).
 
-```coq
+```rocq
 Lemma O_or_succ n :
   n = 0 \/ n = S (Nat.pred n).
 Proof.
@@ -453,7 +453,7 @@ This proof uses `intros` and `rewrite`.
 
 Rocq allows you to write `intros` without arguments, in which case it will automatically select names. We strongly recommend in this class to always give names, since it makes your proof easier to read and modify, as well as making it easier to read the context while you're developing a proof.
 
-```coq
+```rocq
 Lemma eq_add_O_2 n m :
   n = 0 -> m = 0 -> n + m = 0.
 Proof.
@@ -474,7 +474,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   intros Hm.
 
 
@@ -482,7 +482,7 @@ Proof.
 
 `rewrite` is another fundamental proof technique
 
-```coq
+```rocq
   rewrite Hn.
 ```
 
@@ -499,7 +499,7 @@ Proof.
 
 ::::
 
-```coq
+```rocq
   rewrite Hm.
   simpl.
   reflexivity.
@@ -509,7 +509,7 @@ Qed.
 
 This lemma is a proof of a disequality, a "not equals". Even this isn't built-in to Rocq but built from simpler primitives.
 
-```coq
+```rocq
 Lemma neq_succ_0 n :
   S n <> 0.
 Proof.
@@ -519,7 +519,7 @@ Proof.
 
 :::: note Output
 
-```txt title="coq output"
+```txt title="rocq output"
 Notation "x <> y  :> T" := (not (eq x y)) (* T in scope _type_scope *)
   : type_scope (default interpretation) (from Corelib.Init.Logic)
 Notation "x <> y" := (not (eq x y)) : type_scope (default interpretation)
@@ -528,26 +528,26 @@ Notation "x <> y" := (not (eq x y)) : type_scope (default interpretation)
 
 ::::
 
-```coq
+```rocq
   Locate "~".
 ```
 
 :::: note Output
 
-```txt title="coq output"
+```txt title="rocq output"
 Notation "~ x" := (not x) (* x in scope _type_scope *) : type_scope
   (default interpretation) (from Corelib.Init.Logic)
 ```
 
 ::::
 
-```coq
+```rocq
   Print not.
 ```
 
 :::: note Output
 
-```txt title="coq output"
+```txt title="rocq output"
 not = fun A : Prop => A -> False
      : Prop -> Prop
 
@@ -556,7 +556,7 @@ Arguments not A%_type_scope
 
 ::::
 
-```coq
+```rocq
   (** We see that [a <> b] is notation for [not (a = b)], which is by definition
   [a = b -> False]. *)
 
