@@ -33,7 +33,7 @@ Definition stack_rep (l: loc) (xs: list w64): iProp Σ :=
     (* The code appends because this is both easier and more efficient, thus the
     code elements are reversed compared to the abstract state. *)
     "Hels" ∷ own_slice s (DfracOwn 1) (reverse xs) ∗
-    "Hels_cap" ∷ own_slice_cap w64 s.
+    "Hels_cap" ∷ own_slice_cap w64 s (DfracOwn 1).
 
 Lemma wp_NewStack :
   {{{ is_pkg_init heap.heap }}}

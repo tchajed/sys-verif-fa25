@@ -165,7 +165,8 @@ ghost_var.ghost_var_def =
      : ∀ {Σ : gFunctors} {A : Type},
          ghost_varG Σ A → gname → dfrac → A → iProp Σ
 
-Arguments ghost_var.ghost_var_def {Σ} {A}%_type_scope {ghost_varG0} γ dq a
+Arguments ghost_var.ghost_var_def {Σ} {A}%type_scope
+  {ghost_varG0} γ dq%dfrac_scope a
 ```
 
 ::::

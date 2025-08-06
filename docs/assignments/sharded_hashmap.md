@@ -254,7 +254,7 @@ There are no proofs for you to do in this section. These proofs are fairly techn
     assert (sub_m = {[k:=v0]} ∪ delete k sub_m) as Hsplit.
     {
       rewrite -insert_union_singleton_l.
-      rewrite insert_delete_insert.
+      rewrite insert_delete_eq.
       rewrite insert_id //.
     }
     rewrite Hsplit.
@@ -265,7 +265,7 @@ There are no proofs for you to do in this section. These proofs are fairly techn
     iDestruct (auth_map_frag_combine with "[$Hk $Hfrag]") as "Hfrag".
     iExactEq "Hfrag". f_equal.
     rewrite -!insert_union_singleton_l.
-    rewrite insert_insert.
+    rewrite insert_insert_eq.
     done.
   Qed.
 
@@ -714,7 +714,7 @@ Proof.
   - rewrite bucket_map_lookup_Some //.
     destruct (decide (idx = hash_idx)).
     { subst.
-      rewrite lookup_insert.
+      rewrite lookup_insert_eq.
       f_equal.
       set_solver. }
     rewrite lookup_insert_ne //.
@@ -888,7 +888,7 @@ Proof.
                   "Hauth" :: hashmap_pre_auth γ (uint.Z i) ∗
                   "newBuckets" :: newBuckets_ptr ↦ s ∗
                   "Hown_buckets" :: s ↦* b_ls ∗
-                  "Hbucket_cap" :: own_slice_cap loc s ∗
+                  "Hbucket_cap" :: own_slice_cap loc s (DfracOwn 1) ∗
                   "%Hi" :: ⌜length b_ls = uint.nat i⌝ ∗
                   "His_buckets" :: ([∗ list] i'↦bucket_l ∈ b_ls,
                     is_bucket γ bucket_l (Z.of_nat i'))

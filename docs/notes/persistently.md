@@ -101,7 +101,7 @@ Proof.
   "Hx1" : l ↦{#1 / 2} x // [!code --]
   "Hx2" : l ↦{#1 / 2} x // [!code --]
   "HΦ" : l ↦ word.add x x -∗ Φ (# ())
-  "Hx" : l ↦ x // [!code ++]
+  "Hx" : l ↦{DfracOwn (1 / 2) ⋅ DfracOwn (1 / 2)} x // [!code ++]
   --------------------------------------∗
   WP # l <-[# uint64T] # (word.add x x) {{ v, Φ v }}
 ```
@@ -109,6 +109,7 @@ Proof.
 ::::
 
 ```rocq
+  rewrite dfrac_op_own Qp.half_half.
   wp_store.
   wp_auto.
   iApply "HΦ".
@@ -632,7 +633,7 @@ Proof.
     intros x y.
     intros Hget.
     destruct (decide (x0 = x)); subst.
-    { rewrite lookup_insert in Hget. congruence. }
+    { rewrite lookup_insert_eq in Hget. congruence. }
     rewrite lookup_insert_ne // in Hget.
     eauto.
 Qed.

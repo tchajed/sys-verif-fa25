@@ -520,10 +520,9 @@ Proof.
 :::: note Output
 
 ```txt title="rocq output"
-Notation "x <> y  :> T" := (not (eq x y)) (* T in scope _type_scope *)
-  : type_scope (default interpretation) (from Corelib.Init.Logic)
+Notation "x <> y  :> T" := (not (eq x y)) : type_scope
+  (default interpretation)
 Notation "x <> y" := (not (eq x y)) : type_scope (default interpretation)
-  (from Corelib.Init.Logic)
 ```
 
 ::::
@@ -535,8 +534,7 @@ Notation "x <> y" := (not (eq x y)) : type_scope (default interpretation)
 :::: note Output
 
 ```txt title="rocq output"
-Notation "~ x" := (not x) (* x in scope _type_scope *) : type_scope
-  (default interpretation) (from Corelib.Init.Logic)
+Notation "~ x" := (not x) : type_scope (default interpretation)
 ```
 
 ::::
@@ -551,7 +549,7 @@ Notation "~ x" := (not x) (* x in scope _type_scope *) : type_scope
 not = fun A : Prop => A -> False
      : Prop -> Prop
 
-Arguments not A%_type_scope
+Arguments not A%type_scope
 ```
 
 ::::

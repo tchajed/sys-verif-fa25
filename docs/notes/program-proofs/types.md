@@ -68,7 +68,7 @@ Inductive go_type : Type :=
   | funcT : go_type.
 
 Arguments arrayT n elem
-Arguments structT decls%_list_scope%_struct_scope
+Arguments structT decls%list_scope%struct_scope
 ```
 
 ::::

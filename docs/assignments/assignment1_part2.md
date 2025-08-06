@@ -82,13 +82,16 @@ Proof.
 :::: note Output
 
 ```txt title="rocq output"
-lookup_delete_lt:
+list_lookup_delete_lt:
   ∀ {A : Type} (l : list A) (i j : nat),
     (j < i)%nat → delete i l !! j = l !! j
-lookup_delete_ge:
+list_lookup_delete_ge:
   ∀ {A : Type} (l : list A) (i j : nat),
     (i <= j)%nat → delete i l !! j = l !! S j
-lookup_delete:
+list_lookup_delete:
+  ∀ {A : Type} (l : list A) (i j : nat),
+    delete i l !! j = l !! (if decide (j < i)%nat then j else S j)
+lookup_delete_eq:
   ∀ {K : Type} {M : Type → Type} {H : FMap M} {H0 :
                                                ∀ A : Type,
                                                  Lookup K A (M A)}
@@ -135,12 +138,34 @@ lookup_delete_Some:
     FinMap K M
     → ∀ {A : Type} (m : M A) (i j : K) (y : A),
         delete i m !! j = Some y ↔ i ≠ j ∧ m !! j = Some y
+lookup_delete:
+  ∀ {K : Type} {M : Type → Type} {H : FMap M} {H0 :
+                                               ∀ A : Type,
+                                                 Lookup K A (M A)}
+    {H1 : ∀ A : Type, Empty (M A)} {H2 : ∀ A : Type, PartialAlter K A (M A)}
+    {H3 : OMap M} {H4 : Merge M} {H5 : ∀ A : Type, MapFold K A (M A)}
+    {EqDecision0 : EqDecision K},
+    FinMap K M
+    → ∀ {A : Type} (m : M A) (i j : K),
+        delete i m !! j = (if decide (i = j) then None else m !! j)
+lookup_total_delete:
+  ∀ {K : Type} {M : Type → Type} {H : FMap M} {H0 :
+                                               ∀ A : Type,
+                                                 Lookup K A (M A)}
+    {H1 : ∀ A : Type, Empty (M A)} {H2 : ∀ A : Type, PartialAlter K A (M A)}
+    {H3 : OMap M} {H4 : Merge M} {H5 : ∀ A : Type, MapFold K A (M A)}
+    {EqDecision0 : EqDecision K},
+    FinMap K M
+    → ∀ {A : Type},
+        Inhabited A
+        → ∀ (m : M A) (i j : K),
+            delete i m !! j = (if decide (i = j) then inhabitant else m !! j)
 ```
 
 ::::
 
 ```rocq
-  rewrite lookup_delete //.
+  rewrite lookup_delete_eq //.
 Qed.
 
 ```
@@ -170,7 +195,7 @@ Proof.
   intros k'.
   destruct (decide (k = k')).
   - subst.
-    rewrite !lookup_delete //.
+    rewrite !lookup_delete_eq //.
   - (* look for other lookup delete lemmas *)
     rewrite -> !lookup_delete_ne by auto.
 

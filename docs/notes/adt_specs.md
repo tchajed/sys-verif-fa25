@@ -243,9 +243,9 @@ Proof.
   rewrite /rep /=.
   apply map_eq. intros k'.
   destruct (decide (k' = k)).
-  - subst. rewrite lookup_insert.
+  - subst. rewrite lookup_insert_eq.
     apply map_lookup_filter_Some.
-    rewrite lookup_insert.
+    rewrite lookup_insert_eq.
     split.
     + auto.
     + set_solver.
@@ -282,7 +282,7 @@ Proof.
   rewrite /rep /=.
   apply map_eq. intros k'.
   destruct (decide (k' = k)).
-  - subst. rewrite lookup_delete.
+  - subst. rewrite lookup_delete_eq.
     apply map_lookup_filter_None.
     set_solver.
   - rewrite lookup_delete_ne //.

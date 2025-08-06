@@ -295,7 +295,7 @@ lookup_app:
     | Some x => Some x
     | None => l2 !! (i - length l1)
     end
-elem_of_list_split_length:
+list_elem_of_split_length:
   ∀ {A : Type} (l : list A) (i : nat) (x : A),
     l !! i = Some x → ∃ l1 l2 : list A, l = l1 ++ x :: l2 ∧ i = length l1
 lookup_snoc_Some:
@@ -306,6 +306,14 @@ lookup_app_Some:
   ∀ {A : Type} (l1 l2 : list A) (i : nat) (x : A),
     (l1 ++ l2) !! i = Some x
     ↔ l1 !! i = Some x ∨ length l1 ≤ i ∧ l2 !! (i - length l1) = Some x
+List.list_split2:
+  ∀ {A : Type} (l : list A) (i1 i2 : nat) (x1 x2 : A),
+    i1 < i2
+    → l !! i1 = Some x1
+      → l !! i2 = Some x2
+        → l =
+          take i1 l ++
+          [x1] ++ List.subslice (S i1) i2 l ++ [x2] ++ drop (S i2) l
 ```
 
 ::::
@@ -388,7 +396,7 @@ Implicit Types (m: gmap Z V) (k: Z) (v: V).
 
 Lemma gmap_lookup_delete m k :
   delete k m !! k = None.
-Proof. apply lookup_delete. Qed.
+Proof. apply lookup_delete_eq. Qed.
 
 Lemma gmap_lookup_delete_ne m k k' :
   k ≠ k' →
