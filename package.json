@@ -19,7 +19,7 @@
     "@vuepress/plugin-shiki": "2.0.0-rc.110",
     "katex": "^0.16.22",
     "mathjax-full": "^3.2.2",
-    "mermaid": "^11.8.0",
+    "mermaid": "^11.9.0",
     "prettier": "^3.6.2",
     "sass-embedded": "^1.89.2",
     "vue": "^3.5.17",
