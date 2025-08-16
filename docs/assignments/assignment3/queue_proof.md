@@ -20,7 +20,7 @@ From sys_verif.program_proof Require Import heap_proof.stack_proof.
 From sys_verif.program_proof Require Import heap_init.
 
 Section proof.
-Context `{hG: !heapGS Σ} `{!goGlobalsGS Σ}.
+Context `{hG: !heapGS Σ} `{!globalsGS Σ} {go_ctx: GoContext}.
 
 Definition queue_rep (v: heap.Queue.t) (els: list w64): iProp Σ :=
   False.

@@ -28,10 +28,14 @@ From New.proof Require Import std.
 From sys_verif.generatedproof.sys_verif_code Require Import memoize.
 
 Section proof.
-Context `{hG: !heapGS Σ} `{!goGlobalsGS Σ}.
+Context `{hG: !heapGS Σ} `{!globalsGS Σ} {go_ctx: GoContext}.
 
-#[global]
-Program Instance : IsPkgInit memoize := ltac2:(build_pkg_init ()).
+Local Notation deps := (ltac2:(build_pkg_init_deps 'memoize) : iProp Σ) (only parsing).
+#[global] Program Instance : IsPkgInit memoize :=
+  {|
+    is_pkg_init_def := True;
+    is_pkg_init_deps := deps;
+  |}.
 
 ```
 
@@ -64,7 +68,8 @@ Proof.
 ```txt title="goal diff"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   l : loc
   x : w64
   Φ : val → iPropI Σ
@@ -92,7 +97,8 @@ Proof.
 ```txt title="goal diff"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   l : loc
   x : w64
   Φ : val → iPropI Σ
@@ -101,7 +107,7 @@ Proof.
   "Hx1" : l ↦{#1 / 2} x // [!code --]
   "Hx2" : l ↦{#1 / 2} x // [!code --]
   "HΦ" : l ↦ word.add x x -∗ Φ (# ())
-  "Hx" : l ↦{DfracOwn (1 / 2) ⋅ DfracOwn (1 / 2)} x // [!code ++]
+  "Hx" : l ↦ x // [!code ++]
   --------------------------------------∗
   WP # l <-[# uint64T] # (word.add x x) {{ v, Φ v }}
 ```
@@ -109,7 +115,6 @@ Proof.
 ::::
 
 ```rocq
-  rewrite dfrac_op_own Qp.half_half.
   wp_store.
   wp_auto.
   iApply "HΦ".
@@ -163,7 +168,8 @@ This is the step where we persist the points-to permission and turn it into a pe
 ```txt title="goal diff"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   x : w64
   Φ : val → iPropI Σ
   l : loc
@@ -307,7 +313,7 @@ Definition own_mock_memoize (m: loc) (f: w64 → w64) : iProp Σ :=
 
 Lemma wp_NewMockMemoize (f_code: func.t) (f: w64 → w64) :
   {{{ is_pkg_init memoize ∗ fun_implements f_code f }}}
-    memoize @ "NewMockMemoize" #f_code
+    @! memoize.NewMockMemoize #f_code
   {{{ l, RET #l; own_mock_memoize l f }}}.
 Proof.
   wp_start as "#Hfun".
@@ -318,7 +324,8 @@ Proof.
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   f_code : func.t
   f : w64 → w64
   Φ : val → iPropI Σ
@@ -356,7 +363,8 @@ Proof.
 ```txt title="goal diff"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   f_code : func.t
   f : w64 → w64
   Φ : val → iPropI Σ
@@ -391,7 +399,7 @@ Once an `own_mock_memoize` is set up, using it is very straightforward.
 ```rocq
 Lemma wp_MockMemoize__Call l f (x0: w64) :
   {{{ is_pkg_init memoize ∗ own_mock_memoize l f }}}
-    l @ memoize @ "MockMemoize'ptr" @ "Call" #x0
+    l @ (ptrTⁱᵈ memoize.MockMemoizeⁱᵈ) @ "Call" #x0
   {{{ RET #(f x0); True }}}.
 Proof.
   wp_start as "#Hm". iNamed "Hm".
@@ -402,7 +410,8 @@ Proof.
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   l : loc
   f : w64 → w64
   x0 : w64
@@ -445,7 +454,8 @@ Observe how in the next line we use a Hoare triple that comes _from the persiste
 ```txt title="goal diff"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   l : loc
   f : w64 → w64
   x0 : w64
@@ -493,7 +503,7 @@ Definition own_memoize (m: memoize.Memoize.t) (f: w64 → w64) : iProp Σ :=
 
 Lemma wp_NewMemoize (f: w64 → w64) (f_code: func.t) :
   {{{ is_pkg_init memoize ∗ fun_implements f_code f }}}
-    memoize @ "NewMemoize" #f_code
+    @! memoize.NewMemoize #f_code
   {{{ (v: memoize.Memoize.t), RET #v; own_memoize v f }}}.
 Proof.
   wp_start as "#Hf".
@@ -504,7 +514,8 @@ Proof.
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   f : w64 → w64
   f_code : func.t
   Φ : val → iPropI Σ
@@ -540,7 +551,7 @@ Qed.
 
 Lemma wp_Memoize__Call v f (x0: w64) :
   {{{ is_pkg_init memoize ∗ own_memoize v f }}}
-    v @ memoize @ "Memoize" @ "Call" #x0
+    v @ memoize.Memoizeⁱᵈ @ "Call" #x0
   {{{ RET #(f x0); own_memoize v f }}}.
 Proof.
   wp_start as "Hm".
@@ -552,7 +563,8 @@ Proof.
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   f : w64 → w64
   x0 : w64
   Φ : val → iPropI Σ
@@ -647,7 +659,7 @@ The code has two such examples: `UseMemoize1` memoizes a straightforward functio
 ```rocq
 Lemma wp_UseMemoize1 :
   {{{ is_pkg_init memoize }}}
-    memoize @ "UseMemoize1" #()
+    @! memoize.UseMemoize1 #()
   {{{ RET #(); True }}}.
 Proof.
   wp_start as "_".
@@ -669,7 +681,8 @@ Setting up the memoization is the most interesting part of the proof. To use the
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   Φ : val → iPropI Σ
   m_ptr : loc
   x : w64
@@ -737,7 +750,7 @@ Qed.
 
 Lemma wp_UseMemoize2 (s: slice.t) (x1 x2 x3: w64) :
   {{{ is_pkg_init memoize ∗ own_slice s (DfracOwn 1) [x1; x2; x3] }}}
-    memoize @ "UseMemoize2" #s
+    @! memoize.UseMemoize2 #s
   {{{ RET #(); True }}}.
 Proof.
   wp_start as "Hs".
@@ -761,7 +774,8 @@ Proof.
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   s : slice.t
   x1, x2, x3 : w64
   Φ : val → iPropI Σ
@@ -866,7 +880,8 @@ The little proof pattern below of using `iExactEq` is sometimes useful - it allo
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   s : slice.t
   x1, x2, x3 : w64
   Φ : val → iPropI Σ
@@ -932,18 +947,18 @@ The little proof pattern below of using `iExactEq` is sometimes useful - it allo
         (do: # m_ptr <-[# memoize.Memoize] "$r0") ;;;
         let: "y1" := alloc (type.zero_val (# uint64T)) in
         let: "$r0" := let: "$a0" := # (W64 3) in
-                      method_call (# memoize) (# "Memoize"%go)
+                      method_call (# memoize.Memoizeⁱᵈ)
                         (# "Call"%go) ![# memoize.Memoize]
                         (# m_ptr) "$a0" in
         (do: "y1" <-[# uint64T] "$r0") ;;;
         let: "y2" := alloc (type.zero_val (# uint64T)) in
         let: "$r0" := let: "$a0" := # (W64 3) in
-                      method_call (# memoize) (# "Memoize"%go)
+                      method_call (# memoize.Memoizeⁱᵈ)
                         (# "Call"%go) ![# memoize.Memoize]
                         (# m_ptr) "$a0" in
         (do: "y2" <-[# uint64T] "$r0") ;;;
         (do: (let: "$a0" := ![# uint64T] "y1" = ![# uint64T] "y2" in
-              func_call (# std) (# "Assert"%go) "$a0")) ;;;
+              func_call (# std.Assert) "$a0")) ;;;
         return: # ())
   {{ v, Φ v }}
 ```

@@ -288,12 +288,16 @@ End lemmas.
 End auth_map.
 
 Section proof.
-Context `{hG: !heapGS Σ} `{!goGlobalsGS Σ}.
+Context `{hG: !heapGS Σ} `{!globalsGS Σ} {go_ctx: GoContext}.
 Context `{hG1: !auth_map.auth_mapG Σ w32 w64}.
 Context `{hG2: !auth_map.auth_mapG Σ Z (gset w32)}.
 
-#[global]
-Program Instance : IsPkgInit sharded_hashmap := ltac2:(build_pkg_init ()).
+Local Notation deps := (ltac2:(build_pkg_init_deps 'sharded_hashmap) : iProp Σ) (only parsing).
+#[global] Program Instance : IsPkgInit sharded_hashmap :=
+  {|
+    is_pkg_init_def := True;
+    is_pkg_init_deps := deps;
+  |}.
 
 ```
 
@@ -328,7 +332,7 @@ Definition hash_f (w: w32) : w32 :=
 
 Lemma wp_hash (w: w32) :
   {{{ is_pkg_init sharded_hashmap }}}
-    sharded_hashmap @ "hash" #w
+    @! sharded_hashmap.hash #w
   {{{ RET #(hash_f w); True }}}.
 Proof.
   wp_start as "_".
@@ -365,7 +369,7 @@ Definition own_shard (s_l: loc) (m: gmap w32 w64) : iProp Σ :=
 
 Lemma wp_newShard :
   {{{ is_pkg_init sharded_hashmap }}}
-    sharded_hashmap @ "newShard" #()
+    @! sharded_hashmap.newShard #()
   {{{ (s_l: loc), RET #s_l; own_shard s_l ∅ }}}.
 Proof.
   wp_start as "_".
@@ -412,7 +416,7 @@ Qed.
 ```rocq
 Lemma wp_shard__Load (s_l: loc) (key: w32) (m: gmap w32 w64) :
   {{{ is_pkg_init sharded_hashmap ∗ own_shard s_l m }}}
-    s_l @ sharded_hashmap @ "shard'ptr" @ "Load" #key
+    s_l @ (ptrTⁱᵈ sharded_hashmap.shardⁱᵈ) @ "Load" #key
   {{{ (v: w64) (ok: bool), RET (#v, #ok);
       own_shard s_l m ∗
       ⌜(v, ok) = map_get (m !! key)⌝
@@ -436,7 +440,7 @@ Admitted.
 
 Lemma wp_shard__Store (s_l: loc) (key: w32) (val: w64) (m: gmap w32 w64) :
   {{{ is_pkg_init sharded_hashmap ∗ own_shard s_l m }}}
-    s_l @ sharded_hashmap @ "shard'ptr" @ "Store" #key #val
+    s_l @ (ptrTⁱᵈ sharded_hashmap.shardⁱᵈ) @ "Store" #key #val
   {{{ RET #();
       own_shard s_l (<[ key := val ]> m)
   }}}.
@@ -847,7 +851,7 @@ It turns out initializing the hashmap is a huge pain, both dealing with the loop
 ```rocq
 Lemma wp_newBucket (hash_idx: Z) (γ: ghost_names) :
   {{{ is_pkg_init sharded_hashmap ∗ hashmap_sub γ hash_idx ∅ }}}
-    sharded_hashmap @ "newBucket" #()
+    @! sharded_hashmap.newBucket #()
   {{{ (b_l: loc), RET #b_l; is_bucket γ b_l hash_idx }}}.
 Proof.
   wp_start as "Hfrag".
@@ -869,7 +873,7 @@ Lemma wp_createNewBuckets (γ: ghost_names) (newSize: w32) :
   {{{ is_pkg_init sharded_hashmap ∗ ⌜0 < uint.Z newSize⌝ ∗
       hashmap_pre_auth γ 0
   }}}
-    sharded_hashmap @ "createNewBuckets" #newSize
+    @! sharded_hashmap.createNewBuckets #newSize
   {{{ (s: slice.t) (b_ls: list loc), RET #s;
       "Hauth" :: hashmap_pre_auth γ (uint.Z newSize) ∗
       "Hown_buckets" :: own_slice s (DfracOwn 1) b_ls ∗
@@ -956,7 +960,7 @@ You'll need to replace `H1 H2 H3` with whatever hypotheses are needed to prove t
 ```rocq
 Lemma wp_NewHashmap (hm_l: loc) (size: w32) P :
   {{{ is_pkg_init sharded_hashmap ∗ ⌜0 < uint.Z size⌝ ∗ P ∅ }}}
-    sharded_hashmap @ "NewHashMap" #size
+    @! sharded_hashmap.NewHashMap #size
   {{{ (hm_l: loc) (γ: ghost_names), RET #hm_l;
       is_hashmap γ hm_l P
   }}}.
@@ -971,7 +975,7 @@ Admitted.
 
 Lemma wp_bucketIdx (key: w32) (numBuckets: w64) :
   {{{ is_pkg_init sharded_hashmap ∗ ⌜0 < uint.Z numBuckets < 2^32⌝ }}}
-    sharded_hashmap @ "bucketIdx" #key #numBuckets
+    @! sharded_hashmap.bucketIdx #key #numBuckets
   {{{ (idx: w64), RET #idx; ⌜uint.Z idx = hash_bucket key (uint.Z numBuckets)⌝ }}}.
 Proof.
   wp_start as "%Hnonzero".
@@ -1006,7 +1010,7 @@ Lemma wp_HashMap__Load (hm_l: loc) γ (key: w32) P Q {Htimeless: ∀ m, Timeless
   {{{ is_pkg_init sharded_hashmap ∗ is_hashmap γ hm_l P ∗
       (∀ m, P m -∗ |==> P m ∗ Q (map_get (m !! key)))
   }}}
-    hm_l @ sharded_hashmap @ "HashMap'ptr" @ "Load" #key
+    hm_l @ (ptrTⁱᵈ sharded_hashmap.HashMapⁱᵈ) @ "Load" #key
   {{{ (v: w64) (ok: bool), RET (#v, #ok); Q (v, ok) }}}.
 Proof.
   wp_start as "[#Hm Hupd]". iNamed "Hm".
@@ -1061,7 +1065,8 @@ We need to use `iApply fupd_wp` to make `iInv` open at a single point rather tha
 ```txt title="goal diff"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   hG1 : auth_map.auth_mapG Σ w32 w64
   hG2 : auth_map.auth_mapG Σ Z (gset w32)
   hm_l : loc
@@ -1115,7 +1120,8 @@ We need to use `iApply fupd_wp` to make `iInv` open at a single point rather tha
   --------------------------------------∗
   |={⊤}=> // [!code --]
     WP exception_do // [!code --]
-         ((do: # (method_callv sync "Mutex'ptr" "Unlock" (# mu_l)) (# ())) ;;; // [!code --]
+         ((do: # (method_callv (ptrTⁱᵈ sync.Mutexⁱᵈ) "Unlock" (# mu_l)) // [!code --]
+                 (# ())) ;;; // [!code --]
           return: (![# uint64T] (# x_ptr), ![# boolT] (# ok_ptr))) // [!code --]
     {{ v, Φ v }} // [!code --]
   |={⊤ ∖ ↑nroot}=> // [!code ++]
@@ -1123,7 +1129,8 @@ We need to use `iApply fupd_wp` to make `iInv` open at a single point rather tha
          "Hauth" ∷ hashmap_auth γ (uint.Z (slice.len_f b_s)) m) ∗ // [!code ++]
     (|={⊤}=> // [!code ++]
        WP exception_do // [!code ++]
-            ((do: # (method_callv sync "Mutex'ptr" "Unlock" (# mu_l)) (# ())) ;;; // [!code ++]
+            ((do: # (method_callv (ptrTⁱᵈ sync.Mutexⁱᵈ) "Unlock" (# mu_l)) // [!code ++]
+                    (# ())) ;;; // [!code ++]
              return: (![# uint64T] (# x_ptr), ![# boolT] (# ok_ptr))) // [!code ++]
        {{ v, Φ v }}) // [!code ++]
 ```
@@ -1164,7 +1171,7 @@ Lemma wp_HashMap__Store (hm_l: loc) γ (key: w32) (v: w64) P Q {Htimeless: ∀ m
   {{{ is_pkg_init sharded_hashmap ∗ is_hashmap γ hm_l P ∗
       (∀ m, P m -∗ |==> P (<[key := v]> m) ∗ Q m)
   }}}
-    hm_l @ sharded_hashmap @ "HashMap'ptr" @ "Store" #key #v
+    hm_l @ (ptrTⁱᵈ sharded_hashmap.HashMapⁱᵈ) @ "Store" #key #v
   {{{ m0, RET #(); Q m0 }}}.
 Proof.
 Admitted.

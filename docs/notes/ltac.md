@@ -285,9 +285,15 @@ lookup_app_r:
 take_drop_middle:
   ∀ {A : Type} (l : list A) (i : nat) (x : A),
     l !! i = Some x → take i l ++ x :: drop (S i) l = l
+List.prefix_snoc:
+  ∀ {A : Type} (l0 l1 : list A) (x : A),
+    l0 `prefix_of` l1 → l1 !! length l0 = Some x → l0 ++ [x] `prefix_of` l1
 take_S_r:
   ∀ {A : Type} (l : list A) (n : nat) (x : A),
     l !! n = Some x → take (S n) l = take n l ++ [x]
+List.prefix_snoc_inv:
+  ∀ {A : Type} (l0 l1 : list A) (x : A),
+    l0 ++ [x] `prefix_of` l1 → l0 `prefix_of` l1 ∧ l1 !! length l0 = Some x
 lookup_app:
   ∀ {A : Type} (l1 l2 : list A) (i : nat),
     (l1 ++ l2) !! i =

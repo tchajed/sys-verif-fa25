@@ -21,7 +21,7 @@ From sys_verif.program_proof Require Import functional_init.
 
 Section proof.
 Context `{hG: !heapGS Σ}.
-Context `{!goGlobalsGS Σ}.
+Context `{!globalsGS Σ} {go_ctx: GoContext}.
 
 Fixpoint fibonacci (n: nat): nat :=
   match n with
@@ -100,11 +100,11 @@ Here is the statement of what it means for `Fibonacci` (the Go function) to be c
 
 ```rocq
 Lemma wp_Fibonacci (n: w64) :
-  {{{ ⌜Z.of_nat (fibonacci (uint.nat n)) < 2^64⌝ }}}
-    functional.Fibonacci #n
+  {{{ is_pkg_init functional ∗ ⌜Z.of_nat (fibonacci (uint.nat n)) < 2^64⌝ }}}
+    @! functional.Fibonacci #n
   {{{ (c: w64), RET #c; ⌜uint.nat c = fibonacci (uint.nat n)⌝ }}}.
 Proof.
-  wp_start as "%Hoverflow". wp_call.
+  wp_start as "%Hoverflow".
   wp_alloc n_l as "n"; wp_auto.
   wp_if_destruct.
   { iApply "HΦ".

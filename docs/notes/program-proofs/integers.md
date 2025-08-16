@@ -8,7 +8,7 @@ shortTitle: Integers
 
 ```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
-From New.code.sys_verif_code Require Import functional.
+From sys_verif.generatedproof.sys_verif_code Require Import functional.
 Section goose.
 Context `{hG: !heapGS Σ}.
 
@@ -67,7 +67,7 @@ This style of postcondition is common with integers: we say there exists a `z: w
 ```rocq
 Lemma wp_Add_bounded (x y: w64) :
   {{{ ⌜uint.Z x + uint.Z y < 2^64⌝ }}}
-    functional.Add #x #y
+    functional.Addⁱᵐᵖˡ #x #y
   {{{ (z: w64), RET #z; ⌜uint.Z z = (uint.Z x + uint.Z y)%Z⌝ }}}.
 Proof.
   wp_start as "%Hbound". wp_call.
@@ -130,7 +130,7 @@ If for whatever reason you want to just specify the exact word being returned, y
 ```rocq
 Lemma wp_Add_general (x y: w64) :
   {{{ True }}}
-    functional.Add #x #y
+    functional.Addⁱᵐᵖˡ #x #y
   {{{ RET #(word.add x y); True }}}.
 Proof.
   wp_start as "_". wp_call.

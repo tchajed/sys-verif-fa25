@@ -199,7 +199,7 @@ From sys_verif.program_proof Require Import heap_init functional_init.
 
 Section goose.
 Context `{hG: !heapGS Σ}.
-Context `{!goGlobalsGS Σ}.
+Context `{!globalsGS Σ} {go_ctx: GoContext}.
 
 ```
 
@@ -214,7 +214,7 @@ func Add(a uint64, b uint64) uint64 {
 ```rocq
 Lemma wp_Add (n m: w64) :
   {{{ is_pkg_init functional ∗ ⌜uint.Z n + uint.Z m < 2^64⌝ }}}
-    functional @ "Add" #n #m
+    @! functional.Add #n #m
   {{{ (y: w64), RET #y; ⌜(uint.Z y = uint.Z n + uint.Z m)%Z⌝ }}}.
 Proof.
   wp_start as "%Hoverflow".
@@ -238,7 +238,7 @@ func StackEscape() *uint64 {
 ```rocq
 Lemma wp_StackEscape :
   {{{ is_pkg_init heap.heap }}}
-    heap.heap @ "StackEscape" #()
+    @! heap.heap.StackEscape #()
   {{{ (l: loc), RET #l; l ↦ (W64 42) }}}.
 Proof.
   wp_start as "#init". iNamed "init".

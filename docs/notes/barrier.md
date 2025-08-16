@@ -272,7 +272,7 @@ From Perennial.algebra Require Import ghost_var.
 Open Scope Z_scope.
 
 Section proof.
-  Context `{hG: !heapGS Σ} `{!goGlobalsGS Σ}.
+  Context `{hG: !heapGS Σ} `{!globalsGS Σ} {go_ctx: GoContext}.
   Context `{ghost_varG0: ghost_varG Σ Z}.
   Context `{barrierG0: barrier.barrierG Σ}.
 
@@ -285,7 +285,7 @@ Section proof.
 
   Lemma wp_ParallelAdd2 :
     {{{ is_pkg_init concurrent }}}
-      concurrent @ "ParallelAdd2" #()
+      @! concurrent.ParallelAdd2 #()
     {{{ (x: w64), RET #x; ⌜uint.Z x = 4⌝ }}}.
   Proof using All.
     wp_start as "_".

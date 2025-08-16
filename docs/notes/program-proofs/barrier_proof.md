@@ -54,7 +54,7 @@ Definition barrierΣ: gFunctors :=
 Proof. solve_inG. Qed.
 
 Section proof.
-  Context `{hG: !heapGS Σ} `{!goGlobalsGS Σ}.
+  Context `{hG: !heapGS Σ} `{!globalsGS Σ} {go_ctx: GoContext}.
   Context `{!barrierG Σ}.
 
 ```
@@ -118,7 +118,7 @@ Two extremes are worth thinking about here. First, once we've created all the `s
     ∃ (mu_l cond_l: loc),
       "#mu" ∷ l ↦s[concurrent.Barrier :: "mu"]□ mu_l ∗
       "#cond" ∷ l ↦s[concurrent.Barrier :: "cond"]□ cond_l ∗
-      "#Hcond" ∷ is_Cond cond_l (interface.mk Mutex_type_id #mu_l) ∗
+      "#Hcond" ∷ is_Cond cond_l (interface.mk (ptrTⁱᵈ sync.Mutexⁱᵈ) #mu_l) ∗
       "#Hlock" ∷ is_Mutex (mu_l) (lock_inv l γ).
 
   #[global] Instance is_barrier_persistent l γ : Persistent (is_barrier l γ) := _.
@@ -325,7 +325,7 @@ Finally, we do all the program proofs, the specifications for each function. The
 ```rocq
   Lemma wp_NewBarrier :
     {{{ is_pkg_init concurrent }}}
-      concurrent @ "NewBarrier" #()
+      @! concurrent.NewBarrier #()
     {{{ (l: loc) γ, RET #l; is_barrier l γ ∗ recv γ emp }}}.
   Proof.
     wp_start as "_".
@@ -349,7 +349,7 @@ Finally, we do all the program proofs, the specifications for each function. The
 
   Lemma wp_Barrier__Add1 (P: iProp Σ) (Q: iProp Σ) γ l :
     {{{ is_pkg_init concurrent ∗ is_barrier l γ ∗ recv γ Q }}}
-      l @ concurrent @ "Barrier'ptr" @ "Add" #(W64 1)
+      l @ (ptrTⁱᵈ concurrent.Barrierⁱᵈ) @ "Add" #(W64 1)
     {{{ RET #(); send γ P ∗ recv γ (Q ∗ P) }}}.
   Proof.
     wp_start as "[#Hbar Hrecv]".
@@ -371,7 +371,7 @@ Finally, we do all the program proofs, the specifications for each function. The
 
   Lemma wp_Barrier__Done γ l P :
     {{{ is_pkg_init concurrent ∗ is_barrier l γ ∗ send γ P ∗ P }}}
-      l @ concurrent @ "Barrier'ptr" @ "Done" #()
+      l @ (ptrTⁱᵈ concurrent.Barrierⁱᵈ) @ "Done" #()
     {{{ RET #(); True }}}.
   Proof.
     wp_start as "(#Hbar & HsendP & HP)".
@@ -403,7 +403,7 @@ Finally, we do all the program proofs, the specifications for each function. The
 
   Lemma wp_Barrier__Wait γ l Q :
     {{{ is_pkg_init concurrent ∗ is_barrier l γ ∗ recv γ Q }}}
-      l @ concurrent @ "Barrier'ptr" @ "Wait" #()
+      l @ (ptrTⁱᵈ concurrent.Barrierⁱᵈ) @ "Wait" #()
     {{{ RET #(); Q ∗ recv γ emp }}}.
   Proof.
     wp_start as "(#Hbar & HrecvQ)".

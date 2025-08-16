@@ -74,13 +74,13 @@ From sys_verif.program_proof Require Import concurrent_init.
 
 Section goose.
 Context `{hG: !heapGS Σ}.
-Context `{!goGlobalsGS Σ}.
+Context `{!globalsGS Σ} {go_ctx: GoContext}.
 
 Let N := nroot .@ "lock".
 
 Lemma wp_SetX (x_l: loc) (x: w64) :
   {{{ is_pkg_init concurrent ∗ x_l ↦ x }}}
-    concurrent @ "SetX" #x_l
+    @! concurrent.SetX #x_l
   {{{ RET #(); x_l ↦ (W64 1) }}}.
 Proof.
   wp_start as "x".
@@ -92,7 +92,7 @@ Qed.
 
 Lemma wp_NoGo :
   {{{ is_pkg_init concurrent }}}
-    concurrent @ "NoGo" #()
+    @! concurrent.NoGo #()
   {{{ RET #(); True }}}.
 Proof.
   wp_start as "#init".
@@ -106,7 +106,8 @@ Proof.
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   N := nroot.@"lock" : namespace
   Φ : val → iPropI Σ
   x_ptr : loc
@@ -130,7 +131,7 @@ Qed.
 
 Lemma wp_FirstGo :
   {{{ is_pkg_init concurrent }}}
-    concurrent @ "FirstGo" #()
+    @! concurrent.FirstGo #()
   {{{ RET #(); True }}}.
 Proof.
   wp_start as "#init".
@@ -150,7 +151,8 @@ Proof.
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   N := nroot.@"lock" : namespace
   Φ : val → iPropI Σ
   x_ptr : loc
@@ -241,7 +243,7 @@ Let's try a first proof that just shows this code is safe. Even with no interest
 ```rocq
 Lemma wp_FirstLock_v1 :
   {{{ is_pkg_init concurrent }}}
-    concurrent @ "FirstLock" #()
+    @! concurrent.FirstLock #()
   {{{ (y: w64), RET #y; True }}}.
 Proof.
   wp_start as "_".
@@ -263,7 +265,8 @@ Proof.
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   N := nroot.@"lock" : namespace
   Φ : val → iPropI Σ
   x_ptr, m_ptr, r0_l : loc
@@ -279,7 +282,7 @@ Proof.
        ((do: # ()) ;;;
         let: "$r0" := # (W64 1) in
         (do: # x_ptr <-[# uint64T] "$r0") ;;;
-        (do: method_call (# sync) (# "Mutex'ptr"%go)
+        (do: method_call (# (ptrTⁱᵈ sync.Mutexⁱᵈ))
                (# "Unlock"%go) ![# ptrT] (# m_ptr)
                (# ())) ;;;
         return: # ())
@@ -309,7 +312,8 @@ To call Unlock, we need to prove the same lock invariant.
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   N := nroot.@"lock" : namespace
   Φ : val → iPropI Σ
   x_ptr, m_ptr, r0_l : loc
@@ -339,7 +343,7 @@ Qed.
 
 Lemma wp_FirstLock_v2 :
   {{{ is_pkg_init concurrent }}}
-    concurrent @ "FirstLock" #()
+    @! concurrent.FirstLock #()
   {{{ (y: w64), RET #y; ⌜uint.Z y = 0 ∨ uint.Z y = 1⌝ }}}.
 Proof.
   wp_start as "_".

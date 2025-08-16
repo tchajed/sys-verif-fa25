@@ -93,7 +93,7 @@ Proof.
   ============================
   "H1" : l ↦{#1 / 2} x // [!code --]
   "H2" : l ↦{#1 / 2} x // [!code --]
-  "H" : l ↦{DfracOwn (1 / 2) ⋅ DfracOwn (1 / 2)} x // [!code ++]
+  "H" : l ↦ x // [!code ++]
   --------------------------------------∗
   l ↦ x
 ```
@@ -101,7 +101,6 @@ Proof.
 ::::
 
 ```rocq
-    rewrite dfrac_op_own Qp.half_half.
     iFrame.
 Qed.
 

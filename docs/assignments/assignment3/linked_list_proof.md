@@ -20,7 +20,7 @@ From sys_verif.program_proof Require Import heap_init.
 
 
 Section proof.
-Context `{hG: !heapGS Σ} `{!goGlobalsGS Σ}.
+Context `{hG: !heapGS Σ} `{!globalsGS Σ} {go_ctx: GoContext}.
 
 (* We abbreviate "linked list" to "ll" in some of these definitions to keep
 specs and other theorem statements concise. *)
@@ -68,7 +68,7 @@ Prove this specification.
 ```rocq
 Lemma wp_NewList :
   {{{ is_pkg_init heap.heap }}}
-    heap.heap @ "NewList" #()
+    @! heap.heap.NewList #()
   {{{ (l: loc), RET #l; ll_rep l [] }}}.
 Proof.
 Admitted.
@@ -81,7 +81,7 @@ Fill in a postcondition here and prove this specification.
 ```rocq
 Lemma wp_Node__Insert (l: loc) (xs: list w64) (elem: w64) :
   {{{ is_pkg_init heap.heap ∗ ll_rep l xs }}}
-    l @ heap.heap @ "Node'ptr" @ "Insert" #elem
+    l @ (ptrTⁱᵈ heap.Nodeⁱᵈ) @ "Insert" #elem
   {{{ (l': loc), RET #l';
       False  }}}.
 Proof.
@@ -94,7 +94,7 @@ Prove this specification.
 ```rocq
 Lemma wp_Node__Pop (l: loc) (xs: list w64) :
   {{{ is_pkg_init heap.heap ∗ ll_rep l xs }}}
-    l @ heap.heap @ "Node'ptr" @ "Pop" #()
+    l @ (ptrTⁱᵈ heap.Nodeⁱᵈ) @ "Pop" #()
   {{{ (x: w64) (l': loc) (ok: bool), RET (#x, #l', #ok);
       if ok then ∃ xs', ⌜xs = cons x xs'⌝ ∗
                         ll_rep l' xs'
@@ -114,7 +114,7 @@ A general structure is provided for the proof (which you are allowed to change i
 Lemma wp_Node__Append l1 xs1 l2 xs2 :
   {{{ is_pkg_init heap.heap ∗
       ll_rep l1 xs1 ∗ ll_rep l2 xs2 }}}
-    l1 @ heap.heap @ "Node'ptr" @ "Append" #l2
+    l1 @ (ptrTⁱᵈ heap.Nodeⁱᵈ) @ "Append" #l2
   {{{ (l2': loc), RET #l2';
       False  }}}.
 Proof.

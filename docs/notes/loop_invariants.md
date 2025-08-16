@@ -69,7 +69,7 @@ From sys_verif.program_proof Require Import heap_init functional_init.
 
 Section goose.
 Context `{hG: !heapGS Σ}.
-Context `{!goGlobalsGS Σ}.
+Context `{!globalsGS Σ} {go_ctx: GoContext}.
 
 ```
 
@@ -95,7 +95,7 @@ This implementation might overflow a 64-bit number. This specification handles t
 Lemma wp_SumNrec (n: w64) :
   {{{ is_pkg_init functional ∗
       ⌜uint.Z n * (uint.Z n + 1) / 2 < 2^64⌝ }}}
-    functional @ "SumNrec" #n
+    @! functional.SumNrec #n
   {{{ (m: w64), RET #m; ⌜uint.Z m = uint.Z n * (uint.Z n + 1) / 2⌝ }}}.
 Proof.
   iLöb as "IH" forall (n).
@@ -146,7 +146,7 @@ This is a problem of not having a strong enough loop invariant. The loop invaria
 ```rocq
 Lemma wp_SumN_failed (n: w64) :
   {{{ is_pkg_init functional }}}
-    functional @ "SumN" #n
+    @! functional.SumN #n
   {{{ (m: w64), RET #m; ⌜uint.Z m = uint.Z n * (uint.Z n + 1) / 2⌝ }}}.
 Proof.
   wp_start as "_".
@@ -194,7 +194,7 @@ Here is a proof with the right loop invariant.
 ```rocq
 Lemma wp_SumN (n: w64) :
   {{{ is_pkg_init functional ∗ ⌜uint.Z n < 2^64-1⌝ }}}
-    functional @ "SumN" #n
+    @! functional.SumN #n
   {{{ (m: w64), RET #m;
       ⌜uint.Z m = uint.Z n * (uint.Z n + 1) / 2⌝ }}}.
 Proof.
@@ -286,7 +286,7 @@ Definition is_sorted (xs: list w64) :=
 Lemma wp_BinarySearch (s: slice.t) (xs: list w64) (needle: w64) :
   {{{ is_pkg_init heap.heap ∗
         own_slice s (DfracOwn 1) xs ∗ ⌜is_sorted xs⌝ }}}
-    heap.heap @ "BinarySearch" #s #needle
+    @! heap.heap.BinarySearch #s #needle
   {{{ (i: w64) (ok: bool), RET (#i, #ok);
       own_slice s (DfracOwn 1) xs ∗
       ⌜ok = true → xs !! uint.nat i = Some needle⌝

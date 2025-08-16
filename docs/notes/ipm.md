@@ -647,7 +647,7 @@ All of these are easiest understood by seeing them in context; read on for an ex
 ```rocq
 Import sys_verif.program_proof.heap_init.
 Context `{hG: !heapGS Σ}.
-Context `{!goGlobalsGS Σ}.
+Context `{!globalsGS Σ} {go_ctx: GoContext}.
 
 ```
 
@@ -673,7 +673,7 @@ where `std.Assert` is a function provided by the Goose standard library.
 ```rocq
 Lemma wp_IgnoreOneLocF (l l': loc) :
   {{{ is_pkg_init heap.heap ∗ l ↦ (W64 0) }}}
-    heap.heap @ "IgnoreOneLocF" #l #l'
+    @! heap.heap.IgnoreOneLocF #l #l'
   {{{ RET #(); l ↦ (W64 42) }}}.
 Proof.
   (* skip over this proof for now and focus on its usage (the next lemma) *)
@@ -719,7 +719,7 @@ $$
 ```rocq
 Lemma wp_UseIgnoreOneLocOwnership :
   {{{ is_pkg_init heap }}}
-    heap.heap @ "UseIgnoreOneLocOwnership" #()
+    @! heap.heap.UseIgnoreOneLocOwnership #()
   {{{ RET #(); True }}}.
 Proof.
   wp_start as "Hpre". (* precondition is trivial, but we'll name it anyway *)
@@ -730,7 +730,8 @@ Proof.
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   Φ : val → iPropI Σ
   ============================
   _ : is_pkg_init heap
@@ -747,9 +748,9 @@ Proof.
         (do: "y" <-[# uint64T] "$r0") ;;;
         (do: (let: "$a0" := "x" in
               let: "$a1" := "y" in
-              func_call (# heap) (# "IgnoreOneLocF"%go) "$a0" "$a1")) ;;;
+              func_call (# heap.IgnoreOneLocF) "$a0" "$a1")) ;;;
         (do: (let: "$a0" := ![# uint64T] "x" = ![# uint64T] "y" in
-              func_call (# std) (# "Assert"%go) "$a0")) ;;;
+              func_call (# std.Assert) "$a0")) ;;;
         return: # ())
   {{ v, Φ v }}
 ```
@@ -774,7 +775,8 @@ Formally, the proof proceeds by applying the bind rule (to split the program int
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   Φ : val → iPropI Σ
   ============================
   _ : is_pkg_init heap
@@ -793,9 +795,9 @@ Formally, the proof proceeds by applying the bind rule (to split the program int
            (do: "y" <-[# uint64T] "$r0") ;;;
            (do: (let: "$a0" := "x" in
                  let: "$a1" := "y" in
-                 func_call (# heap) (# "IgnoreOneLocF"%go) "$a0" "$a1")) ;;;
+                 func_call (# heap.IgnoreOneLocF) "$a0" "$a1")) ;;;
            (do: (let: "$a0" := ![# uint64T] "x" = ![# uint64T] "y" in
-                 func_call (# std) (# "Assert"%go) "$a0")) ;;;
+                 func_call (# std.Assert) "$a0")) ;;;
            return: # ())
      {{ v, Φ v }} }}
 ```
@@ -822,13 +824,15 @@ where
 ?V :
   [Σ : gFunctors
    hG : heapGS Σ
-   goGlobalsGS0 : goGlobalsGS Σ
+   globalsGS0 : globalsGS Σ
+   go_ctx : GoContext
    Φ : val → iPropI Σ
   |- Type]
 ?IntoVal0 :
   [Σ : gFunctors
    hG : heapGS Σ
-   goGlobalsGS0 : goGlobalsGS Σ
+   globalsGS0 : globalsGS Σ
+   go_ctx : GoContext
    Φ : val → iPropI Σ
   |- IntoVal ?V]
 ```
@@ -859,7 +863,8 @@ At this point there is a `let:` binding which we need to apply the pure-step rul
 ```txt title="goal diff"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   Φ : val → iPropI Σ
   x : loc
   ============================
@@ -880,10 +885,10 @@ At this point there is a `let:` binding which we need to apply the pure-step rul
         (do: (let: "$a0" := "x" in // [!code --]
         (do: (let: "$a0" := # x in // [!code ++]
               let: "$a1" := "y" in
-              func_call (# heap) (# "IgnoreOneLocF"%go) "$a0" "$a1")) ;;;
+              func_call (# heap.IgnoreOneLocF) "$a0" "$a1")) ;;;
         (do: (let: "$a0" := ![# uint64T] "x" = ![# uint64T] "y" in // [!code --]
         (do: (let: "$a0" := ![# uint64T] (# x) = ![# uint64T] "y" in // [!code ++]
-              func_call (# std) (# "Assert"%go) "$a0")) ;;;
+              func_call (# std.Assert) "$a0")) ;;;
         return: # ())
   {{ v, Φ v }}
 ```
@@ -897,7 +902,7 @@ The IPM can automate all of the above for allocation, load, and store:
   wp_alloc y as "Hy".
   wp_pures.
   wp_store. wp_pures.
-  wp_bind (heap @ "IgnoreOneLocF" _ _)%E. (* make the goal easier to understand *)
+  wp_bind (@! heap.IgnoreOneLocF _ _)%E. (* make the goal easier to understand *)
 ```
 
 :::: info Goal
@@ -905,7 +910,8 @@ The IPM can automate all of the above for allocation, load, and store:
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   Φ : val → iPropI Σ
   x, y : loc
   ============================
@@ -916,12 +922,12 @@ The IPM can automate all of the above for allocation, load, and store:
   "Hx" : x ↦ W64 0
   "Hy" : y ↦ W64 42
   --------------------------------------∗
-  WP # (func_callv heap "IgnoreOneLocF") (# x) (# y)
+  WP # (func_callv heap.IgnoreOneLocF) (# x) (# y)
   {{ v,
      WP exception_do
           ((do: v) ;;;
            (do: (let: "$a0" := ![# uint64T] (# x) = ![# uint64T] (# y) in
-                 func_call (# std) (# "Assert"%go) "$a0")) ;;;
+                 func_call (# std.Assert) "$a0")) ;;;
            return: # ())
      {{ v, Φ v }} }}
 ```
@@ -939,7 +945,8 @@ You might think we should do `iApply wp_IgnoreOneLocF`. Let's see what happens i
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   Φ : val → iPropI Σ
   x, y : loc
   ============================
@@ -952,7 +959,8 @@ You might think we should do `iApply wp_IgnoreOneLocF`. Let's see what happens i
 ```txt title="goal 2"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   Φ : val → iPropI Σ
   x, y : loc
   ============================
@@ -967,7 +975,7 @@ You might think we should do `iApply wp_IgnoreOneLocF`. Let's see what happens i
      WP exception_do
           ((do: # ()) ;;;
            (do: (let: "$a0" := ![# uint64T] (# x) = ![# uint64T] (# y) in
-                 func_call (# std) (# "Assert"%go) "$a0")) ;;;
+                 func_call (# std.Assert) "$a0")) ;;;
            return: # ())
      {{ v, Φ v }})
 ```
@@ -996,7 +1004,8 @@ The IPM provides several mechanisms for deciding on these splits. A _specializat
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   Φ : val → iPropI Σ
   x, y : loc
   ============================

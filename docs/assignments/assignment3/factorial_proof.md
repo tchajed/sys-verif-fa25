@@ -20,7 +20,7 @@ From sys_verif.program_proof Require Import functional_init.
 
 Section proof.
 Context `{hG: !heapGS Σ}.
-Context `{!goGlobalsGS Σ}.
+Context `{!globalsGS Σ} {go_ctx: GoContext}.
 
 ```
 
@@ -55,7 +55,7 @@ proof, which the `word` tactic will not (currently) do automatically. *)
 
 Lemma wp_Factorial (n: w64) :
   {{{ is_pkg_init functional ∗ ⌜Z.of_nat (fact (uint.nat n)) < 2^64⌝ }}}
-    functional @ "Factorial" #n
+    @! functional.Factorial #n
   {{{ (c: w64), RET #c; ⌜uint.nat c = fact (uint.nat n)⌝ }}}.
 Proof.
 Admitted.

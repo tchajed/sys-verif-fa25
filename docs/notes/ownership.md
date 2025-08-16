@@ -241,8 +241,7 @@ From sys_verif.program_proof Require Import heap_init.
 
 Section goose.
 Context `{hG: !heapGS Σ}.
-Context `{!goGlobalsGS Σ}.
-Context `{!heap.GlobalAddrs}.
+Context `{!globalsGS Σ} {go_ctx: GoContext}.
 
 ```
 
@@ -255,7 +254,7 @@ Notice also that there's an extra unit value at the end; this makes the recursiv
 ```rocq
 Lemma wp_ExamplePerson :
   {{{ is_pkg_init heap.heap }}}
-    heap.heap @ "ExamplePerson" #()
+    @! heap.heap.ExamplePerson #()
   {{{ RET #(heap.Person.mk "Ada" "Lovelace" (W64 25)); True }}}.
 Proof.
   wp_start as "_".
@@ -265,12 +264,10 @@ Qed.
 
 Lemma wp_Person__Name (firstName lastName: go_string) (age: w64) :
   {{{ is_pkg_init heap.heap }}}
-    heap.Person__Name
-      #(heap.Person.mk firstName lastName age) #()
+  (heap.Person.mk firstName lastName age) @ heap.Personⁱᵈ @ "Name" #()
   {{{ RET #(firstName ++ " " ++ lastName)%go; True }}}.
 Proof.
   wp_start as "#init".
-  wp_call.
   wp_alloc p_l as "p". wp_pures.
   iApply struct_fields_split in "p". iNamed "p".
   cbn [heap.Person.FirstName' heap.Person.LastName' heap.Person.Age'].
@@ -302,7 +299,7 @@ The postcondition of the following spec introduces the _struct field points-to_.
 ```rocq
 Lemma wp_ExamplePersonRef :
   {{{ is_pkg_init heap.heap }}}
-    heap @ "ExamplePersonRef" #()
+    @! heap.ExamplePersonRef #()
   {{{ (l: loc), RET #l;
       l ↦s[heap.Person :: "FirstName"] "Ada"%go ∗
       l ↦s[heap.Person :: "LastName"] "Lovelace"%go ∗
@@ -338,7 +335,7 @@ Lemma wp_Person__Older (firstName lastName: byte_string) (age: w64) (p: loc) (de
       p ↦s[heap.Person :: "LastName"] lastName ∗
       p ↦s[heap.Person :: "Age"] age
   }}}
-    p @ heap.heap @ "Person'ptr" @ "Older" #delta
+    p @ (ptrTⁱᵈ heap.Personⁱᵈ) @ "Older" #delta
   {{{ RET #();
       p ↦s[heap.Person :: "FirstName"] firstName ∗
       p ↦s[heap.Person :: "LastName"] lastName ∗
@@ -364,7 +361,7 @@ Lemma wp_GetAge (firstName lastName: byte_string) (age: w64) (p: loc) (delta: w6
       "last" :: p ↦s[heap.Person :: "LastName"] lastName ∗
       "age" :: p ↦s[heap.Person :: "Age"] age
   }}}
-    p @ heap.heap @ "Person'ptr" @ "GetAge" #()
+    p @ (ptrTⁱᵈ heap.Personⁱᵈ) @ "GetAge" #()
   {{{ (age_l: loc), RET #age_l;
       p ↦s[heap.Person :: "FirstName"] firstName ∗
       p ↦s[heap.Person :: "LastName"] lastName ∗
@@ -451,28 +448,16 @@ wp_load_slice_elem
          WP ![# ?t] (# (slice.elem_ref_f s ?t i)) {{ v, Φ v }}
 where
 ?V :
-  [Σ : gFunctors
-   hG : heapGS Σ
-   goGlobalsGS0 : goGlobalsGS Σ
-   H : heap.GlobalAddrs
+  [Σ : gFunctors  hG : heapGS Σ  globalsGS0 : globalsGS Σ  go_ctx : GoContext
   |- Type]
 ?IntoVal0 :
-  [Σ : gFunctors
-   hG : heapGS Σ
-   goGlobalsGS0 : goGlobalsGS Σ
-   H : heap.GlobalAddrs
+  [Σ : gFunctors  hG : heapGS Σ  globalsGS0 : globalsGS Σ  go_ctx : GoContext
   |- IntoVal ?V]
 ?t :
-  [Σ : gFunctors
-   hG : heapGS Σ
-   goGlobalsGS0 : goGlobalsGS Σ
-   H : heap.GlobalAddrs
+  [Σ : gFunctors  hG : heapGS Σ  globalsGS0 : globalsGS Σ  go_ctx : GoContext
   |- go_type]
 ?IntoValTyped0 :
-  [Σ : gFunctors
-   hG : heapGS Σ
-   goGlobalsGS0 : goGlobalsGS Σ
-   H : heap.GlobalAddrs
+  [Σ : gFunctors  hG : heapGS Σ  globalsGS0 : globalsGS Σ  go_ctx : GoContext
   |- IntoValTyped ?V ?t]
 ```
 

@@ -15,7 +15,7 @@ From sys_verif.program_proof Require Import functional_init heap_init.
 
 Section proof.
 Context `{!heapGS Σ}.
-Context `{!goGlobalsGS Σ}.
+Context `{!globalsGS Σ} {go_ctx: GoContext}.
 
 ```
 
@@ -178,7 +178,8 @@ Proof.
 ```txt title="goal diff"
   Σ : gFunctors
   heapGS0 : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   P : iProp Σ
   ============================
   "HP" : P
@@ -221,7 +222,7 @@ Here is a worked example. It demonstrates a number of tactics:
 ```rocq
 Lemma wp_Swap (l1 l2: loc) (x y: w64) :
   {{{ is_pkg_init heap.heap ∗ l1 ↦ x ∗ l2 ↦ y }}}
-    heap.heap @ "Swap" #l1 #l2
+    @! heap.heap.Swap #l1 #l2
   {{{ RET #(); l1 ↦ y ∗ l2 ↦ x }}}.
 Proof.
   wp_start as "(Hx & Hy)".
@@ -271,7 +272,7 @@ Re-do above proof, but with the automation tactics.
 ```rocq
 Lemma wp_Swap_ex (l1 l2: loc) (x y: w64) :
   {{{ is_pkg_init heap.heap ∗ l1 ↦ x ∗ l2 ↦ y }}}
-    heap.heap @ "Swap" #l1 #l2
+    @! heap.heap.Swap #l1 #l2
   {{{ RET #(); l1 ↦ y ∗ l2 ↦ x }}}.
 Proof.
 Admitted.
@@ -287,14 +288,14 @@ Prove it using the IPM. You may need to find the specification for `Assert` usin
 ```rocq
 Lemma wp_IgnoreOneLocF (x_l y_l: loc) :
   {{{ is_pkg_init heap.heap ∗ x_l ↦ W64 0 }}}
-    heap.heap @ "IgnoreOneLocF" #x_l #y_l
+    @! heap.heap.IgnoreOneLocF #x_l #y_l
   {{{ RET #(); x_l ↦ W64 42 }}}.
 Proof.
 Admitted.
 
 Lemma wp_UseIgnoreOneLocOwnership :
   {{{ is_pkg_init heap.heap }}}
-    heap.heap @ "UseIgnoreOneLocOwnership" #()
+    @! heap.heap.UseIgnoreOneLocOwnership #()
   {{{ RET #(); True }}}.
 Proof.
 Admitted.
@@ -308,7 +309,7 @@ The `(x_l: loc)` in the postcondition should be read as "there exists (x_l: loc)
 ```rocq
 Lemma example_stack_escape :
   {{{ is_pkg_init heap.heap }}}
-    heap.heap @ "StackEscape" #()
+    @! heap.heap.StackEscape #()
   {{{ (x_l: loc), RET #x_l; x_l ↦ W64 42 }}}.
 Proof.
   wp_start as "_".

@@ -35,7 +35,7 @@ From sys_verif.program_proof Require Import prelude empty_ffi.
 From sys_verif.program_proof Require Import heap_init.
 
 Section proof.
-Context `{hG: !heapGS Σ} `{!goGlobalsGS Σ}.
+Context `{hG: !heapGS Σ} `{!globalsGS Σ} {go_ctx: GoContext}.
 
 
 ```
@@ -128,7 +128,7 @@ func NewSearchTree() *SearchTree {
 ```rocq
 Lemma wp_NewSearchTree :
   {{{ is_pkg_init heap.heap }}}
-    heap.heap @ "NewSearchTree" #()
+    @! heap.heap.NewSearchTree #()
   {{{ (l: loc), RET #l; own_tree l ∅ }}}.
 Proof.
   wp_start as "_".
@@ -159,7 +159,7 @@ func (t *SearchTree) Contains(key uint64) bool {
 ```rocq
 Lemma wp_SearchTree__Contains (needle: w64) l keys :
   {{{ is_pkg_init heap.heap ∗ own_tree l keys }}}
-    l @ heap.heap @ "SearchTree'ptr" @ "Contains" #needle
+    l @ (ptrTⁱᵈ heap.SearchTreeⁱᵈ) @ "Contains" #needle
   {{{ RET #(bool_decide (needle ∈ keys)); own_tree l keys }}}.
 Proof.
 
@@ -181,7 +181,8 @@ Note that we can't use this mechanism to prove a program's recursion eventually 
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   needle : w64
   l : loc
   keys : gset w64
@@ -191,7 +192,7 @@ Note that we can't use this mechanism to prove a program's recursion eventually 
   "IH" : ∀ (l0 : loc) (keys0 : gset w64) (x : val → iPropI Σ),
            is_pkg_init heap ∗ own_tree l0 keys0 -∗
            ▷ (own_tree l0 keys0 -∗ x (# (bool_decide (needle ∈ keys0)))) -∗
-           WP # (method_callv heap "SearchTree'ptr" "Contains" (# l0))
+           WP # (method_callv (ptrTⁱᵈ heap.SearchTreeⁱᵈ) "Contains" (# l0))
                 (# needle)
            {{ v, x v }}
   _ : is_pkg_init heap
@@ -213,7 +214,7 @@ Note that we can't use this mechanism to prove a program's recursion eventually 
                              (# t_ptr)) >
              ![# uint64T] (# key_ptr)
          then return: (let: "$a0" := ![# uint64T] (# key_ptr) in
-                       method_call (# heap) (# "SearchTree'ptr"%go)
+                       method_call (# (ptrTⁱᵈ heap.SearchTreeⁱᵈ))
                          (# "Contains"%go)
                          ![# ptrT] (struct.field_ref
                                       (# heap.SearchTree)
@@ -222,7 +223,7 @@ Note that we can't use this mechanism to prove a program's recursion eventually 
                          "$a0")
          else do: # ()) ;;;
         return: (let: "$a0" := ![# uint64T] (# key_ptr) in
-                 method_call (# heap) (# "SearchTree'ptr"%go)
+                 method_call (# (ptrTⁱᵈ heap.SearchTreeⁱᵈ))
                    (# "Contains"%go)
                    ![# ptrT] (struct.field_ref (# heap.SearchTree)
                                 (# "right"%go) ![# ptrT]
@@ -321,7 +322,7 @@ func singletonTree(key uint64) *SearchTree {
 ```rocq
 Lemma wp_singletonTree (key: w64) :
   {{{ is_pkg_init heap.heap }}}
-    heap.heap @ "singletonTree" #key
+    @! heap.heap.singletonTree #key
   {{{ (l: loc), RET #l; own_tree l {[key]} }}}.
 Proof.
   wp_start as "_".
@@ -369,7 +370,7 @@ func (t *SearchTree) Insert(key uint64) *SearchTree {
 ```rocq
 Lemma wp_SearchTree__Insert (new_key: w64) l keys :
   {{{ is_pkg_init heap.heap ∗ own_tree l keys }}}
-    l @ heap.heap @ "SearchTree'ptr" @ "Insert" #new_key
+    l @ (ptrTⁱᵈ heap.SearchTreeⁱᵈ) @ "Insert" #new_key
   {{{ (l': loc), RET #l'; own_tree l' (keys ∪ {[new_key]}) }}}.
 Proof.
   iLöb as "IH" forall (l keys).

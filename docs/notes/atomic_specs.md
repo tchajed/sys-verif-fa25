@@ -100,7 +100,7 @@ From sys_verif.program_proof Require Import concurrent_init.
 
 Module atomic_int.
 Section proof.
-Context `{hG: !heapGS Σ} `{!goGlobalsGS Σ}.
+Context `{hG: !heapGS Σ} `{!globalsGS Σ} {go_ctx: GoContext}.
 
 ```
 
@@ -128,7 +128,7 @@ Proof. apply _. Qed.
 
 Lemma wp_NewAtomicInt (P: w64 → iProp Σ) :
   {{{ is_pkg_init concurrent ∗ P (W64 0) }}}
-    concurrent @ "NewAtomicInt" #()
+    @! concurrent.NewAtomicInt #()
   {{{ (l: loc), RET #l; is_atomic_int l P }}}.
 Proof.
   wp_start as "HP".
@@ -168,7 +168,7 @@ There is one thing missing from this specification: if you only look at the spec
 Lemma wp_AtomicInt__Inc_demo l (P: w64 → iProp _) (y: w64) :
   {{{ is_pkg_init concurrent ∗ is_atomic_int l P ∗
         (∀ x, P x -∗ |={⊤}=> P (word.add x y)) }}}
-    l @ concurrent @ "AtomicInt'ptr" @ "Inc" #y
+    l @ (ptrTⁱᵈ concurrent.AtomicIntⁱᵈ) @ "Inc" #y
   {{{ RET #(); True }}}.
 Proof.
   wp_start as "[#Hint Hfupd]".
@@ -204,7 +204,7 @@ This specification will undoubtedly be hard to read at first: you need to follow
 Lemma wp_AtomicInt__Get l (P: w64 → iProp _) (Q: w64 → iProp Σ) :
   {{{ is_pkg_init concurrent ∗
         is_atomic_int l P ∗ (∀ x, P x -∗ |={⊤}=> Q x ∗ P x) }}}
-    l @ concurrent @ "AtomicInt'ptr" @ "Get" #()
+    l @ (ptrTⁱᵈ concurrent.AtomicIntⁱᵈ) @ "Get" #()
   {{{ (x: w64), RET #x; Q x }}}.
 Proof.
   wp_start as "[#Hint Hfupd]".
@@ -241,7 +241,7 @@ The postcondition looks much like for `Get`, in that it has `∃ x, Q x` for a c
 Lemma wp_AtomicInt__Inc l (P: w64 → iProp _) (Q: w64 → iProp Σ) (y: w64) :
   {{{ is_pkg_init concurrent ∗ is_atomic_int l P ∗
         (∀ x, P x -∗ |={⊤}=> Q x ∗ P (word.add x y)) }}}
-    l @ concurrent @ "AtomicInt'ptr" @ "Inc" #y
+    l @ (ptrTⁱᵈ concurrent.AtomicIntⁱᵈ) @ "Inc" #y
   {{{ (x: w64), RET #(); Q x }}}.
 Proof.
   wp_start as "[#Hint Hfupd]".
@@ -301,7 +301,7 @@ However, it is important that the locking that makes the integer atomic is all h
 
 ```rocq
 Section proof.
-Context `{hG: !heapGS Σ} `{!goGlobalsGS Σ}.
+Context `{hG: !heapGS Σ} `{!globalsGS Σ} {go_ctx: GoContext}.
 Context `{ghost_varG0: ghost_varG Σ Z}.
 
 ```
@@ -318,7 +318,7 @@ As in the proof we saw before for `ParallelAdd3`, this proof will use two ghost 
 
 Lemma wp_ParallelAdd1 :
   {{{ is_pkg_init concurrent }}}
-    concurrent @ "ParallelAdd1" #()
+    @! concurrent.ParallelAdd1 #()
   {{{ (x: w64), RET #x; ⌜uint.Z x = 4⌝ }}}.
 Proof using ghost_varG0.
   wp_start as "_".
@@ -361,7 +361,8 @@ This is the most interesting part of the proof. We need to supply a postconditio
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   ghost_varG0 : ghost_varG Σ Z
   i_ptr : loc
   γ1, γ2 : gname

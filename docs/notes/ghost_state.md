@@ -132,17 +132,14 @@ Let's look at some examples of ghost variables and their updates in Coq.
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From New.proof Require Import std sync.
 From sys_verif.generatedproof.sys_verif_code Require Import concurrent.
+From sys_verif.program_proof Require Import concurrent_init.
 From Perennial.algebra Require Import ghost_var.
 
 Section goose.
 Context `{hG: !heapGS Σ}.
-Context `{!goGlobalsGS Σ}.
+Context `{!globalsGS Σ} {go_ctx: GoContext}.
 Context `{ghost_varG0: ghost_varG Σ Z}.
 Open Scope Z_scope.
-
-Program Instance : IsPkgInit concurrent :=
-  ltac2:(build_pkg_init ()).
-Final Obligation. apply _. Qed.
 
 ```
 
@@ -308,7 +305,7 @@ Definition lock_inv γ1 γ2 l : iProp _ :=
 
 Lemma wp_ParallelAdd3 :
   {{{ is_pkg_init concurrent }}}
-    concurrent @ "ParallelAdd3" #()
+    @! concurrent.ParallelAdd3 #()
   {{{ (x: w64), RET #x; ⌜uint.Z x = 4⌝ }}}.
 Proof using All.
   wp_start as "_".
@@ -328,7 +325,8 @@ Proof using All.
 ```txt title="goal 1"
   Σ : gFunctors
   hG : heapGS Σ
-  goGlobalsGS0 : goGlobalsGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
   ghost_varG0 : ghost_varG Σ Z
   Φ : val → iPropI Σ
   γ1, γ2 : gname
@@ -344,7 +342,7 @@ Proof using All.
   "h1" : h1_ptr ↦ default_val loc
   --------------------------------------∗
   WP exception_do
-       (let: "$r0" := # (func_callv std "Spawn")
+       (let: "$r0" := # (func_callv std.Spawn)
                         (#
                            {|
                              func.f := <>;
@@ -352,8 +350,7 @@ Proof using All.
                              func.e :=
                                exception_do
                                  ((do: method_call
-                                         (# sync)
-                                         (# "Mutex'ptr"%go)
+                                         (# (ptrTⁱᵈ sync.Mutexⁱᵈ))
                                          (# "Lock"%go) ![
                                          # ptrT] (# m_ptr)
                                          (# ())) ;;;
@@ -363,8 +360,7 @@ Proof using All.
                                        (# i_ptr) +
                                        # (W64 2)) ;;;
                                   (do: method_call
-                                         (# sync)
-                                         (# "Mutex'ptr"%go)
+                                         (# (ptrTⁱᵈ sync.Mutexⁱᵈ))
                                          (# "Unlock"%go) ![
                                          # ptrT] (# m_ptr)
                                          (# ())) ;;;
@@ -375,8 +371,7 @@ Proof using All.
         let: "$r0" := let: "$a0" := λ: <>,
                                       exception_do
                                         ((do: method_call
-                                                (# sync)
-                                                (# "Mutex'ptr"%go)
+                                                (# (ptrTⁱᵈ sync.Mutexⁱᵈ))
                                                 (# "Lock"%go)
                                                 ![
                                                 # ptrT]
@@ -388,27 +383,26 @@ Proof using All.
                                               (# i_ptr) +
                                               # (W64 2)) ;;;
                                          (do: method_call
-                                                (# sync)
-                                                (# "Mutex'ptr"%go)
+                                                (# (ptrTⁱᵈ sync.Mutexⁱᵈ))
                                                 (# "Unlock"%go)
                                                 ![
                                                 # ptrT]
                                                 (# m_ptr)
                                                 (# ())) ;;;
                                          return: # ()) in
-                      func_call (# std) (# "Spawn"%go) "$a0" in
+                      func_call (# std.Spawn) "$a0" in
         (do: "h2" <-[# ptrT] "$r0") ;;;
-        (do: method_call (# std) (# "JoinHandle'ptr"%go)
+        (do: method_call (# (ptrTⁱᵈ std.JoinHandleⁱᵈ))
                (# "Join"%go) ![# ptrT] (# h1_ptr)
                (# ())) ;;;
-        (do: method_call (# std) (# "JoinHandle'ptr"%go)
+        (do: method_call (# (ptrTⁱᵈ std.JoinHandleⁱᵈ))
                (# "Join"%go) ![# ptrT] "h2" (# ())) ;;;
-        (do: method_call (# sync) (# "Mutex'ptr"%go)
+        (do: method_call (# (ptrTⁱᵈ sync.Mutexⁱᵈ))
                (# "Lock"%go) ![# ptrT] (# m_ptr) (# ())) ;;;
         let: "y" := alloc (type.zero_val (# uint64T)) in
         let: "$r0" := ![# uint64T] (# i_ptr) in
         (do: "y" <-[# uint64T] "$r0") ;;;
-        (do: method_call (# sync) (# "Mutex'ptr"%go)
+        (do: method_call (# (ptrTⁱᵈ sync.Mutexⁱᵈ))
                (# "Unlock"%go) ![# ptrT] (# m_ptr)
                (# ())) ;;;
         return: ![# uint64T] "y")

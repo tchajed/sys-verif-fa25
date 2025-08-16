@@ -18,7 +18,7 @@ From sys_verif.program_proof Require Import prelude empty_ffi.
 From sys_verif.program_proof Require Import heap_init.
 
 Section proof.
-Context `{hG: !heapGS Σ} `{!goGlobalsGS Σ}.
+Context `{hG: !heapGS Σ} `{!globalsGS Σ} {go_ctx: GoContext}.
 
 ```
 
@@ -37,7 +37,7 @@ Definition stack_rep (l: loc) (xs: list w64): iProp Σ :=
 
 Lemma wp_NewStack :
   {{{ is_pkg_init heap.heap }}}
-    heap.heap @ "NewStack" #()
+    @! heap.heap.NewStack #()
   {{{ l, RET #l; stack_rep l [] }}}.
 Proof.
   wp_start as "_".
@@ -53,7 +53,7 @@ Qed.
 
 Lemma wp_Stack__Push l xs (x: w64) :
   {{{ is_pkg_init heap.heap ∗ stack_rep l xs }}}
-    l @ heap.heap @ "Stack'ptr" @ "Push" #x
+    l @ (ptrTⁱᵈ heap.Stackⁱᵈ) @ "Push" #x
   {{{ RET #(); stack_rep l (x :: xs) }}}.
 Proof.
   wp_start as "Hstack".
@@ -92,7 +92,7 @@ Hint Rewrite @length_reverse : len.
 
 Lemma wp_Stack__Pop l xs :
   {{{ is_pkg_init heap.heap ∗ stack_rep l xs }}}
-    l @ heap.heap @ "Stack'ptr" @ "Pop" #()
+    l @ (ptrTⁱᵈ heap.Stackⁱᵈ) @ "Pop" #()
   {{{ (x: w64) (ok: bool) xs', RET (#x, #ok);
       stack_rep l xs' ∗
       ⌜(x, ok, xs') = stack_pop xs⌝

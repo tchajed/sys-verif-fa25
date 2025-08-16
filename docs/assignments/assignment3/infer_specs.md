@@ -15,13 +15,13 @@ From sys_verif Require Import prelude empty_ffi.
 From sys_verif.program_proof Require Import heap_init.
 
 Section goose.
-Context `{!heapGS Σ} `{!goGlobalsGS Σ}.
+Context `{!heapGS Σ} `{!globalsGS Σ} {go_ctx: GoContext}.
 
 (* worked example of a general specification *)
 Lemma wp_ExampleA (x_l y_l: loc) (z: w64) (x: bool) (y: w64) q :
   {{{ is_pkg_init heap.heap ∗
       "x" :: x_l ↦{q} x ∗ "y" :: y_l ↦ y }}}
-    heap.heap @ "ExampleA" #x_l #y_l #z
+    @! heap.heap.ExampleA #x_l #y_l #z
   {{{ RET #(); x_l ↦{q} x ∗
                y_l ↦ (if x then z else 0) }}}.
 Proof.
@@ -30,7 +30,7 @@ Admitted.
 
 Lemma wp_ExampleB :
   {{{ True }}}
-    heap.heap @ "ExampleB" #()
+    @! heap.heap.ExampleB #()
   {{{ RET #(); True }}}.
 Proof.
   (* FILL IN HERE *)
@@ -38,7 +38,7 @@ Admitted.
 
 Lemma wp_ExampleC :
   {{{ True }}}
-    heap.heap @ "ExampleC" #()
+    @! heap.heap.ExampleC #()
   {{{ RET #(); True }}}.
 Proof.
   (* FILL IN HERE *)
@@ -51,7 +51,7 @@ Admitted.
 ```rocq
 Lemma wp_ExampleD :
   {{{ True }}}
-    heap.heap @ "ExampleD" #()
+    @! heap.heap.ExampleD #()
   {{{ RET #(); True }}}.
 Proof.
   (* FILL IN HERE *)
@@ -59,7 +59,7 @@ Admitted.
 
 Lemma wp_ExampleE :
   {{{ True }}}
-    heap.heap @ "ExampleE" #()
+    @! heap.heap.ExampleE #()
   {{{ RET #(); True }}}.
 Proof.
   (* FILL IN HERE *)
