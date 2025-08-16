@@ -30,7 +30,7 @@ The class is divided into three sections:
 - **Instruction modality**: in-person
 - **Instructor contact info**: \
   Prof. Tej Chajed &lsaquo;<chajed@wisc.edu>&rsaquo; \
-  office hours: Tuesday/Thursday 3-4pm in Morgridge 7572
+  office hours: Wednesday/Thursday 3-4pm in Morgridge 7572
 
 ## Course learning outcomes
 
@@ -90,7 +90,7 @@ I'll hold office hours twice a week, using my office, Morgridge 7572. Office hou
 3. A question about something beyond the lecture
 4. Advice on anything communication related
 
-I encourage all of you to stop by office hours just to introduce yourself and say hi during the first two weeks of the semester.
+I encourage all students to stop by office hours and introduce yourself (you can just say hi or stop and chat for a bit) during the first two weeks of the semester.
 
 ## Collaboration
 
