@@ -399,7 +399,7 @@ Once an `own_mock_memoize` is set up, using it is very straightforward.
 ```rocq
 Lemma wp_MockMemoize__Call l f (x0: w64) :
   {{{ is_pkg_init memoize ∗ own_mock_memoize l f }}}
-    l @ (ptrTⁱᵈ memoize.MockMemoizeⁱᵈ) @ "Call" #x0
+    l @ (ptrT.id memoize.MockMemoize.id) @ "Call" #x0
   {{{ RET #(f x0); True }}}.
 Proof.
   wp_start as "#Hm". iNamed "Hm".
@@ -551,7 +551,7 @@ Qed.
 
 Lemma wp_Memoize__Call v f (x0: w64) :
   {{{ is_pkg_init memoize ∗ own_memoize v f }}}
-    v @ memoize.Memoizeⁱᵈ @ "Call" #x0
+    v @ memoize.Memoize.id @ "Call" #x0
   {{{ RET #(f x0); own_memoize v f }}}.
 Proof.
   wp_start as "Hm".
@@ -947,13 +947,13 @@ The little proof pattern below of using `iExactEq` is sometimes useful - it allo
         (do: # m_ptr <-[# memoize.Memoize] "$r0") ;;;
         let: "y1" := alloc (type.zero_val (# uint64T)) in
         let: "$r0" := let: "$a0" := # (W64 3) in
-                      method_call (# memoize.Memoizeⁱᵈ)
+                      method_call (# memoize.Memoize.id)
                         (# "Call"%go) ![# memoize.Memoize]
                         (# m_ptr) "$a0" in
         (do: "y1" <-[# uint64T] "$r0") ;;;
         let: "y2" := alloc (type.zero_val (# uint64T)) in
         let: "$r0" := let: "$a0" := # (W64 3) in
-                      method_call (# memoize.Memoizeⁱᵈ)
+                      method_call (# memoize.Memoize.id)
                         (# "Call"%go) ![# memoize.Memoize]
                         (# m_ptr) "$a0" in
         (do: "y2" <-[# uint64T] "$r0") ;;;

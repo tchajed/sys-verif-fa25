@@ -168,7 +168,7 @@ There is one thing missing from this specification: if you only look at the spec
 Lemma wp_AtomicInt__Inc_demo l (P: w64 → iProp _) (y: w64) :
   {{{ is_pkg_init concurrent ∗ is_atomic_int l P ∗
         (∀ x, P x -∗ |={⊤}=> P (word.add x y)) }}}
-    l @ (ptrTⁱᵈ concurrent.AtomicIntⁱᵈ) @ "Inc" #y
+    l @ (ptrT.id concurrent.AtomicInt.id) @ "Inc" #y
   {{{ RET #(); True }}}.
 Proof.
   wp_start as "[#Hint Hfupd]".
@@ -204,7 +204,7 @@ This specification will undoubtedly be hard to read at first: you need to follow
 Lemma wp_AtomicInt__Get l (P: w64 → iProp _) (Q: w64 → iProp Σ) :
   {{{ is_pkg_init concurrent ∗
         is_atomic_int l P ∗ (∀ x, P x -∗ |={⊤}=> Q x ∗ P x) }}}
-    l @ (ptrTⁱᵈ concurrent.AtomicIntⁱᵈ) @ "Get" #()
+    l @ (ptrT.id concurrent.AtomicInt.id) @ "Get" #()
   {{{ (x: w64), RET #x; Q x }}}.
 Proof.
   wp_start as "[#Hint Hfupd]".
@@ -241,7 +241,7 @@ The postcondition looks much like for `Get`, in that it has `∃ x, Q x` for a c
 Lemma wp_AtomicInt__Inc l (P: w64 → iProp _) (Q: w64 → iProp Σ) (y: w64) :
   {{{ is_pkg_init concurrent ∗ is_atomic_int l P ∗
         (∀ x, P x -∗ |={⊤}=> Q x ∗ P (word.add x y)) }}}
-    l @ (ptrTⁱᵈ concurrent.AtomicIntⁱᵈ) @ "Inc" #y
+    l @ (ptrT.id concurrent.AtomicInt.id) @ "Inc" #y
   {{{ (x: w64), RET #(); Q x }}}.
 Proof.
   wp_start as "[#Hint Hfupd]".

@@ -282,7 +282,7 @@ Proof.
        ((do: # ()) ;;;
         let: "$r0" := # (W64 1) in
         (do: # x_ptr <-[# uint64T] "$r0") ;;;
-        (do: method_call (# (ptrTⁱᵈ sync.Mutexⁱᵈ))
+        (do: method_call (# (ptrT.id sync.Mutex.id))
                (# "Unlock"%go) ![# ptrT] (# m_ptr)
                (# ())) ;;;
         return: # ())

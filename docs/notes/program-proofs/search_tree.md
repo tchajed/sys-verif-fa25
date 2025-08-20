@@ -159,7 +159,7 @@ func (t *SearchTree) Contains(key uint64) bool {
 ```rocq
 Lemma wp_SearchTree__Contains (needle: w64) l keys :
   {{{ is_pkg_init heap.heap ∗ own_tree l keys }}}
-    l @ (ptrTⁱᵈ heap.SearchTreeⁱᵈ) @ "Contains" #needle
+    l @ (ptrT.id heap.SearchTree.id) @ "Contains" #needle
   {{{ RET #(bool_decide (needle ∈ keys)); own_tree l keys }}}.
 Proof.
 
@@ -192,7 +192,7 @@ Note that we can't use this mechanism to prove a program's recursion eventually 
   "IH" : ∀ (l0 : loc) (keys0 : gset w64) (x : val → iPropI Σ),
            is_pkg_init heap ∗ own_tree l0 keys0 -∗
            ▷ (own_tree l0 keys0 -∗ x (# (bool_decide (needle ∈ keys0)))) -∗
-           WP # (method_callv (ptrTⁱᵈ heap.SearchTreeⁱᵈ) "Contains" (# l0))
+           WP # (method_callv (ptrT.id heap.SearchTree.id) "Contains" (# l0))
                 (# needle)
            {{ v, x v }}
   _ : is_pkg_init heap
@@ -214,7 +214,7 @@ Note that we can't use this mechanism to prove a program's recursion eventually 
                              (# t_ptr)) >
              ![# uint64T] (# key_ptr)
          then return: (let: "$a0" := ![# uint64T] (# key_ptr) in
-                       method_call (# (ptrTⁱᵈ heap.SearchTreeⁱᵈ))
+                       method_call (# (ptrT.id heap.SearchTree.id))
                          (# "Contains"%go)
                          ![# ptrT] (struct.field_ref
                                       (# heap.SearchTree)
@@ -223,7 +223,7 @@ Note that we can't use this mechanism to prove a program's recursion eventually 
                          "$a0")
          else do: # ()) ;;;
         return: (let: "$a0" := ![# uint64T] (# key_ptr) in
-                 method_call (# (ptrTⁱᵈ heap.SearchTreeⁱᵈ))
+                 method_call (# (ptrT.id heap.SearchTree.id))
                    (# "Contains"%go)
                    ![# ptrT] (struct.field_ref (# heap.SearchTree)
                                 (# "right"%go) ![# ptrT]
@@ -370,7 +370,7 @@ func (t *SearchTree) Insert(key uint64) *SearchTree {
 ```rocq
 Lemma wp_SearchTree__Insert (new_key: w64) l keys :
   {{{ is_pkg_init heap.heap ∗ own_tree l keys }}}
-    l @ (ptrTⁱᵈ heap.SearchTreeⁱᵈ) @ "Insert" #new_key
+    l @ (ptrT.id heap.SearchTree.id) @ "Insert" #new_key
   {{{ (l': loc), RET #l'; own_tree l' (keys ∪ {[new_key]}) }}}.
 Proof.
   iLöb as "IH" forall (l keys).

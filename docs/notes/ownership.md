@@ -264,7 +264,7 @@ Qed.
 
 Lemma wp_Person__Name (firstName lastName: go_string) (age: w64) :
   {{{ is_pkg_init heap.heap }}}
-  (heap.Person.mk firstName lastName age) @ heap.Personⁱᵈ @ "Name" #()
+  (heap.Person.mk firstName lastName age) @ heap.Person.id @ "Name" #()
   {{{ RET #(firstName ++ " " ++ lastName)%go; True }}}.
 Proof.
   wp_start as "#init".
@@ -335,7 +335,7 @@ Lemma wp_Person__Older (firstName lastName: byte_string) (age: w64) (p: loc) (de
       p ↦s[heap.Person :: "LastName"] lastName ∗
       p ↦s[heap.Person :: "Age"] age
   }}}
-    p @ (ptrTⁱᵈ heap.Personⁱᵈ) @ "Older" #delta
+    p @ (ptrT.id heap.Person.id) @ "Older" #delta
   {{{ RET #();
       p ↦s[heap.Person :: "FirstName"] firstName ∗
       p ↦s[heap.Person :: "LastName"] lastName ∗
@@ -361,7 +361,7 @@ Lemma wp_GetAge (firstName lastName: byte_string) (age: w64) (p: loc) (delta: w6
       "last" :: p ↦s[heap.Person :: "LastName"] lastName ∗
       "age" :: p ↦s[heap.Person :: "Age"] age
   }}}
-    p @ (ptrTⁱᵈ heap.Personⁱᵈ) @ "GetAge" #()
+    p @ (ptrT.id heap.Person.id) @ "GetAge" #()
   {{{ (age_l: loc), RET #age_l;
       p ↦s[heap.Person :: "FirstName"] firstName ∗
       p ↦s[heap.Person :: "LastName"] lastName ∗

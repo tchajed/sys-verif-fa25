@@ -350,7 +350,7 @@ Proof using All.
                              func.e :=
                                exception_do
                                  ((do: method_call
-                                         (# (ptrTⁱᵈ sync.Mutexⁱᵈ))
+                                         (# (ptrT.id sync.Mutex.id))
                                          (# "Lock"%go) ![
                                          # ptrT] (# m_ptr)
                                          (# ())) ;;;
@@ -360,7 +360,7 @@ Proof using All.
                                        (# i_ptr) +
                                        # (W64 2)) ;;;
                                   (do: method_call
-                                         (# (ptrTⁱᵈ sync.Mutexⁱᵈ))
+                                         (# (ptrT.id sync.Mutex.id))
                                          (# "Unlock"%go) ![
                                          # ptrT] (# m_ptr)
                                          (# ())) ;;;
@@ -371,7 +371,7 @@ Proof using All.
         let: "$r0" := let: "$a0" := λ: <>,
                                       exception_do
                                         ((do: method_call
-                                                (# (ptrTⁱᵈ sync.Mutexⁱᵈ))
+                                                (# (ptrT.id sync.Mutex.id))
                                                 (# "Lock"%go)
                                                 ![
                                                 # ptrT]
@@ -383,7 +383,7 @@ Proof using All.
                                               (# i_ptr) +
                                               # (W64 2)) ;;;
                                          (do: method_call
-                                                (# (ptrTⁱᵈ sync.Mutexⁱᵈ))
+                                                (# (ptrT.id sync.Mutex.id))
                                                 (# "Unlock"%go)
                                                 ![
                                                 # ptrT]
@@ -392,17 +392,17 @@ Proof using All.
                                          return: # ()) in
                       func_call (# std.Spawn) "$a0" in
         (do: "h2" <-[# ptrT] "$r0") ;;;
-        (do: method_call (# (ptrTⁱᵈ std.JoinHandleⁱᵈ))
+        (do: method_call (# (ptrT.id std.JoinHandle.id))
                (# "Join"%go) ![# ptrT] (# h1_ptr)
                (# ())) ;;;
-        (do: method_call (# (ptrTⁱᵈ std.JoinHandleⁱᵈ))
+        (do: method_call (# (ptrT.id std.JoinHandle.id))
                (# "Join"%go) ![# ptrT] "h2" (# ())) ;;;
-        (do: method_call (# (ptrTⁱᵈ sync.Mutexⁱᵈ))
+        (do: method_call (# (ptrT.id sync.Mutex.id))
                (# "Lock"%go) ![# ptrT] (# m_ptr) (# ())) ;;;
         let: "y" := alloc (type.zero_val (# uint64T)) in
         let: "$r0" := ![# uint64T] (# i_ptr) in
         (do: "y" <-[# uint64T] "$r0") ;;;
-        (do: method_call (# (ptrTⁱᵈ sync.Mutexⁱᵈ))
+        (do: method_call (# (ptrT.id sync.Mutex.id))
                (# "Unlock"%go) ![# ptrT] (# m_ptr)
                (# ())) ;;;
         return: ![# uint64T] "y")

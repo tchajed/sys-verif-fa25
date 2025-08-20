@@ -53,7 +53,7 @@ Qed.
 
 Lemma wp_Stack__Push l xs (x: w64) :
   {{{ is_pkg_init heap.heap ∗ stack_rep l xs }}}
-    l @ (ptrTⁱᵈ heap.Stackⁱᵈ) @ "Push" #x
+    l @ (ptrT.id heap.Stack.id) @ "Push" #x
   {{{ RET #(); stack_rep l (x :: xs) }}}.
 Proof.
   wp_start as "Hstack".
@@ -92,7 +92,7 @@ Hint Rewrite @length_reverse : len.
 
 Lemma wp_Stack__Pop l xs :
   {{{ is_pkg_init heap.heap ∗ stack_rep l xs }}}
-    l @ (ptrTⁱᵈ heap.Stackⁱᵈ) @ "Pop" #()
+    l @ (ptrT.id heap.Stack.id) @ "Pop" #()
   {{{ (x: w64) (ok: bool) xs', RET (#x, #ok);
       stack_rep l xs' ∗
       ⌜(x, ok, xs') = stack_pop xs⌝

@@ -81,7 +81,7 @@ Fill in a postcondition here and prove this specification.
 ```rocq
 Lemma wp_Node__Insert (l: loc) (xs: list w64) (elem: w64) :
   {{{ is_pkg_init heap.heap ∗ ll_rep l xs }}}
-    l @ (ptrTⁱᵈ heap.Nodeⁱᵈ) @ "Insert" #elem
+    l @ (ptrT.id heap.Node.id) @ "Insert" #elem
   {{{ (l': loc), RET #l';
       False  }}}.
 Proof.
@@ -94,7 +94,7 @@ Prove this specification.
 ```rocq
 Lemma wp_Node__Pop (l: loc) (xs: list w64) :
   {{{ is_pkg_init heap.heap ∗ ll_rep l xs }}}
-    l @ (ptrTⁱᵈ heap.Nodeⁱᵈ) @ "Pop" #()
+    l @ (ptrT.id heap.Node.id) @ "Pop" #()
   {{{ (x: w64) (l': loc) (ok: bool), RET (#x, #l', #ok);
       if ok then ∃ xs', ⌜xs = cons x xs'⌝ ∗
                         ll_rep l' xs'
@@ -114,7 +114,7 @@ A general structure is provided for the proof (which you are allowed to change i
 Lemma wp_Node__Append l1 xs1 l2 xs2 :
   {{{ is_pkg_init heap.heap ∗
       ll_rep l1 xs1 ∗ ll_rep l2 xs2 }}}
-    l1 @ (ptrTⁱᵈ heap.Nodeⁱᵈ) @ "Append" #l2
+    l1 @ (ptrT.id heap.Node.id) @ "Append" #l2
   {{{ (l2': loc), RET #l2';
       False  }}}.
 Proof.

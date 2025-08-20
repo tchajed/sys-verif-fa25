@@ -416,7 +416,7 @@ Qed.
 ```rocq
 Lemma wp_shard__Load (s_l: loc) (key: w32) (m: gmap w32 w64) :
   {{{ is_pkg_init sharded_hashmap ∗ own_shard s_l m }}}
-    s_l @ (ptrTⁱᵈ sharded_hashmap.shardⁱᵈ) @ "Load" #key
+    s_l @ (ptrT.id sharded_hashmap.shard.id) @ "Load" #key
   {{{ (v: w64) (ok: bool), RET (#v, #ok);
       own_shard s_l m ∗
       ⌜(v, ok) = map_get (m !! key)⌝
@@ -440,7 +440,7 @@ Admitted.
 
 Lemma wp_shard__Store (s_l: loc) (key: w32) (val: w64) (m: gmap w32 w64) :
   {{{ is_pkg_init sharded_hashmap ∗ own_shard s_l m }}}
-    s_l @ (ptrTⁱᵈ sharded_hashmap.shardⁱᵈ) @ "Store" #key #val
+    s_l @ (ptrT.id sharded_hashmap.shard.id) @ "Store" #key #val
   {{{ RET #();
       own_shard s_l (<[ key := val ]> m)
   }}}.
@@ -1010,7 +1010,7 @@ Lemma wp_HashMap__Load (hm_l: loc) γ (key: w32) P Q {Htimeless: ∀ m, Timeless
   {{{ is_pkg_init sharded_hashmap ∗ is_hashmap γ hm_l P ∗
       (∀ m, P m -∗ |==> P m ∗ Q (map_get (m !! key)))
   }}}
-    hm_l @ (ptrTⁱᵈ sharded_hashmap.HashMapⁱᵈ) @ "Load" #key
+    hm_l @ (ptrT.id sharded_hashmap.HashMap.id) @ "Load" #key
   {{{ (v: w64) (ok: bool), RET (#v, #ok); Q (v, ok) }}}.
 Proof.
   wp_start as "[#Hm Hupd]". iNamed "Hm".
@@ -1120,7 +1120,7 @@ We need to use `iApply fupd_wp` to make `iInv` open at a single point rather tha
   --------------------------------------∗
   |={⊤}=> // [!code --]
     WP exception_do // [!code --]
-         ((do: # (method_callv (ptrTⁱᵈ sync.Mutexⁱᵈ) "Unlock" (# mu_l)) // [!code --]
+         ((do: # (method_callv (ptrT.id sync.Mutex.id) "Unlock" (# mu_l)) // [!code --]
                  (# ())) ;;; // [!code --]
           return: (![# uint64T] (# x_ptr), ![# boolT] (# ok_ptr))) // [!code --]
     {{ v, Φ v }} // [!code --]
@@ -1129,7 +1129,7 @@ We need to use `iApply fupd_wp` to make `iInv` open at a single point rather tha
          "Hauth" ∷ hashmap_auth γ (uint.Z (slice.len_f b_s)) m) ∗ // [!code ++]
     (|={⊤}=> // [!code ++]
        WP exception_do // [!code ++]
-            ((do: # (method_callv (ptrTⁱᵈ sync.Mutexⁱᵈ) "Unlock" (# mu_l)) // [!code ++]
+            ((do: # (method_callv (ptrT.id sync.Mutex.id) "Unlock" (# mu_l)) // [!code ++]
                     (# ())) ;;; // [!code ++]
              return: (![# uint64T] (# x_ptr), ![# boolT] (# ok_ptr))) // [!code ++]
        {{ v, Φ v }}) // [!code ++]
@@ -1171,7 +1171,7 @@ Lemma wp_HashMap__Store (hm_l: loc) γ (key: w32) (v: w64) P Q {Htimeless: ∀ m
   {{{ is_pkg_init sharded_hashmap ∗ is_hashmap γ hm_l P ∗
       (∀ m, P m -∗ |==> P (<[key := v]> m) ∗ Q m)
   }}}
-    hm_l @ (ptrTⁱᵈ sharded_hashmap.HashMapⁱᵈ) @ "Store" #key #v
+    hm_l @ (ptrT.id sharded_hashmap.HashMap.id) @ "Store" #key #v
   {{{ m0, RET #(); Q m0 }}}.
 Proof.
 Admitted.

@@ -118,7 +118,7 @@ Two extremes are worth thinking about here. First, once we've created all the `s
     ∃ (mu_l cond_l: loc),
       "#mu" ∷ l ↦s[concurrent.Barrier :: "mu"]□ mu_l ∗
       "#cond" ∷ l ↦s[concurrent.Barrier :: "cond"]□ cond_l ∗
-      "#Hcond" ∷ is_Cond cond_l (interface.mk (ptrTⁱᵈ sync.Mutexⁱᵈ) #mu_l) ∗
+      "#Hcond" ∷ is_Cond cond_l (interface.mk (ptrT.id sync.Mutex.id) #mu_l) ∗
       "#Hlock" ∷ is_Mutex (mu_l) (lock_inv l γ).
 
   #[global] Instance is_barrier_persistent l γ : Persistent (is_barrier l γ) := _.
@@ -349,7 +349,7 @@ Finally, we do all the program proofs, the specifications for each function. The
 
   Lemma wp_Barrier__Add1 (P: iProp Σ) (Q: iProp Σ) γ l :
     {{{ is_pkg_init concurrent ∗ is_barrier l γ ∗ recv γ Q }}}
-      l @ (ptrTⁱᵈ concurrent.Barrierⁱᵈ) @ "Add" #(W64 1)
+      l @ (ptrT.id concurrent.Barrier.id) @ "Add" #(W64 1)
     {{{ RET #(); send γ P ∗ recv γ (Q ∗ P) }}}.
   Proof.
     wp_start as "[#Hbar Hrecv]".
@@ -371,7 +371,7 @@ Finally, we do all the program proofs, the specifications for each function. The
 
   Lemma wp_Barrier__Done γ l P :
     {{{ is_pkg_init concurrent ∗ is_barrier l γ ∗ send γ P ∗ P }}}
-      l @ (ptrTⁱᵈ concurrent.Barrierⁱᵈ) @ "Done" #()
+      l @ (ptrT.id concurrent.Barrier.id) @ "Done" #()
     {{{ RET #(); True }}}.
   Proof.
     wp_start as "(#Hbar & HsendP & HP)".
@@ -403,7 +403,7 @@ Finally, we do all the program proofs, the specifications for each function. The
 
   Lemma wp_Barrier__Wait γ l Q :
     {{{ is_pkg_init concurrent ∗ is_barrier l γ ∗ recv γ Q }}}
-      l @ (ptrTⁱᵈ concurrent.Barrierⁱᵈ) @ "Wait" #()
+      l @ (ptrT.id concurrent.Barrier.id) @ "Wait" #()
     {{{ RET #(); Q ∗ recv γ emp }}}.
   Proof.
     wp_start as "(#Hbar & HrecvQ)".
