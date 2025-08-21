@@ -269,7 +269,7 @@ Proof.
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   n, m : nat
   Hn : n = 0 // [!code ++]
   ============================
@@ -293,7 +293,7 @@ Proof.
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   n, m : nat
   Hn : n = 0
   Hm : m = 0
@@ -324,7 +324,7 @@ Proof.
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
 Notation "x <> y  :> T" := (not (eq x y)) : type_scope
   (default interpretation)
 Notation "x <> y" := (not (eq x y)) : type_scope (default interpretation)
@@ -338,7 +338,7 @@ Notation "x <> y" := (not (eq x y)) : type_scope (default interpretation)
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
 Notation "~ x" := (not x) : type_scope (default interpretation)
 ```
 
@@ -350,7 +350,7 @@ Notation "~ x" := (not x) : type_scope (default interpretation)
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
 not = fun A : Prop => A -> False
      : Prop -> Prop
 
@@ -414,7 +414,7 @@ Proof.
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
 Notation "A <-> B" := (iff A B) : type_scope (default interpretation)
 ```
 
@@ -460,7 +460,7 @@ An important part of your job in constructing both the informal and formal proof
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   n1, n2 : nat
   IHn : n1 + n2 = n2 + n1
   ============================

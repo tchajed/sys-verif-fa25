@@ -1062,7 +1062,7 @@ We need to use `iApply fupd_wp` to make `iInv` open at a single point rather tha
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   globalsGS0 : globalsGS Σ

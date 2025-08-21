@@ -43,7 +43,7 @@ Proof.
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   Σ : gFunctors
   heapGS0 : heapGS Σ
   P, Q : iProp Σ
@@ -76,7 +76,7 @@ Proof.
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   Σ : gFunctors
   heapGS0 : heapGS Σ
   l : loc

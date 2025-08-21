@@ -126,7 +126,7 @@ Proof.
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   x : Z
   H : 0 ≤ x < 10
   ============================

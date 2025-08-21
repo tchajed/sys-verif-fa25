@@ -29,7 +29,7 @@ Eval simpl in (fun (x: w64) => #x).
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
      = fun x : w64 => to_val x
      : forall _ : w64, val
 ```
@@ -78,7 +78,7 @@ Proof.
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   x, y : w64
@@ -104,7 +104,7 @@ You can see in this goal that the specific word being returned is `word.add x y`
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   x, y : w64

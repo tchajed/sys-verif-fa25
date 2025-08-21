@@ -189,7 +189,7 @@ Fail Definition failed_color_dec (c: color) :=
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
 
 ```
 

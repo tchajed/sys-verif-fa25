@@ -65,7 +65,7 @@ Proof.
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   globalsGS0 : globalsGS Σ
@@ -94,7 +94,7 @@ Proof.
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   globalsGS0 : globalsGS Σ
@@ -165,7 +165,7 @@ This is the step where we persist the points-to permission and turn it into a pe
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   globalsGS0 : globalsGS Σ
@@ -321,7 +321,7 @@ Proof.
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   globalsGS0 : globalsGS Σ
@@ -360,7 +360,7 @@ Proof.
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   globalsGS0 : globalsGS Σ
@@ -407,7 +407,7 @@ Proof.
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   globalsGS0 : globalsGS Σ
@@ -451,7 +451,7 @@ Observe how in the next line we use a Hoare triple that comes _from the persiste
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   globalsGS0 : globalsGS Σ
@@ -511,7 +511,7 @@ Proof.
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   globalsGS0 : globalsGS Σ
@@ -560,7 +560,7 @@ Proof.
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   globalsGS0 : globalsGS Σ
@@ -678,7 +678,7 @@ Setting up the memoization is the most interesting part of the proof. To use the
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   globalsGS0 : globalsGS Σ
@@ -771,7 +771,7 @@ Proof.
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   globalsGS0 : globalsGS Σ
@@ -877,7 +877,7 @@ The little proof pattern below of using `iExactEq` is sometimes useful - it allo
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   globalsGS0 : globalsGS Σ

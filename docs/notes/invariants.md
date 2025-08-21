@@ -103,7 +103,7 @@ Proof.
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   globalsGS0 : globalsGS Σ
@@ -148,7 +148,7 @@ Proof.
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   globalsGS0 : globalsGS Σ
@@ -262,7 +262,7 @@ Proof.
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   globalsGS0 : globalsGS Σ
@@ -309,7 +309,7 @@ To call Unlock, we need to prove the same lock invariant.
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   globalsGS0 : globalsGS Σ

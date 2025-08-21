@@ -81,7 +81,7 @@ Proof.
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
 list_lookup_delete_lt:
   ∀ {A : Type} (l : list A) (i j : nat),
     (j < i)%nat → delete i l !! j = l !! j
@@ -181,7 +181,7 @@ Proof.
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   m : gmap Z nat
   k : Z
   v : nat
@@ -278,7 +278,7 @@ Proof.
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   x : Z
   i : interval
   ============================

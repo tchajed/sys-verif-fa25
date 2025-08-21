@@ -46,7 +46,7 @@ Print ex2.
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
 ex2 = <<1; 34; 4; 7>>
      : List Z
 ```
@@ -61,7 +61,7 @@ Check (Cons 1 (Cons 3 (Cons 7 Nil))).
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
 <<1; 3; 7>>
      : List Z
 ```
@@ -153,7 +153,7 @@ About takes_nat_scope.
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
 takes_nat_scope : ∀ {A : Type}, A → A
 
 takes_nat_scope is not universe polymorphic

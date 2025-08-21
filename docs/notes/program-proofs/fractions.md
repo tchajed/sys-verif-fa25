@@ -60,7 +60,7 @@ Proof.
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   l : loc
@@ -85,7 +85,7 @@ Proof.
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   l : loc
@@ -132,7 +132,7 @@ Proof.
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   l : loc
@@ -197,7 +197,7 @@ This is the step where we persist the points-to permission and turn it into a pe
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   x : w64

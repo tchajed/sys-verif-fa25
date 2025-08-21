@@ -403,7 +403,7 @@ About own_slice.
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
 own_slice :
 ∀ {H : ffi_syntax} {ffi : ffi_model} {H0 : ffi_interp ffi} {Σ : gFunctors},
   heapGS Σ
@@ -439,7 +439,7 @@ Check wp_load_slice_elem.
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
 wp_load_slice_elem
      : ∀ (s : slice.t) (i : w64) (vs : list ?V) (dq : dfrac)
          (v : ?V) (Φ : val → iPropI Σ),

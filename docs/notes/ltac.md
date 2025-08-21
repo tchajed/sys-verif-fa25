@@ -35,7 +35,7 @@ Proof.
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   P, Q, R : Prop
   HPQ : P → Q
   HQR : Q → R
@@ -66,7 +66,7 @@ Proof.
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   P, Q, R : Prop
   HPQ : P → Q
   HQR : Q → R
@@ -127,7 +127,7 @@ Proof.
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   ============================
   true = true
 ```
@@ -181,7 +181,7 @@ Proof.
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   n : nat
   IHn : n + 0 = n
   ============================
@@ -215,7 +215,7 @@ Proof.
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   a, b, c : nat // [!code --]
   c : nat // [!code ++]
   f : nat → nat
@@ -267,7 +267,7 @@ Proof.
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
 List.lookup_snoc:
   ∀ {A : Type} (l : list A) (x : A), (l ++ [x]) !! length l = Some x
 lookup_app_l:
@@ -370,7 +370,7 @@ Proof.
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   n1, n2, x : nat
   Heq : n1 = n2
   ============================
@@ -422,7 +422,7 @@ Proof.
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   m : gmap Z V
   k : Z
   v : V
@@ -457,7 +457,7 @@ Proof.
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   m : gmap Z V
   k : Z
   v : V
@@ -560,7 +560,7 @@ Unfortunately Coq actually has two `rewrite` tactics: one from the standard libr
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   m : gmap Z V
   k : Z
   v : V
@@ -581,7 +581,7 @@ It's more cumbersome but we can still assert that the side condition is proven w
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   m : gmap Z V
   k : Z
   v : V

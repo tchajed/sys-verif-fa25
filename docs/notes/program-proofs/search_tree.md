@@ -178,7 +178,7 @@ Note that we can't use this mechanism to prove a program's recursion eventually 
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   globalsGS0 : globalsGS Σ

@@ -151,6 +151,8 @@ export default defineUserConfig({
         notationDiff: true,
         // add // [!code highlight] to the end of a line
         notationHighlight: true,
+        // TODO: doesn't work in rocq (but does work in ts and dafny, for example)
+        notationErrorLevel: true,
         // add :line-numbers to ```lang line to enable selectively
         lineNumbers: false,
       },

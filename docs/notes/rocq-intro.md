@@ -80,7 +80,7 @@ Compute (next_weekday friday).
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
      = monday
      : day
 ```
@@ -99,7 +99,7 @@ Proof.
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   ============================
   tuesday = tuesday
 ```
@@ -230,7 +230,7 @@ Compute (all_zero (bits B1 B0 B1 B0)).
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
      = false
      : bool
 ```
@@ -243,7 +243,7 @@ Compute (all_zero (bits B0 B0 B0 B0)).
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
      = true
      : bool
 ```
@@ -464,7 +464,7 @@ Proof.
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   n, m : nat
   Hn : n = 0 // [!code ++]
   ============================
@@ -488,7 +488,7 @@ Proof.
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   n, m : nat
   Hn : n = 0
   Hm : m = 0
@@ -519,7 +519,7 @@ Proof.
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
 Notation "x <> y  :> T" := (not (eq x y)) : type_scope
   (default interpretation)
 Notation "x <> y" := (not (eq x y)) : type_scope (default interpretation)
@@ -533,7 +533,7 @@ Notation "x <> y" := (not (eq x y)) : type_scope (default interpretation)
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
 Notation "~ x" := (not x) : type_scope (default interpretation)
 ```
 
@@ -545,7 +545,7 @@ Notation "~ x" := (not x) : type_scope (default interpretation)
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
 not = fun A : Prop => A -> False
      : Prop -> Prop
 

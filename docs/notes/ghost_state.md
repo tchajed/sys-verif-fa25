@@ -155,7 +155,7 @@ Print ghost_var.ghost_var_def.
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
 ghost_var.ghost_var_def =
 λ (Σ : gFunctors) (A : Type) (ghost_varG0 : ghost_varG Σ A)
   (γ : gname) (dq : dfrac) (a : A), own γ (dfrac_agree.to_dfrac_agree dq a)
@@ -197,7 +197,7 @@ Check (@ghost_var_alloc Σ).
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
 @ghost_var_alloc Σ
      : ∀ (A : Type) (ghost_varG0 : ghost_varG Σ A) (a : A),
          ⊢ |==> ∃ γ : gname, ghost_var γ (DfracOwn 1) a
@@ -217,7 +217,7 @@ Print dfrac_op_instance.
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
 dfrac_op_instance =
 λ dq dp : dfrac,
   match dq with
@@ -258,7 +258,7 @@ Check (@ghost_var_persist Σ).
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
 @ghost_var_persist Σ
      : ∀ (A : Type) (ghost_varG0 : ghost_varG Σ A)
          (γ : gname) (q : Qp) (a : A),
@@ -275,7 +275,7 @@ Check (@ghost_var_persistent Σ).
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
 @ghost_var_persistent Σ
      : ∀ (A : Type) (ghost_varG0 : ghost_varG Σ A) (γ : gname) (a : A),
          Persistent (ghost_var γ DfracDiscarded a)
@@ -322,7 +322,7 @@ Proof using All.
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   globalsGS0 : globalsGS Σ

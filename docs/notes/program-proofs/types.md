@@ -52,7 +52,7 @@ Print go_type.
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
 Inductive go_type : Type :=
     boolT : go_type
   | uint8T : go_type

@@ -111,7 +111,7 @@ Proof.
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   Σ : gFunctors
   P, Q : iProp Σ
   ============================
@@ -137,7 +137,7 @@ Proof.
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   Σ : gFunctors
   φ, ψ : Prop
   H1 : φ
@@ -205,7 +205,7 @@ Proof.
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   Σ : gFunctors
   A : Type
   P, Q : iProp Σ
@@ -227,7 +227,7 @@ Proof.
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   Σ : gFunctors
   A : Type
   P, Q : iProp Σ
@@ -250,7 +250,7 @@ Proof.
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   Σ : gFunctors
   A : Type
   P, Q : iProp Σ
@@ -329,7 +329,7 @@ Proof.
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   Σ : gFunctors
   P, Q : iProp Σ
   ============================
@@ -359,7 +359,7 @@ Proof.
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   Σ : gFunctors
   P1, P2, P3, Q : iProp Σ
   HQ : P1 ∗ P3 -∗ P2 -∗ Q
@@ -552,7 +552,7 @@ Proof.
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   Σ : gFunctors
   P : iProp Σ
   ============================
@@ -577,7 +577,7 @@ Proof.
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   Σ : gFunctors
   P : iProp Σ
   ============================
@@ -727,7 +727,7 @@ Proof.
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   globalsGS0 : globalsGS Σ
@@ -772,7 +772,7 @@ Formally, the proof proceeds by applying the bind rule (to split the program int
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   globalsGS0 : globalsGS Σ
@@ -814,7 +814,7 @@ The next step you'd expect is that we need to use the rule of consequence to pro
 
 :::: note Output
 
-```txt title="rocq output"
+```txt
 wp_alloc
      : ∀ (v : ?V) (stk : stuckness) (E : coPset) (Φ0 : val → iPropI Σ),
          True -∗
@@ -860,7 +860,7 @@ At this point there is a `let:` binding which we need to apply the pure-step rul
 
 :::: info Goal diff
 
-```txt title="goal diff"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   globalsGS0 : globalsGS Σ
@@ -907,7 +907,7 @@ The IPM can automate all of the above for allocation, load, and store:
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   globalsGS0 : globalsGS Σ
@@ -1001,7 +1001,7 @@ The IPM provides several mechanisms for deciding on these splits. A _specializat
 
 :::: info Goal
 
-```txt title="goal 1"
+```txt
   Σ : gFunctors
   hG : heapGS Σ
   globalsGS0 : globalsGS Σ
