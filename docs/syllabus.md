@@ -90,7 +90,7 @@ I'll hold office hours twice a week, using my office, Morgridge 7572. Office hou
 3. A question about something beyond the lecture
 4. Advice on anything communication related
 
-I encourage all students to stop by office hours and introduce yourself (you can just say hi or stop and chat for a bit) during the first two weeks of the semester.
+In the first two weeks of the semester, I hope you'll stop by office hours and introduce yourself and share why you're taking the class and what you're hoping to get from it.
 
 ## Collaboration
 
@@ -100,15 +100,13 @@ The first assignment is crucial to learning Rocq, so I would suggest that even i
 
 ## Generative AI policy
 
-If you use generative AI like ChatGPT or another LLM, you are required to explain how you used it. You may use GitHub CoPilot without an explanation.
+Using generative AI such as ChatGPT or another LLM is freely permitted. **You must explain how you used it.** I do not believe LLMs do well on Rocq proofs in general, and especially on the course material, but if you would like to put some effort into prompting I will support you investigating and reporting your findings. If it turns out to perform well, I will ask you to go beyond the course assignments.
 
-I do not believe ChatGPT does well on Rocq proofs in general, and especially on the course material, but I would be happy to be proven wrong.
-
-You will need to read and understand what ChatGPT says. Identifying its mistakes is likely to be good for your learning, which is why it's permitted in the first place, but it is important that you not blindly follow it.
+Using an LLM for the Software Foundations assignment is a bad idea since you need those exercises to build a foundational understanding of Rocq.
 
 ## Late policy
 
-For the programming exercises and theory assignment, you get 3 "late days" to use throughout the semester. You don't need to tell me to use them, just submit late. If you have extenuating circumstances and need more time, let me know as soon as possible.
+For the programming exercises and theory assignment, you get 3 "late days" to use throughout the semester. You don't need to tell me to use them, just submit late. If you have extenuating circumstances and need more time, let me know as soon as possible; I can allow you to submit as late as the end of the semester, but I need to know before the deadline.
 
 ## Student well-being
 
