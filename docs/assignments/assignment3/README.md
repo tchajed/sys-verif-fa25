@@ -20,7 +20,7 @@ The point values add up to 90, but the assignment will be weighted in your overa
 
 > 5 points
 
-See [Intro to program proofs](./intro.md)
+See [Intro to program proofs](./intro_exercises.md)
 
 ## Part 2: Inferring specifications
 

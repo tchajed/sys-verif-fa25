@@ -131,7 +131,7 @@ Let's look at some examples of ghost variables and their updates in Coq.
 ```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From New.proof Require Import std sync.
-From sys_verif.generatedproof.sys_verif_code Require Import concurrent.
+From New.generatedproof.sys_verif_code Require Import concurrent.
 From sys_verif.program_proof Require Import concurrent_init.
 From Perennial.algebra Require Import ghost_var.
 

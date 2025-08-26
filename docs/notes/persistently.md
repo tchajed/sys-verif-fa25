@@ -25,7 +25,7 @@ Before getting into modalities, let's revisit the mechanisms in Coq for read-onl
 ```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From New.proof Require Import std.
-From sys_verif.generatedproof.sys_verif_code Require Import memoize.
+From New.generatedproof.sys_verif_code Require Import memoize.
 
 Section proof.
 Context `{hG: !heapGS Σ} `{!globalsGS Σ} {go_ctx: GoContext}.

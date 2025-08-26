@@ -8,7 +8,7 @@ shortTitle: Integers
 
 ```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
-From sys_verif.generatedproof.sys_verif_code Require Import functional.
+From New.generatedproof.sys_verif_code Require Import functional.
 Section goose.
 Context `{hG: !heapGS Σ}.
 

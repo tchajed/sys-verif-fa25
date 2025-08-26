@@ -21,7 +21,7 @@ A secondary goal is for you to _understand_ this proof, so keep that in the back
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From iris.algebra Require Import ofe auth excl gmap.
 From New.proof Require Import sync.
-From sys_verif.generatedproof.sys_verif_code Require Import sharded_hashmap.
+From New.generatedproof.sys_verif_code Require Import sharded_hashmap.
 
 Open Scope Z_scope.
 Add Printing Coercion Z.of_nat.

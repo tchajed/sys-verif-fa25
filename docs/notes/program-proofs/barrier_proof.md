@@ -31,8 +31,21 @@ The reason there is a separate (and more sophisticated) library is related to th
 From iris.base_logic.lib Require Import saved_prop.
 From sys_verif.program_proof.concurrent Require Import auth_set.
 From sys_verif.program_proof Require Import prelude empty_ffi.
+From New.proof Require Import std sync.
+From New.generatedproof.sys_verif_code Require Export concurrent.barrier.
 
-From sys_verif.program_proof Require Import concurrent_init.
+
+Section proof.
+  Context `{hG: heapGS Σ} `{!ffi_semantics _ _}.
+  Context {go_ctx: GoContext}.
+  Local Notation deps := (ltac2:(build_pkg_init_deps 'barrier) : iProp Σ) (only parsing).
+  #[global] Program Instance : IsPkgInit barrier :=
+    {|
+      is_pkg_init_def := True;
+      is_pkg_init_deps := deps;
+    |}.
+End proof.
+
 
 Module barrier.
 Record barrier_names :=
@@ -111,13 +124,13 @@ Two extremes are worth thinking about here. First, once we've created all the `s
 
   Definition lock_inv (l: loc) (γ: barrier_names) : iProp Σ :=
     ∃ (numWaiting: w64),
-      "numWaiting" ∷ l ↦s[concurrent.Barrier :: "numWaiting"] numWaiting ∗
+      "numWaiting" ∷ l ↦s[barrier.Barrier :: "numWaiting"] numWaiting ∗
       "Hbar" ∷ own_barrier_ghost γ numWaiting.
 
   Definition is_barrier (l: loc) (γ: barrier_names): iProp Σ :=
     ∃ (mu_l cond_l: loc),
-      "#mu" ∷ l ↦s[concurrent.Barrier :: "mu"]□ mu_l ∗
-      "#cond" ∷ l ↦s[concurrent.Barrier :: "cond"]□ cond_l ∗
+      "#mu" ∷ l ↦s[barrier.Barrier :: "mu"]□ mu_l ∗
+      "#cond" ∷ l ↦s[barrier.Barrier :: "cond"]□ cond_l ∗
       "#Hcond" ∷ is_Cond cond_l (interface.mk (ptrT.id sync.Mutex.id) #mu_l) ∗
       "#Hlock" ∷ is_Mutex (mu_l) (lock_inv l γ).
 
@@ -324,8 +337,8 @@ Finally, we do all the program proofs, the specifications for each function. The
 
 ```rocq
   Lemma wp_NewBarrier :
-    {{{ is_pkg_init concurrent }}}
-      @! concurrent.NewBarrier #()
+    {{{ is_pkg_init barrier }}}
+      @! barrier.NewBarrier #()
     {{{ (l: loc) γ, RET #l; is_barrier l γ ∗ recv γ emp }}}.
   Proof.
     wp_start as "_".
@@ -335,7 +348,7 @@ Finally, we do all the program proofs, the specifications for each function. The
     wp_apply (wp_NewCond) as "%c His_cond".
     wp_alloc l as "Hbarrier".
     iApply struct_fields_split in "Hbarrier". iNamed "Hbarrier".
-    cbn [concurrent.Barrier.numWaiting' concurrent.Barrier.mu' concurrent.Barrier.cond'].
+    cbn [barrier.Barrier.numWaiting' barrier.Barrier.mu' barrier.Barrier.cond'].
     wp_auto.
 
     iMod (own_barrier_ghost_alloc) as (γ) "[Hbar Hrecv]".
@@ -348,8 +361,8 @@ Finally, we do all the program proofs, the specifications for each function. The
   Qed.
 
   Lemma wp_Barrier__Add1 (P: iProp Σ) (Q: iProp Σ) γ l :
-    {{{ is_pkg_init concurrent ∗ is_barrier l γ ∗ recv γ Q }}}
-      l @ (ptrT.id concurrent.Barrier.id) @ "Add" #(W64 1)
+    {{{ is_pkg_init barrier ∗ is_barrier l γ ∗ recv γ Q }}}
+      l @ (ptrT.id barrier.Barrier.id) @ "Add" #(W64 1)
     {{{ RET #(); send γ P ∗ recv γ (Q ∗ P) }}}.
   Proof.
     wp_start as "[#Hbar Hrecv]".
@@ -370,8 +383,8 @@ Finally, we do all the program proofs, the specifications for each function. The
   Qed.
 
   Lemma wp_Barrier__Done γ l P :
-    {{{ is_pkg_init concurrent ∗ is_barrier l γ ∗ send γ P ∗ P }}}
-      l @ (ptrT.id concurrent.Barrier.id) @ "Done" #()
+    {{{ is_pkg_init barrier ∗ is_barrier l γ ∗ send γ P ∗ P }}}
+      l @ (ptrT.id barrier.Barrier.id) @ "Done" #()
     {{{ RET #(); True }}}.
   Proof.
     wp_start as "(#Hbar & HsendP & HP)".
@@ -402,8 +415,8 @@ Finally, we do all the program proofs, the specifications for each function. The
   Qed.
 
   Lemma wp_Barrier__Wait γ l Q :
-    {{{ is_pkg_init concurrent ∗ is_barrier l γ ∗ recv γ Q }}}
-      l @ (ptrT.id concurrent.Barrier.id) @ "Wait" #()
+    {{{ is_pkg_init barrier ∗ is_barrier l γ ∗ recv γ Q }}}
+      l @ (ptrT.id barrier.Barrier.id) @ "Wait" #()
     {{{ RET #(); Q ∗ recv γ emp }}}.
   Proof.
     wp_start as "(#Hbar & HrecvQ)".

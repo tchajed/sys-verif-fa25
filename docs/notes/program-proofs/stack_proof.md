@@ -127,39 +127,37 @@ Proof.
   iIntros "Hels".
   wp_auto.
   iDestruct (own_slice_wf with "Hels") as %Hcap.
-  (* TODO: need wp for slice.slice *)
-  (*
-  wp_apply (wp_SliceTake_full with "Hels").
+  wp_pure.
   { word. }
-  iIntros "Hels".
-  wp_storeField.
-  wp_pures.
-  iModIntro. iApply "HΦ".
+  wp_auto.
+
+  (* NOTE: need to do this work before iApply due to issue with creating xs'
+  evar too early *)
+  rewrite length_reverse /= in Hlen.
+  apply reverse_lookup_Some in Hx_last_lookup as [Hget ?].
+  replace (length xs - S (uint.nat (slice.len_f s) - 1))%nat with 0%nat
+    in Hget by lia.
+  destruct xs as [|x0 xs'].
+  { exfalso; simpl in *; lia. }
+  simpl in Hget; inversion Hget; subst.
+
+  iApply "HΦ".
   rewrite /stack_rep.
   iFrame "elements".
   iSplit.
   {
-    replace (uint.nat (word.sub (Slice.sz s) (W64 1))) with
-      (uint.nat (Slice.sz s) - 1)%nat by word.
+    (*
+    replace (uint.nat (word.sub (slice.len_f s) (W64 1))) with
+      (uint.nat (slice.len_f s) - 1)%nat by word.
     rewrite take_reverse. rewrite length_reverse in Hlen.
-    replace (length xs - (uint.nat (Slice.sz s) - 1))%nat with 1%nat by word.
+    replace (length xs - (uint.nat (slice.len_f s) - 1))%nat with 1%nat by word.
     iFrame.
+     *)
+    admit. (* TODO: match up ownership of s vs slice.slice_f s *)
   }
   iPureIntro.
   rewrite /stack_pop.
-  destruct xs; auto.
-  - exfalso. simpl in *; lia.
-  - simpl. rewrite drop_0.
-    f_equal.
-    f_equal.
-    apply reverse_lookup_Some in Hx_last_lookup as [Hget ?].
-    rewrite length_reverse in Hlen.
-    simpl in Hget, Hlen.
-    replace (length xs - (uint.nat (Slice.sz s) - 1))%nat with 0%nat
-      in Hget by lia.
-    simpl in Hget.
-    congruence.
-*)
+  reflexivity.
 Admitted.
 
 End proof.

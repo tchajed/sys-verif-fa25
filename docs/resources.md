@@ -11,7 +11,7 @@ A core resource is the course [lecture notes](./notes/), which include some expl
 
 If you want more practice I encourage you to read [Software Foundations](https://softwarefoundations.cis.upenn.edu/lf-current/toc.html) beyond the assigned chapters, and even to do additional exercises.
 
-This [Tactics Cheatsheet](https://www.cs.cornell.edu/courses/cs3110/2018sp/a5/coq-tactics-cheatsheet.html) is much more complete than the [Ltac reference](./notes/ltac.md) I wrote. As a reminder, you're allowed to use any tactic in Coq (unless specifically forbidden).
+This [Tactics Cheatsheet](https://www.cs.cornell.edu/courses/cs3110/2018sp/a5/coq-tactics-cheatsheet.html) is much more complete than the [Ltac reference](./notes/program-proofs/ltac.md) I wrote. As a reminder, you're allowed to use any tactic in Coq (unless specifically forbidden).
 
 For std++ sets and maps in particular, `Search` doesn't work especially well, since the definitions are so general. There I recommend looking at the coqdoc documentation for [finite sets](https://plv.mpi-sws.org/coqdoc/stdpp/stdpp.fin_sets.html) and [finite maps](https://plv.mpi-sws.org/coqdoc/stdpp/stdpp.fin_maps.html). I'll be putting together a tutorial on these as the class progresses.
 

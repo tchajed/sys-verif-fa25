@@ -8,7 +8,7 @@ shortTitle: "Assignment 3: linked lists"
 
 # Assignment 3: Linked lists as lists
 
-This proof develops a specification for the linked-list implementation at [go/heap/linked_list.go](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/go/heap/linked_list.go).
+This proof develops a specification for the linked-list implementation at [go/heap/list/linked_list.go](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/go/heap/list/linked_list.go).
 
 You should start by reading the Go code.
 
@@ -16,11 +16,18 @@ The idea of this proof is similar to what you saw in Assignment 2's exercise 5, 
 
 ```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
-From sys_verif.program_proof Require Import heap_init.
+From New.generatedproof.sys_verif_code Require Import linked_list.
 
 
 Section proof.
 Context `{hG: !heapGS Σ} `{!globalsGS Σ} {go_ctx: GoContext}.
+
+Local Notation deps := (ltac2:(build_pkg_init_deps 'linked_list) : iProp Σ) (only parsing).
+#[global] Program Instance : IsPkgInit linked_list :=
+  {|
+    is_pkg_init_def := True;
+    is_pkg_init_deps := deps;
+  |}.
 
 (* We abbreviate "linked list" to "ll" in some of these definitions to keep
 specs and other theorem statements concise. *)
@@ -34,8 +41,8 @@ Fixpoint ll_rep (l: loc) (xs: list w64) : iProp Σ :=
   match xs with
   | nil => "%Heq" :: ⌜l = null⌝
   | cons x xs' => (∃ (next_l: loc),
-      "elem" :: l ↦s[heap.Node :: "elem"] x ∗
-      "next" :: l ↦s[heap.Node :: "next"] next_l ∗
+      "elem" :: l ↦s[linked_list.Node :: "elem"] x ∗
+      "next" :: l ↦s[linked_list.Node :: "next"] next_l ∗
       "Hnext_l" :: ll_rep next_l xs')%I
   end.
 
@@ -54,11 +61,7 @@ Lemma ll_rep_non_null l x xs :
   ll_rep l (x::xs) -∗ ⌜l ≠ null⌝.
 Proof.
   simpl. iIntros "H". iNamed "H".
-  iDestruct (pointsto_not_null with "elem") as %Hnot_null.
-  { reflexivity. }
-  rewrite struct.field_ref_f_unseal /struct.field_ref_f_def in Hnot_null.
-  rewrite loc_add_0 in Hnot_null.
-  auto.
+  iDestruct (field_pointsto_not_null with "elem") as %Hnot_null; done.
 Qed.
 
 ```
@@ -66,9 +69,9 @@ Qed.
 Prove this specification.
 
 ```rocq
-Lemma wp_NewList :
-  {{{ is_pkg_init heap.heap }}}
-    @! heap.heap.NewList #()
+Lemma wp_New :
+  {{{ is_pkg_init linked_list }}}
+    @! linked_list.New #()
   {{{ (l: loc), RET #l; ll_rep l [] }}}.
 Proof.
 Admitted.
@@ -80,8 +83,8 @@ Fill in a postcondition here and prove this specification.
 
 ```rocq
 Lemma wp_Node__Insert (l: loc) (xs: list w64) (elem: w64) :
-  {{{ is_pkg_init heap.heap ∗ ll_rep l xs }}}
-    l @ (ptrT.id heap.Node.id) @ "Insert" #elem
+  {{{ is_pkg_init linked_list ∗ ll_rep l xs }}}
+    l @ (ptrT.id linked_list.Node.id) @ "Insert" #elem
   {{{ (l': loc), RET #l';
       False  }}}.
 Proof.
@@ -93,8 +96,8 @@ Prove this specification.
 
 ```rocq
 Lemma wp_Node__Pop (l: loc) (xs: list w64) :
-  {{{ is_pkg_init heap.heap ∗ ll_rep l xs }}}
-    l @ (ptrT.id heap.Node.id) @ "Pop" #()
+  {{{ is_pkg_init linked_list ∗ ll_rep l xs }}}
+    l @ (ptrT.id linked_list.Node.id) @ "Pop" #()
   {{{ (x: w64) (l': loc) (ok: bool), RET (#x, #l', #ok);
       if ok then ∃ xs', ⌜xs = cons x xs'⌝ ∗
                         ll_rep l' xs'
@@ -112,9 +115,9 @@ A general structure is provided for the proof (which you are allowed to change i
 
 ```rocq
 Lemma wp_Node__Append l1 xs1 l2 xs2 :
-  {{{ is_pkg_init heap.heap ∗
+  {{{ is_pkg_init linked_list ∗
       ll_rep l1 xs1 ∗ ll_rep l2 xs2 }}}
-    l1 @ (ptrT.id heap.Node.id) @ "Append" #l2
+    l1 @ (ptrT.id linked_list.Node.id) @ "Append" #l2
   {{{ (l2': loc), RET #l2';
       False  }}}.
 Proof.
