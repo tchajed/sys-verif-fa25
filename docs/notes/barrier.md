@@ -296,7 +296,7 @@ Section proof.
     wp_auto.
     iMod (init_Mutex (lock_inv γ1 γ2 x_ptr) with "Hmu [$x $Hv1_1 $Hv2_1]") as "#Hlock".
     { iPureIntro. done. }
-    wp_apply (barrier.wp_NewBarrier).
+    wp_apply (barrier.wp_New).
     iIntros (l γ_b) "[#Hbar Hdone]". wp_auto.
     iPersist "m b".
     wp_apply (barrier.wp_Barrier__Add1 (ghost_var γ1 (DfracOwn (1/2)) 2) with "[$Hbar $Hdone]").

@@ -671,9 +671,9 @@ func IgnoreOneLocF(x *uint64, y *uint64) {
 where `std.Assert` is a function provided by the Goose standard library.
 
 ```rocq
-Lemma wp_IgnoreOneLocF (l l': loc) :
-  {{{ is_pkg_init heap.heap ∗ l ↦ (W64 0) }}}
-    @! heap.heap.IgnoreOneLocF #l #l'
+Lemma wp_IgnoreOne (l l': loc) :
+  {{{ is_pkg_init heap ∗ l ↦ (W64 0) }}}
+    @! heap.IgnoreOne #l #l'
   {{{ RET #(); l ↦ (W64 42) }}}.
 Proof.
   (* skip over this proof for now and focus on its usage (the next lemma) *)
@@ -691,15 +691,15 @@ Qed.
 
 ```
 
-We're now going to verify this Go code that uses `IgnoreOneLocF` as a black box:
+We're now going to verify this Go code that uses `IgnoreOne` as a black box:
 
 ```go
-func IgnoreOneLocF(x *uint64, y *uint64) { ... }
+func IgnoreOne(x *uint64, y *uint64) { ... }
 
-func UseIgnoreOneLocOwnership() {
+func UseIgnoreOneLoc() {
 	var x = uint64(0)
 	var y = uint64(42)
-	IgnoreOneLocF(&x, &y)
+	IgnoreOne(&x, &y)
 	std.Assert(x == y)
 }
 ```
@@ -717,9 +717,9 @@ $$
 $$
 
 ```rocq
-Lemma wp_UseIgnoreOneLocOwnership :
+Lemma wp_UseIgnoreOneOwnership :
   {{{ is_pkg_init heap }}}
-    @! heap.heap.UseIgnoreOneLocOwnership #()
+    @! heap.UseIgnoreOneOwnership #()
   {{{ RET #(); True }}}.
 Proof.
   wp_start as "Hpre". (* precondition is trivial, but we'll name it anyway *)
@@ -740,16 +740,15 @@ Proof.
   "HΦ" : True -∗ Φ (# ())
   --------------------------------------∗
   WP exception_do
-       (let: "x" := alloc (zero_val uint64T) in
+       (let: "x" := alloc (zero_val intT) in
         let: "$r0" := # (W64 0) in
-        (do: "x" <-[# uint64T] "$r0") ;;;
-        let: "y" := alloc (type.zero_val (# uint64T)) in
+        (do: "x" <-[# intT] "$r0") ;;;
+        let: "y" := alloc (type.zero_val (# intT)) in
         let: "$r0" := # (W64 42) in
-        (do: "y" <-[# uint64T] "$r0") ;;;
+        (do: "y" <-[# intT] "$r0") ;;;
         (do: (let: "$a0" := "x" in
-              let: "$a1" := "y" in
-              func_call (# heap.IgnoreOneLocF) "$a0" "$a1")) ;;;
-        (do: (let: "$a0" := ![# uint64T] "x" = ![# uint64T] "y" in
+              let: "$a1" := "y" in func_call (# heap.IgnoreOne) "$a0" "$a1")) ;;;
+        (do: (let: "$a0" := ![# intT] "x" = ![# intT] "y" in
               func_call (# std.Assert) "$a0")) ;;;
         return: # ())
   {{ v, Φ v }}
@@ -789,14 +788,14 @@ Formally, the proof proceeds by applying the bind rule (to split the program int
      WP exception_do
           (let: "x" := v in
            let: "$r0" := # (W64 0) in
-           (do: "x" <-[# uint64T] "$r0") ;;;
-           let: "y" := alloc (type.zero_val (# uint64T)) in
+           (do: "x" <-[# intT] "$r0") ;;;
+           let: "y" := alloc (type.zero_val (# intT)) in
            let: "$r0" := # (W64 42) in
-           (do: "y" <-[# uint64T] "$r0") ;;;
+           (do: "y" <-[# intT] "$r0") ;;;
            (do: (let: "$a0" := "x" in
                  let: "$a1" := "y" in
-                 func_call (# heap.IgnoreOneLocF) "$a0" "$a1")) ;;;
-           (do: (let: "$a0" := ![# uint64T] "x" = ![# uint64T] "y" in
+                 func_call (# heap.IgnoreOne) "$a0" "$a1")) ;;;
+           (do: (let: "$a0" := ![# intT] "x" = ![# intT] "y" in
                  func_call (# std.Assert) "$a0")) ;;;
            return: # ())
      {{ v, Φ v }} }}
@@ -877,17 +876,16 @@ At this point there is a `let:` binding which we need to apply the pure-step rul
   WP exception_do
        (let: "x" := # x in // [!code --]
         let: "$r0" := # (W64 0) in // [!code --]
-        (do: "x" <-[# uint64T] "$r0") ;;; // [!code --]
-       ((do: # x <-[# uint64T] # (W64 0)) ;;; // [!code ++]
-        let: "y" := alloc (type.zero_val (# uint64T)) in
+        (do: "x" <-[# intT] "$r0") ;;; // [!code --]
+       ((do: # x <-[# intT] # (W64 0)) ;;; // [!code ++]
+        let: "y" := alloc (type.zero_val (# intT)) in
         let: "$r0" := # (W64 42) in
-        (do: "y" <-[# uint64T] "$r0") ;;;
+        (do: "y" <-[# intT] "$r0") ;;;
         (do: (let: "$a0" := "x" in // [!code --]
         (do: (let: "$a0" := # x in // [!code ++]
-              let: "$a1" := "y" in
-              func_call (# heap.IgnoreOneLocF) "$a0" "$a1")) ;;;
-        (do: (let: "$a0" := ![# uint64T] "x" = ![# uint64T] "y" in // [!code --]
-        (do: (let: "$a0" := ![# uint64T] (# x) = ![# uint64T] "y" in // [!code ++]
+              let: "$a1" := "y" in func_call (# heap.IgnoreOne) "$a0" "$a1")) ;;;
+        (do: (let: "$a0" := ![# intT] "x" = ![# intT] "y" in // [!code --]
+        (do: (let: "$a0" := ![# intT] (# x) = ![# intT] "y" in // [!code ++]
               func_call (# std.Assert) "$a0")) ;;;
         return: # ())
   {{ v, Φ v }}
@@ -902,7 +900,7 @@ The IPM can automate all of the above for allocation, load, and store:
   wp_alloc y as "Hy".
   wp_pures.
   wp_store. wp_pures.
-  wp_bind (@! heap.IgnoreOneLocF _ _)%E. (* make the goal easier to understand *)
+  wp_bind (@! heap.IgnoreOne _ _)%E. (* make the goal easier to understand *)
 ```
 
 :::: info Goal
@@ -922,11 +920,11 @@ The IPM can automate all of the above for allocation, load, and store:
   "Hx" : x ↦ W64 0
   "Hy" : y ↦ W64 42
   --------------------------------------∗
-  WP # (func_callv heap.IgnoreOneLocF) (# x) (# y)
+  WP # (func_callv heap.IgnoreOne) (# x) (# y)
   {{ v,
      WP exception_do
           ((do: v) ;;;
-           (do: (let: "$a0" := ![# uint64T] (# x) = ![# uint64T] (# y) in
+           (do: (let: "$a0" := ![# intT] (# x) = ![# intT] (# y) in
                  func_call (# std.Assert) "$a0")) ;;;
            return: # ())
      {{ v, Φ v }} }}
@@ -934,10 +932,10 @@ The IPM can automate all of the above for allocation, load, and store:
 
 ::::
 
-You might think we should do `iApply wp_IgnoreOneLocF`. Let's see what happens if we do that:
+You might think we should do `iApply wp_IgnoreOne`. Let's see what happens if we do that:
 
 ```rocq
-  iApply wp_IgnoreOneLocF.
+  iApply wp_IgnoreOne.
 ```
 
 :::: info Goals
@@ -974,7 +972,7 @@ You might think we should do `iApply wp_IgnoreOneLocF`. Let's see what happens i
   ▷ (x ↦ W64 42 -∗
      WP exception_do
           ((do: # ()) ;;;
-           (do: (let: "$a0" := ![# uint64T] (# x) = ![# uint64T] (# y) in
+           (do: (let: "$a0" := ![# intT] (# x) = ![# intT] (# y) in
                  func_call (# std.Assert) "$a0")) ;;;
            return: # ())
      {{ v, Φ v }})
@@ -984,9 +982,9 @@ You might think we should do `iApply wp_IgnoreOneLocF`. Let's see what happens i
 
 The first goal is clearly unprovable! It asks us to prove a points-to fact with no assumptions. This is coming from the precondition in `wp_IgnoreOneLocF`. If you look at the second goal, we have the relevant fact in `Hx`.
 
-What's going on is that `wp_IgnoreOneLocF` is of the form:
+What's going on is that `wp_IgnoreOne` is of the form:
 
-`∀ Φ, pre -∗ (post -∗ Φ) -∗ WP IgnoreOneLocF #l #l' {{ Φ }}`.
+`∀ Φ, pre -∗ (post -∗ Φ) -∗ WP IgnoreOne #l #l' {{ Φ }}`.
 
 When we `iApply`, as with `apply` we get two subgoals: `pre` and `(post -∗ Φ)` (the postcondition `Φ` is automatically determined by looking at the conclusion prior to `iApply`).
 
@@ -996,7 +994,7 @@ The IPM provides several mechanisms for deciding on these splits. A _specializat
 
 ```rocq
   Undo 1.
-  iApply (wp_IgnoreOneLocF with "[Hx]").
+  iApply (wp_IgnoreOne with "[Hx]").
 ```
 
 :::: info Goal
@@ -1023,7 +1021,7 @@ The IPM provides several mechanisms for deciding on these splits. A _specializat
   { iFrame. iPkgInit. (* normally the use of [wp_apply] would have handled this for us *) }
 
   iModIntro.
-  (* this re-introduces the postcondition in `wp_IgnoreOneLocF` *)
+  (* this re-introduces the postcondition in `wp_IgnoreOne` *)
   iIntros "Hx".
 
 

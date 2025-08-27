@@ -336,9 +336,9 @@ With these ghost updates proven, we can treat [own_barrier_ghost] as opaque for 
 Finally, we do all the program proofs, the specifications for each function. The hard work has all been done in the definition of the predicates and the lemmas for the ghost updates, so these proofs are mostly boilerplate.
 
 ```rocq
-  Lemma wp_NewBarrier :
+  Lemma wp_New :
     {{{ is_pkg_init barrier }}}
-      @! barrier.NewBarrier #()
+      @! barrier.New #()
     {{{ (l: loc) γ, RET #l; is_barrier l γ ∗ recv γ emp }}}.
   Proof.
     wp_start as "_".
