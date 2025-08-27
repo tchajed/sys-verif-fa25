@@ -7,7 +7,7 @@ icon: code
 
 ::: warning Replaced with Assignment 4
 
-If you haven't already talked to me about a project, you should do [Assignment 4](./sharded_hashmap.md) instead.
+If you haven't already talked to me about a project, you should do [Assignment 4](./hw4/) instead.
 
 :::
 

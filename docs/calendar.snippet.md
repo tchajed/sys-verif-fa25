@@ -10,7 +10,7 @@
 | **Imperative programs** | 6 | Tue Sep 23 | [Hoare logic (part 1)](./notes/hoare.md) |
 |  | 7 | Thu Sep 25 | [Hoare logic (part 2)](./notes/hoare.md) |
 |  | 8 | Tue Sep 30 | [Separation logic (part 1)](./notes/sep-logic.md) |
-|  |  | Tue Oct 1 | _[Assignment 1](./assignments/assignment1.md) due (11pm)_ |
+|  |  | Tue Oct 1 | _[Assignment 1](./assignments/hw1) due (11pm)_ |
 |  | 9 | Thu Oct 2 | [Separation logic (part 2)](./notes/sep-logic.md) |
 |  | 10 | Tue Oct 7 | [Iris Proof Mode](./notes/ipm.md) |
 |  | 11 | Thu Oct 9 | [Modeling Go programs](./notes/goose.md) |
@@ -33,7 +33,7 @@
 |  | 25 | Tue Dec 2 | [Liveness](./notes/liveness.md) |
 |  | 26 | Thu Dec 4 | slack |
 |  | 27 | Tue Dec 9 | [Course wrap-up](./notes/conclusion.md) |
-|  |  | Thu Dec 11 | _[Assignment 4](./assignments/sharded_hashmap.md) due (11pm)_ |
+|  |  | Thu Dec 11 | _[Assignment 4](./assignments/hw4/) due (11pm)_ |
 |  |  | Tue Dec 16 |  |
 
 <!--

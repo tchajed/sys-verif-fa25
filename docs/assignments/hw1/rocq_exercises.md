@@ -10,11 +10,11 @@ index: false
 
 ::: info
 
-This is a rendered version of the Coq assignment. You should do the assignment in the file `src/sys_verif/rocq/assignment1_part2.v`.
+This is a rendered version of the Coq assignment. You should do the assignment in the file `src/sys_verif/assignments/hw1/rocq_exercises.v`.
 
 :::
 
-Remember that part 1 of this assignment is to complete some of the chapters of Software Foundations (and you should do that first); see the [main assignment](./assignment1.md) for the full description.
+Remember that part 1 of this assignment is to complete some of the chapters of Software Foundations (and you should do that first); see the [main assignment](./) for the full description.
 
 ```rocq
 From sys_verif Require Import options.

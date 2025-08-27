@@ -58,4 +58,4 @@ These chapters have a lot of small, easy exercises to get you practice. If you f
 
 ## Part 2: verifying functional programs
 
-Finish the exercises in `src/sys_verif/coq/assignment1_part2.v`. You can view a rendering of [Assignment 1 part 2](./assignment1_part2.md) as a reference.
+Finish the exercises in `src/sys_verif/assignments/hw1/rocq_exercises.v`. You can view a rendering of [Assignment 1 part 2](./rocq_exercises.md) as a reference.
