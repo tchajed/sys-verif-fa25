@@ -12,7 +12,7 @@ The code in [go/functional/functional.go](https://github.com/tchajed/sys-verif-f
 
 Here, you'll prove this function correct, proving that the imperative, loop-based implementation Go is equivalent to a recursive, functional implementation in Gallina.
 
-Before starting, **you should read the [fibonacci demo](/notes/program-proofs/fibonacci_proof.md)**, which has a very similar structure to this proof.
+Before starting, **you should read the [fibonacci demo](/notes/program-proofs/demos/fibonacci_proof.md)**, which has a very similar structure to this proof.
 
 ```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.

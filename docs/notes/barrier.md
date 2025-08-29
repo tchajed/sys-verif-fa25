@@ -362,6 +362,6 @@ End proof.
 
 ## Verifying the barrier
 
-See the separate [barrier proof](./program-proofs/barrier_proof.md) for how the proof works.
+See the separate [barrier proof](./program-proofs/demos/barrier_proof.md) for how the proof works.
 
-This proof uses an `auth_set` ghost state construction that is defined and verified in its own file, [auth set](./program-proofs/auth_set.md).
+This proof uses an `auth_set` ghost state construction that is defined and verified in its own file, [auth set](./program-proofs/demos/auth_set.md).
