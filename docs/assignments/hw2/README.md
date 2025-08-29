@@ -1,5 +1,6 @@
 ---
-order: 3
+dir:
+  order: 3
 shortTitle: Assignment 2
 icon: pen-fancy
 date: 2024-10-04 08:00:00 -5
@@ -66,7 +67,7 @@ This assignment originally only used the term "weaken rule", but the notes say "
 
 > A bug in separation logic? (15 points)
 
-Your friend Ben Bitdiddle has read the section on [recursion and loops](../notes/sep-logic.md#recursion-loops) and thinks he has found a bug in separation logic. He claims to have proven the following triple:
+Your friend Ben Bitdiddle has read the section on [recursion and loops](../../notes/sep-logic.md#recursion-loops) and thinks he has found a bug in separation logic. He claims to have proven the following triple:
 
 $$\hoare{\True}{(\rec{f}{x} f \, x) \, ()}{\fun{\_} \False}$$
 

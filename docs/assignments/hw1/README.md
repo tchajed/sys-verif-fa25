@@ -1,8 +1,9 @@
 ---
-order: 2
 shortTitle: "Assignment 1"
 icon: file-lines
 date: 2024-09-04 08:00:00 -5
+dir:
+  order: 2
 ---
 
 # Assignment 1: Rocq
