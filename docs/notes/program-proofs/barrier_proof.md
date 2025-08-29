@@ -38,12 +38,9 @@ From New.generatedproof.sys_verif_code Require Export concurrent.barrier.
 Section proof.
   Context `{hG: heapGS Σ} `{!ffi_semantics _ _}.
   Context {go_ctx: GoContext}.
-  Local Notation deps := (ltac2:(build_pkg_init_deps 'barrier) : iProp Σ) (only parsing).
-  #[global] Program Instance : IsPkgInit barrier :=
-    {|
-      is_pkg_init_def := True;
-      is_pkg_init_deps := deps;
-    |}.
+
+  #[global] Instance : IsPkgInit barrier := define_is_pkg_init True%I.
+  #[global] Instance : GetIsPkgInitWf barrier := build_get_is_pkg_init_wf.
 End proof.
 
 

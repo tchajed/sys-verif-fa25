@@ -30,12 +30,8 @@ From New.generatedproof.sys_verif_code Require Import memoize.
 Section proof.
 Context `{hG: !heapGS Σ} `{!globalsGS Σ} {go_ctx: GoContext}.
 
-Local Notation deps := (ltac2:(build_pkg_init_deps 'memoize) : iProp Σ) (only parsing).
-#[global] Program Instance : IsPkgInit memoize :=
-  {|
-    is_pkg_init_def := True;
-    is_pkg_init_deps := deps;
-  |}.
+#[global] Instance : IsPkgInit memoize := define_is_pkg_init True%I.
+#[global] Instance : GetIsPkgInitWf memoize := build_get_is_pkg_init_wf.
 
 ```
 

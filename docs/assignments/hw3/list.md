@@ -22,12 +22,8 @@ From New.generatedproof.sys_verif_code Require Import linked_list.
 Section proof.
 Context `{hG: !heapGS Σ} `{!globalsGS Σ} {go_ctx: GoContext}.
 
-Local Notation deps := (ltac2:(build_pkg_init_deps 'linked_list) : iProp Σ) (only parsing).
-#[global] Program Instance : IsPkgInit linked_list :=
-  {|
-    is_pkg_init_def := True;
-    is_pkg_init_deps := deps;
-  |}.
+#[global] Instance : IsPkgInit linked_list := define_is_pkg_init True%I.
+#[global] Instance : GetIsPkgInitWf linked_list := build_get_is_pkg_init_wf.
 
 (* We abbreviate "linked list" to "ll" in some of these definitions to keep
 specs and other theorem statements concise. *)

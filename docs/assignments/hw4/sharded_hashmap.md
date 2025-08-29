@@ -293,12 +293,8 @@ Context `{hG: !heapGS Σ} `{!globalsGS Σ} {go_ctx: GoContext}.
 Context `{hG1: !auth_map.auth_mapG Σ w32 w64}.
 Context `{hG2: !auth_map.auth_mapG Σ Z (gset w32)}.
 
-Local Notation deps := (ltac2:(build_pkg_init_deps 'sharded_hashmap) : iProp Σ) (only parsing).
-#[global] Program Instance : IsPkgInit sharded_hashmap :=
-  {|
-    is_pkg_init_def := True;
-    is_pkg_init_deps := deps;
-  |}.
+#[global] Instance : IsPkgInit sharded_hashmap := define_is_pkg_init True%I.
+#[global] Instance : GetIsPkgInitWf sharded_hashmap := build_get_is_pkg_init_wf.
 
 ```
 
