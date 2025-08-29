@@ -1,12 +1,11 @@
 ---
 # Auto-generated from literate source. DO NOT EDIT.
-order: 2.5
 icon: file-lines
 tags: literate
-index: false
+order: 2
 ---
 
-# Assignment 1: Part 2
+# Rocq exercises
 
 ::: info
 

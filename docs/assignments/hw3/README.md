@@ -4,6 +4,7 @@ dir:
   icon: file-lines
   text: Assignment 3
   link: true
+icon: circle-exclamation
 shortTitle: Assignment 3 (start here)
 ---
 

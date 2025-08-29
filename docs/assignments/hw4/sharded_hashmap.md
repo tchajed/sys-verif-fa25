@@ -5,7 +5,7 @@ tags: literate
 dir:
   order: 5
 icon: file-lines
-shortTitle: "Assignment 4"
+shortTitle: "Sharded hashmap"
 ---
 
 # Assignment 4: concurrent sharded hash map

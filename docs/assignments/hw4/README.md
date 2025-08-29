@@ -1,8 +1,9 @@
 ---
 category: assignment
-icon: file-lines
+icon: circle-exclamation
 shortTitle: "Assignment 4"
 dir:
+  icon: file-lines
   order: 5
 ---
 

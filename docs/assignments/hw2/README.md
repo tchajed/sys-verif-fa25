@@ -1,8 +1,9 @@
 ---
 dir:
   order: 3
+  icon: pen-fancy
 shortTitle: Assignment 2
-icon: pen-fancy
+icon: circle-exclamation
 date: 2024-10-04 08:00:00 -5
 ---
 
