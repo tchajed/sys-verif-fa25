@@ -40,6 +40,9 @@ const sidebarConfig = sidebar({
       prefix: "assignments/",
       link: "/assignments/",
       children: "structure",
+      collapsible: true,
+      // starts out expanded
+      expanded: true,
     },
     {
       text: "Lecture notes",

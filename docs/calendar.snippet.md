@@ -17,7 +17,7 @@
 |  | 12 | Tue Oct 14 | [Loop invariants](./notes/loop_invariants.md) |
 |  | 13 | Thu Oct 16 | [Ownership](./notes/ownership.md) |
 |  | 14 | Tue Oct 21 | In-class work |
-|  |  | Tue Oct 22 | _[Assignment 2](./assignments/assignment2.md) due (11pm)_ |
+|  |  | Tue Oct 22 | _[Assignment 2](./assignments/hw2/) due (11pm)_ |
 |  | 15 | Thu Oct 23 | [Persistence](./notes/persistently.md) |
 | **Concurrency** | 16 | Tue Oct 28 | [Concurrency intro](./notes/concurrency.md) |
 |  | 17 | Thu Oct 30 | [Lock invariants](./notes/invariants.md) |

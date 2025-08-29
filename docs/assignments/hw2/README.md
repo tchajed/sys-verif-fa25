@@ -15,7 +15,7 @@ This is a theory assignment: you'll submit written responses rather than doing p
 
 In this assignment, you'll answer some questions about Hoare logic and separation logic on paper rather than submitting mechanized proofs. The goal is to build and exercise your mental model for the specifications, proof rules, and program proofs, without having to work out all the details or translate your argument to something Coq understands. The two downsides are that you have to do all the calculations yourself, and there's no computer patiently checking your work and confirming when you're done; you'll have to think about it and wait for (much slower) feedback from me.
 
-<!-- @include: ../notes/macros.snippet.md -->
+<!-- @include: ../../notes/macros.snippet.md -->
 
 **This assignment is due Tuesday, Oct 22, 2024 at 11pm.** Submit solutions to Canvas. You can submit either handwritten (digital or paper) answers, or typeset your solution with LaTeX using the <a href="./assignment2_template.tex" download>assignment 2 template <HopeIcon icon="download" /></a>.
 
@@ -23,7 +23,7 @@ In this assignment, you'll answer some questions about Hoare logic and separatio
 
 > Rule of consequence (5 points)
 
-[Prove the rule of consequence](../notes/hoare.md#hoare-rules) for Hoare logic, from the [soundness definition](../notes/hoare.md#soundness) for a Hoare triple.
+[Prove the rule of consequence](../../notes/hoare.md#hoare-rules) for Hoare logic, from the [soundness definition](../../notes/hoare.md#soundness) for a Hoare triple.
 
 ## Exercise 2
 

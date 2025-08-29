@@ -49,7 +49,14 @@ The next operation that will be part of the "public interface" is `big_int_add`,
 
 ```rocq
 Definition digit_sum_carry (d1 d2: digit): (digit * digit) :=
-  (d1 + d2 `mod` 10, d1 + d2 `div` 10).
+  ((d1 + d2) `mod` 10, (d1 + d2) `div` 10).
+
+(* a quick test case *)
+#[local]
+Lemma __digit_sum_carry_test :
+  (* 7 + 5 = 12 *)
+  digit_sum_carry 7 5 = (2, 1).
+Proof. reflexivity. Qed.
 
 Fixpoint add_one (b : big_int) (d : digit) : big_int :=
   match b with
