@@ -265,7 +265,7 @@ The basic idea of using the specification is that we will create `recv Î³ (P1 âˆ
 From sys_verif.program_proof Require Import prelude empty_ffi.
 
 From sys_verif.program_proof Require Import concurrent_init.
-From sys_verif.program_proof.concurrent Require Import barrier_proof.
+From sys_verif.program_proof Require Import demos.barrier_proof.
 
 From Perennial.algebra Require Import ghost_var.
 

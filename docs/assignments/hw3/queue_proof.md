@@ -16,7 +16,7 @@ This part of the assignment intentionally provides you with almost nothing: you'
 
 ```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
-From sys_verif.program_proof Require Import heap_proof.stack_proof.
+From sys_verif.program_proof Require Import demos.stack_proof.
 From sys_verif.program_proof Require Import heap_init.
 
 Section proof.

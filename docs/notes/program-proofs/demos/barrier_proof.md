@@ -29,7 +29,7 @@ The reason there is a separate (and more sophisticated) library is related to th
 
 ```rocq
 From iris.base_logic.lib Require Import saved_prop.
-From sys_verif.program_proof.concurrent Require Import auth_set.
+From sys_verif.program_proof Require Import demos.auth_set.
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From New.proof Require Import std sync.
 From New.generatedproof.sys_verif_code Require Export concurrent.barrier.
