@@ -9,7 +9,7 @@ pageInfo: ["Date", "Category", "Tag", "Word"]
 
 # Lecture 4: Model-based specifications for functional programs
 
-> Follow these notes in Coq at [src/sys_verif/rocq/adt_specs.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/rocq/adt_specs.v).
+> Follow these notes in Rocq at [src/sys_verif/notes/adt_specs.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/notes/adt_specs.v).
 
 ## Learning outcomes
 
@@ -168,38 +168,6 @@ What do you think is the model of a relational database? To make this concrete, 
 - Albums: AlbumId as INTEGER, Title as TEXT, ArtistId as Integer
 
 What type would be the model of a database in this schema? That is, if we were writing `db_rep : database -> M` what should `M` be?
-
-:::: details Solution
-
-One answer, from database theory, is the relational model of a database.
-
-In that model, a database is a collection of _relations_ (what we often call "tables"), where a relation is a set of _tuples_ (what we often think of as a "rows"). Note that the original formulation really had a _set_, so that the there were no duplicate rows and the rows were unordered. Practically speaking they must be ordered in some way in a computer, and for efficiency reasons duplicates are often allowed. Furthermore the tuples were intended to be a mapping from field names to values that were also unordered, but we won't try to capture that exactly here.
-
-Thus one answer is that we use the following:
-
-```coq
-Record Artist := {
-  ArtistId: Integer;
-  Name: Text;
-}.
-
-Record Album := {
-  AlbumId: Integer;
-  Title: Text;
-  ArtistId: Integer;
-}.
-
-Record database_model := {
-  Artist_relation: gset Artist;
-  Album_relation: gset Album;
-}.
-```
-
-Databases also often have integrity constraints. It wasn't stated above, but it's natural that any valid database would have a unique `ArtistId` for every element of the `Artist_relation` and unique `AlbumId` (because these are _primary keys_). There's also an implied _foreign key_ relationship where every `ArtistId` appearing in the albums relation is in the artists relation.
-
-These ought to be captured by proving that every abstract `database_model` that comes up from the implementation has the above consistency properties. These are distinct from invariants of the code, even though they have many similarities.
-
-::::
 
 ### Example 2: map with deletions
 

@@ -8,7 +8,7 @@ pageInfo: ["Date", "Category", "Tag", "Word"]
 
 # Lecture 3: Induction
 
-> Follow these notes in Coq at [src/sys_verif/rocq/induction.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/rocq/induction.v).
+> Follow these notes in Rocq at [src/sys_verif/notes/induction.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/notes/induction.v).
 
 ## Learning outcomes
 

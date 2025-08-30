@@ -9,7 +9,7 @@ pageInfo: ["Date", "Category", "Tag", "Word"]
 
 # Lecture 19: Ghost state
 
-> Follow these notes in Coq at [src/sys_verif/program_proof/ghost_state.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/program_proof/ghost_state.v).
+> Follow these notes in Rocq at [src/sys_verif/notes/ghost_state.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/notes/ghost_state.v).
 
 ## Learning outcomes
 

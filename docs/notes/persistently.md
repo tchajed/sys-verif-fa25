@@ -9,7 +9,7 @@ pageInfo: ["Date", "Category", "Tag", "Word"]
 
 # Lecture 15: The persistently modality
 
-> Follow these notes in Coq at [src/sys_verif/program_proof/persistently.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/program_proof/persistently.v).
+> Follow these notes in Rocq at [src/sys_verif/notes/persistently.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/notes/persistently.v).
 
 ## Learning outcomes
 
