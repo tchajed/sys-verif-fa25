@@ -7,7 +7,7 @@ toc: false
 
 ::: warning Under construction
 
-The website is still under construction! Some information is out-of-date and copied from last year. The schedule and assignments are all subject to change.
+The website is still under construction! The schedule and assignments are all subject to change.
 
 :::
 
