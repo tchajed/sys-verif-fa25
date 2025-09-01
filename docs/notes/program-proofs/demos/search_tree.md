@@ -118,21 +118,17 @@ Go source:
 
 ```go
 func NewSearchTree() *SearchTree {
-	// NOTE: this pattern works around a Goose bug with translating the nil
-	// constant
-	var s *SearchTree
-	return s
+	return nil
 }
 ```
 
 ```rocq
 Lemma wp_NewSearchTree :
-  {{{ is_pkg_init heap.heap }}}
-    @! heap.heap.NewSearchTree #()
+  {{{ is_pkg_init heap }}}
+    @! heap.NewSearchTree #()
   {{{ (l: loc), RET #l; own_tree l ∅ }}}.
 Proof.
   wp_start as "_".
-  wp_auto.
   iApply "HΦ".
   iApply own_tree_null; done.
 Qed.
@@ -158,7 +154,7 @@ func (t *SearchTree) Contains(key uint64) bool {
 
 ```rocq
 Lemma wp_SearchTree__Contains (needle: w64) l keys :
-  {{{ is_pkg_init heap.heap ∗ own_tree l keys }}}
+  {{{ is_pkg_init heap ∗ own_tree l keys }}}
     l @ (ptrT.id heap.SearchTree.id) @ "Contains" #needle
   {{{ RET #(bool_decide (needle ∈ keys)); own_tree l keys }}}.
 Proof.
@@ -313,16 +309,14 @@ Go source:
 
 ```go
 func singletonTree(key uint64) *SearchTree {
-	// NOTE: same workaround for Goose bug
-	var s *SearchTree
-	return &SearchTree{key: key, left: s, right: s}
+	return &SearchTree{key: key, left: nil, right: nil}
 }
 ```
 
 ```rocq
 Lemma wp_singletonTree (key: w64) :
-  {{{ is_pkg_init heap.heap }}}
-    @! heap.heap.singletonTree #key
+  {{{ is_pkg_init heap }}}
+    @! heap.singletonTree #key
   {{{ (l: loc), RET #l; own_tree l {[key]} }}}.
 Proof.
   wp_start as "_".
@@ -369,7 +363,7 @@ func (t *SearchTree) Insert(key uint64) *SearchTree {
 
 ```rocq
 Lemma wp_SearchTree__Insert (new_key: w64) l keys :
-  {{{ is_pkg_init heap.heap ∗ own_tree l keys }}}
+  {{{ is_pkg_init heap ∗ own_tree l keys }}}
     l @ (ptrT.id heap.SearchTree.id) @ "Insert" #new_key
   {{{ (l': loc), RET #l'; own_tree l' (keys ∪ {[new_key]}) }}}.
 Proof.

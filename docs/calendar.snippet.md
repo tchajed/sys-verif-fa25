@@ -2,7 +2,7 @@
 
 |  |  | Day | Lecture |
 | --: | --: | --- | --- |
-|  | 1 | Thu Sep 4 | [Introduction](./notes/lec1.md) |
+|  | 1 | Thu Sep 4 | [Introduction](./notes/overview.md) |
 | **Functional programs** | 2 | Tue Sep 9 | [Rocq introduction](./notes/rocq_intro.md) |
 |  | 3 | Thu Sep 11 | [Induction](./notes/induction.md) |
 |  | 4 | Tue Sep 16 | [ADT specification](./notes/adt_specs.md) |
@@ -32,7 +32,7 @@
 |  |  | Thu Nov 27 | **No class (Thanksgiving)** |
 |  | 25 | Tue Dec 2 | [Liveness](./notes/liveness.md) |
 |  | 26 | Thu Dec 4 | slack |
-|  | 27 | Tue Dec 9 | [Course wrap-up](./notes/conclusion.md) |
+|  | 27 | Tue Dec 9 | [Course wrap-up](./notes/summary.md) |
 |  |  | Thu Dec 11 | _[Assignment 4](./assignments/hw4/) due (11pm)_ |
 |  |  | Tue Dec 16 |  |
 

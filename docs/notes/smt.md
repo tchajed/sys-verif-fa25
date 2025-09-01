@@ -1,11 +1,11 @@
 ---
-category: lecture
+category: lecture-note
 order: 25
-shortTitle: "Lecture 25: SMT verification"
+shortTitle: "SMT verification"
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
-# Lecture 25: Automated verification with SMT
+# Automated verification with SMT
 
 In this lecture we'll talk about verifying sequential programs with Hoare logic, but with a high degree of automation using an SMT solver.
 

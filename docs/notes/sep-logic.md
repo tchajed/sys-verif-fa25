@@ -1,11 +1,11 @@
 ---
-category: lecture
+category: lecture-note
 order: 8
-shortTitle: "Lecture 8+9: Separation Logic"
+shortTitle: "Separation Logic"
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
-# Lectures 8 and 9: Separation Logic
+# Separation Logic (theory)
 
 ## Learning outcomes
 

@@ -1,13 +1,13 @@
 ---
 # Auto-generated from literate source. DO NOT EDIT.
-category: lecture
+category: lecture-note
 tags: literate
-shortTitle: "Lecture 4: ADT specification"
+shortTitle: "ADT specification"
 order: 4
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
-# Lecture 4: Model-based specifications for functional programs
+# Model-based specifications for functional programs
 
 > Follow these notes in Rocq at [src/sys_verif/notes/adt_specs.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/notes/adt_specs.v).
 

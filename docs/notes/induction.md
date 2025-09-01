@@ -1,12 +1,12 @@
 ---
 # Auto-generated from literate source. DO NOT EDIT.
-category: lecture
+category: lecture-note
 tags: literate
 order: 3
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
-# Lecture 3: Induction
+# Induction
 
 > Follow these notes in Rocq at [src/sys_verif/notes/induction.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/notes/induction.v).
 

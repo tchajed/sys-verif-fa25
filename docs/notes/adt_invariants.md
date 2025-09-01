@@ -1,13 +1,13 @@
 ---
 # Auto-generated from literate source. DO NOT EDIT.
-category: lecture
+category: lecture-note
 tags: literate
-shortTitle: "Lecture 5: ADTs with invariants"
+shortTitle: "ADTs with invariants"
 order: 5
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
-## Lecture 5: ADT specification with invariants
+## ADT specification with invariants
 
 > Follow these notes in Rocq at [src/sys_verif/notes/adt_invariants.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/notes/adt_invariants.v).
 

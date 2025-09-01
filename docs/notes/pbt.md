@@ -1,11 +1,11 @@
 ---
-category: lecture
+category: lecture-note
 order: 24
-shortTitle: "Lecture 24: PBT"
+shortTitle: "PBT"
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
-# Lecture 24: Property-based testing (PBT)
+# Property-based testing (PBT)
 
 In this lecture we'll do something different and talk about _testing_. Don't worry - there is still a close relationship to verification.
 

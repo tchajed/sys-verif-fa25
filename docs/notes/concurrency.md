@@ -1,11 +1,11 @@
 ---
-category: lecture
+category: lecture-note
 order: 16
-shortTitle: "Lecture 16: Concurrency intro"
+shortTitle: "Concurrency intro"
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
-# Lecture 16: Concurrency introduction
+# Concurrency introduction
 
 We will now introduce concurrency to our programs and GooseLang model of programs, and shortly we'll start proving properties of concurrent programs.
 

@@ -1,11 +1,11 @@
 ---
-category: lecture
+category: lecture-note
 order: 6
-shortTitle: "Lecture 6+7: Hoare Logic"
+shortTitle: "Hoare Logic"
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
-# Lectures 6 and 7: Hoare Logic
+# Hoare Logic (theory)
 
 ## Learning outcomes
 

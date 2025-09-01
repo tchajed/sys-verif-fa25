@@ -1,13 +1,13 @@
 ---
 # Auto-generated from literate source. DO NOT EDIT.
-category: lecture
+category: lecture-note
 tags: literate
 order: 10
-shortTitle: "Lecture 10: IPM"
+shortTitle: "IPM"
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
-# Lecture 10: Iris Proof Mode
+# Iris Proof Mode
 
 > Follow these notes in Rocq at [src/sys_verif/notes/ipm.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/notes/ipm.v).
 

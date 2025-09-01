@@ -1,13 +1,13 @@
 ---
 # Auto-generated from literate source. DO NOT EDIT.
-category: lecture
+category: lecture-note
 tags: literate
 order: 15
-shortTitle: "Lecture 15: Persistently"
+shortTitle: "Persistently"
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
-# Lecture 15: The persistently modality
+# The persistently modality
 
 > Follow these notes in Rocq at [src/sys_verif/notes/persistently.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/notes/persistently.v).
 

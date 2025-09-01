@@ -1,13 +1,13 @@
 ---
 # Auto-generated from literate source. DO NOT EDIT.
-category: lecture
+category: lecture-note
 tags: literate
 order: 12
-shortTitle: "Lecture 12: Loop invariants"
+shortTitle: "Loop invariants"
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
-# Lecture 12: Loop invariants
+# Loop invariants
 
 > Follow these notes in Rocq at [src/sys_verif/notes/loop_invariants.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/notes/loop_invariants.v).
 

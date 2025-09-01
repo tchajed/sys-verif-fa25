@@ -1,15 +1,15 @@
 ---
 # Auto-generated from literate source. DO NOT EDIT.
-category: lecture
+category: lecture-note
 tags: literate
 order: 13
-shortTitle: "Lecture 13: Ownership in Go"
+shortTitle: "Ownership in Go"
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
-# Lecture 13: Goose - Ownership reasoning
+# Goose - Ownership reasoning
 
-> Follow these notes in Rocq at [src/sys_verif/notes/ownership.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/notes/ownership.v).
+> Follow these notes in Coq at [src/sys_verif/notes/ownership.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/notes/ownership.v).
 
 ## Learning outcomes
 

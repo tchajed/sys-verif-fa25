@@ -1,13 +1,13 @@
 ---
 # Auto-generated from literate source. DO NOT EDIT.
-category: lecture
+category: lecture-note
 tags: literate
 order: 17
-shortTitle: "Lecture 17: Lock invariants"
+shortTitle: "Lock invariants"
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
-# Lecture 17: Lock invariants
+# Lock invariants
 
 > Follow these notes in Rocq at [src/sys_verif/notes/invariants.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/notes/invariants.v).
 

@@ -1,10 +1,10 @@
 ---
-category: lecture
+category: lecture-note
 order: 18
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
-# Lecture 18: Resource Algebras
+# Resource Algebras
 
 ## Learning Outcomes
 

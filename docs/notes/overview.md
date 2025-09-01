@@ -1,10 +1,10 @@
 ---
-category: lecture
+category: lecture-note-note
 order: 1
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
-# Lecture 1: What is verification?
+# What is verification?
 
 ::: important Main idea
 

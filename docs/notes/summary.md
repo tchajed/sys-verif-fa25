@@ -1,11 +1,11 @@
 ---
-category: lecture
+category: lecture-note
 order: 27
-shortTitle: "Lecture 27: Conclusion"
+shortTitle: "Summary"
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
-# Lecture 27: Conclusion
+# Summary of the class
 
 In order to stabilize what you've learned in the class, take some time to recall what you learned and organize it. This outline give you some keywords to help you remember the broad concepts you've seen.
 

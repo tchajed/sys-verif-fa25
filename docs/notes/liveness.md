@@ -1,11 +1,11 @@
 ---
-category: lecture
+category: lecture-note
 order: 26
-shortTitle: "Lecture 26: Liveness"
+shortTitle: "Liveness"
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
-# Lecture 26: Liveness
+# Liveness
 
 ## Learning outcomes
 

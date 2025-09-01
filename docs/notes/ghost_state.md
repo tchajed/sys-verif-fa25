@@ -1,13 +1,13 @@
 ---
 # Auto-generated from literate source. DO NOT EDIT.
-category: lecture
+category: lecture-note
 tags: literate
 order: 19
-shortTitle: "Lecture 19: Ghost state"
+shortTitle: "Ghost state"
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
-# Lecture 19: Ghost state
+# Ghost state
 
 > Follow these notes in Rocq at [src/sys_verif/notes/ghost_state.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/notes/ghost_state.v).
 
