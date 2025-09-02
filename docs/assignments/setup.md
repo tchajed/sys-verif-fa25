@@ -52,26 +52,27 @@ Install [VS Code](https://code.visualstudio.com/)
 Install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers).
 
 - You can install it directly in VS Code through [this link](vscode:extension/ms-vscode-remote.remote-containers).
-- Alternate option 2: you can also install the extension from the Extensions sidebar item.
-- Alternate option 3: at the command line you can run `code --install-extension ms-vscode-remote.remote-containers`.
+- Alternate option 2: at the command line you can run `code --install-extension ms-vscode-remote.remote-containers`.
 
 The most important VS Code feature to learn is the Command Palette, accessed from View > Command Palette. The shortcut is worth learning (ctrl-shift-p, cmd-shift-p on macOS). The command palette gives search access to most editor functionality and shows keyboard shortcuts if you want to learn them.
 
 Once you have the dev container extension, use the "Dev Containers: Reopen in Container" command on the sys-verif-fa25-proofs repo. This will use Rocq from the container while still running VS Code natively. You should now use the built-in VS Code terminal to run `make` to ensure your code compiles.
 
+The setup installs the VSCoq extension by default. You might want to try out [coq-lsp](https://marketplace.visualstudio.com/items?itemName=ejgallego.coq-lsp), which has a different and simpler interaction model. I'm not sure if it will be more or less stable than VSCoq, so if you use it please let me know your experience. **Use only one of VSCoq and coq-lsp**.
+
 :::
 
-If you feel very comfortable setting up your own tools, you can instead install Rocq on your own.
+If you feel comfortable setting up your own tools, you can instead install Rocq on your own.
 
 ::: details Option 2: install Rocq on your own
 
-Install Rocq 9.0.0 for compatibility.
+Install Rocq 9.0.0 for compatibility. You should install Rocq using opam.
 
 You will need an IDE for Rocq:
 
-- I'd recommend VS Code with the VSCoq extension.
+- I recommend VS Code with the [VSCoq](https://marketplace.visualstudio.com/items?itemName=maximedenes.vscoq) extension (or try out [coq-lsp](https://marketplace.visualstudio.com/items?itemName=ejgallego.coq-lsp)).
 - If you use Emacs, then [Proof General](https://proofgeneral.github.io/) is excellent (this is what I personally use, with Doom Emacs and vim keybindings).
-- If you use Vim or Neovim, then [Coqtail](https://github.com/whonore/Coqtail) is also decent.
+- If you use Vim or Neovim, then [Coqtail](https://github.com/whonore/Coqtail) is also good.
 
 Once you have Rocq installed, run `make` to make sure everything is working.
 
