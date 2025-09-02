@@ -1,5 +1,5 @@
 ---
-category: lecture-note-note
+category: lecture-note
 order: 1
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
