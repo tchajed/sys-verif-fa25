@@ -289,7 +289,7 @@ Lemma wp_BinarySearch (s: slice.t) (xs: list w64) (needle: w64) :
     @! heap.heap.BinarySearch #s #needle
   {{{ (i: w64) (ok: bool), RET (#i, #ok);
       own_slice s (DfracOwn 1) xs ∗
-      ⌜ok = true → xs !! uint.nat i = Some needle⌝
+      ⌜ok = true → xs !! sint.nat i = Some needle⌝
   }}}.
 Proof.
   wp_start as "[Hs %Hsorted]".
@@ -302,13 +302,13 @@ Proof.
                "Hs" :: own_slice s (DfracOwn 1) xs ∗
                "i" :: i_ptr ↦ i ∗
                "j" :: j_ptr ↦ j ∗
-               "%Hij" :: ⌜uint.Z i ≤ uint.Z j ≤ Z.of_nat (length xs)⌝ ∗
+               "%Hij" :: ⌜0 ≤ sint.Z i ≤ sint.Z j ≤ Z.of_nat (length xs)⌝ ∗
                "%H_low" :: ⌜∀ (i': nat),
-                            i' < uint.nat i →
+                            i' < sint.nat i →
                             ∀ (x: w64), xs !! i' = Some x →
                                 uint.Z x < uint.Z needle⌝ ∗
                "%H_hi" :: ⌜∀ (j': nat),
-                            uint.nat j ≤ j' →
+                            sint.nat j ≤ j' →
                             ∀ (y: w64), xs !! j' = Some y →
                                 uint.Z needle ≤ uint.Z y⌝
     )%I with "[Hs i j]" as "HI".
@@ -320,17 +320,25 @@ Proof.
     - intros ??? Hget.
       apply lookup_lt_Some in Hget.
       word.
+    - intros ??? Hget.
+      apply lookup_lt_Some in Hget.
+      word.
   }
   wp_for "HI".
   - wp_if_destruct; try wp_auto.
     + wp_pure.
-      { word. }
-      set (mid := word.add i (word.divu (word.sub j i) (W64 2)) : w64).
-      assert (uint.Z mid = (uint.Z i + uint.Z j) / 2) as Hmid_ok.
-      { subst mid.
+      { rewrite word.signed_add.
+        rewrite Automation.word.word_signed_divs_nowrap_pos; [ word | ].
         word. }
-      list_elem xs (uint.nat mid) as x_mid.
+      set (mid := word.add i (word.divs (word.sub j i) (W64 2)) : w64).
+      assert (sint.Z mid = (sint.Z i + sint.Z j) / 2) as Hmid_ok.
+      { subst mid.
+        rewrite word.signed_add.
+        rewrite Automation.word.word_signed_divs_nowrap_pos; [ word | ].
+        word. }
+      list_elem xs (sint.nat mid) as x_mid.
       wp_apply (wp_load_slice_elem with "[$Hs]") as "Hs".
+      { word. }
       { eauto. }
       wp_if_destruct.
       * wp_auto.
@@ -341,16 +349,16 @@ Proof.
         { intros.
           (* the [revert H] is a bit of black magic here; it [word] operate on H
           by putting it into the goal *)
-          assert (i' ≤ uint.nat mid)%nat by (revert H; word).
+          assert (i' ≤ sint.nat mid)%nat by (revert H; word).
           (* handle the equal case specially (we need a strict inequality to
           make use of [is_sorted]) *)
-          destruct (decide (i' = uint.nat mid)).
+          destruct (decide (i' = sint.nat mid)).
           { subst.
             assert (x = x_mid) by congruence; subst.
             assumption. }
-          assert (i' < uint.nat mid)%nat as Hi'_lt by word.
+          assert (i' < sint.nat mid)%nat as Hi'_lt by word.
           assert (uint.Z x < uint.Z x_mid).
-          { apply (Hsorted i' (uint.nat mid)); auto; word. }
+          { apply (Hsorted i' (sint.nat mid)); auto; word. }
           lia.
         }
         (* This is easy because we didn't change any relevant variables *)
@@ -362,18 +370,21 @@ Proof.
         split_and!; try word.
         { auto. }
         intros.
-        destruct (decide (j' = uint.nat mid)).
+        destruct (decide (j' = sint.nat mid)).
         { subst.
           assert (y = x_mid) by congruence; subst.
           word. }
-        assert (uint.nat mid < j') as Hj'_gt by word.
+        assert (sint.nat mid < j') as Hj'_gt by word.
         assert (uint.Z x_mid < uint.Z y).
-        { apply (Hsorted (uint.nat mid) j'); auto; word. }
+        { apply (Hsorted (sint.nat mid) j'); auto; word. }
         lia.
     + wp_if_destruct.
       * wp_auto.
-        list_elem xs i as x_i.
+        list_elem xs (sint.nat i) as x_i.
+        wp_pure.
+        { word. }
         wp_apply (wp_load_slice_elem with "[$Hs]") as "Hs".
+        { word. }
         { eauto. }
         iApply "HΦ".
         iFrame.

@@ -1018,17 +1018,19 @@ Proof.
   wp_apply wp_bucketIdx.
   { iPureIntro. word. }
   iIntros (idx Hidx).
-  list_elem b_ls (uint.nat idx) as bi_l.
+  list_elem b_ls (sint.nat idx) as bi_l.
   wp_auto.
   wp_pure.
   { word. }
   wp_apply (wp_load_slice_elem with "[$Hb_ls]").
+  { word. }
   { eauto. }
   iIntros "_".
   wp_auto.
-  iDestruct (big_sepL_lookup _ _ (uint.nat idx) with "His_buckets") as "Hidx".
+  iDestruct (big_sepL_lookup _ _ (sint.nat idx) with "His_buckets") as "Hidx".
   { eauto. }
-  replace (Z.of_nat (uint.nat idx)) with (uint.Z idx) by word.
+  replace (Z.of_nat (sint.nat idx)) with (sint.Z idx) by word.
+  replace (uint.Z idx) with (sint.Z idx) in Hidx by word.
   iNamed "Hidx".
   wp_auto.
   wp_apply (wp_Mutex__Lock with "[$Hlock]").
@@ -1077,11 +1079,12 @@ We need to use `iApply fupd_wp` to make `iInv` open at a single point rather tha
   b_ls : list loc
   Hsz32 : 0 < uint.Z (slice.len_f b_s) < 2 ^ 32
   hm_ptr, key_ptr, buckets_ptr, b_ptr : loc
-  Hlen : length b_ls = uint.nat (slice.len_f b_s)
+  Hlen :
+    length b_ls = sint.nat (slice.len_f b_s) ∧ 0 ≤ sint.Z (slice.len_f b_s)
   idx : w64
-  Hidx : uint.Z idx = hash_bucket key (uint.Z (slice.len_f b_s))
+  Hidx : sint.Z idx = hash_bucket key (uint.Z (slice.len_f b_s))
   bi_l : loc
-  Hbi_l_lookup : b_ls !! uint.nat idx = Some bi_l
+  Hbi_l_lookup : b_ls !! sint.nat idx = Some bi_l
   mu_l, subMap_l : loc
   sub_m : gmap w32 w64
   ok_ptr, x_ptr : loc
@@ -1099,7 +1102,7 @@ We need to use `iApply fupd_wp` to make `iInv` open at a single point rather tha
                    "Hauth" ∷ hashmap_auth γ (uint.Z (slice.len_f b_s)) m)
   "subMap" : bi_l ↦s[sharded_hashmap.bucket :: "subMap"]□ subMap_l
   "mu" : bi_l ↦s[sharded_hashmap.bucket :: "mu"]□ mu_l
-  "Hlock" : is_Mutex mu_l (lock_inv γ (uint.Z idx) subMap_l)
+  "Hlock" : is_Mutex mu_l (lock_inv γ (sint.Z idx) subMap_l)
   --------------------------------------□
   "Hupd" : ∀ m : gmap w32 w64, P m ==∗ P m ∗ Q (map_get (m !! key))
   "HΦ" : ∀ (v0 : w64) (ok0 : bool), Q (v0, ok0) -∗ Φ (v0 ::= # ok0)%V
@@ -1108,7 +1111,7 @@ We need to use `iApply fupd_wp` to make `iInv` open at a single point rather tha
   "Hbuckets" : buckets_ptr ↦ b_s
   "b" : b_ptr ↦ bi_l
   "locked" : own_Mutex mu_l
-  "Hfrag" : hashmap_sub γ (uint.Z idx) sub_m
+  "Hfrag" : hashmap_sub γ (sint.Z idx) sub_m
   "ok" : ok_ptr ↦ ok
   "x" : x_ptr ↦ v
   "HsubMap" : own_shard subMap_l sub_m

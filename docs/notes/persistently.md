@@ -776,7 +776,7 @@ Proof.
   x1, x2, x3 : w64
   Φ : val → iPropI Σ
   s_ptr, sumUpto_ptr, m_ptr : loc
-  Hsz : 3%nat = uint.nat (slice.len_f s)
+  Hsz : 3%nat = sint.nat (slice.len_f s) ∧ 0 ≤ sint.Z (slice.len_f s)
   n : w64
   ============================
   _ : is_pkg_init memoize
@@ -844,16 +844,17 @@ The rest of this proof is general loop and slice reasoning and not related to th
     wp_if_destruct; try wp_auto.
     - wp_pure.
       { word. }
-      list_elem [x1; x2; x3] i as x_i.
-      wp_apply (wp_load_slice_elem with "[$Hs]") as "_"; [ by eauto | ].
+      list_elem [x1; x2; x3] (sint.Z i) as x_i.
+      wp_apply (wp_load_slice_elem with "[$Hs]") as "_"; [ word | by eauto | ].
       wp_for_post.
       iFrame.
       iSplit.
       { iPureIntro. word. }
       replace (uint.nat (word.add i (W64 1))) with (S (uint.nat i)) by word.
-      erewrite take_S_r; eauto.
-      rewrite list_w64_sum_app1.
-      iFrame "sum".
+      erewrite take_S_r.
+      { rewrite list_w64_sum_app1.
+        iFrame "sum". }
+      replace (uint.nat i) with (sint.nat i) by word; auto.
     -
 ```
 
@@ -882,7 +883,7 @@ The little proof pattern below of using `iExactEq` is sometimes useful - it allo
   x1, x2, x3 : w64
   Φ : val → iPropI Σ
   s_ptr, sumUpto_ptr, m_ptr : loc
-  Hsz : 3%nat = uint.nat (slice.len_f s)
+  Hsz : 3%nat = sint.nat (slice.len_f s) ∧ 0 ≤ sint.Z (slice.len_f s)
   m : memoize.Memoize.t
   ============================
   _ : is_pkg_init memoize

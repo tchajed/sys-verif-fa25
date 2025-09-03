@@ -119,10 +119,11 @@ Proof.
   { rewrite length_reverse in Hlen. word. }
   wp_pure.
   { word. }
-  list_elem (reverse xs) (uint.nat (slice.len_f s) - 1)%nat as x_last.
+  list_elem (reverse xs) (sint.nat (slice.len_f s) - 1)%nat as x_last.
   { word. }
   wp_apply (wp_load_slice_elem with "[$Hels]").
-  { replace (uint.nat (word.sub (slice.len_f s) (W64 1))) with (uint.nat (slice.len_f s) - 1)%nat by word.
+  { word. }
+  { replace (sint.nat (word.sub (slice.len_f s) (W64 1))) with (sint.nat (slice.len_f s) - 1)%nat by word.
     eauto. }
   iIntros "Hels".
   wp_auto.
@@ -135,7 +136,7 @@ Proof.
   evar too early *)
   rewrite length_reverse /= in Hlen.
   apply reverse_lookup_Some in Hx_last_lookup as [Hget ?].
-  replace (length xs - S (uint.nat (slice.len_f s) - 1))%nat with 0%nat
+  replace (length xs - S (sint.nat (slice.len_f s) - 1))%nat with 0%nat
     in Hget by lia.
   destruct xs as [|x0 xs'].
   { exfalso; simpl in *; lia. }

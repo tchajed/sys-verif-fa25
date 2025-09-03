@@ -441,11 +441,11 @@ Check wp_load_slice_elem.
 
 ```txt
 wp_load_slice_elem
-     : ∀ (s : slice.t) (i : w64) (vs : list ?V) (dq : dfrac)
-         (v : ?V) (Φ : val → iPropI Σ),
-         s ↦*{dq} vs ∗ ⌜vs !! uint.nat i = Some v⌝ -∗
-         ▷ (s ↦*{dq} vs -∗ Φ (# v)) -∗
-         WP ![# ?t] (# (slice.elem_ref_f s ?t i)) {{ v, Φ v }}
+     : ∀ (s : slice.t) (i : w64) (vs : list ?V) (dq : dfrac) (v : ?V),
+         0 ≤ sint.Z i
+         → {{{ s ↦*{dq} vs ∗ ⌜vs !! sint.nat i = Some v⌝ }}}
+             ![# ?t] (# (slice.elem_ref_f s ?t i))
+           {{{ RET # v; s ↦*{dq} vs }}}
 where
 ?V :
   [Σ : gFunctors  hG : heapGS Σ  globalsGS0 : globalsGS Σ  go_ctx : GoContext
