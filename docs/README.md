@@ -22,15 +22,15 @@ We'll use [Canvas](https://canvas.wisc.edu/courses/477243) for submitting assign
 
 The source of this website is on GitHub at [tchajed/sys-verif-fa25](https://github.com/tchajed/sys-verif-fa25). Feel free to submit bug reports and PRs. Your fellow students as well as students in future iterations of this class will thank you!
 
-## Resources
-
-See the course [lecture notes](./notes/) and the [resources](./resources.md) page.
-
 ## Calendar
 
 **Note: consider anything two weeks or more away subject to change.**
 
 <!-- @include: ./calendar.snippet.md -->
+
+## Resources
+
+See the [resources](./resources.md) page.
 
 ## Note for instructors
 

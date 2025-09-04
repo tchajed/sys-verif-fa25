@@ -5,7 +5,7 @@ icon: "book"
 
 # Additional resources
 
-A core resource is the course [lecture notes](./notes/), which include some explanations and references not tied to any specific lecture.
+A core resource is the course [lecture notes](./notes/). See especially the "Program Proofs" entry in the sidebar, which holds a number of explanations not tied to any specific lectures.
 
 ## Rocq
 
@@ -25,7 +25,7 @@ The textbook [Verified Functional Algorithms](https://softwarefoundations.cis.up
 
 We will be working with Go code in this class. It will help to have at least reading familiarity with Go, which you can get by following [A Tour of Go](https://go.dev/tour/welcome/1) (you only really need the Basics and Methods chapters).
 
-To verify code, it must also be in the subset of Go supported by [Goose](https://github.com/goose-lang/goose). You'll mostly be verifying provided code so won't need to understand these restrictions, but if your project involves writing new code I'll work with you to help you write it in the Goose-supported subset.
+To verify code, it must also be in the subset of Go supported by [Goose](https://github.com/goose-lang/goose). We are using "new Goose" which aims to support essentially any Go code. If you want to do a project that involves writing new code, I can help you work with Go features you didn't see in the class.
 
 ## Iris
 
