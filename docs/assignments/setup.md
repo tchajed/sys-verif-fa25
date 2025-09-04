@@ -70,7 +70,10 @@ Install Rocq 9.0.0 for compatibility. You should install Rocq using opam.
 
 You will need an IDE for Rocq:
 
-- I recommend VS Code with the [VSCoq](https://marketplace.visualstudio.com/items?itemName=maximedenes.vscoq) extension (or try out [coq-lsp](https://marketplace.visualstudio.com/items?itemName=ejgallego.coq-lsp)).
+- I recommend VS Code with the [VSCoq](https://marketplace.visualstudio.com/items?itemName=maximedenes.vscoq) extension.
+
+  You might want to try out [coq-lsp](https://marketplace.visualstudio.com/items?itemName=ejgallego.coq-lsp), which has a different and simpler interaction model. I have limited experience with it, so I don't know how stable it will be; if you use it please let me know your experience. **Use only one of VSCoq and coq-lsp**.
+
 - If you use Emacs, then [Proof General](https://proofgeneral.github.io/) is excellent (this is what I personally use, with Doom Emacs and vim keybindings).
 - If you use Vim or Neovim, then [Coqtail](https://github.com/whonore/Coqtail) is also good.
 

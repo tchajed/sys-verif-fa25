@@ -1,40 +1,39 @@
 <!-- markdownlint-disable MD041 -->
 
-|  |  | Day | Lecture |
-| --: | --: | --- | --- |
-|  | 1 | Thu Sep 4 | [Introduction](./notes/overview.md) |
-| **Functional programs** | 2 | Tue Sep 9 | [Rocq introduction](./notes/rocq_intro.md) |
-|  | 3 | Thu Sep 11 | [Induction](./notes/induction.md) |
-|  | 4 | Tue Sep 16 | [ADT specification](./notes/adt_specs.md) |
-|  | 5 | Thu Sep 18 | [ADTs with invariants](./notes/adt_invariants.md) |
-| **Imperative programs** | 6 | Tue Sep 23 | [Hoare logic (part 1)](./notes/hoare.md) |
-|  | 7 | Thu Sep 25 | [Hoare logic (part 2)](./notes/hoare.md) |
-|  |  | Mon Sep 29 | _[Assignment 1](./assignments/hw1/) due (11pm)_ |
-|  | 8 | Tue Sep 30 | [Separation logic (part 1)](./notes/sep-logic.md) |
-|  | 9 | Thu Oct 2 | [Separation logic (part 2)](./notes/sep-logic.md) |
-|  | 10 | Tue Oct 7 | [Iris Proof Mode](./notes/ipm.md) |
-|  | 11 | Thu Oct 9 | [Modeling Go programs](./notes/goose.md) |
-|  | 12 | Tue Oct 14 | [Loop invariants](./notes/loop_invariants.md) |
-|  | 13 | Thu Oct 16 | [Ownership](./notes/ownership.md) |
-|  |  | Mon Oct 20 | _[Assignment 2](./assignments/hw2/) due (11pm)_ |
-|  | 14 | Tue Oct 21 | In-class work |
-|  | 15 | Thu Oct 23 | [Persistence](./notes/persistently.md) |
-| **Concurrency** | 16 | Tue Oct 28 | [Concurrency intro](./notes/concurrency.md) |
-|  | 17 | Thu Oct 30 | [Lock invariants](./notes/invariants.md) |
-|  | 18 | Tue Nov 4 | [Resource algebras](./notes/resource-algebra.md) |
-|  | 19 | Tue Nov 6 | [Ghost state](./notes/ghost_state.md) |
-|  |  | Mon Nov 10 | _[Assignment 3](./assignments/hw3/) due (11pm)_ |
-|  | 20 | Tue Nov 11 | [Atomic specs](./notes/atomic_specs.md) |
-|  | 21 | Thu Nov 13 | [Barrier proof (spec)](./notes/barrier.md) |
-|  | 22 | Tue Nov 18 | [Barrier proof](./notes/barrier.md) |
-|  | 23 | Thu Nov 20 | [Property-based testing](./notes/pbt.md) |
-|  | 24 | Tue Nov 25 | [SMT-based verification](./notes/smt.md) |
-|  |  | Thu Nov 27 | **No class (Thanksgiving)** |
-|  | 25 | Tue Dec 2 | [Liveness](./notes/liveness.md) |
-|  | 26 | Thu Dec 4 | slack |
-|  | 27 | Tue Dec 9 | [Course wrap-up](./notes/summary.md) |
-|  |  | Thu Dec 11 | _[Assignment 4](./assignments/hw4/) due (11pm)_ |
-|  |  | Tue Dec 16 |  |
+|  | Date | Lecture | Pre-reading |  |
+| --- | --- | --- | --- | --- |
+| 1 | Thu Sep 4 | Introduction: [notes](./notes/overview.md), [slides](./slides/lec1.pdf) |  |
+| 2 | Tue Sep 9 | Rocq introduction: [notes](./notes/rocq_intro.md) | [tool setup](./assignments/setup.md), [course syllabus](./syllabus.md) | bring a laptop |
+| 3 | Thu Sep 11 | Induction | [notes](./notes/induction.md) |
+| 4 | Tue Sep 16 | ADT specification | [notes](./notes/adt_specs.md) |
+| 5 | Thu Sep 18 | ADTs with invariants | [notes](./notes/adt_invariants.md) |
+| 6 | Tue Sep 23 | Hoare logic (part 1) | [notes](./notes/hoare.md) |
+| 7 | Thu Sep 25 | Hoare logic (part 2) |  |
+|  | Mon Sep 29 |  |  | _[Assignment 1](./assignments/hw1/) due (11pm)_ |
+| 8 | Tue Sep 30 | Separation logic (part 1) | [notes](./notes/sep-logic.md) |
+| 9 | Thu Oct 2 | Separation logic (part 2) |  |
+| 10 | Tue Oct 7 | Iris Proof Mode | [notes](./notes/ipm.md) |
+| 11 | Thu Oct 9 | Modeling Go programs | [notes](./notes/goose.md) |
+| 12 | Tue Oct 14 | Loop invariants | [notes](./notes/loop_invariants.md) |
+| 13 | Thu Oct 16 | Ownership | [notes](./notes/ownership.md) |
+|  | Mon Oct 20 |  |  | _[Assignment 2](./assignments/hw2/) due (11pm)_ |
+| 14 | Tue Oct 21 | In-class work |  |
+| 15 | Thu Oct 23 | Persistence | [notes](./notes/persistently.md) |
+| 16 | Tue Oct 28 | Concurrency intro | [notes](./notes/concurrency.md) |
+| 17 | Thu Oct 30 | Lock invariants | [notes](./notes/invariants.md) |
+| 18 | Tue Nov 4 | Resource algebras | [notes](./notes/resource-algebra.md) |
+| 19 | Tue Nov 6 | Ghost state | [notes](./notes/ghost_state.md) |
+|  | Mon Nov 10 |  |  | _[Assignment 3](./assignments/hw3/) due (11pm)_ |
+| 20 | Tue Nov 11 | Atomic specs | [notes](./notes/atomic_specs.md) |
+| 21 | Thu Nov 13 | Barrier proof (spec) | [notes](./notes/barrier.md) |
+| 22 | Tue Nov 18 | Barrier proof |  |
+| 23 | Thu Nov 20 | Property-based testing | [notes](./notes/pbt.md) |
+| 24 | Tue Nov 25 | SMT-based verification | [notes](./notes/smt.md) |
+|  | Thu Nov 27 | **No class (Thanksgiving)** |  |
+| 25 | Tue Dec 2 | Liveness | [notes](./notes/liveness.md) |
+| 26 | Thu Dec 4 | slack |  |
+| 27 | Tue Dec 9 | [Course wrap-up](./notes/summary.md) |  |
+|  | Thu Dec 11 |  |  | _[Assignment 4](./assignments/hw4/) due (11pm)_ |
 
 <!--
 Had a week off for SOSP in Fall 2024.
