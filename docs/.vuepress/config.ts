@@ -26,6 +26,16 @@ const navbarConfig = navbar([
       },
       "/syllabus.md",
       "/resources.md",
+      {
+        text: "Canvas",
+        icon: "chalkboard-user",
+        link: "https://canvas.wisc.edu/courses/477243",
+      },
+      {
+        text: "Piazza",
+        icon: "comments",
+        link: "https://piazza.com/wisc/fall2025/cs839002",
+      },
     ],
   },
 ]);
