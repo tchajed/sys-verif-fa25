@@ -5,12 +5,6 @@ icon: "circle-check"
 toc: false
 ---
 
-::: warning Under construction
-
-The website is still under construction! The schedule and assignments are all subject to change.
-
-:::
-
 This is a graduate-level class on _systems verification_: how to mathematically prove the correctness of programs with machine-checked proofs. A core technique throughout the class is _separation logic_, which we will use to reason about real-world programs written in Go, including using loop invariants, reasoning about slices, pointer-based data structures, and concurrency. Programming assignments will involve proving theorems with the Rocq prover.
 
 ::: info Course info
@@ -33,6 +27,8 @@ The source of this website is on GitHub at [tchajed/sys-verif-fa25](https://gith
 See the course [lecture notes](./notes/) and the [resources](./resources.md) page.
 
 ## Calendar
+
+**Note: consider anything two weeks or more away subject to change.**
 
 <!-- @include: ./calendar.snippet.md -->
 

@@ -299,7 +299,7 @@ Proof.
 
   iAssert (
       ∃ (i j: w64),
-               "Hs" :: own_slice s (DfracOwn 1) xs ∗
+               "Hs" :: s ↦* xs ∗
                "i" :: i_ptr ↦ i ∗
                "j" :: j_ptr ↦ j ∗
                "%Hij" :: ⌜0 ≤ sint.Z i ≤ sint.Z j ≤ Z.of_nat (length xs)⌝ ∗
