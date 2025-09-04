@@ -10,7 +10,7 @@
 | **Imperative programs** | 6 | Tue Sep 23 | [Hoare logic (part 1)](./notes/hoare.md) |
 |  | 7 | Thu Sep 25 | [Hoare logic (part 2)](./notes/hoare.md) |
 |  | 8 | Tue Sep 30 | [Separation logic (part 1)](./notes/sep-logic.md) |
-|  |  | Tue Oct 1 | _[Assignment 1](./assignments/hw1) due (11pm)_ |
+|  |  | Tue Oct 1 | _[Assignment 1](./assignments/hw1/) due (11pm)_ |
 |  | 9 | Thu Oct 2 | [Separation logic (part 2)](./notes/sep-logic.md) |
 |  | 10 | Tue Oct 7 | [Iris Proof Mode](./notes/ipm.md) |
 |  | 11 | Thu Oct 9 | [Modeling Go programs](./notes/goose.md) |
@@ -23,7 +23,7 @@
 |  | 17 | Thu Oct 30 | [Lock invariants](./notes/invariants.md) |
 |  | 18 | Tue Nov 4 | [Resource algebras](./notes/resource-algebra.md) |
 |  | 19 | Tue Nov 6 | [Ghost state](./notes/ghost_state.md) |
-|  |  | Tue Nov 11 | _[Assignment 3](./assignments/assignment3/) due (11pm)_ |
+|  |  | Tue Nov 11 | _[Assignment 3](./assignments/hw3/) due (11pm)_ |
 |  | 20 | Tue Nov 11 | [Atomic specs](./notes/atomic_specs.md) |
 |  | 21 | Thu Nov 13 | [Barrier proof (spec)](./notes/barrier.md) |
 |  | 22 | Tue Nov 18 | [Barrier proof](./notes/barrier.md) |
