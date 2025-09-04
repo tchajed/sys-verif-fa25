@@ -16,7 +16,7 @@ This assignment has two purposes:
 
 ## Submitting
 
-See [submitting assignments](./setup#submitting-assignments) on the assignment setup page.
+See [submitting assignments](../setup#submitting-assignments) on the assignment setup page.
 
 **The assignment is due Monday, Sep 29th at 11pm.** However, you are welcome and encouraged to submit early with partial progress to keep me informed of how the class is doing. If you have questions, just mention them briefly in the Canvas submission so I know to look.
 
@@ -24,7 +24,7 @@ I would recommend aiming to finish part 0 by Tuesday, September 9th and part 1 b
 
 ## Part 0: setup
 
-The [assignment setup page](./setup) has instructions on getting the sys-verif-fa25-proofs repo and installing Rocq. Follow those first.
+The [assignment setup page](../setup) has instructions on getting the sys-verif-fa25-proofs repo and installing Rocq. Follow those first.
 
 ::: warning
 
