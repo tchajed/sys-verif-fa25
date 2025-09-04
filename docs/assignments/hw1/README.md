@@ -1,7 +1,7 @@
 ---
 shortTitle: "Assignment 1"
 icon: circle-exclamation
-date: 2024-09-04 08:00:00 -5
+date: 2025-09-04 08:00:00 -5
 dir:
   icon: file-lines
   order: 2
@@ -18,9 +18,9 @@ This assignment has two purposes:
 
 See [submitting assignments](./setup#submitting-assignments) on the assignment setup page.
 
-**The assignment is due Tuesday, Oct 1st at 11pm.** However, you are welcome and encouraged to submit early with partial progress to keep me informed of how the class is doing. If you have questions, just mention them briefly in the Canvas submission so I know to look.
+**The assignment is due Monday, Sep 29th at 11pm.** However, you are welcome and encouraged to submit early with partial progress to keep me informed of how the class is doing. If you have questions, just mention them briefly in the Canvas submission so I know to look.
 
-I would recommend aiming to finish parts 0 and 1 by Tuesday, Sep 17th to be on track.
+I would recommend aiming to finish part 0 by Tuesday, September 9th and part 1 by Monday, Sep 15th to be on track.
 
 ## Part 0: setup
 
