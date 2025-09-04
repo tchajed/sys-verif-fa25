@@ -3,6 +3,7 @@ title: "CS 839: Systems Verification"
 shortTitle: "Home"
 icon: "circle-check"
 toc: false
+date: 2025-09-03 08:00:00 -5
 ---
 
 This is a graduate-level class on _systems verification_: how to mathematically prove the correctness of programs with machine-checked proofs. A core technique throughout the class is _separation logic_, which we will use to reason about real-world programs written in Go, including using loop invariants, reasoning about slices, pointer-based data structures, and concurrency. Programming assignments will involve proving theorems with the Rocq prover.
