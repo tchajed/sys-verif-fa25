@@ -285,10 +285,10 @@ Definition is_sorted (xs: list w64) :=
 
 Lemma wp_BinarySearch (s: slice.t) (xs: list w64) (needle: w64) :
   {{{ is_pkg_init heap.heap ∗
-        own_slice s (DfracOwn 1) xs ∗ ⌜is_sorted xs⌝ }}}
+        s ↦* xs ∗ ⌜is_sorted xs⌝ }}}
     @! heap.heap.BinarySearch #s #needle
   {{{ (i: w64) (ok: bool), RET (#i, #ok);
-      own_slice s (DfracOwn 1) xs ∗
+      s ↦* xs ∗
       ⌜ok = true → xs !! sint.nat i = Some needle⌝
   }}}.
 Proof.
