@@ -25,7 +25,7 @@ The source of this website is on GitHub at [tchajed/sys-verif-fa25](https://gith
 
 ## Calendar
 
-**Note: consider anything two weeks or more away subject to change.**
+**Note: plans two weeks out might change.**
 
 <!-- @include: ./calendar.snippet.md -->
 
