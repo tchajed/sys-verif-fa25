@@ -10,7 +10,7 @@ pageInfo: ["Date", "Category", "Tag", "Word"]
 
 > Follow these notes in Rocq at [src/sys_verif/notes/rocq_intro.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/notes/rocq_intro.v).
 
-In this lecture, we'll introduce Rocq as a system, functional programming, and proving theorems about functional programs.
+In this lecture, we'll introduce Rocq as a system, functional programming, and proving theorems about functional programs. This lecture is intended to follow Software Foundation's Basics chapter, so I recommend reading that first.
 
 ## Learning outcomes
 
@@ -29,15 +29,6 @@ Rocq is a lot like a programming language, but it is fundamentally _interactive_
 Rocq was formerly called Coq, with the name change implemented around January 2025. See the [note on the Rocq website](https://rocq-prover.org/about#Name). You will still see references to Coq, in particular in Software Foundations.
 
 :::
-
-Three programming languages: terms, vernacular, tactics
-
-- Calculus of inductive constructions is the theory behind the term language.
-- Due to dependent types, there is no distinction between terms and types; it's all the same language.
-- Vernacular is a sequence of stateful commands. They create definitions, change attributes. They can also be queries which don't affect the state but help you write code. When you use Rocq interactively, you've executed a prefix of the vernacular commands. You can move forward and backward, undoing commands.
-- When you are done with a development, you generally re-run Rocq in "batch mode" like a compiler, which runs the same vernacular commands and produces a compiled output file. This is needed to make sure everything gets checked, and because Rocq uses those outputs when it needs to import another file.
-- Vernacular commands create new types, definitions, and start proofs. Creating new types is especially interesting.
-- Tactics are used to prove theorems. This is yet another language (quite different from both vernacular and terms) that is stateful. At any point in a proof, you have N goals left. Tactics make progress or solve goals. Once a theorem is proven, you can generally ignore how it was proven; only the statement matters. However, the tactics are also code that is subject to maintenance as definitions/theorems change.
 
 ## Functional programming
 
@@ -110,7 +101,18 @@ Proof.
   reflexivity.
 Qed.
 
+
 ```
+
+Now that we've seen some use of Rocq, let's take a step and characterize what we've seen.
+
+Rocq has three programming languages, interwoven in one proof system: terms, vernacular, and tactics.
+
+**Terms**: The Calculus of Inductive Constructions is the theory behind the term language. Due to the use of _dependent types_, there is no distinction between terms and types; it's all part of the same term language. **Vernacular**: Vernacular is a sequence of stateful commands. They create definitions, change attributes. They can also be queries which don't affect the state but help you write code. When you use Rocq interactively, you've executed a prefix of the vernacular commands. You can move forward and backward, undoing commands. Vernacular commands create new types, definitions, and start proofs. **Tactics** are used to prove theorems. This is yet another language. A proof consists of a number of goals, and tactics transform one goal into another (potentially solving the goal, or creating multiple new goals), hopefully making progress towards a finished proof. Once a theorem is proven, you can generally ignore how it was proven.
+
+When you are done with a development, you generally re-run Rocq in "batch mode" like a compiler, which runs the same vernacular commands and produces a compiled output file. This is needed to make sure everything gets checked, and because Rocq uses those outputs when it needs to import another file.
+
+Unlike most programming languages (where you could work in a terminal, write code for a while, run the compiler or the program, and then repeat), you must interact with the system via the IDE frequently to develop a proof. This is because when you make progress in a proof, Rocq has an interface to show you the effect of that progress (that is, the remaining goal), and you will need to see that to decide what to do next. It is important for learning Rocq to both have _some_ mental model for what tactics to do and also to _read_ the resulting goals.
 
 ## Booleans and the usual functions
 
@@ -172,9 +174,33 @@ Qed.
 
 ### In-class exercise: decoding type errors
 
-Think about these two errors on your own and try to explain how they were produced. What is needed to fix each?
+Think about these errors on your own and try to explain how they were produced. What is needed to fix each?
 
 ```rocq
+Fail Definition simple1 (b: bool) : bool :=
+  match b with
+  | true => false
+  | false => 0
+  end.
+(*
+Error:
+In environment
+b : bool
+The term "0" has type "nat" while it is expected to have type "bool".
+*)
+
+Fail Definition simple2 (b: bool) :=
+  match b with
+  | true => 0
+  | false => false
+  end.
+(*
+Error:
+In environment
+b : bool
+The term "false" has type "bool" while it is expected to have type "nat".
+*)
+
 Fail Definition complex_expr1 (b1 b2 b3: bool) :=
   orb (andb' b2 false) (andb (orb (b1)) (b3)) b2.
 (*
@@ -197,101 +223,16 @@ b3 : bool
 The term "b2" has type "bool -> bool" while it is expected to have type "bool".
 *)
 
+Fail Definition complex_expr3 b1 b2 b3 :=
+  andb (andb b1 (orb b2 b3 b1)) b2.
+(*
+Error:
+Illegal application (Non-functional construction):
+The expression "orb b2 b3" of type "bool" cannot be applied to the term
+ "b1" : "bool"
+*)
+
 End BooleanPlayground.
-
-```
-
-## Tuple types
-
-```rocq
-Module TuplePlayground.
-
-Inductive bit : Type :=
-| B1
-| B0.
-
-```
-
-A single constructor with multiple parameters creates a "tuple" type (in PL called a "product" type). Rocq has syntactic sugar for "record types" that extend this feature slightly.
-
-```rocq
-Inductive nybble : Type :=
-  | bits (b0 b1 b2 b3 : bit).
-Check (bits B1 B0 B1 B0)
-  : nybble.
-
-Definition all_zero (nb : nybble) : bool :=
-  match nb with
-  | (bits B0 B0 B0 B0) => true
-  | (bits _ _ _ _) => false
-  end.
-Compute (all_zero (bits B1 B0 B1 B0)).
-```
-
-:::: note Output
-
-```txt
-     = false
-     : bool
-```
-
-::::
-
-```rocq
-Compute (all_zero (bits B0 B0 B0 B0)).
-```
-
-:::: note Output
-
-```txt
-     = true
-     : bool
-```
-
-::::
-
-```rocq
-End TuplePlayground.
-
-```
-
-## Natural numbers
-
-```rocq
-Module NatPlayground.
-
-```
-
-So far, every type has finitely many values. For infinite types, we need something more.
-
-```rocq
-Inductive nat : Type :=
-| O
-| S (n: nat).
-
-```
-
-There's a lot to unpack here.
-
-First, what values does `nat` have? It produces the numbers `O`, `S O`, `S (S O)`, which we will interpret as 0, 1, 2, ....
-
-Second, this _defines_ `nat`, `O : nat`, and `S : nat -> nat`, but doesn't give them any meaning - we'll do that as humans reading the code, and via the functions we define.
-
-Another definition of numbers that we could use to mean the same thing:
-
-```rocq
-Inductive otherNat : Type :=
-  | stop
-  | tick (foo : otherNat).
-
-Fixpoint even (n:nat) : bool :=
-  match n with
-  | O => true
-  | S O => false
-  | S (S n') => even n'
-  end.
-
-End NatPlayground.
 
 ```
 
