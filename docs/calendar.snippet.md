@@ -3,8 +3,8 @@
 |  | Date | Lecture | Pre-reading |  |
 | --- | --- | --- | --- | --- |
 | 1 | Thu Sep 4 | Introduction: [notes](./notes/overview.md), [slides](./slides/lec1.pdf) |  |
-| 2 | Tue Sep 9 | Rocq introduction: [notes](./notes/rocq_intro.md) | [tool setup](./assignments/setup.md), [course syllabus](./syllabus.md) | bring a laptop |
-| 3 | Thu Sep 11 | Induction | [notes](./notes/induction.md), [slides](./slides/lec2.pdf) |
+| 2 | Tue Sep 9 | Rocq introduction: [notes](./notes/rocq_intro.md), [slides](./slides/lec2.pdf) | [tool setup](./assignments/setup.md), [course syllabus](./syllabus.md) | bring a laptop |
+| 3 | Thu Sep 11 | Induction | [notes](./notes/induction.md) |
 | 4 | Tue Sep 16 | ADT specification | [notes](./notes/adt_specs.md) |
 | 5 | Thu Sep 18 | ADTs with invariants | [notes](./notes/adt_invariants.md) |
 | 6 | Tue Sep 23 | Hoare logic (part 1) | [notes](./notes/hoare.md) |
