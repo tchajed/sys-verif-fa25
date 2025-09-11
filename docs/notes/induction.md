@@ -3,6 +3,7 @@
 category: lecture-note
 tags: literate
 order: 3
+date: 2025-09-10 8:00:00 -5
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
@@ -14,20 +15,95 @@ pageInfo: ["Date", "Category", "Tag", "Word"]
 
 By the end of this lecture, you should be able to
 
-1. Prove theorems about `nat`s with induction
-2. Translate informal proof to tactics
+1. Translate informal proof to mechanized proof
+2. Appreciate the nuances of induction
 
-## Logistics
+## Proving disjunctions and exists statements
 
-Make sure you have keyboard shortcuts working. The essential command is "Coq: Interpret to Point", but it's sometimes useful to also have "Coq: Step Forward" and "Coq: Step Backward".
+```rocq
+Inductive day : Type :=
+| monday
+| tuesday
+| wednesday
+| thursday
+| friday
+| saturday
+| sunday.
 
-## Review exercise: safe vs unsafe tactics (part 1)
+Definition is_weekend (d: day) :=
+  d = saturday \/ d = sunday.
 
-Recall some tactics we saw last lecture:
+Definition next_weekday (d: day) : day :=
+  match d with
+  | monday => tuesday
+  | tuesday => wednesday
+  | wednesday => thursday
+  | thursday => friday
+  | friday => monday
+  | saturday => monday
+  | sunday => monday
+  end.
+
+Definition next_day (d: day) : day :=
+  match d with
+  | monday => tuesday
+  | tuesday => wednesday
+  | wednesday => thursday
+  | thursday => friday
+  | friday => saturday
+  | saturday => sunday
+  | sunday => monday
+  end.
+
+Lemma weekend_next_day_weekend (d: day) :
+  d = friday \/ d = saturday ->
+  is_weekend (next_day d).
+Proof.
+Admitted.
+```
+
+Proving an [exists] is complicated and we'll have more to say, but try to think through this intuitively for now.
+
+```rocq
+Lemma wednesday_has_prev_day : exists d, next_day d = wednesday.
+Proof.
+  exists tuesday.
+  simpl. reflexivity.
+Qed.
+
+```
+
+## In-class exercise: informal proof
+
+Now let's prove something more interesting: every day has a previous day.
+
+Think-pair-share and come up with an _informal_ proof strategy. Then I'll show how to translate it to a Rocq proof.
+
+```rocq
+Lemma every_day_has_prev : forall d, exists d', next_day d' = d.
+Proof.
+  (* Goal is a forall, so introduce it. *)
+  intros d.
+Admitted.
+```
+
+Challenging proof: the above lemma becomes false if `next_day` is replaced with `next_weekday`. Let's prove that.
+
+```rocq
+Lemma every_day_does_not_have_prev_weekday : ~forall d, exists d', next_weekday d' = d.
+Proof.
+Admitted.
+```
+
+## Exercise: safe vs unsafe tactics (part 1)
+
+Recall some tactics we've seen:
 
 - `intros`
+- `destruct`
+- `left`
+- `right`
 - `reflexivity`
-- `rewrite`
 - `simpl`
 - `exists` (provides a witness when the goal is `exists (x: T), P x`)
 
@@ -107,7 +183,7 @@ Proof.
   - (* base case *)
     simpl.
     reflexivity.
-  - (* inductve step, with [IHn] as the inductive hypothesis *)
+  - (* inductive step, with [IHn] as the inductive hypothesis *)
     simpl.
     rewrite IHn.
     reflexivity.
@@ -127,7 +203,7 @@ Proof.
 
 ```
 
-Pick the right disjunct to prove. Similarly, `left` would leave use to prove `P`.
+Pick the right disjunct to prove. Similarly, `left` would leave us to prove `P`.
 
 ```rocq
   right.
