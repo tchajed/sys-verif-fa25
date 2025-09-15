@@ -18,6 +18,12 @@ pageInfo: ["Date", "Category", "Tag", "Word"]
 
 ### Invariant-based ADT specification
 
+The strategy we saw in the previous note is good, but we can make it better. There are cases where you have code and a model, and the code always behaves like the model, but the above strategy doesn't work.
+
+The issue is that we might need an _invariant_ for the code to be correct. The specifications above ask the developer to prove the abstraction is correct for every operation and getter function for any input of type `T`; however, some values of type `T` may never be produced by this library. Typically with an ADT we can rely on the client to only use the provided methods (that's what the "abstract" in "abstract data type" means), so our code should only have to be correct for data it can actually produce.
+
+The way to address this is to change the specification we prove to incorporate an invariant, so that all the proofs (a) show the invariant is preserved at all times, and (b) we relate the code to the model only when the invariant holds. We'll see how the client reasoning above still works, so that the specification still shows that any client can substitute the model and think about the model rather than the code.
+
 An ADT consists of:
 
 - A type `T` (the _code_ or _concrete_ representation) of the data type.

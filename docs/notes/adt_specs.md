@@ -4,6 +4,7 @@ category: lecture-note
 tags: literate
 shortTitle: "ADT specification"
 order: 4
+date: 2025-09-14
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
@@ -26,7 +27,7 @@ For functional programs, there are a few different styles you might use. In this
 
 The basic idea is that when you have something called an Abstract Data Type (ADT) - some data type and associated functions to use it - you can prove that it behaves like an _abstract model_. The specification we show is enough to enable a client to reason about their own code without referencing your code, only the model.
 
-## Illustrative example: big numbers
+## Example 1: big numbers
 
 Suppose we want to represent numbers of arbitrary size. One way to do this is with a list of digits, using the built-in `list` type.
 
@@ -169,7 +170,9 @@ What do you think is the model of a relational database? To make this concrete, 
 
 What type would be the model of a database in this schema? That is, if we were writing `db_rep : database -> M` what should `M` be?
 
-### Example 2: map with deletions
+## Example 2: map with deletions
+
+The abstraction in this example is a simple map, but the implementation is more complex: it tracks both a normal map of elements and a set of deleted keys. Such an implementation might be useful if the map is large and it is desirable to make deletions fast (at the cost of slower lookups). A more sophisticated implementation would also normalize the data structure, occasionally removing an element from both the `elements` map and `deletions` set, in order to avoid unbounded growth of the deletions set.
 
 ```rocq
 (* This Module just groups the definitions so we can use short names inside. *)
@@ -242,7 +245,7 @@ Proof.
       { set_solver. }
       auto.
     }
-    destruct (elements m !! k') as [v0|] eqn:Heqk'.
+    destruct (elements m !! k') as [v0|] eqn:Hgetk'.
     + transitivity (Some v0).
       { apply map_lookup_filter_Some. split; auto. set_solver. }
       symmetry.
@@ -261,7 +264,6 @@ Proof.
     apply map_lookup_filter_None.
     set_solver.
   - rewrite lookup_delete_ne //.
-    admit.
 Admitted.
 
 Lemma lookup_spec k m : lookup_ k m = (rep m) !! k.
@@ -354,17 +356,3 @@ Sometimes described as a **commutative diagram** (though this term has a very sp
 Notice that the client reasoning does not depend on `rep`; it is a detail of the proof that explains _why_ the code is correct, but is not necessary to understand _what the code does_. On the other hand if you were verifying the code you would certainly care about what `rep` is since it directly shows up in all of the proof obligations, and if you were implementing this library you also might want to have a model in mind and think about how each code state maps to it.
 
 Also notice that the model - `S` and all the spec variants - were invented as part of the spec, but aren't inheret to the code. You can even imagine proving the same code relates to two different models.
-
-## Extension 1: code invariants
-
-The above strategy is good, but we can make it better. There are cases where you have code and a model, and the code always behaves like the model, but the above strategy doesn't work.
-
-The issue is that we might need an _invariant_ for the code to be correct. The specifications above ask the developer to prove the abstraction is correct for every operation and getter function for any input of type `T`; however, some values of type `T` may never be produced by this library. Typically with an ADT we can rely on the client to only use the provided methods (that's what the "abstract" in "abstract data type" means), so our code should only have to be correct for data it can actually produce.
-
-The way to address this is to change the specification we prove to incorporate an invariant, so that all the proofs (a) show the invariant is preserved at all times, and (b) we relate the code to the model only when the invariant holds. We'll see how the client reasoning above still works, so that the specification still shows that any client can substitute the model and think about the model rather than the code.
-
-## Exercise: derive model-based specifications with invariants
-
-Make an attempt to write the proof obligations for a model-based specification that incorporates an invariant over the data, adapting the strategy above. Think about what would make your strategy _sound_ in justifying the reasoning above that converted the code functions to spec functions.
-
-In the next lecture we'll start with this specification.
