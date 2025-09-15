@@ -19,12 +19,12 @@
     "@vuepress/plugin-shiki": "2.0.0-rc.112",
     "katex": "^0.16.22",
     "mathjax-full": "^3.2.2",
-    "mermaid": "^11.10.1",
+    "mermaid": "^11.11.0",
     "prettier": "^3.6.2",
-    "sass-embedded": "^1.91.0",
-    "vue": "^3.5.20",
+    "sass-embedded": "^1.92.1",
+    "vue": "^3.5.21",
     "vuepress": "2.0.0-rc.24",
     "vuepress-theme-hope": "2.0.0-rc.94"
   },
-  "packageManager": "pnpm@10.15.0+sha512.486ebc259d3e999a4e8691ce03b5cac4a71cbeca39372a9b762cb500cfdf0873e2cb16abe3d951b1ee2cf012503f027b98b6584e4df22524e0c7450d9ec7aa7b"
+  "packageManager": "pnpm@10.16.1+sha512.0e155aa2629db8672b49e8475da6226aa4bdea85fdcdfdc15350874946d4f3c91faaf64cbdc4a5d1ab8002f473d5c3fcedcd197989cf0390f9badd3c04678706"
 }
