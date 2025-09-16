@@ -550,7 +550,33 @@ Proof.
       destruct (decide (x ∈ st_rep t1)).
       * rewrite decide_True //. set_solver.
       * rewrite decide_False //.
-        (* We will prove that x is not in each of these three parts. We already have `x ∉ st_rep` by assumption. *)
+```
+
+:::: info Goal
+
+```txt
+  el : Z
+  t1, t2 : search_tree
+  x : Z
+  n : x ∉ st_rep t1
+  IHt1 : st_inv t1 → st_find t1 x = false
+  IHt2 :
+    st_inv t2
+    → st_find t2 x = (if decide (x ∈ st_rep t2) then true else false)
+  Hlt : ∀ x : Z, x ∈ st_rep t1 → x < el
+  Hgt : ∀ y : Z, y ∈ st_rep t2 → el < y
+  Hinvt1 : st_inv t1
+  Hinvt2 : st_inv t2
+  l : x < el
+  ============================
+  x ∉ {[el]} ∪ st_rep t1 ∪ st_rep t2
+```
+
+::::
+
+```rocq
+        (* We will prove that x is not in each of these three parts. We already
+        have [x ∉ st_rep t1] by assumption. *)
         assert (x ≠ el) by lia.
         (* x being on the right side is a contradiction: we are in a branch
         (from much earlier) where [x < el] but on the right side of the tree [el
@@ -560,7 +586,8 @@ Proof.
           apply Hgt in Hel.
           lia. }
         set_solver.
-    + destruct Hinv as (Hlt & Hgt & Hinvt1 & Hinvt2).
+    + (* This branch is when [x ≥ el]. *)
+      destruct Hinv as (Hlt & Hgt & Hinvt1 & Hinvt2).
       destruct (decide (el < x)).
       * rewrite -> IHt2 by auto.
         (* NOTE: you could do the rest of this proof with more basic techniques,
