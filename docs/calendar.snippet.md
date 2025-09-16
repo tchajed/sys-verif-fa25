@@ -5,14 +5,14 @@
 | 1 | Thu Sep 4 | Introduction: [notes](./notes/overview.md), [slides](./slides/lec1.pdf) |  |  |
 | 2 | Tue Sep 9 | Rocq introduction: [notes](./notes/rocq_intro.md), [slides](./slides/lec2.pdf) | [tool setup](./assignments/setup.md), [course syllabus](./syllabus.md) | bring a laptop |
 | 3 | Thu Sep 11 | Induction: [slides](./slides/lec3.pdf) | [notes](./notes/induction.md) |  |
-| 4 | Tue Sep 16 | ADT specification | [notes](./notes/adt_specs.md) |  |
-| 5 | Thu Sep 18 | ADTs with invariants | [notes](./notes/adt_invariants.md) |  |
-| 6 | Tue Sep 23 | Hoare logic (part 1) | [notes](./notes/hoare.md) |  |
-| 7 | Thu Sep 25 | Hoare logic (part 2) |  |  |
+| 4 | Tue Sep 16 | Abstraction | [notes](./notes/adt_specs.md) |  |
+| 5 | Thu Sep 18 | Hoare logic (part 1) | [notes](./notes/hoare.md) | theory lecture |
+| 6 | Tue Sep 23 | Hoare logic (part 2) |  | theory lecture |
+| 7 | Thu Sep 25 | Separation logic (part 1) | [notes](./notes/sep-logic.md) | theory lecture |
 |  | Mon Sep 29 |  |  | _[Assignment 1](./assignments/hw1/) due (11pm)_ |
-| 8 | Tue Sep 30 | Separation logic (part 1) | [notes](./notes/sep-logic.md) |  |
-| 9 | Thu Oct 2 | Separation logic (part 2) |  |  |
-| 10 | Tue Oct 7 | Iris Proof Mode | [notes](./notes/ipm.md) |  |
+| 8 | Tue Sep 30 | Separation logic (part 2) |  | theory lecture |
+| 9 | Thu Oct 2 | **No class** (Tej is traveling) |  |  |
+| 10 | Tue Oct 7 | Iris Proof Mode | [notes](./notes/ipm.md) | bring a laptop |
 | 11 | Thu Oct 9 | Modeling Go programs | [notes](./notes/goose.md) |  |
 | 12 | Tue Oct 14 | Loop invariants | [notes](./notes/loop_invariants.md) |  |
 | 13 | Thu Oct 16 | Ownership | [notes](./notes/ownership.md) |  |
@@ -31,7 +31,7 @@
 | 24 | Tue Nov 25 | SMT-based verification | [notes](./notes/smt.md) |  |
 |  | Thu Nov 27 | **No class (Thanksgiving)** |  |  |
 | 25 | Tue Dec 2 | Liveness | [notes](./notes/liveness.md) |  |
-| 26 | Thu Dec 4 | slack |  |  |
+| 26 | Thu Dec 4 | \__slack_ |  |  |
 | 27 | Tue Dec 9 | [Course wrap-up](./notes/summary.md) |  |  |
 |  | Thu Dec 11 |  |  | _[Assignment 4](./assignments/hw4/) due (11pm)_ |
 
