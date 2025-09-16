@@ -15,7 +15,7 @@ This is a graduate-level class on _systems verification_: how to mathematically 
 **Lecture**: Tue/Thu 1-2:15pm \
 **Classroom**: Morgridge Hall 2538
 
-**Office hours**: Wed/Thu 3-4pm, in Morgridge 7572
+**Office hours**: Mon/Thu 3-4pm, in Morgridge 7572
 
 :::
 
