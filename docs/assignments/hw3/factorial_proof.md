@@ -26,7 +26,7 @@ Context `{!globalsGS Σ} {go_ctx: GoContext}.
 
 A functional implementation of the factorial function is already provided as `fact` by the Coq standard library, which is what we'll use. It looks as you'd expect:
 
-```coq
+```rocq
 Fixpoint fact (n: nat): nat :=
   match n with
   | 0%nat => 1%nat

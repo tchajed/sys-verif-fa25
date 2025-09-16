@@ -93,7 +93,7 @@ Admitted. (* exercise for the reader *)
 
 To summarize, the interface to the code we export to the client (which we'll have to write a spec for) consists of the following signatures:
 
-```coq
+```rocq
 Definition big_int : Type.
 
 Definition zero : big_int.

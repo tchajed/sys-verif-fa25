@@ -55,7 +55,7 @@ func Arith(a, b uint64) uint64 {
 
 translates to:
 
-```coq
+```rocq
 Definition Arith: val :=
   rec: "Arith" "a" "b" :=
     let: "sum" := "a" + "b" in
@@ -109,7 +109,7 @@ func StackEscape() *uint64 {
 }
 ```
 
-```coq
+```rocq
 Definition StackEscape: val :=
   rec: "StackEscape" <> :=
     let: "x" := ref_to uint64T #42 in
@@ -142,7 +142,7 @@ func SumN(n uint64) uint64 {
 }
 ```
 
-```coq
+```rocq
 Definition SumN: val :=
   rec: "SumN" "n" :=
     let: "sum" := ref_to uint64T #0 in
@@ -160,7 +160,7 @@ Definition SumN: val :=
 
 The (GooseLang) syntax `for:` is a very thin Notation around the following _model_ of (Go) `for` loops:
 
-```coq
+```rocq
 Definition For: val :=
   λ: "cond" "body" "post",
   (rec: "loop" <> :=

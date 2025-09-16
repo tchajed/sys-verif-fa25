@@ -41,14 +41,14 @@ These two signatures are very similar, but the comments say different things abo
 
 The answer is that these two functions have different _ownership_ disciplines for their input buffers, and these are expressed only through comments. The ownership of the slice becomes more concrete when we look at (hypothetical) separation logic specifications:
 
-```coq
+```rocq
 Lemma wp_FileAppend f data_s bs bs' :
   {{{ file_data(f, bs) ∗ own_slice data_s bs' }}}
     FileAppend f data_s
   {{{ file_data(f, bs ++ bs') ∗ own_slice data_s bs' }}}.
 ```
 
-```coq
+```rocq
 Lemma wp_NetworkSend c data_s bs bs' :
   {{{ conn_stream(c, bs) ∗ own_slice data_s bs' }}}
     NetworkSend c data_s
@@ -192,7 +192,7 @@ Now let's see how this theory translates to Goose. First of all, we don't litera
 
 Here's the actual translation of the structs above:
 
-```coq
+```rocq
 Definition Person := struct.decl [
   "FirstName" :: stringT;
   "LastName" :: stringT;
@@ -422,7 +422,7 @@ Declared in library New.golang.theory.slice, line 34, characters 19-28
 
 You can ignore this whole string of parameters, which are related to Goose support for interacting with disks and the network (all of the "external" and "FFI" related parameters):
 
-```coq
+```rocq
 {ext : ffi_syntax} {ffi : ffi_model} {ffi_interp0 : ffi_interp ffi}
   {Σ : gFunctors},
   heapGS Σ
@@ -514,7 +514,7 @@ Confirm for yourself that `own_slice_small` and `own_slice_cap` are disjoint; wi
 
 The main specification related to capacity is the one for append:
 
-```coq
+```rocq
 Lemma wp_SliceAppend s t vs x :
   {{{ own_slice s t (DfracOwn 1) vs ∗ ⌜val_ty x t⌝ }}}
     SliceAppend t s x

@@ -117,7 +117,7 @@ This problem is also why we need the `done` variable.
 
 We already used the specification for this library in the first proof of the parallel add example. Recall that the basic idea was to promise something as the postcondition for the spawned thread, and then to return that assertion in `Join`. Here's what that looks like:
 
-```coq
+```rocq
 Lemma wp_Spawn (Q: iProp Σ) (f: val) :
   {{{ WP f #() {{ Q }} }}}
     Spawn f

@@ -26,7 +26,7 @@ The general idea for proving the correctness of a loop is to invent a _loop inva
 
 Here's the principle of loop invariants stated formally, for the `for` loop model above. This is a theorem in Perennial (slightly simplified).
 
-```coq
+```rocq
 Lemma wp_forBreak (I: bool -> iProp Σ) (body: val) :
   {{{ I true }}}
     body #()
