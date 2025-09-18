@@ -19,7 +19,7 @@ pageInfo: ["Date", "Category", "Tag", "Word"]
 
 ## Introduction
 
-We have so far taken a view of program verification where the code is a functional program in Coq, the specification is a property about that function, and the proof uses any Coq-level reasoning required; we specifically developed a style where the code is an ADT and the specification relates it to a model.
+We have so far taken a view of program verification where the code is a functional program in Rocq, the specification is a property about that function, and the proof uses any Rocq-level reasoning required; we specifically developed a style where the code is an ADT and the specification relates it to a model.
 
 We will now develop Hoare logic, a formal system for reasoning about program correctness. At first, the code will still be functional programs. The specifications will use a new style of pre- and post-conditions, attached to each function. Proofs will use the rules of Hoare logic to handle each programming feature and to compose existing specifications together. Hoare logic will provide a smooth path to separation logic and concurrent separation logic, which add extensions for reasoning about more interesting programs while retaining much of the basic structure of this simple version.
 
@@ -73,7 +73,7 @@ e_1 \, e_2 \, e_3 &::= (\app{e_1}{e_2}) \, e_3
 \end{aligned}
 $$
 
-Some notation is worth explaining here. The notation uses _metavariables_ to indicate what is being defined; $e$ always refers to an expression, $v$ to a value, $x$ to a variable, and $n$ to a number. When we write $v ::= \true \mid \false$, this defines variables $v$ to be either the constant $\true$ or $\false$ (the vertical bar separates alternatives, just like a Coq `Inductive`). The grammar for expressions includes one alternative $e ::= v$, which says that any value (defined above) can also be used as an expression. The grammar defines a recursive inductive datatype for expressions and for values; the definitions refer to each other ($e ::= v$ refers to values when defining expressions, but also $v ::= \fun{x} e$ says anonymous functions are values and the body is an expression), so we have _mutually recursive inductives_.
+Some notation is worth explaining here. The notation uses _metavariables_ to indicate what is being defined; $e$ always refers to an expression, $v$ to a value, $x$ to a variable, and $n$ to a number. When we write $v ::= \true \mid \false$, this defines variables $v$ to be either the constant $\true$ or $\false$ (the vertical bar separates alternatives, just like a Rocq `Inductive`). The grammar for expressions includes one alternative $e ::= v$, which says that any value (defined above) can also be used as an expression. The grammar defines a recursive inductive datatype for expressions and for values; the definitions refer to each other ($e ::= v$ refers to values when defining expressions, but also $v ::= \fun{x} e$ says anonymous functions are values and the body is an expression), so we have _mutually recursive inductives_.
 
 The grammar rule $e ::= x$ says that a variable like $x$ or $y$ is an expression ($e$ in the grammar). $v ::= \overline{n}$ says that an integer constant $\overline{n}$ is a value; the overline is used to distinguish between a meta-level number $n : \mathbb{Z}$ and the literal $\overline{n}$ which is a value in the language. $\pi_1 \, e$ and $\pi_2 \, e$ are "projection functions" (often denoted using $\pi$) that get the first and second element of a tuple, respectively.
 
@@ -81,7 +81,7 @@ The grammar rule $e ::= x$ says that a variable like $x$ or $y$ is an expression
 
 You may have seen a definition of the lambda calculus that basically said $e ::= x \mid v \mid \fun{x} e$. Separately, you would then have a definition of a value predicate $\operatorname{val}(e)$ (probably as part of the semantics), defined so that only lambda abstractions are values.
 
-The definition above instead makes values a separate syntax, and then embeds them into expressions. A value is only the expressions formed this way. When this definition is formalized in Coq, this does mean that there are some constructs like pairs and lambda abstractions that appear in both the definition of expressions and values, but we can be ambiguous via an "abuse of notation" when working on paper.
+The definition above instead makes values a separate syntax, and then embeds them into expressions. A value is only the expressions formed this way. When this definition is formalized in Rocq, this does mean that there are some constructs like pairs and lambda abstractions that appear in both the definition of expressions and values, but we can be ambiguous via an "abuse of notation" when working on paper.
 
 :::
 
@@ -173,7 +173,7 @@ For the curious, substitution is not entirely straightforward.
 
 There is a generally tricky issue of _variable capture_ when defining substitution. The issue is that if we have an expression like $\lambda y.\, \lambda x.\, x + y$ and try to apply it to the free variable $x$, a naive definition of substitution will reduce to $(\lambda x.\, x + y)[x / y] = \lambda x.\ x + x$. Notice that what was a free variable is now a reference to the lambda abstraction's bound variable; we call this "variable capture" and it's generally considered a bug in substitution. Instead, _capture-avoiding substitution_ will rename bound variables and produce $(\lambda x.\, x + y)[x / y] = \lambda z.\ z + x$, preserving the meaning of the original expression.
 
-The Coq formalism we will eventually use based on Iris does not solve this problem (using a slightly wrong definition of substitution), but we will always substitute closed terms $v$ and in that situation variable capture is not possible.
+The Rocq formalism we will eventually use based on Iris does not solve this problem (using a slightly wrong definition of substitution), but we will always substitute closed terms $v$ and in that situation variable capture is not possible.
 
 :::
 
@@ -267,7 +267,7 @@ The rules of Hoare logic explain how to prove a triple by breaking it down into 
 
 ### Propositions {#propositions}
 
-The Hoare triple has "propositions" $P$ and $Q$. You can proceed to the next sub-section with an intuition that a proposition is a Coq proposition, but eventually (when we upgrade to separation logic) it will be more like a _predicate over the program state_. The main thing to note is that in the Hoare logic rules we use a statement $P \entails Q$ (pronounced "$P$ entails $Q$"), which says "whenever $P$ is true, $Q$ is true".
+The Hoare triple has "propositions" $P$ and $Q$. You can proceed to the next sub-section with an intuition that a proposition is a Rocq proposition, but eventually (when we upgrade to separation logic) it will be more like a _predicate over the program state_. The main thing to note is that in the Hoare logic rules we use a statement $P \entails Q$ (pronounced "$P$ entails $Q$"), which says "whenever $P$ is true, $Q$ is true".
 
 Let's start with the following grammar for propositions:
 
@@ -275,9 +275,9 @@ $$
 \mathrm{Propositions}\quad P ::= \lift{\phi} \mid \exists x.\, P(x) \mid \forall x.\, Q(x) \mid P \land Q \mid P \lor Q
 $$
 
-where $\phi$ is a "meta-level" proposition (think of it as a Coq proposition, which is what it will be when we use formalization of all of this theory). We will use $\lift{\phi}$ to "lift" a meta-level proposition to the Hoare logic level; in the rest of these notes this conversion will be implicit, to keep things concise.
+where $\phi$ is a "meta-level" proposition (think of it as a Rocq proposition, which is what it will be when we use formalization of all of this theory). We will use $\lift{\phi}$ to "lift" a meta-level proposition to the Hoare logic level; in the rest of these notes this conversion will be implicit, to keep things concise.
 
-For now, a Hoare logic proposition $P$ appears no better than Coq propositions. This will change when we move to separation logic.
+For now, a Hoare logic proposition $P$ appears no better than Rocq propositions. This will change when we move to separation logic.
 
 The rules for proving entailments between propositions are mostly intuitive, and we will come back to them and be more precise with separation logic. However, to give you a flavor here are a few rules:
 
@@ -308,16 +308,16 @@ It's important to have some fluency with these rules. This first means knowing h
 
 First, remember that above the line is a rule's premises (if there are any) and below is its conclusion.
 
-In general with such proof rules, you will want to start by looking for _axioms_, or rules without premises. These are the ends of a proof, where using these rules will finish the proof. For other rules (which will be the majority) you will want to read rules from the conclusion to the premises: the effect of `apply`ing in Coq is to transform a goal that looks like the conclusion into the premises. If there's a Hoare triple in both, then the one in the premise is the "rest of the proof" and the rest of the premises are "side conditions" required to apply this rule.
+In general with such proof rules, you will want to start by looking for _axioms_, or rules without premises. These are the ends of a proof, where using these rules will finish the proof. For other rules (which will be the majority) you will want to read rules from the conclusion to the premises: the effect of `apply`ing in Rocq is to transform a goal that looks like the conclusion into the premises. If there's a Hoare triple in both, then the one in the premise is the "rest of the proof" and the rest of the premises are "side conditions" required to apply this rule.
 
 For Hoare logic more specifically, read rules **counter-clockwise starting at the bottom left**, starting with the precondition in the goal, observe what preconditions are provided in the premises, see what postcondition needs to be established, and finally see what postcondition this concludes in by looking at the goal. Try doing this to understand what the consequence and pure-step rules accomplish.
 
 :::
 
-It's best for the purpose of this class to think about $\hoare{P}{e}{\fun{v} Q(v)}$ as a Coq `Prop` that says $e$ has a particular specification, with a definition that we haven't yet given. The rules below are then theorems proven with that definition. There are two consequences to this view:
+It's best for the purpose of this class to think about $\hoare{P}{e}{\fun{v} Q(v)}$ as a Rocq `Prop` that says $e$ has a particular specification, with a definition that we haven't yet given. The rules below are then theorems proven with that definition. There are two consequences to this view:
 
-- The specifications we write will quantify over Coq-level variables (implicitly in the notes, but in Coq we will have to be explicit about this). For example, $\hoare{\True}{\operatorname{add}  \, \overline{n} \, \overline{m}}{\fun{v} v = \overline{n + m}}$ should be viewed as being for all values of the Coq variables $n : \mathbb{Z}$ and $m : \mathbb{Z}$.
-- In addition to using the rules of Hoare logic, we can also use Coq reasoning principles, like `destruct` and arithmetic reasoning about $n$ and $m$. The rules will handle anything specific to programs.
+- The specifications we write will quantify over Rocq-level variables (implicitly in the notes, but in Rocq we will have to be explicit about this). For example, $\hoare{\True}{\operatorname{add}  \, \overline{n} \, \overline{m}}{\fun{v} v = \overline{n + m}}$ should be viewed as being for all values of the Rocq variables $n : \mathbb{Z}$ and $m : \mathbb{Z}$.
+- In addition to using the rules of Hoare logic, we can also use Rocq reasoning principles, like `destruct` and arithmetic reasoning about $n$ and $m$. The rules will handle anything specific to programs.
 
 $$\hoare{P(v)}{v}{\fun{w} P(w)} \eqnlabel{value}$$
 
@@ -347,9 +347,9 @@ $$
 \hoare{\exists x.\, P(x)}{e}{\fun{v} Q(v)}} \eqnlabel{exists}
 $$
 
-You can think of $\Rightarrow$ as being Coq implication, as opposed to entailment between propositions.
+You can think of $\Rightarrow$ as being Rocq implication, as opposed to entailment between propositions.
 
-Let's walk through the pure-step rule. It says to prove a triple about $e_1$ with arbitrary pre- and post-conditions, we can switch to a different proof about $e_2$ with the same pre- and post-conditions, if $e_1 \to e_2$. In practice, imagine you're doing a Coq proof whose goal is $\hoare{P}{e_1}{\fun{v} Q(v)}$. Applying this rule would change your goal to a goal with $e_2$ instead, which is _simpler_ because $e_2$ is the result of one step of computation. This is almost like running `simpl` on a Coq goal, but we've moved forward by one step of computation _in the programming language_ as opposed to steps of Coq's functions.
+Let's walk through the pure-step rule. It says to prove a triple about $e_1$ with arbitrary pre- and post-conditions, we can switch to a different proof about $e_2$ with the same pre- and post-conditions, if $e_1 \to e_2$. In practice, imagine you're doing a Rocq proof whose goal is $\hoare{P}{e_1}{\fun{v} Q(v)}$. Applying this rule would change your goal to a goal with $e_2$ instead, which is _simpler_ because $e_2$ is the result of one step of computation. This is almost like running `simpl` on a Rocq goal, but we've moved forward by one step of computation _in the programming language_ as opposed to steps of Rocq's functions.
 
 ### Example: consequences of bind rule
 
@@ -510,7 +510,7 @@ This completes the proof! Taking a step back, notice how we basically broken dow
 
 ### Exercise: prove the triples
 
-Prove the Hoare triples above. Do the proofs as carefully as you can, annotating the rules you use. This is good practice for understanding the rules, and will also help you appreciate when we switch to Coq and it automates the book-keeping for you.
+Prove the Hoare triples above. Do the proofs as carefully as you can, annotating the rules you use. This is good practice for understanding the rules, and will also help you appreciate when we switch to Rocq and it automates the book-keeping for you.
 
 You may want to start by reading the next section on Hoare outlines and writing an outline-based proof sketch, and only then trying to do a detailed proof.
 
@@ -564,7 +564,7 @@ Modularity is also beneficial when a helper function is reused, since then the p
 
 What does it mean to prove $\hoare{P}{e}{\fun{v} Q(v)}$? We have a bunch of "rules" above, but where do they come from?
 
-The reason Hoare logic is useful and what it means to have a (proven) Hoare triple is that we can give a definition of _soundness_ of a Hoare triple that relates it to the semantics of programs, and then all the rules given above can be proven as theorems. The soundness definition requires that we interpret propositions, and you can think of that interpretation as being Coq propositions here.
+The reason Hoare logic is useful and what it means to have a (proven) Hoare triple is that we can give a definition of _soundness_ of a Hoare triple that relates it to the semantics of programs, and then all the rules given above can be proven as theorems. The soundness definition requires that we interpret propositions, and you can think of that interpretation as being Rocq propositions here.
 
 ::: important Hoare triple definition/soundness
 

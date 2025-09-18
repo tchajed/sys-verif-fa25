@@ -26,7 +26,7 @@ After much time spent on functional programs, we will now finally start talking 
 Separation logic is an extension of Hoare logic. We'll still have a specification of the form $\hoare{P}{e}{\fun{v} Q(v)}$. There are three main extensions:
 
 - Our programs (the expressions $e$) will now have constructs for allocating, reading, and writing to heap memory.
-- Propositions will no longer be pure and equivalent to a Coq `Prop`. Instead, they'll be predicates over the heap, of type `hProp := heap → Prop` (`heap` is our representation of the state of these imperative programs, which we'll get to later). The precondition and postcondition will be these heap predicates, so they'll say something about both program variables and the initial and final states of the program.
+- Propositions will no longer be pure and equivalent to a Rocq `Prop`. Instead, they'll be predicates over the heap, of type `hProp := heap → Prop` (`heap` is our representation of the state of these imperative programs, which we'll get to later). The precondition and postcondition will be these heap predicates, so they'll say something about both program variables and the initial and final states of the program.
 - In addition to the usual connectives over propositions ($P \land Q$, $P \lor Q$, $\exists x.\, P(x)$), we'll add a new _points-to assertion_ $\ell \pointsto v$ that says what the value of one heap address is, and a new _separating conjunction_ $P \sep Q$, pronounced "$P$ and separately $Q$". $P \sep Q$ says that $P$ and $Q$ both hold _separately_: they must be true over disjoint sub-parts of the heap.
 - We'll add some new rules for proving separation logic triples (and keep all the old rules). A crucial rule is the _frame rule_ which permits us to write a specification for a function that talks only about the memory addresses that a program needs, while still capturing that other addresses are unchanged when we use that function's specification in a bigger context.
 
@@ -70,7 +70,7 @@ If we choose not to ignore other locations, we can say more generally that $h = 
 
 ## Heap predicates
 
-In separation logic, when we write $\hoare{P}{e}{\fun{v} Q(v)}$, the propositions $P$ and $Q(v)$ will no longer be regular Coq `Prop`s but instead _heap predicates_ `hProp := heap → Prop`. The meaning of the Hoare triple is that if we start in an _initial heap_ where $P(h)$ is true, run $e$ till it terminates in a value $v$ and _final heap_ $h'$, then $Q(v)(h')$ holds (notice how $Q$ is a heap predicate which is a function of a value, thus it needs two arguments).
+In separation logic, when we write $\hoare{P}{e}{\fun{v} Q(v)}$, the propositions $P$ and $Q(v)$ will no longer be regular Rocq `Prop`s but instead _heap predicates_ `hProp := heap → Prop`. The meaning of the Hoare triple is that if we start in an _initial heap_ where $P(h)$ is true, run $e$ till it terminates in a value $v$ and _final heap_ $h'$, then $Q(v)(h')$ holds (notice how $Q$ is a heap predicate which is a function of a value, thus it needs two arguments).
 
 ::: info Aside on logic
 
@@ -136,7 +136,7 @@ Entailment between heap predicates is straightforward to define:
 
 $P \entails Q ::= \forall (h: \Heap).\, P(h) \to Q(h)$
 
-Remember that $P$ and $Q$ are predicates over heaps, so we cannot say one "implies" the other directly, but $P(h)$ (for some heap $h$) on the other hand is a $\mathrm{Prop}$ and we can use regular Coq implication $\to$ over it.
+Remember that $P$ and $Q$ are predicates over heaps, so we cannot say one "implies" the other directly, but $P(h)$ (for some heap $h$) on the other hand is a $\mathrm{Prop}$ and we can use regular Rocq implication $\to$ over it.
 
 Remember the syntax $\lift{\varphi}$ from earlier. This "lifts" a pure proposition $\varphi : \mathrm{Prop}$ to the propositions in our logic. Before those were also $\mathrm{Prop}$ and lifting didn't do anything, but now we want heap predicates. The definition we'll choose is $(\lift{\varphi})(h) = \varphi \land h = \empty$; this requires $\varphi$ to be true and also meanwhile asserts $\varphi$ is true.
 
@@ -430,7 +430,7 @@ Again, read the same thing but for propositional logic:
 
 $$P \entails (Q \to R) \iff P \land Q \entails R$$
 
-If you read (either of these rules) left to right, you can think of them as moving $Q$ into the hypotheses, if this were a Coq tactic. Reading right to left, we can move a hypotheses back into the goal (you haven't really needed to do that in Coq but you should certainly imagine it's sound).
+If you read (either of these rules) left to right, you can think of them as moving $Q$ into the hypotheses, if this were a Rocq tactic. Reading right to left, we can move a hypotheses back into the goal (you haven't really needed to do that in Rocq but you should certainly imagine it's sound).
 
 One very useful rule for wands is that they _curry_ in the same way as functions and propositional implication:
 
@@ -442,7 +442,7 @@ Again, make an analogy to how $P \to (Q \to R)$ is equivalent to $P \land Q \to 
 
 Because of currying, implication and wand are parsed as right associative: $P \to (Q \to R)$ is written without parentheses as $P \to Q \to R$ and $P \wand (Q \wand R)$ is written $P \wand Q \wand R$. The other parenthesization, $(P \to Q) \to R$, has a less intuitive meaning ("if we had a proof that $P$ implies $Q$, then we could prove $R$") and comes up less often.
 
-There's more to say about magic wand. Some practice is needed before you become comfortable with it, which I think will be easier with the Coq development than just seeing rules on paper.
+There's more to say about magic wand. Some practice is needed before you become comfortable with it, which I think will be easier with the Rocq development than just seeing rules on paper.
 
 ## Weakest preconditions
 
