@@ -76,30 +76,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Exercise 1
-\question[5]
-Prove the rule of consequence for Hoare logic, from the soundness definition for
-a Hoare triple.
-
-\paragraph{Consequence}
-\[
-  \frac{P' \entails P \quad (\forall v.\, Q(v) \entails Q'(v)) \quad \hoare{P}{e}{Q(v)}}{%
-  \hoare{P'}{e}{\fun{v} Q'(v)}
-  }
-\]
-
-\paragraph{Soundness}
-$\hoare{P}{e}{\fun{v} Q(v)}$ means if $P$ holds and $e \to^* e'$, then either
-(a) $\exists e''.\, e' \to e''$ ($e'$ is not stuck), or (b) there exists a value
-$v'$ such that $e' = v'$ and $Q(v')$ holds.
-
-\begin{solution}
-  YOUR SOLUTION HERE
-\end{solution}
-
-%% Exercise 2
 \question
-For each proposition of separation logic below, state precisely the set of heaps
-it describes.
+For each separation logic proposition below, describe precisely the set of heaps where it is true.
 
 \begin{parts}
 \part[1] $\exists v.\, \ell \pointsto v$
@@ -144,9 +122,30 @@ it describes.
   \end{solution}
 \end{parts}
 
+%% Exercise 2
+\question[5]
+Prove the rule of consequence for Hoare logic, from the soundness definition for
+a Hoare triple.
+
+\paragraph{Consequence}
+\[
+  \frac{P' \entails P \quad (\forall v.\, Q(v) \entails Q'(v)) \quad \hoare{P}{e}{Q(v)}}{%
+  \hoare{P'}{e}{\fun{v} Q'(v)}
+  }
+\]
+
+\paragraph{Soundness}
+$\hoare{P}{e}{\fun{v} Q(v)}$ means if $P$ holds and $e \to^* e'$, then either
+(a) $\exists e''.\, e' \to e''$ ($e'$ is not stuck), or (b) there exists a value
+$v'$ such that $e' = v'$ and $Q(v')$ holds.
+
+\begin{solution}
+  YOUR SOLUTION HERE
+\end{solution}
+
 %% Exercise 3
 \question
-Compare the separation logic frame rule to the rule for weakening. Explain why the weaken rule does not imply the frame rule. Explain why the frame rule does not imply the weaken rule. These explanations are not meant to be fully formal proofs (which is well beyond the scope of this class for this question), but should aim to be convincing explanations --- in this case, convincing me that you've understood what these rules mean.
+Compare the separation logic frame rule to the consequence rule. Explain why the consequence rule does not imply the frame rule. Explain why the frame rule does not imply the consequence rule. These explanations are not meant to be fully formal proofs (which is well beyond the scope of this class for this question), but should aim to be convincing explanations --- in this case, convincing me that you've understood what these rules mean.
 
 \begin{solution}
   YOUR SOLUTION HERE

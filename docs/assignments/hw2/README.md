@@ -23,12 +23,6 @@ In this assignment, you'll answer some questions about Hoare logic and separatio
 
 ## Exercise 1
 
-> Rule of consequence (5 points)
-
-[Prove the rule of consequence](../../notes/hoare.md#hoare-rules) for Hoare logic, from the [soundness definition](../../notes/hoare.md#soundness) for a Hoare triple.
-
-## Exercise 2
-
 > Understanding separation logic propositions (10 points)
 
 For each separation logic proposition below, describe precisely the set of heaps where it is true. If you think the answer is non-trivial or are unsure of your answer, briefly explain so I can see your thought process. Assume a linear separation logic - remember that $\True(h)$ holds for any heap, even in a linear logic.
@@ -52,17 +46,17 @@ $\ell_1 \mapsto v \sep \ell_2 \mapsto v$. If $\ell_1 \neq \ell_2$, holds for onl
 - (i) $(\exists v.\, \ell \pointsto v) \land (\exists \ell'.\, \ell' \pointsto \num{3})$
 - (j) $(\exists x. \lift{x > 2}) \sep (\exists x. \lift{x < 2})$
 
+## Exercise 2
+
+> Rule of consequence (5 points)
+
+[Prove the rule of consequence](../../notes/hoare.md#hoare-rules) for Hoare logic, from the [soundness definition](../../notes/hoare.md#soundness) for a Hoare triple.
+
 ## Exercise 3
 
-> Frame rule vs consequence (10 points)
+> Frame rule vs consequence (5 points)
 
-Compare the separation logic frame rule to the consequence/weaken rule. Explain why the consequence rule does not imply the frame rule. Explain why the frame rule does not imply the consequence rule. These explanations are not meant to be fully formal proofs (which is well beyond the scope of this class for this question), but should aim to be convincing explanations - in this case, convincing me that you've understood what these rules mean.
-
-::: info Rule of consequence = weaken rule
-
-This assignment originally only used the term "weaken rule", but the notes say "rule of consequence". These are the same thing; sorry for the confusion. Note that this question _not_ referring to weakening propositions, $P \sep Q \entails P$.
-
-:::
+Compare the separation logic frame rule to the consequence rule. Explain why the consequence rule does not imply the frame rule. Explain why the frame rule does not imply the consequence rule. These explanations should aim to convince me that you've understood the meaning of the rules, and don't need to be formal.
 
 ## Exercise 4
 
@@ -74,7 +68,7 @@ $$\hoare{\True}{(\rec{f}{x} f \, x) \, ()}{\fun{\_} \False}$$
 
 "This proves False with no hypotheses, which makes separation logic unsound!" he exclaims, a little too excited at having broken what you spent so much time learning.
 
-What do you say to Ben?
+What do you say to Ben? Write directly to Ben (a fellow student), with the sort of explanation you might write in an email or at a whiteboard.
 
 ## Exercise 5
 
