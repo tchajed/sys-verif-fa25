@@ -6,7 +6,7 @@
 | 2 | Tue Sep 9 | Rocq introduction: [notes](./notes/rocq_intro.md), [slides](./slides/lec2.pdf) | [tool setup](./assignments/setup.md), [course syllabus](./syllabus.md) | bring a laptop |
 | 3 | Thu Sep 11 | Induction: [slides](./slides/lec3.pdf) | [notes](./notes/induction.md) |  |
 | 4 | Tue Sep 16 | Abstraction: [slides](./slides/lec4.pdf) | [notes](./notes/adt_specs.md) |  |
-| 5 | Thu Sep 18 | Hoare logic (part 1) | [notes](./notes/hoare.md) | theory lecture |
+| 5 | Thu Sep 18 | Hoare logic (part 1): [slides](./slides/lec5.pdf) | [notes](./notes/hoare.md) | theory lecture |
 | 6 | Tue Sep 23 | Hoare logic (part 2) |  | theory lecture |
 | 7 | Thu Sep 25 | Separation logic (part 1) | [notes](./notes/sep-logic.md) | theory lecture |
 |  | Mon Sep 29 |  |  | _[Assignment 1](./assignments/hw1/) due (11pm)_ |
