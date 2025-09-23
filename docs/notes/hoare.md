@@ -3,6 +3,7 @@ category: lecture-note
 order: 6
 shortTitle: "Hoare Logic"
 pageInfo: ["Date", "Category", "Tag", "Word"]
+date: 2025-09-17
 ---
 
 # Hoare Logic (theory)
@@ -433,10 +434,6 @@ $$
 \and &= \lambda b_1, b_2.\, \ife{b_1}{b_2}{\false} \\
 \add &= \lambda x, y.\, x + y \\
 \min &= \lambda x, y.\, \ife{x < y}{x}{y} \\
-\operatorname{f} &= \fun{x} \add \, (\min \, 0 \, x) \, 1 \\
-\operatorname{g} &= \fun{x} \ife{x = 1}{\true}{\\ %
-&\phantom{= \fun{x}} (\ife{x = 0}{\false}{\overline{2} + \false})} \\
-\operatorname{h} &= \fun{x} \ife{\and \, (0 < x) \, (x < 0)}{\overline{1} + \true}{\overline{2}} \\
 \end{aligned}
 $$
 
@@ -458,6 +455,19 @@ $$
 {\fun{v} \exists (p: \mathbb{Z}).\, v = \overline{p} \land p \leq n \land p \leq m }
 $$
 
+The $\operatorname{and}$ spec is an example of giving a strong specification, $\operatorname{add}$ is an example of under-specification (in this case, it would work just as well without the precondition), $\min$ is an under-specification (we could say something stronger in the postcondition and still prove it). Even the $\operatorname{and}$ spec is not the strongest possible - notice that the code does not actually require the second argument to be a boolean, and that it only needs to be safe if the first argument is $\true$.
+
+A few more synthetic examples:
+
+$$
+\begin{aligned}
+\operatorname{f} &= \fun{x} \add \, (\min \, 0 \, x) \, 1 \\
+\operatorname{g} &= \fun{x} \ife{x = 1}{\true}{\\ %
+&\phantom{= \fun{x}} (\ife{x = 0}{\false}{\overline{2} + \false})} \\
+\operatorname{h} &= \fun{x} \ife{\and \, (0 < x) \, (x < 0)}{\overline{1} + \true}{\overline{2}} \\
+\end{aligned}
+$$
+
 $$
 \hoare{n < 2^{64} - 1}%
 {\operatorname{f} \, \overline{n}}
@@ -476,9 +486,7 @@ $$
 {\fun{v} v = \overline{2}}
 $$
 
-The $\operatorname{and}$ spec is an example of giving a strong specification, $\operatorname{add}$ is an example of under-specification (in this case, it would work just as well without the precondition), $\min$ is an under-specification (we could say something stronger in the postcondition and still prove it), $\operatorname{f}$ is the best we can prove assuming the $\operatorname{add}$ and $\min$ specs, and $\operatorname{g}$ is an example where the precondition is necessary and we under-specify in the postcondition.
-
-Even the $\operatorname{and}$ spec is not the strongest possible - notice that the code does not actually require the second argument to be a boolean, and that it only needs to be safe if the first argument is $\true$.
+The $\operatorname{f}$ spec is the best we can prove assuming the $\operatorname{add}$ and $\min$ specs, and $\operatorname{g}$ is an example where the precondition is necessary and we under-specify in the postcondition.
 
 ### Example proof: specification for f
 
@@ -539,9 +547,11 @@ $$
 &\outlineSpec{\True} \\
 &\quad \lete{m}{\min \, 0 \, \overline{n}} \\
 &\outlineSpec{\exists p_m.\, m = \overline{p_m} \land p_m \leq 0 \land p_m \leq n} \\
+&\outlineSpec{\overline{m} + 1 < 2^{64}} \\
 &\quad \lete{y}{\operatorname{add} \, m \, 1} \\
-&\outlineSpec{y = \overline{p_m + 1}} \\
+&\outlineSpec{y = \overline{m + 1}} \\
 &\quad y \\
+&\outlineSpec{y = \overline{p_m + 1} \land p_m + 1 \leq 1} \\
 &\outlineSpec{\exists (p: \mathbb{Z}).\, y = \overline{p} \land p \leq 1)}
 \end{aligned}
 $$

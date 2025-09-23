@@ -3,6 +3,7 @@ category: lecture-note
 order: 8
 shortTitle: "Separation Logic"
 pageInfo: ["Date", "Category", "Tag", "Word"]
+date: 2025-09-23
 ---
 
 # Separation Logic (theory)
