@@ -33,17 +33,30 @@ Separation logic is an extension of Hoare logic. We'll still have a specificatio
 
 ## Programming language
 
-We only need a few new constructs to have something interesting:
+We only need a few new constructs (highlighted in blue) to have something interesting:
 
-$\text{Values}\quad v ::= \dots \mid () \mid \ell$
+$$
+\begin{aligned}
+&\mathrm{Values} &v &::= \lambda x.\, e \mid \overline{n} \mid \mathrm{true} \mid \mathrm{false} \mid (v_1, v_2) \\
+&&&\phantom{::=} \textcolor{blue}{\mid () \mid \ell}
+\end{aligned}
+$$
 
-$\text{Expressions}\quad e ::= \dots \mid \alloc{e_1} \mid \load{e_1} \mid \store{e_1}{e_2}$
+$$
+\begin{aligned}
+&\mathrm{Expressions} &e &::= x \mid v \mid \fun{x} e \mid \app{e_1}{e_2} \\
+&&&\phantom{::=} \mid \ife{e}{e_1}{e_2} \\
+&&&\phantom{::=} \mid e_1 + e_2 \mid e_1 == e_2 \mid e_1 < e_2 \\
+&&&\phantom{::=} \mid (e_1, e_2) \mid \pi_1 \, e \mid \pi_2 \, e \\
+&&&\phantom{::=} \mid \textcolor{blue}{\alloc{e_1} \mid \load{e_1} \mid \store{e_1}{e_2}} \\
+\end{aligned}
+$$
 
 We add a value $()$ which is often called a "unit value" - you can think of it like an empty tuple, which carries no information, which will be used when a function has nothing interesting to return. Memory addresses are modeled using _locations_, which use the metavariable $\ell$. Locations are a new variant of the value type, as denoted by $v$. The type of locations will simply be `loc := Z` (unbounded mathematical integers), and we won't have a way to do pointer-integer or integer-pointer casts. A location is like the value of a pointer; it doesn't carry data, but can be dereferenced to access data.
 
 The expression $\alloc{v}$ allocates a new location $\ell$ and gives it the initial value $v$, then reduces to $\ell$. The syntax $\load{\ell}$ is a load from the address $\ell$ while $\store{\ell}{v}$ stores $v$ in the address given by $\ell$. In all cases when these operations are used on expressions, they must first be reduced to values; loading and storing to a non-location fails (is stuck). You can think of $\load{e_1}$ as being like the C or Go code `*e1` and $\store{e_1}{e_2}$ as being like `*e1 = e2`.
 
-The new syntax is fairly small, but it requires a big change in the semantics: programs now have state. In the computer, the heap memory is a large array of bytes. In our model of programs, it will be a little more abstract: memory addresses will be `loc := Z` (that is, mathematical and thus unbounded integers), and each location in the heap will have a value of the programming language. A heap will then be `heap := gmap loc val` or more mathematically $\Heap ::= \Loc \finto \val$; the symbol $\finto$ represents a finite partial function, which maps some locations to values, and always has a finite domain. It will be useful to talk about the _domain_ of a heap $\dom(h)$, which you can think of as the set of allocated addresses in $h$.
+The new syntax is fairly small, but it requires a big change in the semantics: programs now have state. In the computer, the heap memory is a large array of bytes. In our model of programs, it will be a little more abstract: memory addresses will be `loc := Z` (that is, mathematical and thus unbounded integers), and each location in the heap will have a value of the programming language. A heap will then be `heap := gmap loc val` or more mathematically $\Heap ::= \Loc \finto \val$; the symbol $\finto$ represents a finite partial function, which maps some locations to values, and always has a finite domain. It will be useful to talk about the _domain_ of a heap $\dom(h)$, which is the set of allocated addresses in $h$.
 
 The semantics of a program will now be given by a new small-step operational semantics of the form $(e, h) \leadsto (e', h')$. This involves both reducing the expression $e$ and changes to a heap $h$; we will still have expressions that reduce to values. We use a new notation to be clear this is different from the _pure_ reduction step from before. I'll use $e \purestep e'$ to refer to that relation, which is still useful for many expressions since if $e \purestep e'$ then $(e, h) \leadsto (e', h)$.
 
@@ -77,17 +90,22 @@ In separation logic, when we write $\hoare{P}{e}{\fun{v} Q(v)}$, the proposition
 
 The view that propositions of separation logic are heap predicates is not actually necessary, and goes against traditional presentations of logic. The alternative is that propositions are _defined_ by the syntax and the rules below (plus several more rules, like the ones from the [Hoare logic section on propositions](./hoare.md#propositions)). We could then use heap predicates to give a particular "model" or semantics for what separation logic propositions mean.
 
-As with Hoare logic, I am instead giving what's called a _model-theoretic_ view, where everything is done in the context of a specific model and all the rules are lemmas. I think this helps make things more concrete since you can think about one model rather than trying to juggle all the rules.
+As with Hoare logic, I am instead giving what's called a _model-theoretic_ view, where everything is done in the context of a specific model and all the rules are lemmas. This make things more concrete since you can think about one model rather than trying to juggle all the rules.
 
-The logic view is still very useful. One thing it enables is that if we do proofs assuming just the rules, then we can switch to a different model where the rules are still true; while heap predicates are the standard model, there are extremely useful non-standard ones as well. Later on, when we get to concurrency, it will be practically necessary to work with the rules since the model is just too difficult to wrap your head around - someone still needs to prove the rules in that model once, but you'll be glad you're not doing it.
+The logic view is still a useful abstraction. One important use of the logic is that if we do proofs assuming just the rules, then we can switch to a different model where the rules are still true; while heap predicates are the simplest model, there are extremely useful but more complicated ones as well. Later on, when we get to concurrency, we will work with a more complex model and it will be practically necessary to work with the rules abstractly - someone still needs to prove the rules in that model (once), but you should be glad you're not doing it.
 
 :::
 
 ## Separation logic propositions
 
-$\text{Propositions}\quad P ::= \dots \mid \ell \pointsto v \mid P \sep Q \mid \emp$
+$$
+\begin{aligned}
+&\mathrm{Propositions}\quad &P &::= \lift{\phi} \mid \exists x.\, P(x) \mid \forall x.\, Q(x) \mid P \lor Q \\
+&&&\phantom{::=} \textcolor{blue}{\mid \ell \pointsto v \mid P \sep Q \mid \emp}
+\end{aligned}
+$$
 
-The assertion $\ell \pointsto v$ (read "$\ell$ points to $v$") says that the heap maps location $\ell$ to value $v$. The proposition $P \sep Q$ (read "$P$ and separately $Q$", or simply "$P$ star $Q$") is called the _separating conjunction_. Like a regular conjunction, it asserts that both $P$ and $Q$ are true. What makes it special (and this is the key feature of separation logic) is that it also asserts $P$ and $Q$ hold in _disjoint_ parts of the heap. For example, $\ell \pointsto v \sep \ell \pointsto v$ is false, because $\ell$ cannot be allocated in two disjoint parts of the heap.
+Before defining the meaning of propositions formally, let's go through the new ones informally first. The assertion $\ell \pointsto v$ (read "$\ell$ points to $v$") says that the heap maps location $\ell$ to value $v$. The proposition $P \sep Q$ (read "$P$ and separately $Q$", or simply "$P$ star $Q$") is called the _separating conjunction_. Like a regular conjunction, it asserts that both $P$ and $Q$ are true. What makes it special (and this is the key feature of separation logic) is that it also asserts $P$ and $Q$ hold in _disjoint_ parts of the heap. For example, $\ell \pointsto v \sep \ell \pointsto v$ is false, because $\ell$ cannot be allocated in two disjoint parts of the heap.
 
 We also add a new proposition $\emp$ which says the heap is empty.
 
