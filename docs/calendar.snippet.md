@@ -8,7 +8,7 @@
 | 4 | Tue Sep 16 | Abstraction: [slides](./slides/lec4.pdf) | [notes](./notes/adt_specs.md) |  |
 | 5 | Thu Sep 18 | Hoare logic (part 1): [slides](./slides/lec5.pdf) | [notes](./notes/hoare.md) | theory lecture |
 | 6 | Tue Sep 23 | Hoare logic (part 2): [slides](./slides/lec6.pdf) |  | theory lecture |
-| 7 | Thu Sep 25 | Separation logic (part 1) | [notes](./notes/sep-logic.md) | theory lecture |
+| 7 | Thu Sep 25 | Separation logic (part 1): [slides](./slides/lec7.pdf) | [notes](./notes/sep-logic.md) | theory lecture |
 |  | Mon Sep 29 |  |  | _[Assignment 1](./assignments/hw1/) due (11pm)_ |
 | 8 | Tue Sep 30 | Separation logic (part 2) |  | theory lecture |
 | 9 | Thu Oct 2 | **No class** (Tej is traveling) |  |  |
