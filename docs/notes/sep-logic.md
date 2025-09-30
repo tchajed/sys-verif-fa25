@@ -451,7 +451,27 @@ $$P \entails (Q \to R) \iff P \land Q \entails R$$
 
 If you read (either of these rules) left to right, you can think of them as moving $Q$ into the hypotheses, if this were a Rocq tactic. Reading right to left, we can move a hypotheses back into the goal (you haven't really needed to do that in Rocq but you should certainly imagine it's sound).
 
-One very useful rule for wands is that they _curry_ in the same way as functions and propositional implication:
+### Rules for wand
+
+A key rule is the rule for eliminating a wand (using it to prove something else):
+
+$$
+\dfrac{}{
+P \sep (P \wand Q) \entails Q
+}\eqnlabel{wand-elim}
+$$
+
+The left-to-right direction of the equivalence above is how we introduce a wand (prove it from other premises):
+
+$$
+\dfrac{
+P \sep Q \entails R
+}{
+P \entails (Q \wand R)
+}\eqnlabel{wand-intro}
+$$
+
+**Currying:** One very useful rule for wands is that they _curry_ in the same way as functions and propositional implication:
 
 $P \wand (Q \wand R) \bient (P \sep Q \wand R)$
 
@@ -461,7 +481,33 @@ Again, make an analogy to how $P \to (Q \to R)$ is equivalent to $P \land Q \to 
 
 Because of currying, implication and wand are parsed as right associative: $P \to (Q \to R)$ is written without parentheses as $P \to Q \to R$ and $P \wand (Q \wand R)$ is written $P \wand Q \wand R$. The other parenthesization, $(P \to Q) \to R$, has a less intuitive meaning ("if we had a proof that $P$ implies $Q$, then we could prove $R$") and comes up less often.
 
-There's more to say about magic wand. Some practice is needed before you become comfortable with it, which I think will be easier with the Rocq development than just seeing rules on paper.
+**Variance:** The following rule says when one wand implies another; notice that this is _covariant_ in the conclusion position $Q$ (the implications are in the same direction) but _contravariant_ in the premise position $P$ (the implications are in opposite directions). This is analogous to Hoare triples, as well as to the ordinary propositional implication $P \to Q$.
+
+$$
+\dfrac{
+P' \entails P \quad Q \entails Q'
+}{
+(P \wand Q) \entails (P' \wand Q')
+}\eqnlabel{wand-impl}
+$$
+
+**Not a rule:** This looks tempting but it's false:
+
+$$
+\textcolor{red}{(P \wand P) \entails \mathrm{emp}}
+$$
+
+An example where it fails is $P = \mathrm{False}$, in which case $(P \wand P)$ holds on any heap, but $\mathrm{emp}$ only holds on the empty heap. (At least in a linear separation logic.)
+
+**Also not a rule:** The converse of the wand elimination rule is false:
+
+$$
+\textcolor{red}{Q \entails P \sep (P \wand Q)}
+$$
+
+An example where this fails is $Q = \mathrm{emp}$ and $P = \mathrm{False}$. In general, $P \wand Q$ holds when $Q$ somehow "contains" a $P$, and in this case we're claiming to extract a $P$ out of anything.
+
+There's more to say about magic wand (see [The Magic Wand and Other Operators](https://softwarefoundations.cis.upenn.edu/slf-current/Wand.html) for more details). Some practice is needed before you become comfortable with it, which I think will be easier with the Rocq development than just seeing rules on paper.
 
 ## Weakest preconditions
 
