@@ -43,6 +43,12 @@ The second question is especially important since you will face failed proofs in
 
 We'll start by defining a programming language and its semantics. The goal right now is to have just enough features to understand the rules of Hoare logic; eventually we'll add features to enable writing useful programs, without changing the structure of the verification features.
 
+::: info Credits
+
+The presentation in these notes owes a lot to the [Semantics of Type Systems Lecture Notes](https://plv.mpi-sws.org/semantics-course/lecturenotes.pdf) (chapter 5 in particular).
+
+:::
+
 ### Syntax
 
 The language is an extension of the $\lambda$-calculus that includes tuples, numbers and booleans as primitive data, and arithmetic operations for addition and comparison.
