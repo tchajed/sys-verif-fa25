@@ -27,6 +27,8 @@ The source of this website is on GitHub at [tchajed/sys-verif-fa25](https://gith
 
 **Note: plans two weeks out might change.**
 
+The hand-written iPad notes (for lectures 1-8) are available at [board-notes.pdf](./slides/board-notes.pdf).
+
 <!-- @include: ./calendar.snippet.md -->
 
 ## Resources
