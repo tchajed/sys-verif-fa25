@@ -11,28 +11,28 @@
 | 7 | Thu Sep 25 | Separation logic (part 1): [slides](./slides/lec7.pdf) | [notes](./notes/sep-logic.md) | theory lecture |
 |  | Mon Sep 29 |  |  | _[Assignment 1](./assignments/hw1/) due (11pm)_ |
 | 8 | Tue Sep 30 | Separation logic (part 2): [slides](./slides/lec8.pdf) |  | theory lecture |
-| 9 | Thu Oct 2 | **No class** (Tej is traveling) |  |  |
-| 10 | Tue Oct 7 | Iris Proof Mode | [notes](./notes/ipm.md) | bring a laptop |
-| 11 | Thu Oct 9 | Modeling Go programs | [notes](./notes/goose.md) |  |
-| 12 | Tue Oct 14 | Loop invariants | [notes](./notes/loop_invariants.md) |  |
-| 13 | Thu Oct 16 | Ownership | [notes](./notes/ownership.md) |  |
+|  | Thu Oct 2 | **No class** (Tej is traveling) |  |  |
+| 9 | Tue Oct 7 | Iris Proof Mode | [notes](./notes/ipm.md) | bring a laptop |
+| 10 | Thu Oct 9 | Modeling Go programs | [notes](./notes/goose.md) |  |
+| 11 | Tue Oct 14 | Loop invariants | [notes](./notes/loop_invariants.md) |  |
+| 12 | Thu Oct 16 | Ownership | [notes](./notes/ownership.md) |  |
 |  | Mon Oct 20 |  |  | _[Assignment 2](./assignments/hw2/) due (11pm)_ |
-| 14 | Tue Oct 21 | In-class work |  |  |
-| 15 | Thu Oct 23 | Persistence | [notes](./notes/persistently.md) |  |
-| 16 | Tue Oct 28 | Concurrency intro | [notes](./notes/concurrency.md) |  |
-| 17 | Thu Oct 30 | Lock invariants | [notes](./notes/invariants.md) |  |
-| 18 | Tue Nov 4 | Resource algebras | [notes](./notes/resource-algebra.md) |  |
-| 19 | Tue Nov 6 | Ghost state | [notes](./notes/ghost_state.md) |  |
+| 13 | Tue Oct 21 | In-class work |  |  |
+| 14 | Thu Oct 23 | Persistence | [notes](./notes/persistently.md) |  |
+| 15 | Tue Oct 28 | Concurrency intro | [notes](./notes/concurrency.md) |  |
+| 16 | Thu Oct 30 | Lock invariants | [notes](./notes/invariants.md) |  |
+| 17 | Tue Nov 4 | Resource algebras | [notes](./notes/resource-algebra.md) |  |
+| 18 | Tue Nov 6 | Ghost state | [notes](./notes/ghost_state.md) |  |
 |  | Mon Nov 10 |  |  | _[Assignment 3](./assignments/hw3/) due (11pm)_ |
-| 20 | Tue Nov 11 | Atomic specs | [notes](./notes/atomic_specs.md) |  |
-| 21 | Thu Nov 13 | Barrier proof (spec) | [notes](./notes/barrier.md) |  |
-| 22 | Tue Nov 18 | Barrier proof |  |  |
-| 23 | Thu Nov 20 | Property-based testing | [notes](./notes/pbt.md) |  |
-| 24 | Tue Nov 25 | SMT-based verification | [notes](./notes/smt.md) |  |
+| 19 | Tue Nov 11 | Atomic specs | [notes](./notes/atomic_specs.md) |  |
+| 20 | Thu Nov 13 | Barrier proof (spec) | [notes](./notes/barrier.md) |  |
+| 21 | Tue Nov 18 | Barrier proof |  |  |
+| 22 | Thu Nov 20 | Property-based testing | [notes](./notes/pbt.md) |  |
+| 23 | Tue Nov 25 | SMT-based verification | [notes](./notes/smt.md) |  |
 |  | Thu Nov 27 | **No class (Thanksgiving)** |  |  |
-| 25 | Tue Dec 2 | Liveness | [notes](./notes/liveness.md) |  |
-| 26 | Thu Dec 4 | \__slack_ |  |  |
-| 27 | Tue Dec 9 | [Course wrap-up](./notes/summary.md) |  |  |
+| 24 | Tue Dec 2 | Liveness | [notes](./notes/liveness.md) |  |
+| 25 | Thu Dec 4 | _slack_ |  |  |
+| 26 | Tue Dec 9 | [Course wrap-up](./notes/summary.md) |  |  |
 |  | Thu Dec 11 |  |  | _[Assignment 4](./assignments/hw4/) due (11pm)_ |
 
 <!--
