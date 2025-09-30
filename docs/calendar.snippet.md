@@ -10,7 +10,7 @@
 | 6 | Tue Sep 23 | Hoare logic (part 2): [slides](./slides/lec6.pdf) |  | theory lecture |
 | 7 | Thu Sep 25 | Separation logic (part 1): [slides](./slides/lec7.pdf) | [notes](./notes/sep-logic.md) | theory lecture |
 |  | Mon Sep 29 |  |  | _[Assignment 1](./assignments/hw1/) due (11pm)_ |
-| 8 | Tue Sep 30 | Separation logic (part 2) |  | theory lecture |
+| 8 | Tue Sep 30 | Separation logic (part 2): [slides](./slides/lec8.pdf) |  | theory lecture |
 | 9 | Thu Oct 2 | **No class** (Tej is traveling) |  |  |
 | 10 | Tue Oct 7 | Iris Proof Mode | [notes](./notes/ipm.md) | bring a laptop |
 | 11 | Thu Oct 9 | Modeling Go programs | [notes](./notes/goose.md) |  |
