@@ -78,7 +78,7 @@ The three locations have different values so we can confirm they are distinct. (
 
 The expression $\store{\load{\ell_1}}{\load{\ell_2}}$ takes several steps in $h$. It first reduces to $\store{\ell_3}{\num{7}}$, without changing the heap (though we did not say in what order those loads happen, it doesn't affect the answer). This store then results in a heap $h' = \{\ell_1 \mapsto \ell_3, \ell_2 \mapsto \num{7}, \ell_3 \mapsto \num{7}\}$.
 
-If we choose not to ignore other locations, we can say more generally that $h = \{\ell_1 \mapsto \ell_3, \ell_2 \mapsto \num{7}, \ell_3 \mapsto \true \} \union h_f$ for some $h_f$ that does not contain $\ell_1$, $\ell_2$, or $\ell_3$, and the final heap will be $h' = \{\ell_1 \mapsto \ell_3, \ell_2 \mapsto \num{7}, \ell_3 \mapsto \num{7}\} \union h_f$ with the same $h_f$. This statement captures all the possibilities for how this example expression executes, not just the smallest heap. However, writing doesn the general statement took much more work, and this is only a one-line program; separation logic will help with that.
+If we choose not to ignore other locations, we can say more generally that $h = \{\ell_1 \mapsto \ell_3, \ell_2 \mapsto \num{7}, \ell_3 \mapsto \true \} \union h_f$ for some $h_f$ that does not contain $\ell_1$, $\ell_2$, or $\ell_3$, and the final heap will be $h' = \{\ell_1 \mapsto \ell_3, \ell_2 \mapsto \num{7}, \ell_3 \mapsto \num{7}\} \union h_f$ with the same $h_f$. This statement captures all the possibilities for how this example expression executes, not just the smallest heap. However, writing down the general statement took much more work, and this is only a one-line program; separation logic will help with that.
 
 :::
 
@@ -90,7 +90,7 @@ In separation logic, when we write $\hoare{P}{e}{\fun{v} Q(v)}$, the proposition
 
 The view that propositions of separation logic are heap predicates is not actually necessary, and goes against traditional presentations of logic. The alternative is that propositions are _defined_ by the syntax and the rules below (plus several more rules, like the ones from the [Hoare logic section on propositions](./hoare.md#propositions)). We could then use heap predicates to give a particular "model" or semantics for what separation logic propositions mean.
 
-As with Hoare logic, I am instead giving what's called a _model-theoretic_ view, where everything is done in the context of a specific model and all the rules are lemmas. This make things more concrete since you can think about one model rather than trying to juggle all the rules.
+As with Hoare logic, I am instead giving what's called a _model-theoretic_ view, where everything is done in the context of a specific model and all the rules are lemmas. This makes things more concrete since you can think about one model rather than trying to juggle all the rules.
 
 The logic view is still a useful abstraction. One important use of the logic is that if we do proofs assuming just the rules, then we can switch to a different model where the rules are still true; while heap predicates are the simplest model, there are extremely useful but more complicated ones as well. Later on, when we get to concurrency, we will work with a more complex model and it will be practically necessary to work with the rules abstractly - someone still needs to prove the rules in that model (once), but you should be glad you're not doing it.
 
@@ -439,7 +439,7 @@ Notice the similarity to $P \land (P \to Q) \entails Q$, if we had mere $\mathrm
 
 Formally we can define wand as
 
-$$(P \wand Q)(h) ::= \forall h', h \disjoint h' \to P(h) \to Q(h \union h')$$
+$$(P \wand Q)(h) ::= \forall h', h \disjoint h' \to P(h') \to Q(h \union h')$$
 
 One characterization of wand is:
 
@@ -449,7 +449,7 @@ Again, read the same thing but for propositional logic:
 
 $$P \entails (Q \to R) \iff P \land Q \entails R$$
 
-If you read (either of these rules) left to right, you can think of them as moving $Q$ into the hypotheses, if this were a Rocq tactic. Reading right to left, we can move a hypotheses back into the goal (you haven't really needed to do that in Rocq but you should certainly imagine it's sound).
+If you read (either of these rules) left to right, you can think of them as moving $Q$ into the hypotheses, if this were a Rocq tactic. Reading right to left, we can move a hypothesis back into the goal (you haven't really needed to do that in Rocq but you should certainly imagine it's sound).
 
 ### Rules for wand
 
@@ -532,7 +532,7 @@ $$
 We can reformulate this as:
 
 $$
-\left( \hoare{wp(e, Q)}{e}{Q} \right) \land %
+\left( \hoare{\wp(e, Q)}{e}{Q} \right) \land %
 \left( \forall P.\, \hoare{P}{e}{Q} \to P \entails \wp(e, Q) \right)
 $$
 
