@@ -415,7 +415,7 @@ Arguments own_slice {H ffi H0 Σ heapGS0} {V}%type_scope
   {IntoVal0 t IntoValTyped0} s dq%dfrac_scope vs%list_scope
 own_slice is transparent
 Expands to: Constant New.golang.theory.slice.own_slice
-Declared in library New.golang.theory.slice, line 34, characters 19-28
+Declared in library New.golang.theory.slice, line 35, characters 19-28
 ```
 
 ::::

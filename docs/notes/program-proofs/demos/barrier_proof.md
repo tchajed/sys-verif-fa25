@@ -391,7 +391,7 @@ Finally, we do all the program proofs, the specifications for each function. The
     iNamed "Hinv".
     wp_auto.
     iPersist "b".
-    wp_if_destruct; try wp_auto.
+    wp_if_destruct.
     { (* The code checks if [numWaiting] is 0 and panics if so.
 
          In the proof we can show this is impossible using the ghost ownership,
@@ -403,7 +403,7 @@ Finally, we do all the program proofs, the specifications for each function. The
     { iMod (own_barrier_ghost_send with "[$Hbar $HsendP $HP]") as "Hbar".
       iModIntro.
       iFrame. }
-    wp_if_destruct; try wp_auto.
+    wp_if_destruct.
     - wp_apply (wp_Cond__Broadcast with "Hcond").
       wp_apply (wp_Mutex__Unlock with "[$Hlock $Hlocked $Hlinv]").
       iApply "HΦ". auto.
@@ -431,7 +431,7 @@ Finally, we do all the program proofs, the specifications for each function. The
     wp_for "HI".
     - iNamed "Hinv".
       wp_auto.
-      wp_if_destruct; try wp_auto.
+      wp_if_destruct.
       + wp_apply (wp_Cond__Wait with "[Hlocked numWaiting Hbar]").
         { iFrame "Hcond".
           iSplit.
@@ -443,10 +443,7 @@ Finally, we do all the program proofs, the specifications for each function. The
         wp_auto.
         wp_for_post.
         iFrame.
-      + rewrite decide_False.
-        { inv 1. }
-        rewrite decide_True //; wp_auto.
-        iMod (own_barrier_ghost_recv with "[$Hbar $HQ]") as "(Hbar & Hrecv & HQ)".
+      + iMod (own_barrier_ghost_recv with "[$Hbar $HQ]") as "(Hbar & Hrecv & HQ)".
         { word. }
         wp_apply (wp_Mutex__Unlock with "[$Hlock $Hlocked Hbar numWaiting]").
         { iFrame. }

@@ -623,7 +623,7 @@ Proof.
   wp_auto.
   cbn [memoize.Memoize.results'].
   wp_apply (wp_map_get with "Hm") as "Hm".
-  wp_if_destruct; subst; try wp_auto.
+  wp_if_destruct; subst.
   - destruct i as [y Hget].
     assert (y = f x0) by eauto; subst.
     rewrite Hget.
@@ -832,7 +832,6 @@ The rest of this proof is general loop and slice reasoning and not related to th
       rewrite -> decide_False by word.
       iApply "HΦ"; done.
     }
-    wp_auto.
     iAssert (
         ∃ (i: w64),
           "i" :: i_ptr ↦ i ∗
@@ -841,7 +840,7 @@ The rest of this proof is general loop and slice reasoning and not related to th
       )%I with "[$i $sum]" as "HI".
     { iPureIntro. word. }
     wp_for "HI".
-    wp_if_destruct; try wp_auto.
+    wp_if_destruct.
     - wp_pure.
       { word. }
       list_elem [x1; x2; x3] (sint.Z i) as x_i.

@@ -233,7 +233,7 @@ Note that we can't use this mechanism to prove a program's recursion eventually 
 Notice that the ▷ in front of "IH" has disappeared because we've taken a step. We're now free to use it whenever there's a call to `SearchTree__Contains`.
 
 ```rocq
-  wp_if_destruct; try wp_auto.
+  wp_if_destruct.
   { (* If the root is nil, then the tree is empty. We need to prove that to show
        that returning false is the right thing to do. *)
     (* we need to prove this before `iApply HΦ` since the proof requires
@@ -262,8 +262,7 @@ Notice that the ▷ in front of "IH" has disappeared because we've taken a step.
 
   (* else: didn't find at root *)
   assert (needle ≠ key) as Hnotkey by congruence.
-  wp_auto.
-  wp_if_destruct; try wp_auto.
+  wp_if_destruct.
   - (* recursive subcall, to the left tree *)
     wp_apply ("IH" with "[$Hleft]").
     iIntros "Hleft".
@@ -370,7 +369,7 @@ Proof.
   iLöb as "IH" forall (l keys).
   wp_start as "Htree".
   wp_auto.
-  wp_if_destruct; try wp_auto.
+  wp_if_destruct.
   { wp_apply wp_singletonTree.
     iDestruct (own_tree_null with "Htree") as %Hkeys; subst. iClear "Htree".
     iIntros (l') "Htree".
@@ -384,7 +383,7 @@ Proof.
   iRename "key" into "key_var".
   iNamed "Htree". subst keys.
   wp_auto.
-  wp_if_destruct; try wp_auto.
+  wp_if_destruct.
   { wp_apply ("IH" with "[$Hleft]").
     iIntros (left_l') "Hleft".
     wp_auto.
@@ -397,7 +396,7 @@ Proof.
     - set_solver.
     - set_solver.
   }
-  wp_if_destruct; try wp_auto.
+  wp_if_destruct.
   { wp_apply ("IH" with "[$Hright]").
     iIntros (right_l') "Hright".
     wp_auto.

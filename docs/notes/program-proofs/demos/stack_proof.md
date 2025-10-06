@@ -114,7 +114,6 @@ Proof.
     }
     subst. auto.
   }
-  wp_auto.
   assert (0 < length xs).
   { rewrite length_reverse in Hlen. word. }
   wp_pure.

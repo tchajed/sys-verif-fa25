@@ -105,8 +105,7 @@ Proof.
   - iApply "HΦ".
     iPureIntro.
     word.
-  - wp_auto. wp_pures.
-    wp_apply "IH".
+  - wp_apply "IH".
     { (* [word] doesn't work on its own here. It's helpful to know how to do some of the work it does manually, to help it along. *)
       (* FIXME: word bug? *)
       rewrite -> !word.unsigned_sub_nowrap by word.
@@ -211,16 +210,15 @@ Proof.
   { iPureIntro. split; word. }
   wp_for "HI".
   wp_if_destruct.
-  - iApply wp_for_post_break. wp_auto.
+  - wp_for_post.
     iApply "HΦ".
     iPureIntro.
     assert (uint.Z i = (uint.Z n + 1)%Z) by word.
     word.
-  - wp_auto.
-    wp_apply wp_SumAssumeNoOverflow.
+  - wp_apply wp_SumAssumeNoOverflow.
     iIntros (Hoverflow).
     wp_auto.
-    iApply wp_for_post_do; wp_auto.
+    wp_for_post.
     iFrame.
     iPureIntro.
     split_and!; try word.
@@ -325,7 +323,7 @@ Proof.
       word.
   }
   wp_for "HI".
-  - wp_if_destruct; try wp_auto.
+  - wp_if_destruct.
     + wp_pure.
       { rewrite word.signed_add.
         rewrite Automation.word.word_signed_divs_nowrap_pos; [ word | ].
@@ -341,8 +339,7 @@ Proof.
       { word. }
       { eauto. }
       wp_if_destruct.
-      * wp_auto.
-        iApply wp_for_post_do; wp_auto.
+      * wp_for_post.
         iFrame.
         iPureIntro.
         split_and!; try word.
@@ -363,8 +360,7 @@ Proof.
         }
         (* This is easy because we didn't change any relevant variables *)
         eauto.
-      * wp_auto.
-        iApply wp_for_post_do; wp_auto.
+      * wp_for_post.
         iFrame.
         iPureIntro.
         split_and!; try word.
@@ -379,8 +375,7 @@ Proof.
         { apply (Hsorted (sint.nat mid) j'); auto; word. }
         lia.
     + wp_if_destruct.
-      * wp_auto.
-        list_elem xs (sint.nat i) as x_i.
+      * list_elem xs (sint.nat i) as x_i.
         wp_pure.
         { word. }
         wp_apply (wp_load_slice_elem with "[$Hs]") as "Hs".
@@ -392,8 +387,7 @@ Proof.
         intros Heq.
         apply bool_decide_eq_true_1 in Heq. subst.
         auto.
-      * wp_auto.
-        iApply "HΦ".
+      * iApply "HΦ".
         iFrame.
         iPureIntro.
         congruence.

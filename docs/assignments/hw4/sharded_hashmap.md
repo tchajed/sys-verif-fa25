@@ -722,12 +722,12 @@ Proof.
     rewrite bucket_map_lookup_Some //.
     f_equal.
     rewrite filter_union_L.
-    rewrite filter_singleton_not_L.
-    + congruence.
-    + set_solver.
+    rewrite filter_singleton_False_L.
+    { congruence. }
+    set_solver.
   - rewrite lookup_insert_ne.
-    + word.
-    + rewrite !bucket_map_lookup_None //.
+    { word. }
+    rewrite !bucket_map_lookup_None //.
 Qed.
 
 ```
@@ -902,8 +902,7 @@ Proof.
   }
   wp_for "HI".
   wp_if_destruct.
-  { wp_auto.
-    iMod (hashmap_pre_auth_alloc_bucket with "[$Hauth]") as "[Hauth Hsub]".
+  { iMod (hashmap_pre_auth_alloc_bucket with "[$Hauth]") as "[Hauth Hsub]".
     wp_apply (wp_newBucket (uint.Z i) with "[$Hsub]").
     iIntros (b_l) "Hbucket".
     wp_auto.
@@ -922,14 +921,13 @@ Proof.
     iFrame "newBuckets Hown_buckets Hbucket_cap".
     simpl.
     iSplit.
-    { iPureIntro. word. }
+    { word. }
     iSplit.
-    { iPureIntro. len. }
+    { len. }
     rewrite big_sepL_app /=.
     replace (Z.of_nat (length b_ls + 0)) with (uint.Z i) by word.
     iFrame "His_buckets Hbucket".
   }
-  wp_auto.
   iApply "HΦ".
   iFrame.
   replace (uint.Z i) with (uint.Z newSize) by word.
