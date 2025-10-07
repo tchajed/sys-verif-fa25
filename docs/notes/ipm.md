@@ -531,10 +531,59 @@ Here's a different way to move something into the pure context:
 Lemma pure_intro_pattern_v2 `{hG: !heapGS Σ} (t a b: w64) (x y: loc) :
   ⌜t = a⌝ ∗ x ↦ b ∗ y ↦ t -∗ x ↦ b ∗ y ↦ a.
 Proof.
-  iIntros "(Heq & Hx & Hy)".
-  iDestruct "Heq" as %Heq. subst.
+  iIntros "H".
+  iDestruct "H" as "(%Heq & Hx & Hy)".
+  iFrame.
+  subst.
   iFrame.
 Qed.
+
+```
+
+### Exercise: find the documentation for these features
+
+Go to the [IPM documentation](https://gitlab.mpi-sws.org/iris/iris/-/blob/master/docs/proof_mode.md) and find the _exact_ lines where the `%Heq` in both the first proof and second proof are documented.
+
+### Exercises
+
+The lemmas above are repeated here (plus a few new ones). Fill in the proofs, looking above at solutions only when you get stuck.
+
+```rocq
+Lemma exercise_sep_exist_ex A (P Q: iProp Σ) (R: A → iProp Σ) :
+  P ∗ (∃ a, R a) ∗ Q -∗ ∃ a, R a ∗ P.
+Proof.
+Admitted.
+
+Lemma exercise_apply_simple_ex P Q :
+  (P -∗ Q) ∗ P -∗ Q.
+Proof.
+Admitted.
+
+Lemma exercise_destruct_more_framing_ex P1 P2 P3 Q :
+  ((P1 ∗ P3) -∗ P2 -∗ Q) →
+  P1 ∗ P2 ∗ P3 -∗ Q.
+Proof.
+Admitted.
+
+Lemma exercise_pure_intro_pattern `{hG: !heapGS Σ} (t a b: w64) (x y: loc) :
+  ⌜t = a⌝ ∗ x ↦ b ∗ y ↦ t -∗ x ↦ b ∗ y ↦ a.
+Proof.
+Admitted.
+
+Lemma exercise_sep_comm (P Q : iProp Σ) : P ∗ Q ⊢ Q ∗ P.
+Proof.
+Admitted.
+
+Lemma exercise_wand_adj (P Q R : iProp Σ) : (P -∗ Q -∗ R) ⊣⊢ (P ∗ Q -∗ R).
+Proof.
+Admitted.
+
+(* note: might be a bit tricky *)
+Lemma exercise_sep_exist_2 A (P Q: iProp Σ) (R: A → iProp Σ) :
+  (∀ a, R a -∗ Q) -∗
+  (∃ a, R a) -∗ Q.
+Proof.
+Admitted.
 
 ```
 
@@ -594,10 +643,6 @@ Proof.
 Qed.
 
 ```
-
-### Exercise: find the documentation for these features
-
-Go to the [IPM documentation](https://gitlab.mpi-sws.org/iris/iris/-/blob/master/docs/proof_mode.md) and find the _exact_ lines where the `%Heq` in both the first proof and second proof are documented.
 
 ## Program proofs in the IPM
 
@@ -673,13 +718,9 @@ Lemma wp_IgnoreOne (l l': loc) :
 Proof.
   (* skip over this proof for now and focus on its usage (the next lemma) *)
   wp_start as "Hl".
-  wp_alloc_auto; wp_pures.
-  wp_alloc_auto; wp_pures.
-  wp_load; wp_pures.
-  wp_load; wp_pures.
+  wp_auto.
   wp_apply (wp_Assert).
   { rewrite bool_decide_eq_true_2 //. }
-  wp_pures.
   iApply "HΦ".
   iFrame.
 Qed.
