@@ -12,12 +12,12 @@
 |  | Mon Sep 29 |  |  | _[Assignment 1](./assignments/hw1/) due (11pm)_ |
 | 8 | Tue Sep 30 | Separation logic (part 2): [slides](./slides/lec8.pdf) |  | theory lecture |
 |  | Thu Oct 2 | **No class** (Tej is traveling) |  |  |
-| 9 | Tue Oct 7 | Iris Proof Mode | [notes](./notes/ipm.md) | bring a laptop |
-| 10 | Thu Oct 9 | Modeling Go programs | [notes](./notes/goose.md) |  |
-| 11 | Tue Oct 14 | Loop invariants | [notes](./notes/loop_invariants.md) |  |
-| 12 | Thu Oct 16 | Ownership | [notes](./notes/ownership.md) |  |
+| 9 | Tue Oct 7 | Iris Proof Mode (part 1) | [notes](./notes/ipm.md) | bring a laptop |
+| 10 | Thu Oct 9 | Iris Proof Mode (part 2) |  | bring a laptop |
+| 11 | Tue Oct 14 | Modeling Go programs | [notes](./notes/goose.md) (including Tour of Go) |  |
+| 12 | Thu Oct 16 | Loop invariants | [notes](./notes/loop_invariants.md) |  |
 |  | Mon Oct 20 |  |  | _[Assignment 2](./assignments/hw2/) due (11pm)_ |
-| 13 | Tue Oct 21 | In-class work |  |  |
+| 13 | Tue Oct 21 | Ownership | [notes](./notes/ownership.md) |  |
 | 14 | Thu Oct 23 | Persistence | [notes](./notes/persistently.md) |  |
 | 15 | Tue Oct 28 | Concurrency intro | [notes](./notes/concurrency.md) |  |
 | 16 | Thu Oct 30 | Lock invariants | [notes](./notes/invariants.md) |  |
