@@ -129,7 +129,7 @@ Qed.
 ```
 
 ```rocq
-Lemma coq_context_ex φ ψ :
+Lemma rocq_context_ex φ ψ :
   φ ∧ ψ → ψ ∧ φ.
 Proof.
   intros [H1 H2].
@@ -549,8 +549,7 @@ Go to the [IPM documentation](https://gitlab.mpi-sws.org/iris/iris/-/blob/master
 The lemmas above are repeated here (plus a few new ones). Fill in the proofs, looking above at solutions only when you get stuck.
 
 ```rocq
-Lemma exercise_sep_exist_ex A (P Q: iProp Σ) (R: A → iProp Σ) :
-  P ∗ (∃ a, R a) ∗ Q -∗ ∃ a, R a ∗ P.
+Lemma exercise_sep_comm (P Q : iProp Σ) : P ∗ Q ⊢ Q ∗ P.
 Proof.
 Admitted.
 
@@ -559,18 +558,26 @@ Lemma exercise_apply_simple_ex P Q :
 Proof.
 Admitted.
 
+Lemma exercise_apply_split_ex P1 P2 P3 Q :
+  ((P1 ∗ P3) -∗ P2 -∗ Q) →
+  P1 ∗ P2 ∗ P3 -∗ Q.
+Proof.
+  intros HQ.
+Admitted.
+
 Lemma exercise_destruct_more_framing_ex P1 P2 P3 Q :
   ((P1 ∗ P3) -∗ P2 -∗ Q) →
   P1 ∗ P2 ∗ P3 -∗ Q.
 Proof.
 Admitted.
 
-Lemma exercise_pure_intro_pattern `{hG: !heapGS Σ} (t a b: w64) (x y: loc) :
-  ⌜t = a⌝ ∗ x ↦ b ∗ y ↦ t -∗ x ↦ b ∗ y ↦ a.
+Lemma exercise_sep_exist_ex A (P Q: iProp Σ) (R: A → iProp Σ) :
+  P ∗ (∃ a, R a) ∗ Q -∗ ∃ a, R a ∗ P.
 Proof.
 Admitted.
 
-Lemma exercise_sep_comm (P Q : iProp Σ) : P ∗ Q ⊢ Q ∗ P.
+Lemma exercise_pure_intro_pattern `{hG: !heapGS Σ} (t a b: w64) (x y: loc) :
+  ⌜t = a⌝ ∗ x ↦ b ∗ y ↦ t -∗ x ↦ b ∗ y ↦ a.
 Proof.
 Admitted.
 
@@ -587,9 +594,11 @@ Admitted.
 
 ```
 
-One last tactic: you will need to use `iModIntro` in a couple situations. What's going on here is beyond the scope of this lecture.
+One last tactic: you will need to use `iModIntro` in a couple situations.
 
-`iModIntro` "introduces a modality". You'll use it for the _later modality_ `▷ P` (rarely) and for the _fancy update modality_ `|==> P` (often pronounced "fup-d", or "update").
+`iModIntro` "introduces a modality". You'll use it for the _later modality_ `▷ P` and for the _fancy update modality_ `|==> P` (often pronounced "fup-d", or "update"). We'll talk about these more later in subsequent lectures, as they come up.
+
+Modalities can also be introduced with `iIntros` using the pattern "!>".
 
 ```rocq
 Lemma iModIntro_later P :
@@ -620,8 +629,8 @@ Qed.
 Lemma iModIntro_fupd P :
   P -∗ |==> P.
 Proof.
-  iIntros "H".
-  iModIntro.
+  (* introduce H and the modality in one tactic *)
+  iIntros "H !>".
 ```
 
 :::: info Goal diff
@@ -630,16 +639,16 @@ Proof.
   Σ : gFunctors
   P : iProp Σ
   ============================
-  "H" : P
-  --------------------------------------∗
-  |==> P // [!code --]
+  P ==∗ P // [!code --]
+  "H" : P // [!code ++]
+  --------------------------------------∗ // [!code ++]
   P // [!code ++]
 ```
 
 ::::
 
 ```rocq
-  iAssumption.
+  iFrame.
 Qed.
 
 ```
