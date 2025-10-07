@@ -17,7 +17,7 @@ By the end of this lecture, you should be able to
 
 1. Translate goals from paper to the IPM and back
 2. Read the IPM tactic documentation
-3. Prove entailments in separation logic in Coq
+3. Prove entailments in separation logic in Rocq
 
 ---
 
@@ -32,7 +32,7 @@ By the end of this lecture, you should be able to
 
 ## Motivation
 
-We now want to move to using separation logic in Coq. If we formalized everything so far and proved all the rules as theorems, we would run into trouble when formalizing the proof outlines we've written so far, even with weakest preconditions. Consider the following entailment we left unproven in the [swap exercise solution](./sep-logic.md#ex-swap):
+We now want to move to using separation logic in Rocq. If we formalized everything so far and proved all the rules as theorems, we would run into trouble when formalizing the proof outlines we've written so far, even with weakest preconditions. Consider the following entailment we left unproven in the [swap exercise solution](./sep-logic.md#ex-swap):
 
 $\lift{t = a} ∗ x \pointsto b ∗ y \pointsto t ⊢ x \pointsto b ∗ y \pointsto a$.
 
@@ -48,9 +48,9 @@ Finish the proof of the entailment above using only separation logic rules. This
 
 ## Reading IPM goals
 
-The Iris Proof Mode provides an interface similar to Coq's proof mode; since you already have experience using that, it's helpful to understand it by analogy to how Coq's proof mode helps you work with the rules of Coq's logic.
+The Iris Proof Mode provides an interface similar to Rocq's proof mode; since you already have experience using that, it's helpful to understand it by analogy to how Rocq's proof mode helps you work with the rules of Rocq's logic.
 
-In this explanation I'll use φ, ψ, ρ (phi, psi, rho) for Coq propositions and P, Q, R for separation logic propositions.
+In this explanation I'll use φ, ψ, ρ (phi, psi, rho) for Rocq propositions and P, Q, R for separation logic propositions.
 
 The IPM is used to prove entailments in separation logic. It's sufficient to get the intuition to imagine that the propositions are heap predicates `gmap loc val → Prop`, the separation logic operations are as defined as given in the notes, and entailment `P ⊢ Q` is defined as `∀ h, P h → Q h` (also as in the notes). However, the actual implementation is _parametric_ in the separation logic - you can "bring your own" separation logic implementation (if it satisfies the expected rules) and prove theorems in it.
 
@@ -63,22 +63,22 @@ An IPM goal looks like the following:
 Q ∗ P
 ```
 
-This represents the separation logic entailment $P ∗ Q ⊢ Q ∗ P$. However, the IPM goal has a richer representation of the context than a single proposition: it divides it into several _named conjuncts_. The names use Coq strings, which we write with quotes. Notice how this is exactly analogous to how we might have the following Coq goal:
+This represents the separation logic entailment $P ∗ Q ⊢ Q ∗ P$. However, the IPM goal has a richer representation of the context than a single proposition: it divides it into several _named conjuncts_. The names use Rocq strings, which we write with quotes. Notice how this is exactly analogous to how we might have the following Rocq goal:
 
-```text title="Coq goal"
+```text title="Rocq goal"
 H1: φ
 H2: ψ
 ============
 ψ ∧ φ
 ```
 
-which represents an entailment in the Coq logic `φ ∧ ψ ⊢ ψ ∧ φ`.
+which represents an entailment in the Rocq logic `φ ∧ ψ ⊢ ψ ∧ φ`.
 
 To recap: both representations have a _context_ with _named hypotheses_ and a _conclusion_. The names have no semantic meaning but are instead used to refer to hypotheses in tactics.
 
 ---
 
-Now let's see how these look in Coq. First, we need to do some setup:
+Now let's see how these look in Rocq. First, we need to do some setup:
 
 ```rocq
 From sys_verif.program_proof Require Import prelude.
@@ -95,9 +95,9 @@ Implicit Types (P Q R: iProp Σ).
 
 ```
 
-The IPM is _embedded_ in Coq, rather than developed as a separate system. The way this works is that the entire IPM goal, context and conclusion together, will be in a Coq goal, and above that will be a _Coq context_. Thus we will actually be proving that a set of Coq hypotheses imply (at the Coq level) a separation logic entailment.
+The IPM is _embedded_ in Rocq, rather than developed as a separate system. The way this works is that the entire IPM goal, context and conclusion together, will be in a Rocq goal, and above that will be a _Rocq context_. Thus we will actually be proving that a set of Rocq hypotheses imply (at the Rocq level) a separation logic entailment.
 
-In both Coq and the IPM, we will state the original goal using an implication rather than an entailment symbol.
+In both Rocq and the IPM, we will state the original goal using an implication rather than an entailment symbol.
 
 For separation logic, we will use the _separating implication_ or wand.
 
@@ -160,9 +160,9 @@ You might be wondering, how do you type this stuff? See the notes on [inputting 
 
 ## IPM tactics
 
-To prove theorems in Coq, we use tactics to manipulate the proof state. The IPM works the same way, providing a collection of tactics to manipulate the IPM context and conclusion. These tactics are intentionally designed to look like analogous Coq tactics, but there are some key differences that come from separation logic. Let's see an example, adapted from Figure 2 from the IPM paper. In this example I'll use the names P, Q, R in both, even though they are `Prop`s in one case and `iProp`s in the other:
+To prove theorems in Rocq, we use tactics to manipulate the proof state. The IPM works the same way, providing a collection of tactics to manipulate the IPM context and conclusion. These tactics are intentionally designed to look like analogous Rocq tactics, but there are some key differences that come from separation logic. Let's see an example, adapted from Figure 2 from the IPM paper. In this example I'll use the names P, Q, R in both, even though they are `Prop`s in one case and `iProp`s in the other:
 
-### Analogy to the Coq proof mode
+### Analogy to the Rocq proof mode
 
 ```rocq
 Lemma and_exist_ex A (P Q: Prop) (R: A → Prop) :
@@ -307,16 +307,16 @@ Qed.
 
 ```
 
-Notice how `iIntros`, `iDestruct`, `iExists`, and `iAssumption` are all very similar to the analogous Coq tactics. You can see in `iDestruct` and `iExists` that we sometimes need to mix Coq-level identifiers (`x` is given to name the variable in `iDestruct` and passed as an argument to `iExists`) and IPM hypotheses (which all appear in quotes).
+Notice how `iIntros`, `iDestruct`, `iExists`, and `iAssumption` are all very similar to the analogous Rocq tactics. You can see in `iDestruct` and `iExists` that we sometimes need to mix Rocq-level identifiers (`x` is given to name the variable in `iDestruct` and passed as an argument to `iExists`) and IPM hypotheses (which all appear in quotes).
 
-What is different in this proof is that `iSplit` is written `iSplitL "HR"`. This is because if we're proving $R ⊢ P ∗ Q$, we have to decide how to split up the hypotheses in $R$. Each hypothesis can be used for $P$ or $Q$ but not both; this is coming directly from the _separation_ in separation logic, and no such decision is needed in the Coq logic since all hypotheses can be used on both sides. The tactic `iSplitL` defines the split by naming all the hypotheses that should be used for the left-hand side; similarly `iSplitR` takes the hypotheses that should be used on the right-hand side.
+What is different in this proof is that `iSplit` is written `iSplitL "HR"`. This is because if we're proving $R ⊢ P ∗ Q$, we have to decide how to split up the hypotheses in $R$. Each hypothesis can be used for $P$ or $Q$ but not both; this is coming directly from the _separation_ in separation logic, and no such decision is needed in the Rocq logic since all hypotheses can be used on both sides. The tactic `iSplitL` defines the split by naming all the hypotheses that should be used for the left-hand side; similarly `iSplitR` takes the hypotheses that should be used on the right-hand side.
 
 ### Separation logic-specific features
 
 There are a few more tactics with behavior specific to separation logic.
 
-- `iApply` is analogous to `apply`, but applying a wand rather than an implication. It can be used with Coq lemmas as well.
-- `iDestruct` is similar to `iApply` but for forward reasoning. It can also be used with Coq lemmas.
+- `iApply` is analogous to `apply`, but applying a wand rather than an implication. It can be used with Rocq lemmas as well.
+- `iDestruct` is similar to `iApply` but for forward reasoning. It can also be used with Rocq lemmas.
 - `iFrame` automates the process of proving something like `P1 ∗ P3 ∗ P2 ⊢ P1 ∗ P2 ∗ P3` by lining up hypotheses to the goal and "canceling" them out.
 
 ```rocq
@@ -346,7 +346,7 @@ Qed.
 
 ```
 
-Applying is a little trickier when there are multiple hypotheses. Just like with `iSplit` we have to decide how hypotheses are divided up. We also see an example below where the wand comes from a Coq-level assumption; more realistically imagine that this is a lemma.
+Applying is a little trickier when there are multiple hypotheses. Just like with `iSplit` we have to decide how hypotheses are divided up. We also see an example below where the wand comes from a Rocq-level assumption; more realistically imagine that this is a lemma.
 
 ```rocq
 Lemma apply_split_ex P1 P2 P3 Q :
@@ -514,7 +514,7 @@ Proof.
 
 ```
 
-The `%Heq` intro pattern moves the hypothesis into the Coq context (sometimes called the "pure" context). It is unusual in that `Heq` appears in a string but turns into a Coq identifier.
+The `%Heq` intro pattern moves the hypothesis into the Rocq context (sometimes called the "pure" context). It is unusual in that `Heq` appears in a string but turns into a Rocq identifier.
 
 ```rocq
   iIntros "(%Heq & Hx & Hy)".
@@ -616,31 +616,26 @@ $$
 
 The syntax `{{{ P }}} e {{{ RET v; Q(v) }}}` does not quite mean exactly the above. It is defined as:
 
-$$∀ Φ.\, P \wand (∀ v.\, Q(v) \wand Φ(v)) \wand \wp(e, Φ)$$
-
-To understand this, it helps to first rewrite it to an equivalent entailment with fewer wands:
-
 $$∀ Φ.\, P ∗ (∀ v.\, Q(v) \wand Φ(v)) ⊢ \wp(e, Φ)$$
-
-This is like a _continuation-passing style_ version of $P ⊢ \wp(e, Q)$ (if you've seen the term that might give some intuition). Observe that it is at least as strong: we can set $Φ = Q$ and recover the original triple. It also includes framing; it is like applying the wp-ramified-rule.
 
 The benefit of applying the frame rule is that this form of specification gives a way to prove $\wp(e, Φ)$ for an arbitrary postcondition. However, it requires that the user prove $∀ v.\, Q(v) \wand Φ(v)$. The benefit of using this rule is that it can be applied whenever the goal is about $e$ while deferring the proof that $Q$ implies $Φ$.
 
-The practical consequence, as we will see in Coq below, is convenience when we _use_ the specification in a larger proof. If we are in the midst of proving $R ⊢ \wp(e, Ψ)$ for some $Ψ$, we can use the specification $\hoare{P}{e}{Q}$ by splitting the context into $R ⊢ R_{\text{pre}} ∗ R_f$ and then proving the following things:
+The practical consequence, as we will see in Rocq below, is convenience when we _use_ the specification in a larger proof. If we are in the midst of proving $R ⊢ \wp(e, Ψ)$ for some $Ψ$, we can use the specification $\hoare{P}{e}{Q}$ by splitting the context into $R ⊢ R_{\text{pre}} ∗ R_f$ and then proving the following things:
 
 - $R_{\text{pre}} ⊢ P$
 - $∀ v.\, Q(v) ∗ R_f ⊢ Ψ(v)$
 
 Intuitively, the $R_f$ are the "leftover" facts that were not needed for the call to $e$, and thus they can be used for the remainder of the proof. This is exactly what the frame rule would give with $R_f$ as the frame (what we called $F$ in the rule). This reasoning does follow from separation logic rules, but it's okay if you don't see that right away; it's useful to see the intuition for this reasoning without deriving it purely formally.
 
+To understand the rule itself, you can think of it like a _continuation-passing style_ version of $P ⊢ \wp(e, Q)$; instead of directly proving the WP with $Q$, it takes an arbitrary continuation postcondition $Φ$ and proves that. Observe that the rule is at least as strong as the regular version above: we can set $Φ = Q$ and recover the original triple. It also includes framing; it is like applying the wp-ramified-rule. This version of a program specification is also _no more powerful_; we could use framing and the rule of consequence to prove it from the standard separation logic triple.
+
 ### IPM tactics for WPs
 
-The IPM has some tactics for weakest precondition reasoning specifically. It's actually not much:
+The IPM has some tactics for weakest precondition reasoning. It's actually not much:
 
-- `wp_pures` is the most commonly used tactic. It applies the pure-step rule: if $e \purestep e'$, then $\wp(e', Q) ⊢ \wp(e, Q)$. Applying this rule has the effect of going from $e$ to the $e'$ that it reduces to, something that can be computed automatically. `wp_pures` applies the pure-step as many times as it can, but without going into the bodies of functions.
-- `wp_bind e` automatically applies the bind rule, finding a way to split the current goal into `e` followed by `K[e]` (and failing if `e` is not actually the next part of the code to execute).
-- `wp_apply lem` uses `wp_bind` to find a way to apply the already-proven triple `lem`.
-- `wp_load`, `wp_store`, and `wp_alloc` automate using those specifications, since they are so commonly used.
+- `wp_auto` is the most commonly used tactic. It applies the pure-step rule (if $e \purestep e'$, then $\wp(e', Q) ⊢ \wp(e, Q)$). Applying this rule has the effect of going from $e$ to the $e'$ that it reduces to, something that can be computed automatically. `wp_auto` applies the pure-step as many times as it can, but without going into the bodies of functions. It also automatically uses the load, store, and alloc rules when possible.
+- `wp_apply lem` applies the already-proven triple `lem`.
+- `wp_bind e` applies the bind rule, finding a way to split the current goal into `e` followed by `K[e]` (and failing if `e` is not actually the next part of the code to execute). You rarely need to use this directly since `wp_apply` automatically uses it.
 
 All of these are easiest understood by seeing them in context; read on for an example.
 
@@ -662,7 +657,7 @@ We'll now do an analogous proof using Go code for `f` and some code that uses it
 The Go code for $f$ looks like this, although we won't cover its proof and will only use its specification.
 
 ```go
-func IgnoreOneLocF(x *uint64, y *uint64) {
+func IgnoreOneLocF(x *int, y *int) {
 	std.Assert( *x == 0 )
 	*x = 42
 }
@@ -694,11 +689,11 @@ Qed.
 We're now going to verify this Go code that uses `IgnoreOne` as a black box:
 
 ```go
-func IgnoreOne(x *uint64, y *uint64) { ... }
+func IgnoreOne(x *int, y *int) { ... }
 
 func UseIgnoreOneLoc() {
-	var x = uint64(0)
-	var y = uint64(42)
+	x := 0
+	y := 42
 	IgnoreOne(&x, &y)
 	std.Assert(x == y)
 }
@@ -1030,13 +1025,9 @@ The IPM provides several mechanisms for deciding on these splits. A _specializat
 We'll now breeze through the rest of the proof:
 
 ```rocq
-  wp_pures.
-  wp_load.
-  wp_load.
-  wp_pures.
+  wp_auto.
   wp_apply (wp_Assert).
   { rewrite bool_decide_eq_true_2 //. }
-  wp_pures.
   iApply "HΦ". done.
 Qed.
 
