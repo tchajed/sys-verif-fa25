@@ -4,6 +4,7 @@ category: lecture-note
 tags: literate
 order: 10
 shortTitle: "IPM"
+date: 2025-10-07 8:00:00 -5
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
@@ -431,7 +432,6 @@ The first goal is the premise of `HQ` (using the hypotheses we made available us
 ```rocq
   { iFrame. }
 
-
 ```
 
 "H2" and "HQ" are lost after this tactic, which is actually required because of separation logic; the wand is "used up" in proving `Q`, in the same ay that "H1" and "H3" were used in the premise of `HQ`.
@@ -454,7 +454,6 @@ Lemma destruct_more_framing_ex P1 P2 P3 Q :
 Proof.
   intros HQ.
   iIntros "(H1 & H2 & H3)".
-
 
 ```
 
@@ -492,7 +491,6 @@ Proof.
 ```rocq
   { iFrame "H3". }
 
-
 ```
 
 `as "$"` is an introduction pattern that does not name the resulting hypothesis but instead immediately frames it with something in the goal. In this case that finishes the proof.
@@ -511,7 +509,6 @@ One more commonly used intro pattern is used for pure facts `⌜φ⌝` that show
 Lemma pure_intro_pattern `{hG: !heapGS Σ} (t a b: w64) (x y: loc) :
   ⌜t = a⌝ ∗ x ↦ b ∗ y ↦ t -∗ x ↦ b ∗ y ↦ a.
 Proof.
-
 ```
 
 The `%Heq` intro pattern moves the hypothesis into the Rocq context (sometimes called the "pure" context). It is unusual in that `Heq` appears in a string but turns into a Rocq identifier.
@@ -544,7 +541,7 @@ Qed.
 
 Go to the [IPM documentation](https://gitlab.mpi-sws.org/iris/iris/-/blob/master/docs/proof_mode.md) and find the _exact_ lines where the `%Heq` in both the first proof and second proof are documented.
 
-### Exercises
+### Exercise: complete proofs on your own
 
 The lemmas above are repeated here (plus a few new ones). Fill in the proofs, looking above at solutions only when you get stuck.
 
@@ -893,7 +890,6 @@ We do _not_ end up needing the rule of consequence. The reason is that the meani
   iModIntro. (* don't worry about this for now *)
   iIntros (x) "Hx".
 
-
 ```
 
 At this point there is a `let:` binding which we need to apply the pure-step rule to. Thankfully, the IPM has automation to handle this for us.
@@ -1068,7 +1064,6 @@ The IPM provides several mechanisms for deciding on these splits. A _specializat
   iModIntro.
   (* this re-introduces the postcondition in `wp_IgnoreOne` *)
   iIntros "Hx".
-
 
 ```
 

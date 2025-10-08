@@ -30,7 +30,9 @@ The workflow is that we write the code we plan to run in Go, then translate it t
 
 ::: tip
 
-While you won't have to _write_ Go for this class, it helps to be able to _read_ it. Luckily it's a fairly simple language to learn if you know how to program already. You should spend a few minutes reading the [Tour of Go](https://go.dev/tour/list). For this class, the Basics section and Methods and Interfaces are plenty.
+While you won't have to _write_ Go for this class, it helps to be able to _read_ it. Luckily it's a fairly simple language to learn if you  
+know how to program already. You should spend a few minutes reading the [Tour of Go](https://go.dev/tour/list). For this class, the Basics  
+section and Methods and Interfaces are plenty.
 
 :::
 
