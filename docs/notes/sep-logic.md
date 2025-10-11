@@ -306,7 +306,7 @@ $$
 
 There's a frame in pretty much every step, since each line interacts with either $x$ or $y$ and the other is framed out. Technically the pure assertion $\lift{t = a}$ is also framed once it appears.
 
-Note that at the end we can drop `\lift{t = a}` even in a linear logic; it "takes up no space" in the heap since the part where it holds also satisfies $\emp$.
+Note that at the end we can drop $\lift{t = a}$ even in a linear logic; it "takes up no space" in the heap since the part where it holds also satisfies $\emp$.
 
 :::
 
