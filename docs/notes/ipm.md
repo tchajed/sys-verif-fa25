@@ -593,7 +593,7 @@ Admitted.
 
 One last tactic: you will need to use `iModIntro` in a couple situations.
 
-`iModIntro` "introduces a modality". You'll use it for the _later modality_ `▷ P` and for the _fancy update modality_ `|==> P` (often pronounced "fup-d", or "update"). We'll talk about these more later in subsequent lectures, as they come up.
+`iModIntro` "introduces a modality" in the goal. You'll use it for the _later modality_ `▷ P` and for the _fancy update modality_ `|==> P` (often pronounced "fup-d", or "update"). We'll talk about these more later in subsequent lectures, as they come up.
 
 Modalities can also be introduced with `iIntros` using the pattern "!>".
 
@@ -649,6 +649,8 @@ Proof.
 Qed.
 
 ```
+
+The effect of `iModIntro` is to remove a modality from the goal, so you might wonder why it's called an "introduction" tactic. The reason is due to thinking of the proof in a forward direction (from assumptions to goals) rather than a backward direction (as we often use in Rocq). From that perspective, `iModIntro` applies a rule that allows us to prove `▷ P` or `|==> P`, thus _introducing_ it in the proof.
 
 ## Program proofs in the IPM
 
@@ -799,13 +801,13 @@ Proof.
 ::::
 
 ```rocq
-  rewrite -default_val_eq_zero_val.
+  rewrite -default_val_eq_zero_val. (* only for demo; needed due to using iApply wp_alloc below *)
 
 ```
 
 The next step in the proof outline is this call to `ref_to`, which allocates.
 
-Formally, the proof proceeds by applying the bind rule (to split the program into `ref_to uint64T #(W64 0)` and the rest of the code that uses this value). We can use an IPM tactic to automate this process, in particular identifying the context `K` in the bind rule.
+Formally, the proof proceeds by applying the bind rule (to split the program into `alloc #(default_val w64)` and the rest of the code that uses this value). We can use an IPM tactic to automate this process, in particular identifying the context `K` in the bind rule.
 
 ```rocq
   wp_bind (alloc #(default_val w64))%E.
@@ -845,7 +847,7 @@ Formally, the proof proceeds by applying the bind rule (to split the program int
 
 ::::
 
-Take a moment to read this goal: it says we need to prove a specification for just `ref` in which the postcondition contains the remainder of the code. Where the original code had `ref_to ...` it now has `v`, the return value of allocating; this is `K[v]` from the bind rule.
+Take a moment to read this goal: it says we need to prove a specification for just `alloc` in which the postcondition contains the remainder of the code. Where the original code had `alloc ...` it now has `v`, the return value of allocating; this is `K[v]` from the bind rule.
 
 The next step you'd expect is that we need to use the rule of consequence to prove this goal from the existing specification for `ref`:
 
@@ -887,7 +889,7 @@ We do _not_ end up needing the rule of consequence. The reason is that the meani
   { (* the (trivial) precondition in wp_alloc *)
     auto. }
 
-  iModIntro. (* don't worry about this for now *)
+  iModIntro. (* introduce the later *)
   iIntros (x) "Hx".
 
 ```
@@ -1076,6 +1078,57 @@ We'll now breeze through the rest of the proof:
   iApply "HΦ". done.
 Qed.
 
+```
+
+### Exercise: complete proofs
+
+Here are some simple examples of some specifications for practice using previously proven specifications. You should call previously proven specifications with `wp_apply`.
+
+```rocq
+Definition f: val := λ: <>, #().
+Definition g: val := λ: "x", f "x";; #(W64 1).
+Definition h: val := λ: "l",
+    let: "y" := g "l" in
+    ![#uint32T] "l";;
+    "y".
+
+Lemma wp_f l (x: w32) :
+  {{{ l ↦ x }}}
+    f #l
+  {{{ RET #(); l ↦ x }}}.
+Proof.
+  wp_start as "l".
+  wp_call.
+  iApply "HΦ".
+Admitted.
+
+Lemma wp_g (l: loc) (x: w32) :
+  {{{ l ↦ x }}}
+    g #l
+  {{{ (y: w64), RET #y; ⌜uint.Z y < 10⌝ ∗ l ↦ x }}}.
+Proof.
+  wp_start as "l".
+  wp_call.
+Admitted.
+
+Lemma wp_h (l: loc) (x: w32) :
+  {{{ l ↦ x }}}
+    h #l
+  {{{ (y: w64), RET #y; ⌜uint.Z y < 20⌝ ∗ l ↦ x }}}.
+Proof.
+Admitted.
+
+```
+
+A bonus proof. Can this be done from your previous work in wp_f, wp_g, and even wp_h? Why or why not? How could you prove it?
+
+```rocq
+Lemma wp_h' (l: loc) (x: w32) :
+  {{{ l ↦ x }}}
+    h #l
+  {{{ (y: w64), RET #y; ⌜uint.Z y < 2⌝ ∗ l ↦ x }}}.
+Proof.
+Admitted.
 ```
 
 ```rocq
