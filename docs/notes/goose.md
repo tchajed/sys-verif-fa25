@@ -84,16 +84,12 @@ Goose _models_ Go code using GooseLang. You can see one evidence of this modelin
 
 GooseLang has the following features:
 
-- Values can be bytes, 64-bit integers, strings. As before, we have the unit value $()$ and functions as first-class values.
+- Values can be bytes, integers (64, 32, or 16-bit), booleans, strings, and pointers. As before, we have the unit value $()$ and functions as first-class values.
 - The Rocq implementation has a concrete syntax. Constructs like `λ:`, `rec:`, and `if:` all have a colon to disambiguate them during parsing from similar Rocq syntax. Literals have to be explicitly turned into value with `#`, so we write `#true` and `#()` for the boolean true and the unit value. Similarly, `#(W64 1)` represents the 64-bit integer constant 1.
 - Allocation supports arrays that get contiguous locations, to model slices.
-- The binary operator `ℓ +ₗ n` implements pointer arithmetic: we can take an offset to a location. Allocating an array returns a single location `ℓ`, and loading and storing at `ℓ +ₗ n` accesses the `n`th element of the array.
+- The binary operator `ℓ +ₗ n` implements pointer arithmetic: we can take an offset to a location. Allocating an array returns a single location `ℓ`, and loading and storing at `ℓ +ₗ n` accesses the `n`th element of the array. Structs are laid out with their fields contiguously in memory, so that we can use pointer arithmetic to get a pointer to an individual field.
 
-In addition, GooseLang has some primitives related to concurrency:
-
-- Pointer loads and stores are _non-atomic_ to model weak memory (we won't talk about this in class)
-- Fork creates a new thread, used to model the `go f()` statement that spawns a "goroutine" running `f()`.
-- A compare-and-exchange operation that is used in the translation of locks.
+In addition, GooseLang has a Fork operation to create a concurrent thread, used to model the `go f()` statement that spawns a "goroutine" running `f()`.
 
 There are also some features we won't talk about:
 
@@ -102,35 +98,75 @@ There are also some features we won't talk about:
 
 ### Local variables
 
-Goose models immutable local variables as `let` bindings, while mutable variables are modeled by allocating them on the heap. In Go, it is permitted and safe to take the address of local variables; conceptually, it would be sound to model all variables as being on the heap. The compiler does a simple _escape analysis_: if the analysis proves that a function's address is never used outside the function, then it is instead allocated on the stack (for example, in the common case that the address is never taken).
+Goose models local variables on the heap. The compiler does a simple _escape analysis_: if the analysis proves that a function's address is never used outside the function, then it is instead allocated on the stack (for example, in the common case that the address is never taken). However, it is sound to think of all local variables as being on the heap; stack allocation is just a performance optimization.
 
-Goose uses a `let` binding (vs always using a heap variable) only to make the resulting code easier to reason about: the let binding is a pure operation that is handled by substituting the right-hand side, whereas a heap variable (even if constant) would result in a points-to assertion.
-
-Here's an example where Go and Goose both use a heap-allocated local variable.
+Here's an example of
 
 ```go
-func StackEscape() *uint64 {
-	var x = uint64(42)
+func StackEscape() *int {
+	x := 42
 	return &x // x has escaped! // [!code highlight]
 }
 ```
 
 ```rocq
-Definition StackEscape: val :=
-  rec: "StackEscape" <> :=
-    let: "x" := ref_to uint64T #42 in
-    "x".
+Definition StackEscapeⁱᵐᵖˡ : val :=
+  λ: <>,
+    exception_do (let: "x" := (mem.alloc (type.zero_val #intT)) in
+    let: "$r0" := #(W64 42) in
+    do:  ("x" <-[#intT] "$r0");;;
+    return: ("x")).
 ```
 
-One caveat about this "optimization": Goose translates variables declared with `x := ...` as immutable and variables declared as `var x = ...` as mutable; this is not a feature of Go, in which all local variables are mutable. A future version should probably do an analysis of the function rather than using the syntax.
+The key to note here is that `x` is allocated on the heap and then returned.
 
-Go also has a construct `new(T)` that allocates a pointer to a value of type `T` and initializes it to the _zero value_ of the type (and every type in Go has a well-defined zero value). Goose also supports this form of allocation, although allocating by taking the address of a heap variable is more common. (For structs, the most common pattern is actually `&S { ... }` - that is, taking the address of a struct literal.)
+Go also has a construct `new(T)` that allocates a pointer to a value of type `T` and initializes it to the _zero value_ of the type (and every type in Go has a well-defined zero value). Goose also supports this form of allocation. (For structs, it's typical to write `&S { ... }` to allocate a pointer - that is, taking the address of a struct literal.)
 
 ### Control flow
 
-GooseLang has no special features for control flow. Instead, it must be modeled in the translation. The current translation handles specific, known patterns and is not fully general, thus there are control flow patterns that are not supported (for example, `return` inside a `for` loop). In those cases the translation fails and the developer must rewrite the code to avoid the tricky control flow. A new version of Goose (a significant rewrite) is in progress that will lift most of these limitations.
+Control flow features are modeled using the primitives of first-class functions and tuples. These use a variety of definitions and notations, implemented in the "GoLang" layer on top of GooseLang in the Perennial codebase.
 
-The `Arith` example above shows how an `if` statement with an early return is translated. Another set of control flow features is related to loops. Here's an example of a loop translation:
+The `Arith` example shows how control flow is translated:
+
+```go
+func Arith(a, b uint64) uint64 {
+	sum := a + b
+	if sum == 7 {
+		return a
+	}
+	mid := Midpoint(a, b)
+	return mid
+}
+```
+
+```rocq
+Definition Arithⁱᵐᵖˡ : val :=
+  λ: "a" "b",
+    exception_do (let: "b" := (mem.alloc "b") in
+    let: "a" := (mem.alloc "a") in
+    let: "sum" := (mem.alloc (type.zero_val #uint64T)) in
+    let: "$r0" := ((![#uint64T] "a") + (![#uint64T] "b")) in
+    do:  ("sum" <-[#uint64T] "$r0");;;
+    (if: (![#uint64T] "sum") = #(W64 7)
+    then return: (![#uint64T] "a")
+    else do:  #());;;
+    let: "mid" := (mem.alloc (type.zero_val #uint64T)) in
+    let: "$r0" := (let: "$a0" := (![#uint64T] "a") in
+    let: "$a1" := (![#uint64T] "b") in
+    (func_call #Midpoint) "$a0" "$a1") in
+    do:  ("mid" <-[#uint64T] "$r0");;;
+    return: (![#uint64T] "mid")).
+```
+
+There is a lot of syntax here. First, note the `exception_do` wrapper; a `return: e` expression inside will return early, preventing execution of code afterward. On the other hand `do: e` will run as normal and proceed to the next line. This sequencing-with-return is implemented by `;;;`, which is _not_ the same as the usual sequencing `;;`.
+
+The next part of this code is that it allocates a lot of variables. The arguments are stored in new variables `a` and `b` since function arguments become mutable within this function. Whenever a local variable is referenced, we see something like `![#uint64T] "a"`, which loads `a` with the help of a _type annotation_. The type is needed to know how many heap locations the value takes, which will be more than one for a composite struct.
+
+From there we see a more straightforward correspondence between the Go and the translation. Notice that the `if` has no else branch in Go, but it does have `do: #()` in GooseLang since we always need both branches.
+
+The call to `Midpoint` becomes `func_call #Midpoint $a0 $a1`. What this actually does is look up the code for Midpoint by its name (`Midpoint` is just the full Go path to the function followed by the string "Midpoint") and then call it. The level of indirection is needed to allow recursion, both for one function to call itself and for multiple top-level functions to call each other.
+
+Another set of control flow features is related to loops. Here's an example of a loop translation:
 
 ```go
 // SumN adds up the numbers from 1 to n, with a loop.
@@ -149,49 +185,28 @@ func SumN(n uint64) uint64 {
 ```
 
 ```rocq
-Definition SumN: val :=
-  rec: "SumN" "n" :=
-    let: "sum" := ref_to uint64T #0 in
-    let: "i" := ref_to uint64T #1 in
-    Skip;;
-    (for: (λ: <>, #true); (λ: <>, Skip) := λ: <>,
-      (if: (![uint64T] "i") > "n"
-      then Break
-      else
-        "sum" <-[uint64T] ((![uint64T] "sum") + (![uint64T] "i"));;
-        "i" <-[uint64T] ((![uint64T] "i") + #1);;
-        Continue));;
-    ![uint64T] "sum".
+Definition SumNⁱᵐᵖˡ : val :=
+  λ: "n",
+    exception_do (let: "n" := (mem.alloc "n") in
+    let: "sum" := (mem.alloc (type.zero_val #uint64T)) in
+    let: "$r0" := #(W64 0) in
+    do:  ("sum" <-[#uint64T] "$r0");;;
+    let: "i" := (mem.alloc (type.zero_val #uint64T)) in
+    let: "$r0" := #(W64 1) in
+    do:  ("i" <-[#uint64T] "$r0");;;
+    (for: (λ: <>, #true); (λ: <>, #()) := λ: <>,
+      (if: (![#uint64T] "i") > (![#uint64T] "n")
+      then break: #()
+      else do:  #());;;
+      let: "$r0" := (let: "$a0" := (![#uint64T] "sum") in
+      let: "$a1" := (![#uint64T] "i") in
+      (func_call #std.SumAssumeNoOverflow) "$a0" "$a1") in
+      do:  ("sum" <-[#uint64T] "$r0");;;
+      do:  ("i" <-[#uint64T] ((![#uint64T] "i") + #(W64 1))));;;
+    return: (![#uint64T] "sum")).
 ```
 
-The (GooseLang) syntax `for:` is a very thin Notation around the following _model_ of (Go) `for` loops:
-
-```rocq
-Definition For: val :=
-  λ: "cond" "body" "post",
-  (rec: "loop" <> :=
-     let: "continue" :=
-        (if: "cond" #()
-         then "body" #()
-         else #false) in
-     if: "continue"
-     then "post" #();; "loop" #()
-     else #()) #().
-```
-
-The Go code `for init; cond; post { body }` is translated (roughly) into `init;; For cond body post`. (Unfortunately this isn't the order of arguments of the notation, which goes `for: cond ; post := body`. The function `For` should be fixed.)
-
-`For` takes three _functions_ as arguments (making it a so-called _higher-order function_): cond, body, and post. You can think of it as having the type `For : (unit -> bool) -> (unit -> unit) -> (unit -> unit) -> unit`, where `#() : unit` is the unit value in GooseLang. (You are welcome to think about these types but we don't actually have a type system for GooseLang, so it's only in your imagination.)
-
-You might be confused by the `unit` argument each function takes: this is sometimes called a _thunk_ and is needed to prevent evaluating the condition, body, and post until they are needed in the loop. For example, if for the `cond` we passed a `bool` rather than a `unit -> bool` it would be a constant throughout the entire loop. A function that takes a unit isn't evaluated until desired by passing the argument.
-
-::: info Exercise
-
-Check your understanding: does the `cond` return `true` when the loop should stop or keep going? Try to figure out how this follows from the definition of `For`, not just your expectations.
-
-Next, do you believe this is a correct model of `for` loops?
-
-:::
+The complexity here is mostly hidden by the `for:` syntax, which picks up the `break: #()` and appropriately stops looping at that point. There is no loop condition, hence why `(λ: <>, #true)` appears as the first argument to `for:`.
 
 ## Proofs with Goose
 
