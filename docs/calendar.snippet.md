@@ -15,7 +15,7 @@
 | 9 | Tue Oct 7 | Iris Proof Mode (part 1) | [notes](./notes/ipm.md) | bring a laptop |
 |  | Thu Oct 9 | **No class** (Tej is sick) |  |  |
 | 10 | Tue Oct 14 | Iris Proof Mode (part 2) | [same notes](./notes/ipm.md) | bring a laptop |
-| 11 | Thu Oct 16 | Modeling Go programs | [notes](./notes/goose.md) (including Tour of Go) |  |
+| 11 | Thu Oct 16 | Modeling Go programs: [slides](./slides/lec11.pdf) | [notes](./notes/goose.md) (including Tour of Go) |  |
 |  | Mon Oct 20 |  |  | _[Assignment 2](./assignments/hw2/) due (11pm)_ |
 | 12 | Tue Oct 21 | Loop invariants | [notes](./notes/loop_invariants.md) |  |
 | 13 | Thu Oct 23 | Ownership | [notes](./notes/ownership.md) |  |
