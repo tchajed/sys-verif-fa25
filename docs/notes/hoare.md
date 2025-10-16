@@ -590,7 +590,7 @@ $\hoare{P}{e}{\fun{v} Q(v)}$ means if $P$ holds and $e \to^* e'$, then either (a
 
 First, notice that Hoare logic connects back to the operational semantics of the programming language and $e$ in particular: we can precisely say how a Hoare triple relates to $e$'s behavior.
 
-Second, notice that we only learn anything about $Q$ if $e \to^* v'$. This is called _partial correctness_ because it only gives the postcondition for programs when the terminate; there is a variant of Hoare logic with so-called _total correctness triples_ that also prove the program terminates, but proving termination can be quite complicated. Do note that regardless of termination, if $P$ holds initially the program is at least _safe_ in that it never does something "bad" like trying to execute $1 + \true$.
+Second, notice that we only learn anything about $Q$ if $e \to^* v'$. This is called _partial correctness_ because it only gives the postcondition for programs when they terminate; there is a variant of Hoare logic with so-called _total correctness triples_ that also prove the program terminates, but proving termination can be quite complicated. Do note that regardless of termination, if $P$ holds initially the program is at least _safe_ in that it never does something "bad" like trying to execute $1 + \true$.
 
 ::: info Hoare logic as a logic
 
