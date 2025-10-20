@@ -177,15 +177,16 @@ entries: list[Lecture | AssignmentDue | NoClass] = [
     ),
     Lecture("Modeling Go programs", notes_link("goose"), has_slides=True),
     AssignmentDue("Assignment 2", "./assignments/hw2/", datetime.date(2025, 10, 20)),
+    Lecture("Ownership (part 1)", notes_link("ownership"), comment="bring a laptop"),
+    Lecture(
+        "Ownership (part 2)",
+        notes_link("ownership", text="same notes"),
+        comment="bring a laptop",
+    ),
     Lecture("Loop invariants", notes_link("loop_invariants")),
-    Lecture("Ownership", notes_link("ownership")),
     Lecture("Persistence", notes_link("persistently")),
     Lecture("Concurrency intro", notes_link("concurrency")),
     Lecture("Lock invariants", notes_link("invariants")),
-    Lecture(
-        "Resource algebras",
-        notes_link("resource-algebra"),
-    ),
     AssignmentDue("Assignment 3", "./assignments/hw3/", datetime.date(2025, 11, 10)),
     Lecture("Ghost state", notes_link("ghost_state")),
     Lecture("Atomic specs", notes_link("atomic_specs")),
@@ -202,7 +203,7 @@ entries: list[Lecture | AssignmentDue | NoClass] = [
 # Had a week off for SOSP in Fall 2024.
 # Fall 2025 has fewer lecture days.
 # Fall 2025 had one travel day for NESVD and one sick day.
-# Dropped SMT lecture
+# Dropped lectures: Resource algebras, ADT invariants, and SMT
 
 
 def main():

@@ -55,72 +55,65 @@ Lemma wp_NetworkSend c data_s bs bs' :
   {{{ conn_stream(c, bs ++ bs') }}}.
 ```
 
+In these specifications, `file_data(f, bs)` is a _representation predicate_ that expresses that the file `f` contains bytes `bs`, while `conn_stream(c, bs)` expresses that the bytes `bs` have been sent on stream `c`. `own_slice data_s bs'` is how we state that the slice value `data_s` points to the data `bs'` (a list of bytes in this case).
+
 What these functions might do differently and how this translates to these specifications is one mystery this lecture will aim to resolve.
 
 The ideas of _ownership_ and _permissions_ are at play in all of these examples. In each example, the code doesn't tell us which piece of the code is allowed to read or write a data structure, but knowing these permission rules is important for writing correct code. Separation logic allows us to specify and prove the permission discipline for a function. The specification communicates the ownership discpline, the proof ensures that we follow our stated ownership, and the caller's proof ensures that they follow whatever rules our function requires to be correct.
 
 **Terminology note:** The term _ownership_ in C++ and Rust refers specifically to the permission (and responsibility) to _destroy_ an object, which is not important in Go as a garbage collected language. In the separation logic context ownership and permissions are used a bit more interchangeably.
 
-### Ownership in iterators
+```rocq
+From sys_verif.program_proof Require Import prelude empty_ffi.
+From Coq Require Import Strings.String.
+From sys_verif.program_proof Require Import heap_init.
 
-As another example, consider a hashmap with an iteration API that looks like this:
+Section goose.
+Context `{hG: !heapGS Σ}.
+Context `{!globalsGS Σ} {go_ctx: GoContext}.
 
-```go
-func PrintKeys(m HashMap) {
-  it := m.KeyIterator()
-  for k, ok := it.Next(); ok {
-      fmt.Println(k)
-  }
-}
 ```
 
-That is, we have an API like this (where `Key` is a placeholder for the key type):
+## Typed points-to assertion
 
-```go
-// normal operations:
-func (m HashMap) Get(k Key) (v Value, ok bool)
-func (m HashMap) Put(k Key, v Value)
-func (m HashMap) Delete(k Key)
+The most basic form of ownership in Goose is the points-to assertion, which expresses ownership over a single heap variable. As we saw previously, a GooseLang heap variable is also used to model local variables (and function arguments, which behave just like local variables), since these are also mutable locations. Thus the same proof principles are used for Go pointers as for these local variables.
 
-// iteration:
-func (m HashMap) KeyIterator() *Iterator
-func (it *Iterator) Next() (k Key, ok bool)
+The location in a points-to is always of type `loc`, which is the type of heap locations. Rather than using `val` (the GooseLang type for all values, including literals and structs) directly in the notation, though, the Rocq implementation takes a Gallina value, such as a `w64` (the type of 64-bit integers) or `bool`:
+
+```rocq
+Definition pointsto_example_1 (l: loc): iProp Σ := l ↦ W64 1.
+Definition pointsto_example_2 (l: loc): iProp Σ := l ↦ true.
+Definition pointsto_example_3 (l: loc): iProp Σ := l ↦ l.
+
 ```
 
-Given this API, is this safe?
+The points-to assertion can take any type `V` that implements a typeclass `IntoVal V`. Implementing this typeclass requires providing a function `to_val : V → val`. GooseLang already provides implementations for all the base literals, which is why the examples above work.
 
-```go
-// does this work?
+You'll see `IntoVal V` in another form in GooseLang code: `#x` is a notation for `to_val x`. Just like the points-to assertion, this allows using Gallina types in the GooseLang code.
 
-func PrintValues(m HashMap) {
-  it := m.KeyIterator()
-  for k, ok := it.Next(); ok {
-      v, _ := m.Get(k)
-      fmt.Println(v)
-  }
-}
+A points-to assertion is required to load and store to a location. We think of the assertion both as permission to read and write to the location, as well as asserting what the current value is.
+
+```rocq
+Lemma wp_load_example (l: loc) :
+  {{{ l ↦ W64 3 }}}
+    let: "x" := ![#uint64T] #l in
+    "x"
+  {{{ RET #(W64 3); l ↦ W64 3 }}}.
+Proof.
+  wp_start as "l".
+  wp_load.
+  wp_auto.
+  iApply "HΦ".
+  iFrame.
+Qed.
+
 ```
 
-What about this one?
-
-```go
-// does this work?
-
-func ClearMap(m HashMap) {
-  it := m.KeyIterator()
-  for k, ok := it.Next(); ok {
-      m.Delete(k)
-  }
-}
-```
-
-::: details Solution
-
-You can't tell from just the API (which does not even describe ownership in comments), but for most hashmap implementations this would not be safe - the problem is often called _iterator invalidation_ since the call to `m.Delete(k)` is considered to _invalidate_ `it` in the next iteration.
-
-:::
+The code in this example includes a type annotation on the load, with the type `#uint64T`. This type is required since this load is not a core primitive, but instead a function. Composite values like structs are not stored in one heap location, but laid out with one field per location, and `![#s] #l` with a struct type `s` would load the fields individually. However, this specification hides that complexity: as long as the type `uint64T` matches the type of data in the points-to assertin (`w64`), we get the expected specification for loads.
 
 ## Structs
+
+Ownership over pointers to structs is more interesting than ownership over plain variables.
 
 Go has structs. Here's an example, along with a few methods:
 
@@ -233,17 +226,6 @@ Similarly, `struct.mk` takes a struct declaration and a list of field values and
 The other Gallina functions in this example, `struct.loadF` and `struct.storeF` are very similar to `struct.fieldRef`, except that they also do a store or load at the location.
 
 Goose has a nice set of reasoning principles for structs, which extend the basic points-to assertion we've been using for heap locations. Let's see what specifications for the code above look like.
-
-```rocq
-From sys_verif.program_proof Require Import prelude empty_ffi.
-From Coq Require Import Strings.String.
-From sys_verif.program_proof Require Import heap_init.
-
-Section goose.
-Context `{hG: !heapGS Σ}.
-Context `{!globalsGS Σ} {go_ctx: GoContext}.
-
-```
 
 Goose does actually model struct values as tuples, and doesn't (yet) have a better way to write them in specs.
 
@@ -547,6 +529,65 @@ Try to use the predicates and rules for slice ownership to give a proof outline 
 Fractional permissions are an approach to reasoning about read-only access in separation logic.
 
 This concept is explained as part of the Program Proofs guide in [fractional permissions](./program-proofs/fractions.md).
+
+### Ownership in iterators
+
+As another example, consider a hashmap with an iteration API that looks like this:
+
+```go
+func PrintKeys(m HashMap) {
+  it := m.KeyIterator()
+  for k, ok := it.Next(); ok {
+      fmt.Println(k)
+  }
+}
+```
+
+That is, we have an API like this (where `Key` is a placeholder for the key type):
+
+```go
+// normal operations:
+func (m HashMap) Get(k Key) (v Value, ok bool)
+func (m HashMap) Put(k Key, v Value)
+func (m HashMap) Delete(k Key)
+
+// iteration:
+func (m HashMap) KeyIterator() *Iterator
+func (it *Iterator) Next() (k Key, ok bool)
+```
+
+Given this API, is this safe?
+
+```go
+// does this work?
+
+func PrintValues(m HashMap) {
+  it := m.KeyIterator()
+  for k, ok := it.Next(); ok {
+      v, _ := m.Get(k)
+      fmt.Println(v)
+  }
+}
+```
+
+What about this one?
+
+```go
+// does this work?
+
+func ClearMap(m HashMap) {
+  it := m.KeyIterator()
+  for k, ok := it.Next(); ok {
+      m.Delete(k)
+  }
+}
+```
+
+::: details Solution
+
+You can't tell from just the API (which does not even describe ownership in comments). For most hashmap implementations, the iterator should be considered to _own_ read-only permission on the entire hashmap. This means that `PrintValues` is safe, but `ClearMap` is not. This problem is often called _iterator invalidation_ since the call to `m.Delete(k)` is considered to _invalidate_ `it` in the next iteration.
+
+:::
 
 ```rocq
 End goose.

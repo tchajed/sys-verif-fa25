@@ -17,12 +17,12 @@
 | 10 | Tue Oct 14 | Iris Proof Mode (part 2) | [same notes](./notes/ipm.md) | bring a laptop |
 | 11 | Thu Oct 16 | Modeling Go programs: [slides](./slides/lec11.pdf) | [notes](./notes/goose.md) |  |
 |    | Mon Oct 20 |  |  | _[Assignment 2](./assignments/hw2/) due (11pm)_ |
-| 12 | Tue Oct 21 | Loop invariants | [notes](./notes/loop_invariants.md) |  |
-| 13 | Thu Oct 23 | Ownership | [notes](./notes/ownership.md) |  |
-| 14 | Tue Oct 28 | Persistence | [notes](./notes/persistently.md) |  |
-| 15 | Thu Oct 30 | Concurrency intro | [notes](./notes/concurrency.md) |  |
-| 16 | Tue Nov 4 | Lock invariants | [notes](./notes/invariants.md) |  |
-| 17 | Thu Nov 6 | Resource algebras | [notes](./notes/resource-algebra.md) |  |
+| 12 | Tue Oct 21 | Ownership (part 1) | [notes](./notes/ownership.md) | bring a laptop |
+| 13 | Thu Oct 23 | Ownership (part 2) | [same notes](./notes/ownership.md) | bring a laptop |
+| 14 | Tue Oct 28 | Loop invariants | [notes](./notes/loop_invariants.md) |  |
+| 15 | Thu Oct 30 | Persistence | [notes](./notes/persistently.md) |  |
+| 16 | Tue Nov 4 | Concurrency intro | [notes](./notes/concurrency.md) |  |
+| 17 | Thu Nov 6 | Lock invariants | [notes](./notes/invariants.md) |  |
 |    | Mon Nov 10 |  |  | _[Assignment 3](./assignments/hw3/) due (11pm)_ |
 | 18 | Tue Nov 11 | Ghost state | [notes](./notes/ghost_state.md) |  |
 | 19 | Thu Nov 13 | Atomic specs | [notes](./notes/atomic_specs.md) |  |
