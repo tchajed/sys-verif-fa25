@@ -86,7 +86,7 @@ The grammar rule $e ::= x$ says that a variable like $x$ or $y$ is an expression
 
 ::: warning If you've seen the λ-calculus before...
 
-You may have seen a definition of the lambda calculus that basically said $e ::= x \mid v \mid \fun{x} e$. Separately, you would then have a definition of a value predicate $\operatorname{val}(e)$ (probably as part of the semantics), defined so that only lambda abstractions are values.
+You may have seen a definition of the lambda calculus that basically said $e ::= x \mid v \mid \fun{x} e \mid e_1~e_2$. Separately, you would then have a definition of a value predicate $\operatorname{val}(e)$ (probably as part of the semantics), defined so that only lambda abstractions are values.
 
 The definition above instead makes values a separate syntax, and then embeds them into expressions. A value is only the expressions formed this way. When this definition is formalized in Rocq, this does mean that there are some constructs like pairs and lambda abstractions that appear in both the definition of expressions and values, but we can be ambiguous via an "abuse of notation" when working on paper.
 
@@ -195,6 +195,7 @@ $$
 \text{Evaluation context}\quad K &::= \bullet \mid K\, v \mid e\, K \\
 &\phantom{::=} \mid \ife{K}{e_1}{e_2} \\
 &\phantom{::=} \mid K + v \mid e + K \\
+&\phantom{::=} \mid K == v \mid e == K \\
 &\phantom{::=} \mid K < v \mid e < K \\
 &\phantom{::=} \mid (K, v) \mid (e, K) \mid \pi_1 \, K \mid \pi_2 \, K
 \end{aligned}
@@ -212,6 +213,8 @@ $$
 \left(\ife{K}{e_1}{e_2}\right)[e'] &::= \ife{K[e]}{e_1}{e_2} \\
 (K + v)[e'] &::= K[e'] + v \\
 (e + K)[e'] &::= e + K[e'] \\
+(K == v)[e'] &::= K[e'] == v \\
+(e == K)[e'] &::= e == K[e'] \\ 
 (K < v)[e'] &::= K[e'] < v \\
 (e < K)[e'] &::= e < K[e'] \\
 (K, v)[e'] &::= \left( K[e'], \, v \right) \\
