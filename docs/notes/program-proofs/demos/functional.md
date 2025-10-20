@@ -1,12 +1,13 @@
 ---
 # Auto-generated from literate source. DO NOT EDIT.
 category: demo
+shortTitle: "Demo: Goose basics"
 tags: literate
-order: -1
+date: 2025-10-16 8:00:00 -5
 pageInfo: ["Date", "Category", "Tag"]
 ---
 
-# Demo: proofs of simple Go code
+# Demo: proofs of functional Go code
 
 Here are some proofs of "functional" Go code that just does some arithmetic and doesn't interact with the heap.
 

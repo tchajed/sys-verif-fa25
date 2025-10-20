@@ -7,9 +7,9 @@ shortTitle: "Ownership in Go"
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
-# Goose - Ownership reasoning
+# Ownership reasoning with Goose
 
-> Follow these notes in Coq at [src/sys_verif/notes/ownership.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/notes/ownership.v).
+> Follow these notes in Rocq at [src/sys_verif/notes/ownership.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/notes/ownership.v).
 
 ## Learning outcomes
 
@@ -17,7 +17,7 @@ pageInfo: ["Date", "Category", "Tag", "Word"]
 2. Use the different slice permissions to specify functions.
 3. Read and write specifications with fractional permissions.
 
-Theme for today: ownership in Go and in GooseLang
+Theme for today: ownership in Go, as implemented by Goose
 
 ---
 

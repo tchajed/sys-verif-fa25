@@ -4,7 +4,7 @@ category: lecture-note
 tags: literate
 shortTitle: "Abstraction"
 order: 4
-date: 2025-09-14
+date: 2025-09-14 8:00:00 -5
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 

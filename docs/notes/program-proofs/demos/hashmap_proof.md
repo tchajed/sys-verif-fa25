@@ -8,7 +8,7 @@ shortTitle: "Demo: hashmap proof"
 
 # Demo: verifying a concurrent hashmap
 
-> The Coq code for this file is at [src/sys_verif/program_proof/demos/hashmap_proof.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/program_proof/demos/hashmap_proof.v).
+> The Rocq code for this file is at [src/sys_verif/program_proof/demos/hashmap_proof.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/program_proof/demos/hashmap_proof.v).
 
 ```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.

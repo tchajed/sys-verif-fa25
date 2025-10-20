@@ -1,12 +1,16 @@
 ---
 # Auto-generated from literate source. DO NOT EDIT.
 tags: literate
-shortTitle: decide
+shortTitle: Decidable equality
 ---
 
 # What is `decide`?
 
 What is this `if decide` thing? And what is `bool_decide`? And how do I do proofs involving them?
+
+The basic answer is that if you want to write functional code with an `if` over a proposition (often an equality `a = b`), you must wrap the proposition in `decide`. The reason is that in general, Rocq's theory doesn't permit testing arbitrary propositions, but for specific ones it is possible to provide an algorithm for testing them, showing that they are "decidable" (in the same sense as in complexity theory). For example, we can provide such a decidability algorithm for equality over most plain data types.
+
+The way we _access_ these decidability implementations is using `decide`, which is implemented using Rocq Typeclasses.
 
 ```rocq
 From stdpp Require Import numbers.
@@ -258,6 +262,8 @@ Definition use_color_dec (c: color) := if decide (c = red) then true else false.
 ## Implementation
 
 The implementation (which comes from std++) is actually very short, so let's show that.
+
+If you're unfamiliar with typeclasses, you might want to start by reading this [tutorial on typeclasses](https://softwarefoundations.cis.upenn.edu/qc-current/Typeclasses.html).
 
 ```rocq
 Module decide_playground.

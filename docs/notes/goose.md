@@ -2,8 +2,9 @@
 # Auto-generated from literate source. DO NOT EDIT.
 category: lecture-note
 tags: literate
-order: 11
 shortTitle: "Goose"
+order: 11
+date: 2025-10-16 8:00:00 -5
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
