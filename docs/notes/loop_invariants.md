@@ -2,7 +2,7 @@
 # Auto-generated from literate source. DO NOT EDIT.
 category: lecture-note
 tags: literate
-order: 12
+order: 13
 shortTitle: "Loop invariants"
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
