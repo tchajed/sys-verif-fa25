@@ -1,5 +1,6 @@
 ---
 icon: "circle-exclamation"
+date: 2025-08-21 08:00:00 -5
 ---
 
 # Syllabus

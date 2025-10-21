@@ -4,7 +4,7 @@ dir:
   icon: pen-fancy
 shortTitle: Assignment 2
 icon: circle-exclamation
-date: 2024-10-04 08:00:00 -5
+date: 2025-09-17 08:00:00 -5
 ---
 
 # Assignment 2: Separation logic theory
@@ -19,7 +19,7 @@ In this assignment, you'll answer some questions about Hoare logic and separatio
 
 <!-- @include: ../../notes/macros.snippet.md -->
 
-**This assignment is due Tuesday, Oct 22, 2024 at 11pm.** Submit solutions to Canvas. You can submit either handwritten (digital or paper) answers, or typeset your solution with LaTeX using the <a href="./assignment2_template.tex" download>assignment 2 template <HopeIcon icon="download" /></a>.
+**This assignment is due Monday, Oct 20, 2025 at 11pm.** Submit solutions to Canvas. You can submit either handwritten (digital or paper) answers, or typeset your solution with LaTeX using the <a href="./assignment2_template.tex" download>assignment 2 template <HopeIcon icon="download" /></a>.
 
 ## Exercise 1
 
