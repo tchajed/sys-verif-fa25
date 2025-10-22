@@ -8,6 +8,16 @@ date: 2025-10-16 8:00:00 -5
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
+```rocq
+From sys_verif.program_proof Require Import prelude empty_ffi.
+From sys_verif.program_proof Require Import heap_init functional_init.
+
+Section goose.
+Context `{hG: !heapGS Σ}.
+Context `{!globalsGS Σ} {go_ctx: GoContext}.
+
+```
+
 # Goose - Modeling and reasoning about Go
 
 > Follow these notes in Rocq at [src/sys_verif/notes/goose.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/notes/goose.v).
@@ -39,13 +49,13 @@ While you won't have to _write_ Go for this class, it helps to be able to _read_
 
 What goes into making the Goose approach work?
 
-First, we need to define GooseLang, the target of the translation. This language will look a lot like our `expr`s, but an important change is that values will be more realistic primitives - for example, we'll replace numbers of type $\mathbb{Z}$ with 64-bit unsigned integers. GooseLang has a precise semantics in the same style as the notes, a relation $(e, h) \leadsto^* (e', h')$ where $h$ is the heap, a (finite) map from locations to values.
+First, we define GooseLang, the target of the translation. GooseLang will be defined in Rocq. The language will look a lot like our `expr`s, but an important change is that values will be more realistic primitives - for example, we'll replace numbers of type $\mathbb{Z}$ with 64-bit unsigned integers. GooseLang has a precise semantics in the same style as the notes, although defined in Rocq: `expr` is an inductive type, and the semantics is given as a relation $(e, h) \leadsto^* (e', h')$ where $h$ is the heap, a (finite) map from locations to values.
 
-Second, we need to translate Go to GooseLang. The basic idea is to translate each Go package to a Rocq file, and each Go function to an expression. Go has structs and _methods_ on structs, which will be translated to GooseLang functions that take the struct as the first argument. Some complications we'll have to deal with when we get to the specifics include handling slices (variable-length arrays), concurrency, and loops.
+Second, we need to translate Go to GooseLang. The basic idea is to translate each Go package to a Rocq file, and each Go function to an expression. Go has structs and _methods_ on structs, which will be translated to GooseLang functions that take the struct as the first argument. Some complications we'll have to deal with when we get to the specifics include handling control flow (`if`, `return`), slices, loops, and concurrency.
 
-Finally, we will prove useful reasoning principles about GooseLang that make it convenient to reason about the translation.
+Third, we define a separation logic over the GooseLang syntax and semantics, for proving properties of the translated code. As part of this separation logic we also prove all the usual rules (such as the rule of consequence and the frame rule) as lemmas.
 
-Of course, you, the reader, don't have to do these things; they're already done in Goose.
+Finally, we provide good reasoning principles for verifying the translated code. The translation often uses libraries implemented in GooseLang to model some aspect of Go - for example, control flow - and we provide specifications and proofs for the library code that the user will use for their proofs.
 
 Here's a first taste of what this translation looks like:
 
@@ -75,8 +85,6 @@ Definition Arith: val :=
 
 An important aspect of Goose (and any verification methodology for "real" code) is to ask, what do the proofs _mean_? Another way to think about this question is, what do we believe a verified specification says about the code, and what tools do we trust to make this happen?
 
-We've already talked about how to interpret specifications in separation logic and won't go further into that part.
-
 Goose _models_ Go code using GooseLang. You can see one evidence of this modeling above: whereas the Go code has a `return` statement to stop executing a function and return to the caller, the `Arith` in Rocq (a `val`, which is a GooseLang value) instead is an expression that evaluates to an integer. If you compare the two you can convince yourself for this example that `Arith` in GooseLang, under the expected semantics you learned, evaluates to the same result as `Arith` in Go (assuming `Midpoint` is also translated correctly). When you use Goose to verify a program, you are essentially trusting that every function in that program has been modeled correctly.
 
 ## Goose details
@@ -99,9 +107,9 @@ There are also some features we won't talk about:
 
 ### Local variables
 
-Goose models local variables on the heap. The compiler does a simple _escape analysis_: if the analysis proves that a function's address is never used outside the function, then it is instead allocated on the stack (for example, in the common case that the address is never taken). However, it is sound to think of all local variables as being on the heap; stack allocation is just a performance optimization.
+Goose models all local variables as being on the GooseLang heap. On the other hand, the Go compiler does a simple _escape analysis_: if the analysis proves that a function's address is never used outside the function, then it is instead allocated on the stack (for example, in the common case that the address is never taken). However, it is sound to think of all local variables as being on the heap; stack allocation is just a performance optimization.
 
-Here's an example of
+Here's an example of this happening in Go:
 
 ```go
 func StackEscape() *int {
@@ -122,6 +130,24 @@ Definition StackEscapeⁱᵐᵖˡ : val :=
 The key to note here is that `x` is allocated on the heap and then returned.
 
 Go also has a construct `new(T)` that allocates a pointer to a value of type `T` and initializes it to the _zero value_ of the type (and every type in Go has a well-defined zero value). Goose also supports this form of allocation. (For structs, it's typical to write `&S { ... }` to allocate a pointer - that is, taking the address of a struct literal.)
+
+Function parameters are also allocated on the heap, since in Go they are treated as mutable local variables. The way this works is that the values of the parameters are passed to a GooseLang function (that is, the construct with the syntax `λ: "x", ...`), and the function body immediately stores them on the heap. We can see this in the translation of this function:
+
+```go
+func Add(a uint64, b uint64) uint64 {
+	return a + b
+}
+```
+
+```rocq
+Definition Addⁱᵐᵖˡ : val :=
+  λ: "a" "b",
+    exception_do (let: "b" := (mem.alloc "b") in
+    let: "a" := (mem.alloc "a") in
+    return: ((![#uint64T] "a") + (![#uint64T] "b"))).
+```
+
+The variables `"a"` and `"b"` are immediately shadowed by pointers to their heap locations. As a result, when they are referenced later they have to be loaded with `![#uint64T] "a"` and `![#uint64T]  "b"`. These loads have a type annotation, which you can largely ignore as a user; we'll see what purpose it serves when talking about the model of structs.
 
 ### Control flow
 
@@ -159,13 +185,15 @@ Definition Arithⁱᵐᵖˡ : val :=
     return: (![#uint64T] "mid")).
 ```
 
-There is a lot of syntax here. First, note the `exception_do` wrapper; a `return: e` expression inside will return early, preventing execution of code afterward. On the other hand `do: e` will run as normal and proceed to the next line. This sequencing-with-return is implemented by `;;;`, which is _not_ the same as the usual sequencing `;;`.
+Note the `exception_do` wrapper, which is used to implement the control flow for function returns: a `return: e` expression inside will return early, preventing execution of code afterward. On the other hand `do: e` will run as normal and proceed to the next line. This sequencing-with-return is implemented by `;;;`, which is _not_ the same as the usual sequencing `;;`.
 
-The next part of this code is that it allocates a lot of variables. The arguments are stored in new variables `a` and `b` since function arguments become mutable within this function. Whenever a local variable is referenced, we see something like `![#uint64T] "a"`, which loads `a` with the help of a _type annotation_. The type is needed to know how many heap locations the value takes, which will be more than one for a composite struct.
+As a user, the implementation of these control flow constructs is largely invisible. In proofs, `wp_pures` (which is called by `wp_auto`) will "step" over control flow as needed. `wp_apply` will work inside the `exception_do` wrapper. If you want an idea of the semantics of these operations, see the comments in Perennial's [defn/exception.v](https://github.com/mit-pdos/perennial/blob/master/new/golang/defn/exception.v).
+
+Next this code allocates `"a"` and `"b"` on the heap, as we saw in the previous example.
 
 From there we see a more straightforward correspondence between the Go and the translation. Notice that the `if` has no else branch in Go, but it does have `do: #()` in GooseLang since we always need both branches.
 
-The call to `Midpoint` becomes `func_call #Midpoint $a0 $a1`. What this actually does is look up the code for Midpoint by its name (`Midpoint` is just the full Go path to the function followed by the string "Midpoint") and then call it. The level of indirection is needed to allow recursion, both for one function to call itself and for multiple top-level functions to call each other.
+The call to `Midpoint` becomes `func_call #Midpoint $a0 $a1`. What this actually does is look up the code for Midpoint by its name (`Midpoint` is just the full Go path to the function followed by the string "Midpoint") and then call it. The level of indirection is needed to allow recursion, both for one function to call itself and for multiple top-level functions to call each other. As a user of Goose, you can largely ignore this complication: we will state all separation logic triples to be about `func_call` of a function, and `wp_start` handles resolving the function call to the function's code.
 
 Another set of control flow features is related to loops. Here's an example of a loop translation:
 
@@ -207,23 +235,25 @@ Definition SumNⁱᵐᵖˡ : val :=
     return: (![#uint64T] "sum")).
 ```
 
-The complexity here is mostly hidden by the `for:` syntax, which picks up the `break: #()` and appropriately stops looping at that point. There is no loop condition, hence why `(λ: <>, #true)` appears as the first argument to `for:`.
+The complexity here is mostly hidden by the `for:` syntax, which picks up the `break: #()` and appropriately stops looping at that point. There is no loop condition, hence why `(λ: <>, #true)` appears as the first argument to `for:`. If you want to see the implementation of loops, you can read it in [defn/loop.v](https://github.com/mit-pdos/perennial/blob/master/new/golang/defn/loop.v). The best place to start is `do_loop`, which models the simplest loop, `for { ... }`, which has no initializer, condition, or post-expression:
+
+```rocq
+Definition do_loop_def: val :=
+  λ: "body",
+  (rec: "loop" <> := exception_do (
+     let: "b" := "body" #() in
+     if: Fst "b" = #"break" then (return: (do: #())) else (do: #()) ;;;
+     if: (Fst "b" = #"continue") || (Fst "b" = #"execute")
+          then (return: "loop" #()) else do: #() ;;;
+     return: "b"
+  )) #().
+```
+
+The loop body might produce `break: #()` or `continue: #()`, which get returned in `"b"`. The loop definition handles a `break` by stopping the entire loop. A `continue` doesn't need special handling; its role is to halt execution of the body, which is already handled by `;;;` inside the body.
 
 ## Proofs with Goose
 
 This section shows some examples of specifications and proofs.
-
-```rocq
-From sys_verif.program_proof Require Import prelude empty_ffi.
-From sys_verif.program_proof Require Import heap_init functional_init.
-
-#[local] Ltac Zify.zify_post_hook ::= Z.div_mod_to_equations.
-
-Section goose.
-Context `{hG: !heapGS Σ}.
-Context `{!globalsGS Σ} {go_ctx: GoContext}.
-
-```
 
 Code being verified:
 
@@ -232,6 +262,8 @@ func Add(a uint64, b uint64) uint64 {
 	return a + b
 }
 ```
+
+You will see `is_pkg_init <pkg>` in all preconditions for functions and methods. This asserts that the package (`functional` in this case) for the relevant function has been initialized. We need this precondition because initialization is where the code for `functional.Add` (the `Addⁱᵐᵖˡ` expression) is stored in a global variable where it is accessed by `func_call`. `wp_start` knows how to handle `is_pkg_init` and automatically puts it in the right place, so you don't mention it in the intro pattern passed to `wp_start`.
 
 ```rocq
 Lemma wp_Add (n m: w64) :

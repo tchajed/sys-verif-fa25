@@ -403,6 +403,65 @@ What is Go's `sort.Find` assuming and promising? Translate the prose specificati
 
 Proving the real `sort.Find` with Goose is also a possibility, with minor tweaks to the code due to Goose translation limitations. A tricky part is that `Find` is a higher-order function: it takes a function as an argument. We already saw one such function, `For`, but this was only in GooseLang; now we have to deal with one coming from Go.
 
+### Ownership in iterators
+
+Let's revisit the idea of ownership in the context of a loop. Consider a hashmap with an iteration API that looks like this:
+
+```go
+func PrintKeys(m HashMap) {
+  it := m.KeyIterator()
+  for k, ok := it.Next(); ok {
+      fmt.Println(k)
+  }
+}
+```
+
+That is, we have an API like this (where `Key` is a placeholder for the key type):
+
+```go
+// normal operations:
+func (m HashMap) Get(k Key) (v Value, ok bool)
+func (m HashMap) Put(k Key, v Value)
+func (m HashMap) Delete(k Key)
+
+// iteration:
+func (m HashMap) KeyIterator() *Iterator
+func (it *Iterator) Next() (k Key, ok bool)
+```
+
+Given this API, is this safe?
+
+```go
+// does this work?
+
+func PrintValues(m HashMap) {
+  it := m.KeyIterator()
+  for k, ok := it.Next(); ok {
+      v, _ := m.Get(k)
+      fmt.Println(v)
+  }
+}
+```
+
+What about this one?
+
+```go
+// does this work?
+
+func ClearMap(m HashMap) {
+  it := m.KeyIterator()
+  for k, ok := it.Next(); ok {
+      m.Delete(k)
+  }
+}
+```
+
+::: details Solution
+
+You can't tell from just the API (which does not even describe ownership in comments). For most hashmap implementations, the iterator should be considered to _own_ read-only permission on the entire hashmap. This means that `PrintValues` is safe, but `ClearMap` is not. This problem is often called _iterator invalidation_ since the call to `m.Delete(k)` is considered to _invalidate_ `it` in the next iteration.
+
+:::
+
 ```rocq
 End goose.
 ```

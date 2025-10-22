@@ -111,6 +111,12 @@ Qed.
 
 The code in this example includes a type annotation on the load, with the type `#uint64T`. This type is required since this load is not a core primitive, but instead a function. Composite values like structs are not stored in one heap location, but laid out with one field per location, and `![#s] #l` with a struct type `s` would load the fields individually. However, this specification hides that complexity: as long as the type `uint64T` matches the type of data in the points-to assertin (`w64`), we get the expected specification for loads.
 
+## Read-only ownership: fractional permissions {#read-only}
+
+Fractional permissions are an approach to reasoning about read-only access in separation logic.
+
+This concept is explained as part of the Program Proofs guide in [fractional permissions](./program-proofs/fractions.md).
+
 ## Modeling Structs
 
 Ownership over pointers to structs is more interesting than ownership over plain variables.
@@ -498,9 +504,7 @@ You can ignore this whole string of parameters, which are related to Goose suppo
   → ∀ {ext_ty : ext_types ext}
 ```
 
-Getting and setting slice elements have reasonable specifications:
-
-TODO: fix the written explanation in this lecture: slice operations are now based on getting a reference and using it, not `SliceGet` and `SliceSet`
+GooseLang models loading and storing slice elements in a similar way to struct field operations: a GooseLang function `slice.elem_ref` computes a pointer to the relevant element (the analogous Gallina function is `slice.elem_ref_f`), and then that element pointer can be used like any other pointer. We can see that in these two specifications:
 
 ```rocq
 Check wp_load_slice_elem.
@@ -532,17 +536,127 @@ where
 
 ::::
 
-We got this specification using `Check` rather than copying it from the Perennial source code. Notice that the Hoare triple notation is not used here (I'm not entirely sure why, possibly a bug in the notations). You should still be able to read this specification, if you understood the "continuation-passing style" encoding of Hoare triple used in Iris.
+We got this specification using `Check` rather than copying it from the Perennial source code.
 
-The one complication with this particular specification is that its precondition requires the caller to pass the value `v0` that is in the slice. `SliceGet` itself requires `i` to be in-bounds (otherwise `s[i]` panics in Go), and `vs !! uint.nat i = Some v0` has the side of enforcing this obligation, and the postcondition then uses the same value `v0`.
+One complication in using this specification is that its precondition requires the caller to pass the value `v0` that is in the slice. This automatically enforces that the index is less than the length of the slice, that is, `sint.nat i < length vs` (we separately need the index to be non-negative, hence the precondition `0 ≤ sint.Z i`).
 
-Storing into a slice requires a proof `is_Some (vs !! uint.nat i)`, which similarly guarantees that `i` is in-bounds, but the original value is not needed. The postcondition uses `<[uint.nat i := v]> vs` which is a Gallina implementation of updating one index of a list (it's notation for the function `insert` from std++).
+Storing is fairly similar:
 
-You may notice that there's an arbitrary `q : dfrac` in the specification for `SliceGet`, while `SliceSet` has `DfracOwn 1`. This difference is no accident and corresponds to the fact that `SliceGet` works even on a _read-only_ slice while `SliceSet` needs to be able to modify the input slice. We'll cover the mechanism with fractions [later on](#read-only).
+```rocq
+Check wp_store_slice_elem.
+```
+
+:::: note Output
+
+```txt
+wp_store_slice_elem
+     : ∀ (s : slice.t) (i : w64) (vs : list ?V) (v' : ?V)
+         (Φ : val → iPropI Σ),
+         s ↦* vs ∗ ⌜0 ≤ sint.Z i < length vs⌝ -∗
+         ▷ (s ↦* <[sint.nat i:=v']> vs -∗ Φ (# ())) -∗
+         WP # (slice.elem_ref_f s ?t i) <-[# ?t] # v' {{ v, Φ v }}
+where
+?V :
+  [Σ : gFunctors  hG : heapGS Σ  globalsGS0 : globalsGS Σ  go_ctx : GoContext
+  |- Type]
+?IntoVal0 :
+  [Σ : gFunctors  hG : heapGS Σ  globalsGS0 : globalsGS Σ  go_ctx : GoContext
+  |- IntoVal ?V]
+?t :
+  [Σ : gFunctors  hG : heapGS Σ  globalsGS0 : globalsGS Σ  go_ctx : GoContext
+  |- go_type]
+?IntoValTyped0 :
+  [Σ : gFunctors  hG : heapGS Σ  globalsGS0 : globalsGS Σ  go_ctx : GoContext
+  |- IntoValTyped ?V ?t]
+```
+
+::::
+
+This slightly complicated proof illustrates both the load and store specs above as well as how to do the arithmetic reasoning required.
+
+The code being verified is a one-liner:
+
+```go
+func SliceSwap(s []int, i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+```
+
+```rocq
+Lemma wp_SliceSwap (s: slice.t) (xs: list w64) (i j: w64) (x_i x_j: w64) :
+  {{{ is_pkg_init heap.heap ∗ s ↦* xs ∗ ⌜xs !! sint.nat i = Some x_i ∧ xs !! sint.nat j = Some x_j⌝ ∗ ⌜0 ≤ sint.Z i ∧ 0 ≤ sint.Z j⌝ }}}
+    @! heap.SliceSwap #s #i #j
+  {{{ RET #(); s ↦* <[ sint.nat j := x_i ]> (<[ sint.nat i := x_j ]> xs) }}}.
+Proof.
+  wp_start as "(Hs & [%Hi %Hj] & %Hbound)".
+  wp_auto.
+
+  (* The slice specs require a bit of boilerplate to prove all the in-bounds requirements. *)
+  pose proof Hi as Hi_bound.
+  apply lookup_lt_Some in Hi_bound.
+  pose proof Hj as Hj_bound.
+  apply lookup_lt_Some in Hj_bound.
+
+  iDestruct (own_slice_len with "Hs") as %Hlen.
+  (* slice.elem_ref requires calling [wp_pure] and then proving that the indices are in-bounds, since Go panics even if you just compute these indices *)
+  wp_pure.
+```
+
+:::: info Goal
+
+```txt
+  Σ : gFunctors
+  hG : heapGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
+  s : slice.t
+  xs : list w64
+  i, j, x_i, x_j : w64
+  Φ : val → iPropI Σ
+  Hi : xs !! sint.nat i = Some x_i
+  Hj : xs !! sint.nat j = Some x_j
+  Hbound : 0 ≤ sint.Z i ∧ 0 ≤ sint.Z j
+  j_ptr, i_ptr, s_ptr : loc
+  Hi_bound : (sint.nat i < length xs)%nat
+  Hj_bound : (sint.nat j < length xs)%nat
+  Hlen : length xs = sint.nat (slice.len_f s) ∧ 0 ≤ sint.Z (slice.len_f s)
+  ============================
+  0 ≤ sint.Z j < sint.Z (slice.len_f s)
+```
+
+::::
+
+```rocq
+  { word. }
+  wp_apply (wp_load_slice_elem with "[$Hs]") as "Hs".
+  { word. }
+  { eauto. }
+
+  wp_pure; first word.
+  wp_apply (wp_load_slice_elem with "[$Hs]") as "Hs"; first word.
+  { eauto. }
+
+  wp_pure; first word.
+  wp_apply (wp_store_slice_elem with "[$Hs]") as "Hs"; first word.
+
+  wp_pure; first word.
+  wp_apply (wp_store_slice_elem with "[$Hs]") as "Hs".
+  { autorewrite with len. word. }
+  iApply "HΦ".
+  iFrame.
+Qed.
+
+```
+
+Storing into a slice requires only a proof that the index is in-bounds. The postcondition uses `<[sint.nat i := v]> vs` which is a Gallina implementation of updating one index of a list (it's notation for the function `insert` from std++).
+
+You may notice that there's an arbitrary `q : dfrac` in the specification for `wp_load_slice_elem`, while `wp_store_slice_elem` does not have a fraction (it is implicitly 1). This is analogous to the read-only ownership for plain pointers that we saw earlier.
 
 ### Appending to a slice
 
-The capacity of a slice is interesting in the model because it turns out ownership of the capacity is separate from ownership of the elements. Consider the following code, which splits a slice:
+The ownership reasoning for appending to a slice turns out to be especially interesting in Go. The way this shows up is that it turns out that owning the logical _elements_ of a slice (the memory for `s.(slice.len_f)` elements, starting from the base pointer of the slice) is separate from the ownership of the _capacity_ (the memory from the length up to the capacity).
+
+Consider the following code, which splits a slice:
 
 ```go
 s := []int{1,2,3}
@@ -550,7 +664,7 @@ s1 := s[:1]
 s2 := s[1:]
 ```
 
-What is not obvious in this example is that `s1` has a capacity that _overlaps_ with that of `s2`. Specifically, the behavior of this code is surprising (you can [run it yourself](https://go.dev/play/p/yhcjYdVBVjo) on the Go playground):
+What is not obvious in this example is that in Go, `s1` has a capacity that _overlaps_ with that of `s2`. Specifically, the behavior of this code is surprising (you can [run it yourself](https://go.dev/play/p/yhcjYdVBVjo) on the Go playground):
 
 ```go
 s := []int{1,2,3}
@@ -565,116 +679,52 @@ Goose accurately models this situation. If `s = (ptr, l, c)`, we know from const
 
 In proofs, Goose separates out the predicates for ownership of a slice's elements (between 0 and its length) and its capacity (from length to capacity).
 
-- `own_slice_small s dq t xs` asserts ownership only over the elements within the length of `s`, and says they have values `xs`.
-- `own_slice_cap s t` asserts ownership over just the capacity of `s`, saying nothing about their contents (but they must have type `t`).
-- `own_slice s dq t xs := own_slice_small s dq t xs ∗ own_slice_cap s t` asserts ownership over the elements and capacity.
+- `own_slice s dq xs` asserts ownership only over the elements within the length of `s`, and says they have values `(xs: list V)`.
+- `own_slice_cap V s dq` asserts ownership over just the capacity of `s`, saying nothing about their contents. It takes the Gallina type of elements `V`. This ownership may be fractional, though it is typically 1.
+- `own_slice s dq xs ∗ own_slice_cap V s (DfracOwn 1)` asserts ownership over the elements and capacity of slice `s`.
 
 These predicates are just definitions that are separating conjunctions over regular points-to facts for the elements. In the context of the example above, with `s = (ptr, 3, 4)` (notice we picked a capacity of 4), these predicates are equal to the following:
 
-- `own_slice_small s [1;2;3] = (ptr + 0) ↦ 1 ∗ (ptr + 1) ↦ 2 ∗ (ptr + 2) ↦ 3`
+- `own_slice s [1;2;3] = (ptr + 0) ↦ 1 ∗ (ptr + 1) ↦ 2 ∗ (ptr + 2) ↦ 3`
 - `own_slice_cap s [1;2;3] = ∃ x, (ptr + 3) ↦ x`
 - ```
-  own_slice_small (s[1:]) [2; 3]
+  own_slice (s[1:]) [2; 3]
    = ((ptr + 1) + 0) ↦ 2 ∗ ((ptr + 1) + 1) ↦ 3
    = (ptr + 1) ↦ 2 ∗ (ptr + 2) ↦ 3
   ```
 
-Confirm for yourself that `own_slice_small` and `own_slice_cap` are disjoint; without that, `own_slice` wouldn't be useful since it would be equivalent to $\False$.
+Confirm for yourself that `own_slice` and `own_slice_cap` are disjoint; without that, we could never own both the slice and capacity.
 
 The main specification related to capacity is the one for append:
 
 ```rocq
-Lemma wp_SliceAppend s t vs x :
-  {{{ own_slice s t (DfracOwn 1) vs ∗ ⌜val_ty x t⌝ }}}
-    SliceAppend t s x
-  {{{ s', RET slice_val s'; own_slice s' t (DfracOwn 1) (vs ++ [x]) }}}.
+Lemma wp_slice_append (s: slice.t) (vs: list V) (s2: slice.t) (vs': list V) dq :
+  {{{ s ↦* vs ∗ own_slice_cap V s (DfracOwn 1) ∗ s2 ↦*{dq} vs' }}}
+    slice.append #t #s #s2
+  {{{ (s': slice.t), RET #s';
+      s' ↦* (vs ++ vs') ∗ own_slice_cap V s' (DfracOwn 1) ∗ s2 ↦*{dq} vs' }}}.
 ```
 
-Notice that `own_slice` appears in the pre- and post-condition; it would be unsound to use `own_slice_small` here, since appending modifies the capacity of a slice.
+Notice that `own_slice_cap` appears in the pre-condition, with fraction 1; this is required since append will write to the elements in the capacity if there is room.
 
-What is key to understanding the Go example above is that the Go expression `s[:n]` is ambiguous as to how it handles ownership. The capacity of `s[:n]` and `s[n:]` overlap; if we model `s[:n]` with `slice_take s n` and `s[n:]` as `slice_drop s n`, then there are two main choices for how to divide ownership when taking a prefix:
+With this specification, we can now return to the example above. What is key to understanding the Go example above is that the Go expression `s[:n]` is ambiguous as to how it handles ownership. The capacity of `s[:n]` and `s[n:]` overlap; if we model `s[:n]` with `slice.slice_f s 0 n` and `s[n:]` as `slice.slice_f s n s.(slice.len_f)`, then there are two main choices for how to divide ownership when taking a prefix (taking some liberty to omit fractions and use n as both a w64 and a nat)
 
-- `own_slice s dq t xs ⊢ own_slice (slice_take s dq t (take xs n))`. Drop any ownership over the elements after `n`, but retain the capacity of the smaller slice.
-- `own_slice_small s dq t xs ⊢ own_slice_small (slice_take s dq t (take xs n)) ∗ own_slice_small (slice_drop s dq t (drop xs n))`. Split ownership, but lose the ability to append to the prefix.
+- `own_slice s xs ∗ own_slice_cap s V ⊢ own_slice (slice.slice_f s 0 n) (take xs n))`. Drop any ownership over the elements after `n`, but retain the capacity of the smaller slice.
+- `own_slice s xs ⊢ own_slice (slice.slice_f s 0 n) (take xs n)) ∗ own_slice (slice.slice_f s n s.(slice.len_f) (drop xs n))`. Split ownership, but lose the ability to append to the prefix.
 
 There is one more possibility which is a slight variation on splitting:
 
-- `own_slice s dq t xs ⊢ own_slice_small (slice_take s dq t (take xs n)) ∗ own_slice (slice_drop s dq t (drop xs n))`. If we start out with ownership of the capacity, we can split ownership and still be able to append to the _second_ part (its capacity is the capacity of the original slice). We can actually derive this from the lower-level fact that `slice_cap s t ⊣⊢ slice_cap (slice_skip s n)` if `n` is in-bounds.
+- `own_slice s xs ∗ own_slice_cap s V ⊢ own_slice (slice.slice_f s 0 n) (take xs n)) ∗ own_slice (slice.slice_f s n s.(slice.len_f)) (drop xs n)) ∗ own_slice_cap (slice.slice_f s n s.(slice.len_f))`. If we start out with ownership of the capacity, we can split ownership and still be able to append to the _second_ part (its capacity is the capacity of the original slice). We can actually derive this from the lower-level fact that `slice_cap s V ⊣⊢ slice_cap (slice.slice_f s n s.(slice.len_f)) V` if `n` is in-bounds.
 
 ### Exercise: find the theorems above in Perennial
 
 Either using `Search` or by looking at the source code in Perennial, find the theorems above.
 
-The relevant source code is the file `src/goose_lang/lib/slice/typed_slice.v` in Perennial (you can use the submodule copy in your exercises repo).
+The relevant source code is the file `new/golang/theory/slice.v` in Perennial (you can use the submodule copy in your exercises repo).
 
 ### Exercise: attempt a proof outline for the append example
 
 Try to use the predicates and rules for slice ownership to give a proof outline for the append example. At some point you will get stuck, because the reasoning principles don't give a way to verify the code above - this is fine in that we don't really intend to verify odd code like the above, but seeing exactly where you get stuck is instructive for learning how the rules work.
-
-## Read-only ownership: fractional permissions {#read-only}
-
-Fractional permissions are an approach to reasoning about read-only access in separation logic.
-
-This concept is explained as part of the Program Proofs guide in [fractional permissions](./program-proofs/fractions.md).
-
-### Ownership in iterators
-
-As another example, consider a hashmap with an iteration API that looks like this:
-
-```go
-func PrintKeys(m HashMap) {
-  it := m.KeyIterator()
-  for k, ok := it.Next(); ok {
-      fmt.Println(k)
-  }
-}
-```
-
-That is, we have an API like this (where `Key` is a placeholder for the key type):
-
-```go
-// normal operations:
-func (m HashMap) Get(k Key) (v Value, ok bool)
-func (m HashMap) Put(k Key, v Value)
-func (m HashMap) Delete(k Key)
-
-// iteration:
-func (m HashMap) KeyIterator() *Iterator
-func (it *Iterator) Next() (k Key, ok bool)
-```
-
-Given this API, is this safe?
-
-```go
-// does this work?
-
-func PrintValues(m HashMap) {
-  it := m.KeyIterator()
-  for k, ok := it.Next(); ok {
-      v, _ := m.Get(k)
-      fmt.Println(v)
-  }
-}
-```
-
-What about this one?
-
-```go
-// does this work?
-
-func ClearMap(m HashMap) {
-  it := m.KeyIterator()
-  for k, ok := it.Next(); ok {
-      m.Delete(k)
-  }
-}
-```
-
-::: details Solution
-
-You can't tell from just the API (which does not even describe ownership in comments). For most hashmap implementations, the iterator should be considered to _own_ read-only permission on the entire hashmap. This means that `PrintValues` is safe, but `ClearMap` is not. This problem is often called _iterator invalidation_ since the call to `m.Delete(k)` is considered to _invalidate_ `it` in the next iteration.
-
-:::
 
 ```rocq
 End goose.
