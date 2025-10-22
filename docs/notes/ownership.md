@@ -67,7 +67,6 @@ The ideas of _ownership_ and _permissions_ are at play in all of these examples.
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From Coq Require Import Strings.String.
 From sys_verif.program_proof Require Import heap_init.
-From New.generatedproof Require Import sys_verif_code.heap.
 
 Section goose.
 Context `{hG: !heapGS Σ}.
@@ -112,7 +111,7 @@ Qed.
 
 The code in this example includes a type annotation on the load, with the type `#uint64T`. This type is required since this load is not a core primitive, but instead a function. Composite values like structs are not stored in one heap location, but laid out with one field per location, and `![#s] #l` with a struct type `s` would load the fields individually. However, this specification hides that complexity: as long as the type `uint64T` matches the type of data in the points-to assertin (`w64`), we get the expected specification for loads.
 
-## Structs
+## Modeling Structs
 
 Ownership over pointers to structs is more interesting than ownership over plain variables.
 
@@ -166,11 +165,7 @@ The third method, `GetAge`, however, would be problematic for this model. What p
 
 The solution Goose uses is not to store a struct in a single heap cell, but instead _one per field_. The heap locations are all laid out contiguously, just like an array. Thus the model for `GetAge` is actually `GetAge := λ: "ℓ", "ℓ" +ₗ 2`, where 2 is the index of the `Age` field.
 
-## Proofs using structs
-
-Now let's see how this theory translates to Goose. First of all, we don't literally work with field offsets as literals; we would want constants based on the field names for those immediately in the proofs, and the actual translation uses field names in an even better way.
-
-Here's the actual translation of the structs above:
+The translated code for struct operations doesn't directly use offsets but instead uses a helper function `struct.field_ref` to compute the offset from a struct type and field name. We can see this used throughout the model in the translation of the code above:
 
 ```rocq
 Definition Person : go_type := structT [
@@ -215,7 +210,11 @@ The easiest model to understand is `GetAge`, which is entirely based on the func
 
 Similarly, `struct.make` takes a struct declaration and a list of field values and assembles them into a struct value, a tuple with all the fields. This is needed since a struct literal in Go need not be in the same order as the declaration (what would go wrong if we assumed it was?) and because fields can be omitted, in which case they get the zero value for their type. The declaration records both the order of the fields and the types for this reason.
 
-Goose has a nice set of reasoning principles for structs, which extend the basic points-to assertion we've been using for heap locations. Let's see what specifications for the code above look like.
+## Ownership of structs
+
+Goose has two key ideas for reasoning about structs: first, the typed points-to assertion allows ownership over structs, not just base data, and second, a points-to with a struct value is actually a separating conjunction of all of its fields.
+
+To see these ideas in action, let's start with a function that doesn't involve ownership:
 
 ```rocq
 Lemma wp_ExamplePerson :
@@ -228,6 +227,70 @@ Proof.
   done.
 Qed.
 
+```
+
+`ExamplePerson` returns a struct value. We write the specification using Person.t, and use `#` to turn it into the GooseLang value that is actually returned (which is a tuple, not the Gallina record). The next example illustrates ownership over a struct pointer. It's helpful to see this in a context where `*Person` initially gets allocated. For that we'll use this function:
+
+```go
+func ExamplePersonRef() *Person {
+	return &Person{
+		FirstName: "Ada",
+		LastName:  "Lovelace",
+		Age:       25,
+	}
+}
+```
+
+This specification shows that the typed points-to can be used for something other than a base literal. The underlying mechanism is the `IntoVal` typeclass, used for both `#` and `l ↦ v`.
+
+```rocq
+Lemma wp_ExamplePersonRef :
+  {{{ is_pkg_init heap.heap }}}
+    @! heap.ExamplePersonRef #()
+  {{{ (l: loc), RET #l;
+      l ↦ (heap.Person.mk "Ada" "Lovelace" (W64 25)) }}}.
+Proof.
+  wp_start as "_".
+  wp_alloc l as "p".
+  wp_pures.
+  iApply "HΦ".
+  iFrame.
+Qed.
+
+```
+
+As discussed above, a Person struct in memory is not stored in a single location. The points-to above is actually a separating conjunction over three smaller points-to assertions, one for each field. We can break it down into _struct field points-to_ assertions of the form `l ↦s[heap.Person :: "Age"] (W64 25)`. This is actually notation for a simpler concept: `(struct.field_ref_f heap.Person "Age" l) ↦ (W64 25)`. That is, owning a struct field is simply owning an appropriate offset from the base pointer, computed based on the struct and field name.
+
+```rocq
+Lemma wp_ExamplePersonRef_fields :
+  {{{ is_pkg_init heap.heap }}}
+    @! heap.ExamplePersonRef #()
+  {{{ (l: loc), RET #l;
+      l ↦s[heap.Person :: "FirstName"] "Ada"%go ∗
+      l ↦s[heap.Person :: "LastName"] "Lovelace"%go ∗
+      l ↦s[heap.Person :: "Age"] W64 25
+  }}}.
+Proof.
+  wp_start as "#init".
+  wp_alloc l as "p".
+  iApply struct_fields_split in "p". iNamed "p".
+  cbn [heap.Person.FirstName' heap.Person.LastName' heap.Person.Age'].
+
+```
+
+The theorem `struct_fields_split` gives a way to take any points-to assertion with a struct type and split it into its component field points-to assertions, which is what the postcondition of this spec gives.
+
+```rocq
+  wp_pures.
+  iApply "HΦ".
+  iFrame.
+Qed.
+
+```
+
+The two concepts of a single points-to for the whole struct and individual field points-to assertions are the main ideas for how Goose handles ownership of struct. We see them used throughout the rest of the examples above:
+
+```rocq
 Lemma wp_Person__Name (firstName lastName: go_string) (age: w64) :
   {{{ is_pkg_init heap.heap }}}
   (heap.Person.mk firstName lastName age) @ heap.Person.id @ "Name" #()
@@ -336,55 +399,6 @@ The `struct_fields_split` theorem turns a pointer to a struct into pointers for 
   rewrite -app_assoc //.
 Qed.
 
-```
-
-It's helpful to see the struct reasoning where `*Person` gets allocated before seeing how to use it. For that we'll use this function:
-
-```go
-func ExamplePersonRef() *Person {
-	return &Person{
-		FirstName: "Ada",
-		LastName:  "Lovelace",
-		Age:       25,
-	}
-}
-```
-
-The postcondition of the following spec introduces the _struct field points-to_. `l ↦s[heap.Person :: "Age"] (W64 25)` combines calculating an offset from `l` for the Age field of Person (that is, computing `l +ₗ #2`) with asserting that the value at that location is `#25`.
-
-```rocq
-Lemma wp_ExamplePersonRef :
-  {{{ is_pkg_init heap.heap }}}
-    @! heap.ExamplePersonRef #()
-  {{{ (l: loc), RET #l;
-      l ↦s[heap.Person :: "FirstName"] "Ada"%go ∗
-      l ↦s[heap.Person :: "LastName"] "Lovelace"%go ∗
-      l ↦s[heap.Person :: "Age"] W64 25
-  }}}.
-Proof.
-  wp_start as "#init".
-  wp_alloc l as "p".
-
-```
-
-Notice in the goal above how the struct allocation produced a `p ↦[struct.t heap.Person] v` assertion. This is actually the same as the points-to assertion we've been using all along, albeit with a more complex type. This assertion actually says that `v` is a tuple with the right structure to be a `Person` struct, and its three values are laid out in memory starting at `p`.
-
-Now look at what the following line of proof does to the goal.
-
-```rocq
-  iApply struct_fields_split in "p". iNamed "p".
-  cbn [heap.Person.FirstName' heap.Person.LastName' heap.Person.Age'].
-
-```
-
-The theorem `struct_fields_split` gives a way to take any points-to assertion with a struct type and split it into its component field points-to assertions, which is what the postcondition of this spec gives.
-
-```rocq
-  wp_pures.
-  iApply "HΦ".
-  iFrame.
-Qed.
-
 Lemma wp_Person__Older (firstName lastName: byte_string) (age: w64) (p: loc) (delta: w64) :
   {{{ is_pkg_init heap.heap ∗
       p ↦s[heap.Person :: "FirstName"] firstName ∗
@@ -408,7 +422,7 @@ Qed.
 
 ```
 
-Here is one spec for `GetAge`, which results in breaking off the age field into its points-to assertion.
+Here is one possible spec for `GetAge`, which results in breaking off the age field into its points-to assertion. Note that this spec allows the caller to retain ownership over the other fields, as opposed to a spec which only gave `age_l ↦ age` in the postcondition.
 
 ```rocq
 Lemma wp_GetAge (firstName lastName: byte_string) (age: w64) (p: loc) (delta: w64) :
@@ -440,15 +454,15 @@ Go has a slice type `[]T`, a generic type that works for any element type `T`.
 
 Slices in Go are implemented as a struct value with a pointer, a length, and a capacity; this is also how they are modeled in GooseLang. It is helpful to know this implementation detail to understand how they work, and it is also a common pattern for dynamically sized arrays (e.g., C++'s `std::vector` and Rust's `Vec` are almost identical).
 
-You can read more about Rust slices in this post on [Go data structures](https://research.swtch.com/godata) or in even more detail in this [post on slices and append](https://go.dev/blog/slices). Below are some basic details.
+You can read more about Go slices in this post on [Go data structures](https://research.swtch.com/godata) or in even more detail in this [post on slices and append](https://go.dev/blog/slices). Below are some basic details.
 
 More primitive than slices are arrays. An array is a contiguous block of memory, and we interact with them through a pointer to the first element. A slice is a "view" into a piece of an array (possibly the entire thing, but not necessarily). You can think of a slice as containing (at any given time) a sequence of elements. The slice is a (pointer, length, capacity) tuple, where the pointer points to the first element in the slice and the length says how many elements are in the slice. The array in memory is contiguous, so we can find any element by taking an offset from the pointer. Finally, the capacity tracks elements past the length that are allocated and in the array, which is memory available to grow the slice if elements are appended.
 
-In Go, the common idiom for appending to a slice `s []T` is `s = append(s, x)`. This is because if `s` has no spare capacity, `append` allocates a new, larger array and copies the elements over to it; this cannot change `s` since this is passed by value, so instead the new slice is returned. When a slice is grown, typically its capacity will be double the original length, to amortize the cost of copying over the elements; hopefully you saw something like this in a data structure class, perhaps as the first example of an amortized analysis.
+The Go `append(s, x)` operation appends to a slice and returns a new slice. If `s` has spare capacity, the new element is stored there and the new slice has the same pointer as the old one, but with its length increased by 1. On the other hand if `s` has no spare capacity, `append` allocates a new, larger array and copies the elements pointed to by `s` over to it. When a slice is grown, typically its capacity will be double the original length, to amortize the cost of copying over the elements; hopefully you saw something like this in a data structure class (it's often the first example shown of amortized cost analysis). A common idiom for appending to a slice `s []T` is `s = append(s, x)`, since we typically want to only use the new slice.
 
 ### Reasoning about slices
 
-The basic assertion for working with slices is `own_slice s t dq xs`. `s` is a `Slice.t`, a Coq record representing the slice value (the triple of pointer, length, and capacity); in GooseLang code, you will instead use `slice_val s : val`. `t` is the type of elements, similar to the types used for structs and struct fields. `dq` is a fraction, explained below; for now we will pretend like it's always `DfracOwn 1`. Finally, `xs` is a Gallina `list` of the elements of the slice. The overall result is an assertion that gives ownership over the slice `s`, and records that it has the elements `xs`.
+The basic assertion for working with slices is `own_slice t dq xs`. `s` is a `Slice.t`, a Rocq record representing the slice value (the triple of pointer, length, and capacity); GooseLang code will use `#s`, the standard way of converting Gallina values to GooseLang values. `dq` is a fraction, explained below; for now we will pretend like it's always `DfracOwn 1`. Finally, `xs` is a Gallina `list V` of the elements of the slice, with the same flexibility for the type `V` as used in points-to assertions, namely `V` can be any type that satisfies `IntoVal V`. The overall result is an assertion that gives ownership over the memory referenced by the slice `s`, and records that it has the elements `xs`.
 
 This abstraction uses typeclasses so the type of `xs` can vary, so for example we can use `list w64` for a slice of integers. You can see this in the type signature for `own_slice`, where there are parameters `V: Type` and `IntoVal V`:
 
