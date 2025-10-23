@@ -452,23 +452,83 @@ Qed.
 
 ```
 
+## Exercises: struct specifications
+
+Fill in a specification for each function, then do the proof. Proofs should mostly be automated (using tactics like `wp_start`, `wp_auto`, `iApply "HΦ"`, and `iFrame`) if you have a correct specification.
+
+You'll need to reference the implementation of these functions and methods in [go/heap/struct.go](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/go/heap/struct.go).
+
+```rocq
+Lemma wp_Rect__Area (r_ptr0: loc) :
+  {{{ is_pkg_init heap ∗ r_ptr0 ↦ () }}}
+    r_ptr0 @ (ptrT.id heap.Rect.id) @ "Area" #()
+  {{{ RET #(); True }}}.
+Proof.
+Admitted.
+
+Lemma wp_IsSquare (r: heap.Rect.t) :
+  {{{ True }}}
+    @! heap.IsSquare #r
+  {{{ RET #(); True }}}.
+Proof.
+Abort.
+
+```
+
+Use struct field points-tos for the pre- and post-condition in this specification.
+
+```rocq
+Lemma wp_Rect__MakeSquare (r_ptr0: loc) (width height: w64) :
+  {{{ is_pkg_init heap }}}
+    r_ptr0 @ (ptrT.id heap.Rect.id) @ "MakeSquare" #()
+  {{{ RET #(); True }}}.
+Proof.
+Abort.
+
+```
+
+Note that this specification isn't stated for the correct function - you should fix that.
+
+```rocq
+Lemma wp_Rotate (r_ptr0: loc) (width height: w64) :
+  {{{ is_pkg_init heap }}}
+    Skip
+  {{{ RET #(); True }}}.
+Proof.
+Abort.
+
+```
+
+This one is a bit subtle. First, figure out what's wrong with the code. Then, write an appropriate specification.
+
+```rocq
+Lemma wp_Person__BuggySetAge (p: unit) :
+  {{{ True }}}
+    p @ heap.Person.id @ "BuggySetAge" #()
+  {{{ RET #(); True }}}.
+Proof.
+Admitted.
+```
+
 ## Slices
 
 Go has a slice type `[]T`, a generic type that works for any element type `T`.
 
 ### What are slices?
 
-Slices in Go are implemented as a struct value with a pointer, a length, and a capacity; this is also how they are modeled in GooseLang. It is helpful to know this implementation detail to understand how they work, and it is also a common pattern for dynamically sized arrays (e.g., C++'s `std::vector` and Rust's `Vec` are almost identical).
+Slices in Go are implemented as a struct value with a pointer, a length, and a capacity; this is also how they are modeled in GooseLang. It is helpful to know some implementation details to understand how they work. This structure of pointer, length, and capacity is a common pattern for dynamically sized arrays (e.g., C++'s `std::vector` and Rust's `Vec` are almost identical).
 
-You can read more about Go slices in this post on [Go data structures](https://research.swtch.com/godata) or in even more detail in this [post on slices and append](https://go.dev/blog/slices). Below are some basic details.
+You can read more about Go slices in this post on [Go data structures](https://research.swtch.com/godata) or in even more detail in this [post on slices and append](https://go.dev/blog/slices).
 
-More primitive than slices are arrays. An array is a contiguous block of memory, and we interact with them through a pointer to the first element. A slice is a "view" into a piece of an array (possibly the entire thing, but not necessarily). You can think of a slice as containing (at any given time) a sequence of elements. The slice is a (pointer, length, capacity) tuple, where the pointer points to the first element in the slice and the length says how many elements are in the slice. The array in memory is contiguous, so we can find any element by taking an offset from the pointer. Finally, the capacity tracks elements past the length that are allocated and in the array, which is memory available to grow the slice if elements are appended.
+More primitive than slices is the idea of an _array_. An array is a contiguous block of memory, and we interact with them through a pointer to the first element. A slice is a "view" into a piece of an array (possibly the entire thing, but not necessarily). You can think of a slice as containing (at any given time) a sequence of elements. The slice is a (pointer, length, capacity) tuple, where the pointer points to the first element in the slice and the length says how many elements are in the slice. The array in memory is contiguous, so we can find any element by taking an offset from the pointer. Finally, the capacity tracks elements past the length that are allocated and in the array, which is memory available to grow the slice if elements are appended.
+
+Remember that there is a difference between a slice _value_ (the tuple of pointer, length, capacity) and what it points to (a sequence of elements in memory), much like the difference between a pointer _value_ (a memory address) and whatever it points _to_.
 
 The Go `append(s, x)` operation appends to a slice and returns a new slice. If `s` has spare capacity, the new element is stored there and the new slice has the same pointer as the old one, but with its length increased by 1. On the other hand if `s` has no spare capacity, `append` allocates a new, larger array and copies the elements pointed to by `s` over to it. When a slice is grown, typically its capacity will be double the original length, to amortize the cost of copying over the elements; hopefully you saw something like this in a data structure class (it's often the first example shown of amortized cost analysis). A common idiom for appending to a slice `s []T` is `s = append(s, x)`, since we typically want to only use the new slice.
 
 ### Reasoning about slices
 
-The basic assertion for working with slices is `own_slice t dq xs`. `s` is a `Slice.t`, a Rocq record representing the slice value (the triple of pointer, length, and capacity); GooseLang code will use `#s`, the standard way of converting Gallina values to GooseLang values. `dq` is a fraction, explained below; for now we will pretend like it's always `DfracOwn 1`. Finally, `xs` is a Gallina `list V` of the elements of the slice, with the same flexibility for the type `V` as used in points-to assertions, namely `V` can be any type that satisfies `IntoVal V`. The overall result is an assertion that gives ownership over the memory referenced by the slice `s`, and records that it has the elements `xs`.
+The basic assertion for working with slices is `own_slice s dq xs`. `s` is a `Slice.t`, a Rocq record representing the slice value (the triple of pointer, length, and capacity); GooseLang code will use `#s`, the standard way of converting Gallina values to GooseLang values. `dq` is a fraction, explained below; for now we will pretend like it's always `DfracOwn 1`. Finally, `xs` is a Gallina `list V` of the elements of the slice, with the same flexibility for the type `V` as used in points-to assertions, namely `V` can be any type that satisfies `IntoVal V`. The overall result is an assertion that gives ownership over the memory referenced by the slice `s`, and records that it has the elements `xs`.
 
 This abstraction uses typeclasses so the type of `xs` can vary, so for example we can use `list w64` for a slice of integers. You can see this in the type signature for `own_slice`, where there are parameters `V: Type` and `IntoVal V`:
 
