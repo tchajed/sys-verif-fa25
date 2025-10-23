@@ -265,6 +265,8 @@ func Add(a uint64, b uint64) uint64 {
 
 You will see `is_pkg_init <pkg>` in all preconditions for functions and methods. This asserts that the package (`functional` in this case) for the relevant function has been initialized. We need this precondition because initialization is where the code for `functional.Add` (the `Addⁱᵐᵖˡ` expression) is stored in a global variable where it is accessed by `func_call`. `wp_start` knows how to handle `is_pkg_init` and automatically puts it in the right place, so you don't mention it in the intro pattern passed to `wp_start`.
 
+We finish the proof with `wp_finish`. This is just a shorthand for `iApply "HΦ"` followed by some tactics to solve any trivial postcondition. Recall where HΦ comes from: all of our specifications are stated in continuation-passing style in the form `∀ Φ, P -∗ (Q -∗ Φ) -∗ wp e Φ`; HΦ is that second premise.
+
 ```rocq
 Lemma wp_Add (n m: w64) :
   {{{ is_pkg_init functional ∗ ⌜uint.Z n + uint.Z m < 2^64⌝ }}}
@@ -273,32 +275,7 @@ Lemma wp_Add (n m: w64) :
 Proof.
   wp_start as "%Hoverflow".
   wp_auto.
-  iApply "HΦ".
-  iPureIntro.
-  word.
-Qed.
-
-```
-
-Code being verified:
-
-```go
-func StackEscape() *uint64 {
-	var x = uint64(42)
-	return &x
-}
-```
-
-```rocq
-Lemma wp_StackEscape :
-  {{{ is_pkg_init heap.heap }}}
-    @! heap.heap.StackEscape #()
-  {{{ (l: loc), RET #l; l ↦ (W64 42) }}}.
-Proof.
-  wp_start as "#init". iNamed "init".
-  wp_auto.
-  iApply "HΦ".
-  iFrame.
+  wp_finish. (* could do [iApply "HΦ". word.] *)
 Qed.
 
 End goose.

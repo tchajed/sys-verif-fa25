@@ -128,8 +128,8 @@ Lemma wp_NewSearchTree :
     @! heap.NewSearchTree #()
   {{{ (l: loc), RET #l; own_tree l ∅ }}}.
 Proof.
-  wp_start as "_".
-  iApply "HΦ".
+  wp_start.
+  wp_finish.
   iApply own_tree_null; done.
 Qed.
 
@@ -242,7 +242,7 @@ Notice that the ▷ in front of "IH" has disappeared because we've taken a step.
     { iDestruct (own_tree_null with "Htree") as %Hkeys; subst.
       iPureIntro; set_solver. }
     rewrite bool_decide_eq_false_2; [ done | ].
-    iApply "HΦ". iFrame. }
+    wp_finish. }
 
   (* non-nil cases *)
   assert (l ≠ null) as Hnon_null by congruence.
@@ -254,7 +254,7 @@ Notice that the ▷ in front of "IH" has disappeared because we've taken a step.
   { (* found needle at root *)
     rewrite bool_decide_eq_true_2.
     { set_solver. }
-    iApply "HΦ".
+    wp_finish.
     iApply own_tree_non_null; auto.
     iFrame "key left right Hleft Hright %".
     iPureIntro; set_solver.
@@ -326,7 +326,7 @@ Proof.
   iApply struct_fields_split in "Hl". iNamed "Hl".
   cbn [heap.SearchTree.key' heap.SearchTree.left' heap.SearchTree.right'].
   wp_auto.
-  iApply "HΦ".
+  wp_finish.
   rewrite own_tree_unfold /own_tree_F.
   iRight.
   iSplit; [ done | ].
@@ -374,7 +374,7 @@ Proof.
     iDestruct (own_tree_null with "Htree") as %Hkeys; subst. iClear "Htree".
     iIntros (l') "Htree".
     wp_auto.
-    iApply "HΦ".
+    wp_finish.
     iExactEq "Htree".
     f_equal. set_solver. }
 
@@ -387,7 +387,7 @@ Proof.
   { wp_apply ("IH" with "[$Hleft]").
     iIntros (left_l') "Hleft".
     wp_auto.
-    iApply "HΦ".
+    wp_finish.
     iApply own_tree_non_null; [ done | ].
     (* need to re-prove binay search invariant *)
     iFrame "key left right Hleft Hright %".
@@ -400,7 +400,7 @@ Proof.
   { wp_apply ("IH" with "[$Hright]").
     iIntros (right_l') "Hright".
     wp_auto.
-    iApply "HΦ".
+    wp_finish.
     iApply own_tree_non_null; [ done | ].
     iFrame "key left right Hleft Hright %".
     iPureIntro.
@@ -410,7 +410,7 @@ Proof.
   }
   (* key was already present *)
   assert (key = new_key) by word; subst new_key.
-  iApply "HΦ".
+  wp_finish.
   iApply own_tree_non_null; [ auto | ].
   iFrame "key left right Hleft Hright %".
   iPureIntro.

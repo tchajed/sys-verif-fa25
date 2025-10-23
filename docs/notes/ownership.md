@@ -103,8 +103,7 @@ Proof.
   wp_start as "l".
   wp_load.
   wp_auto.
-  iApply "HΦ".
-  iFrame.
+  wp_finish.
 Qed.
 
 ```
@@ -228,9 +227,8 @@ Lemma wp_ExamplePerson :
     @! heap.ExamplePerson #()
   {{{ RET #(heap.Person.mk "Ada" "Lovelace" (W64 25)); True }}}.
 Proof.
-  wp_start as "_".
-  iApply "HΦ".
-  done.
+  wp_start.
+  wp_finish.
 Qed.
 
 ```
@@ -258,9 +256,7 @@ Lemma wp_ExamplePersonRef :
 Proof.
   wp_start as "_".
   wp_alloc l as "p".
-  wp_pures.
-  iApply "HΦ".
-  iFrame.
+  wp_finish.
 Qed.
 
 ```
@@ -287,9 +283,7 @@ Proof.
 The theorem `struct_fields_split` gives a way to take any points-to assertion with a struct type and split it into its component field points-to assertions, which is what the postcondition of this spec gives.
 
 ```rocq
-  wp_pures.
-  iApply "HΦ".
-  iFrame.
+  wp_finish.
 Qed.
 
 ```
@@ -397,11 +391,7 @@ The `struct_fields_split` theorem turns a pointer to a struct into pointers for 
 
 ```rocq
   wp_auto.
-  iDestruct ("HΦ" with "[]") as "HΦ".
-  { done. }
-  iExactEq "HΦ".
-  f_equal.
-  f_equal.
+  wp_finish.
   rewrite -app_assoc //.
 Qed.
 
@@ -422,8 +412,7 @@ Lemma wp_Person__Older (firstName lastName: byte_string) (age: w64) (p: loc) (de
 Proof.
   wp_start as "(first & last & age)".
   wp_auto.
-  iApply "HΦ".
-  iFrame.
+  wp_finish.
 Qed.
 
 ```
@@ -446,15 +435,14 @@ Lemma wp_GetAge (firstName lastName: byte_string) (age: w64) (p: loc) (delta: w6
 Proof.
   wp_start as "H". iNamed "H".
   wp_auto.
-  iApply "HΦ".
-  iFrame.
+  wp_finish.
 Qed.
 
 ```
 
 ## Exercises: struct specifications
 
-Fill in a specification for each function, then do the proof. Proofs should mostly be automated (using tactics like `wp_start`, `wp_auto`, `iApply "HΦ"`, and `iFrame`) if you have a correct specification.
+Fill in a specification for each function, then do the proof. Proofs should mostly be automated (using tactics like `wp_start`, `wp_auto`, and `wp_finish`) if you have a correct specification.
 
 You'll need to reference the implementation of these functions and methods in [go/heap/struct.go](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/go/heap/struct.go).
 
@@ -702,8 +690,8 @@ Proof.
   wp_pure; first word.
   wp_apply (wp_store_slice_elem with "[$Hs]") as "Hs".
   { autorewrite with len. word. }
-  iApply "HΦ".
-  iFrame.
+
+  wp_finish.
 Qed.
 
 ```

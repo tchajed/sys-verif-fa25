@@ -54,7 +54,7 @@ Section proof.
            with "mu [HP Hval]") as "Hlock".
     { iFrame. }
     wp_auto.
-    iApply "HΦ".
+    wp_finish.
     iFrame "#∗".
   Qed.
 
@@ -76,8 +76,7 @@ Section proof.
     wp_apply (wp_Mutex__Unlock with "[$Hlock $Hlocked HP val]").
     { iFrame. }
 
-    iApply "HΦ".
-    iFrame.
+    wp_finish.
   Qed.
 
   Lemma wp_atomicPtr__store l (P: loc → iProp _) (Q: loc → iProp _) (y: loc) :
@@ -98,8 +97,7 @@ Section proof.
     wp_apply (wp_Mutex__Unlock with "[$Hlock $Hlocked HP val]").
     { iFrame. }
 
-    iApply "HΦ".
-    iFrame.
+    wp_finish.
   Qed.
 
 End proof.
@@ -188,7 +186,7 @@ Section proof.
     cbn [hashmap.HashMap.clean' hashmap.HashMap.mu'].
     iPersist "Hclean Hmu".
     wp_auto.
-    iApply "HΦ".
+    wp_finish.
     iFrame "∗#".
   Qed.
 
@@ -215,14 +213,13 @@ Section proof.
       { eauto. }
       wp_auto.
       iIntros "Hm_new".
-      iApply "HΦ".
+      wp_finish.
       rewrite /typed_map.map_insert.
       iFrame. }
 
     iIntros "[_ Hm_new]".
     wp_auto.
-    iApply "HΦ".
-    iFrame.
+    wp_finish.
 *)
   Admitted.
 
@@ -255,9 +252,7 @@ Section proof.
     wp_apply (wp_map_get with "[$Hclean_map]").
     iIntros "_".
     wp_auto.
-    iApply "HΦ".
-    iExactEq "HQ".
-    reflexivity.
+    wp_finish.
   Qed.
 
   (* The spec of this helper is a bit complicated since it is called with the
@@ -292,8 +287,7 @@ Section proof.
       wp_apply (wp_mapClone with "[$Hclean_m]").
       iIntros (mref') "Hdirty".
       wp_auto.
-      iApply "HΦ".
-      iFrame.
+      wp_finish.
   Qed.
 
   Lemma wp_HashMap__Store l (key: w64) (val: w64) (P: gmap w64 w64 → iProp _)
@@ -330,7 +324,7 @@ Section proof.
     wp_auto.
     wp_apply (wp_Mutex__Unlock with "[$Hlock $Hlocked Hm_lock]").
     { iFrame. }
-    iApply "HΦ". iFrame.
+    wp_finish.
   Qed.
 
   Lemma wp_HashMap__Delete l (key: w64) (P: gmap w64 w64 → iProp _)
@@ -367,7 +361,7 @@ Section proof.
     wp_auto.
     wp_apply (wp_Mutex__Unlock with "[$Hlock $Hlocked Hm_lock]").
     { iFrame. }
-    iApply "HΦ". iFrame.
+    wp_finish.
   Qed.
 
 End proof.
