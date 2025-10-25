@@ -496,6 +496,7 @@ Lemma wp_Person__BuggySetAge (p: unit) :
   {{{ RET #(); True }}}.
 Proof.
 Admitted.
+
 ```
 
 ## Slices

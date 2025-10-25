@@ -20,52 +20,56 @@ By the end of this lecture, you should be able to:
 
 ---
 
-## Loop invariants
+<!-- @include: ./macros.snippet.md -->
 
-The general idea for proving the correctness of a loop is to invent a _loop invariant_, an assertion that is (1) true when the loop starts, and (2) _if_ the loop invariant holds at the start of the loop, it should hold at the end. If you prove these two things, via induction, you've proven that the loop invariant is true at the end of the loop. We also can learn one more fact which is necessary in practice: the loop probably has a "break condition", a property that is true when it terminates. We know the loop invariant is preserved by each iteration, and if the loop exits it satisfies the break condition.
+## Loop invariants in theory
 
-Here's the principle of loop invariants stated formally, for the `for` loop model above. This is a theorem in Perennial (slightly simplified).
+The general idea for proving the correctness of a loop is to invent a _loop invariant_, an assertion that is (1) true when the loop starts, and (2) _if_ the loop invariant holds at the start of the loop, it should hold at the end. If you prove these two things, due to an induction argument, you've proven that the loop invariant is true at the end of the loop. That's it; this is the main idea.
 
-```rocq
-Lemma wp_forBreak (I: bool -> iProp Σ) (body: val) :
-  {{{ I true }}}
-    body #()
-  {{{ r, RET #r; I r }}} -∗
-  {{{ I true }}}
-    (for: (λ: <>, #true)%V ; (λ: <>, Skip)%V :=
-       body)
-  {{{ RET #(); I false }}}.
-```
+In practice, loops have one more complication, which is that they exit when a specific condition is met, so when they terminate we know that condition holds. This is what tells us that the loop ran for the "correct" number of iterations.
 
-The invariant `I` takes a boolean which is true if the loop is continuing and becomes false when it stops iterating.
+Here's the principle of loop invariants stated formally:
 
-Note that loop invariants are a _derived principle_. The proof of the theorem above is based only on recursion (since that's how `For` is implemented), and in fact Perennial has some other loop invariant-like rules for special cases of `for` loops, like the common case of `for i := 0; i < n; i++ { ... }`.
+$$
+\frac{
+\hoare{I(\true)}{body \, ()}{\fun{(r: \mathrm{bool})} I(r)}
+}{
+\hoare{I(\true)}{\mathrm{loop} \, body}{I(\false)}
+}
+$$
 
-You can think of `I true` and `I false` as two slightly different invariants: `I true` means the loop will run again, while `I false` means the loop terminates. Commonly `I false` is a stronger statement which is true only when the loop exits (it reaches some desired stopping condition, like `!(i < n)`).
+where $\mathrm{loop} \triangleq \rec{f}{body} \ife{body \, ()}{f \, body}{()}$.
+
+This principle we've stated could just be a theorem about the function $\mathrm{loop}$. We could prove it using induction over the number of steps taken by the loop, for example, though such a low-level proof is somewhat complicated.
 
 ::: important Main idea
 
 This theorem produces two proof obligations when used:
 
-1. `I` is preserved by the loop. More precisely the loop gets to assume `I true` (since the loop continues), and must prove `I r`, where `r` is the continue/break boolean that the body returns.
-2. The loop invariant holds initially. More precisely `I true`.
+1. $I$ is preserved by the loop. More precisely the loop gets to assume $I(\true)$ (since the loop continues), and must prove $I(r)$, where $r$ is the continue/break boolean that the body returns.
+2. The loop invariant holds initially. More precisely $I(\true)$.
 
-The result is the assertion `I false`, which is used to verify the rest of the code (after the for loop).
+The result is the assertion $I(\false)$, which is used to verify the rest of the code (after the for loop).
 
 :::
 
-### Exercise (difficult, especially useful)
+## Using loop invariants in practice
 
-The informal description above describes a "continue condition" and "break condition", but that is not how `wp_forBreak` is written. In this exercise you'll bridge the gap.
+The actual principle proven in Perennial is a bit more complicated than what we see above, because it is designed for `for` loops. A `for` loop looks like this:
 
-1. Reformulate `wp_forBreak` so that it takes a regular loop invariant and a break condition as separate arguments, to more closely match the principle above. That, state a different theorem (let's call it `wp_for_breakCondition`) for proving a specification about that same expression `(for: (λ: <>, #true)%V ; (λ: <>, Skip)%V := body)`.
-2. Prove your new `wp_for_breakCondition` using `wp_forBreak`. You should replace the `-∗` in the theorem statement with a `→` (we will discuss what difference this creates later when we talk about something called the _persistently modality_).
+```
+for i := 0; i < 10; i++ {
+  body // might use break, continue
+}
+```
+
+In this code, `i := 0` is an initializer, which simply runs before the whole `for` loop and is unrelated to loop invariants. `i < 10` is a loop condition that is checked at the _beginning_ of each loop iteration, and provides one way for a loop to exit. In the middle of the loop, the code might execute `continue`; this is easy to understand as simply skipping the rest of the loop body. `break` is more complicated to reason about since it is another way for a loop to stop executing, and it means the condition is not guaranteed to be false when the loop exits. Finally, at the end of every loop iteration (unless `break` is called), the post-iteration code `i++` is executed.
+
+While the theorem that handles all of these features is somewhat complicated, using it is pleasantly simple if you understand the idea of loop invariants.
 
 ```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
 From sys_verif.program_proof Require Import heap_init functional_init.
-
-#[local] Ltac Zify.zify_post_hook ::= Z.div_mod_to_equations.
 
 Section goose.
 Context `{hG: !heapGS Σ}.
@@ -75,21 +79,7 @@ Context `{!globalsGS Σ} {go_ctx: GoContext}.
 
 For our first example, we'll consider a function that adds the numbers from 1 to $n$. We'll prove this produces $n(n+1)/2$.
 
-Before doing this with a loop, let's consider a recursive implementation. The recursive version turns out to be a bit _easier_ in this case because the specification for the entire function is sufficient: we can prove `SumNrec` produces $n(n+1)/2$ by merely assuming that every recursive subcall is already correct. (This reasoning is sound because we aren't proving termination; if it seems magical, it's the same magic that goes into recursion in general.)
-
-This proof strategy does not always work. In general, when we want to prove something with induction or recursion, we might need to _strengthen the induction hypothesis_. But for this example, when implemented recursively, the original specification is enough.
-
-```go
-// SumNrec adds up the numbers from 1 to n, recursively.
-func SumNrec(n uint64) uint64 {
-	if n == 0 {
-		return 0
-	}
-	return n + SumNrec(n-1)
-}
-```
-
-This implementation might overflow a 64-bit number. This specification handles this case by assuming the result doesn't overflow.
+Let's first see what this would look like without a `for` loop, using a recursive implementation and an induction argument.
 
 ```rocq
 Lemma wp_SumNrec (n: w64) :
@@ -98,14 +88,53 @@ Lemma wp_SumNrec (n: w64) :
     @! functional.SumNrec #n
   {{{ (m: w64), RET #m; ⌜uint.Z m = uint.Z n * (uint.Z n + 1) / 2⌝ }}}.
 Proof.
+  (* Löb induction is a somewhat magical principle that says we can assume our function is correct while proving it, as long as we only use its correctness for _recursive_ subcalls (to avoid circular reasoning). The intuitive reason why this makes sense is that we only prove partial correctness, so we assume the function terminates. Given that assumption, what we're doing is  induction on the number of steps the function takes to terminate. *)
   iLöb as "IH" forall (n).
   wp_start as "%Hoverflow".
+```
+
+:::: info Goal
+
+```txt
+  Σ : gFunctors
+  hG : heapGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
+  n : w64
+  Φ : val → iPropI Σ
+  Hoverflow : (uint.Z n * (uint.Z n + 1)) `div` 2 < 2 ^ 64
+  ============================
+  "IH" : ∀ (n0 : w64) (x : val → iPropI Σ),
+           is_pkg_init functional ∗
+           ⌜(uint.Z n0 * (uint.Z n0 + 1)) `div` 2 < 2 ^ 64⌝ -∗
+           ▷ (∀ m : w64,
+                ⌜uint.Z m = (uint.Z n0 * (uint.Z n0 + 1)) `div` 2⌝ -∗ x (# m)) -∗
+           WP # (func_callv functional.SumNrec) (# n0) {{ v, x v }}
+  _ : is_pkg_init functional
+  --------------------------------------□
+  "HΦ" : ∀ m : w64,
+           ⌜uint.Z m = (uint.Z n * (uint.Z n + 1)) `div` 2⌝ -∗ Φ (# m)
+  --------------------------------------∗
+  WP exception_do
+       (let: "n" := alloc (# n) in
+        (if: ![# uint64T] "n" = # (W64 0) then return:
+         # (W64 0) else do: # ()) ;;;
+        return: ![# uint64T] "n" +
+                (let: "$a0" := ![# uint64T] "n" - # (W64 1) in
+                 func_call (# functional.SumNrec) "$a0"))
+  {{ v, Φ v }}
+```
+
+::::
+
+Notice here how Löb induction gives us the correctness of `functional.SumNrec` as an assumption, but the goal is a proof about the body of that function, so `"IH"` is only useful for recursive calls.
+
+```rocq
   wp_auto.
   wp_if_destruct.
   - wp_finish.
   - wp_apply "IH".
-    { (* [word] doesn't work on its own here. It's helpful to know how to do some of the work it does manually, to help it along. *)
-      (* FIXME: word bug? *)
+    { (* [word] doesn't work on its own here (possibly a bug in the tactic). It's helpful to know how to do some of the work it does manually, to help it along. *)
       rewrite -> !word.unsigned_sub_nowrap by word.
       word. }
     iIntros (m Hm).
@@ -116,7 +145,7 @@ Qed.
 
 ### SumN with a loop
 
-Now let's re-implement this function with a loop instead. Here we handle integer overflow differently: the function `std.SumAssumeNoOverflow(x, y)` returns `x + y` and panics if the result would overflow, but we do not prove this function doesn't panic. This introduces an assumption in our whole verified code that this sum never overflows.
+Now let's re-implement this function with a loop instead. Here we handle integer overflow differently: the function `std.SumAssumeNoOverflow(x, y)` returns `x + y` and panics if the result would overflow, but in the proof we ignore the overflow case. This introduces an assumption in our whole verified code that this sum never overflows.
 
 ```go
 // SumN adds up the numbers from 1 to n, with a loop.
@@ -136,7 +165,12 @@ func SumN(n uint64) uint64 {
 
 The first proof we'll attempt for this function has a minimal loop invariant that shows that the heap loads and stores work, but nothing about the values of the `sum` and `i` variables.
 
-This is a problem of not having a strong enough loop invariant. The loop invariant is an invariant: we can prove it holds initially and that it is preserved by the loop. However, it's hopelessly weak for proving that `return sum` is correct after the loop - it only shows that `sum` is an integer.
+We'll see that this loop invariant is indeed an invariant: we can prove it holds initially and that it is preserved by the loop. However, it's hopelessly weak for proving that `return sum` is correct after the `for` loop, which we'll fix in the next attempt.
+
+There are two new tactics specific to for loops:
+
+- When the next piece of code in the WP is a for loop, `wp_for` starts verifying it by reasoning about the loop body. It uses the current proof context (whatever hypotheses you currently have) as the loop invariant, so the standard pattern is to _generalize_ with `iAssert` to something weaker that holds throughout the loop. You can see this below.
+- `wp_for` produces a statement `for_postcondition` whenever the loop body finishes (either due to `continue` or just by getting to the end), executes a `break` statement, or calls `return`. In each case, the tactic `wp_for_post` transforms that `for_postcondition` into whatever you should prove next: when the loop exits, that's the loop invariant; when the loop breaks, that's verifying the code after the loop; and for a `return` statement that's whatever the postcondition of the outer function is.
 
 ```rocq
 Lemma wp_SumN_failed (n: w64) :
@@ -146,45 +180,45 @@ Lemma wp_SumN_failed (n: w64) :
 Proof.
   wp_start as "_".
   wp_auto.
-  (* n doesn't change, so persist its points-to assertion *)
-  iPersist "n".
 
-
-```
-
-TODO: describe the new way we supply loop invariants.
-
-```rocq
   iAssert (∃ (sum i: w64),
               "sum" :: sum_ptr ↦ sum ∗
               "i" :: i_ptr ↦ i)%I
-          with "[$sum $i]" as "HI".
-  wp_for "HI".
+          with "[sum i]" as "HI".
+  { iExists (W64 0), (W64 1). iFrame. }
+
+  wp_for.
+  iNamed "HI". wp_auto.
   wp_if_destruct.
-  - iApply wp_for_post_break.
-    wp_auto.
+  - (* the code breaks in this branch, at which point we have to verify the code after the loop *)
+    wp_for_post.
     wp_finish.
     iPureIntro.
     (* oops, don't know anything about sum *)
+    admit.
+  - (* we can prove the loop preserves the loop invariant *)
+    wp_apply (wp_SumAssumeNoOverflow).
+    iIntros "%Hoverflow".
+    wp_auto.
+    wp_for_post.
+    iFrame.
 Abort.
 
 ```
 
 ### Exercise: loop invariant for SumN
 
-What loop invariant does this code maintain that makes the postcondition true? A complete answer should have a loop invariant when continue is true and one when it is false (the two are very similar).
-
-Remember that the loop body needs to satisfy the Hoare triple `{{{ I true }}} body #() {{{ r, RET #r; I r }}}`. The return value `r` is false when the Go code ends with a `break` and true otherwise (either a `continue` or implicitly at the end of the loop body). `I false` is the only thing we will know in the proof after the loop executes.
+What loop invariant does this code maintain that makes the postcondition true?
 
 ::: warning
 
-I _strongly_ recommend being fairly confident in your answer before reading the solution. Don't spoil the exercise for yourself!
+Take some time to think about this before reading the solution. Don't spoil the exercise for yourself!
 
 :::
 
 ::: details Solution
 
-Here is a proof with the right loop invariant.
+Here is a proof with the right loop invariant. We also show a couple more tricks to make this proof easier.
 
 ```rocq
 Lemma wp_SumN (n: w64) :
@@ -195,20 +229,71 @@ Lemma wp_SumN (n: w64) :
 Proof.
   wp_start as "%Hn_bound".
   wp_auto.
-  iPersist "n".
 
   iAssert (∃ (sum i: w64),
               "sum" :: sum_ptr ↦ sum ∗
               "i" :: i_ptr ↦ i ∗
+
+```
+
+This time around, we'll be precise about what values our local variables take. Note that we can only prove that $i \leq n + 1$ - the loop really does increment `i` one past the end, but then it doesn't increment the sum with `n+1`. Remember these are properties that are true at the beginning of each loop iteration, but don't have to be proven when the loop breaks.
+
+```rocq
               "%i_bound" :: ⌜uint.Z i ≤ uint.Z n + 1⌝ ∗
               "%Hsum_ok" :: ⌜uint.Z sum = (uint.Z i-1) * (uint.Z i) / 2⌝)%I
          with "[$sum $i]" as "HI".
   { iPureIntro. split; word. }
+
+```
+
+If we use named hypotheses (e.g., the `"sum" ::` label above), then passing the name of the "loop invariant hypothesis" to `wp_for` will destruct it back out afterward.
+
+```rocq
   wp_for "HI".
   wp_if_destruct.
   - wp_for_post.
+```
+
+:::: info Goal
+
+```txt
+  Σ : gFunctors
+  hG : heapGS Σ
+  globalsGS0 : globalsGS Σ
+  go_ctx : GoContext
+  n : w64
+  Φ : val → iPropI Σ
+  Hn_bound : uint.Z n < 2 ^ 64 - 1
+  n_ptr, sum_ptr, i_ptr : loc
+  sum, i : w64
+  i_bound : uint.Z i ≤ uint.Z n + 1
+  Hsum_ok : uint.Z sum = ((uint.Z i - 1) * uint.Z i) `div` 2
+  l : uint.Z n < uint.Z i
+  ============================
+  _ : is_pkg_init functional
+  --------------------------------------□
+  "HΦ" : ∀ m : w64,
+           ⌜uint.Z m = (uint.Z n * (uint.Z n + 1)) `div` 2⌝ -∗ Φ (# m)
+  "n" : n_ptr ↦ n
+  "sum" : sum_ptr ↦ sum
+  "i" : i_ptr ↦ i
+  --------------------------------------∗
+  Φ (# sum)
+```
+
+::::
+
+With this correct loop invariant, notice the extra pure facts we have when the loop `break`s: `i_bound` and `Hsum_ok` come from the loop invariant, and `n < i` comes from the `if` test we just did.
+
+```rocq
     wp_finish.
     iPureIntro.
+
+```
+
+The combination of the invariant and that test guarantee `i = n + 1`.
+
+```rocq
     assert (uint.Z i = (uint.Z n + 1)%Z) by word.
     word.
   - wp_apply wp_SumAssumeNoOverflow.
@@ -275,6 +360,7 @@ Definition is_sorted (xs: list w64) :=
   ∀ (i j: nat), (i < j)%nat →
          ∀ (x1 x2: w64), xs !! i = Some x1 →
                   xs !! j = Some x2 →
+                  (* for simplicity, our definition uses strict inequality which guarantees that elements are distinct *)
                   uint.Z x1 < uint.Z x2.
 
 Lemma wp_BinarySearch (s: slice.t) (xs: list w64) (needle: w64) :
