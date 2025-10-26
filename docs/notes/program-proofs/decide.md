@@ -4,7 +4,7 @@ tags: literate
 shortTitle: Decidable equality
 ---
 
-# What is `decide`?
+# Decidable equality
 
 What is this `if decide` thing? And what is `bool_decide`? And how do I do proofs involving them?
 

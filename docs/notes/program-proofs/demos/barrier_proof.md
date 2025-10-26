@@ -2,7 +2,7 @@
 # Auto-generated from literate source. DO NOT EDIT.
 category: demo
 tags: literate
-order: -1
+order: 12
 shortTitle: "Demo: barrier proof"
 ---
 

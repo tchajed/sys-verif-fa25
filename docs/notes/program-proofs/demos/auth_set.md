@@ -2,15 +2,15 @@
 # Auto-generated from literate source. DO NOT EDIT.
 category: demo
 tags: literate
-order: -1
-shortTitle: "Auth set ghost state"
+order: 11
+shortTitle: "Demo: auth set ghost state"
 ---
 
 # Auth set ghost library
 
-This library is a dependency for the barrier proof. It's also a self-contained example of creating a new ghost theory in Iris.
+This library is both a dependency for the barrier proof, and a demo of a new ghost theory in Iris.
 
-As is typical, we don't define a resource algebra from scratch, but instead build one out of existing primitives. However, we do prove lemmas about the ownership of that RA (that, is the `own` predicate) to make using ghost state of this type more convenient.
+As is typical, we don't define a resource algebra from scratch, but instead build one out of existing primitives. The main work in this library is to prove lemmas about the ownership of that RA (that, is the `own` predicate) to make using ghost state of this type more convenient.
 
 You should think of an instance of `auth_set A` (that is, a ghost variable that uses this RA) as being a variable of type `gset A`; the whole construction is parameterized by a type `A` of elements. It has two predicates: `auth_set_auth (γ: gname) (s: gset A)` which says exactly what the set for the variable named γ is and `auth_set_frag (γ: gname) (x: A)`, which asserts ownership of one element `x ∈ s`. The `_auth` stands for "authoritative" and there is only one copy of that predicate for any γ; think of this as the value of the ghost variable. The `_frag` stands for "fragment" and there can be many fragments, one for each element of the authoritative set.
 

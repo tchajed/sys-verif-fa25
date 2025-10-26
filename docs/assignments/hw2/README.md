@@ -1,7 +1,8 @@
 ---
 dir:
-  order: 3
   icon: pen-fancy
+  order: 3
+  link: true
 shortTitle: Assignment 2
 icon: circle-exclamation
 date: 2025-09-17 08:00:00 -5

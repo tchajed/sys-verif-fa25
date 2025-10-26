@@ -2,14 +2,15 @@
 # Auto-generated from literate source. DO NOT EDIT.
 category: demo
 shortTitle: "Demo: Goose basics"
+order: 1
 tags: literate
 date: 2025-10-16 8:00:00 -5
 pageInfo: ["Date", "Category", "Tag"]
 ---
 
-# Demo: proofs of functional Go code
+# Demo: proofs of simple Go code
 
-Here are some proofs of "functional" Go code that just does some arithmetic and doesn't interact with the heap.
+Here are some proofs of Go code that operates on numbers, which demonstrate how to write specifications and all the basic automation tactics. The bodies of these functions use the heap for local variables, but notice how all the specifications can be written without points-to facts.
 
 ```rocq
 From sys_verif.program_proof Require Import prelude.
@@ -30,9 +31,26 @@ Section proof.
     {{{ (c: w64), RET #c; ⌜uint.Z c = (uint.Z a + uint.Z b)%Z⌝  }}}.
   Proof.
     wp_start as "%Hoverflow".
+    wp_auto.
+    wp_finish.
+  Qed.
+
+  (* The same proof, but carried out more manually. *)
+  Lemma wp_Add_manual_proof (a b: w64) :
+    {{{ is_pkg_init functional ∗ ⌜uint.Z a + uint.Z b < 2^64⌝ }}}
+      @! functional.Add #a #b
+    {{{ (c: w64), RET #c; ⌜uint.Z c = (uint.Z a + uint.Z b)%Z⌝  }}}.
+  Proof.
+    (* wp_start: *)
+    iIntros (Φ) "[#? %Hoverflow] HΦ". (* wp_start introduces the [is_pkg_init for you] *)
+    wp_func_call. wp_call.
+
+    (* wp_auto: *)
     wp_alloc b_l as "b"; wp_pures.
     wp_alloc a_l as "a"; wp_pures.
     wp_load; wp_load; wp_pures.
+
+    (* wp_finish: *)
     iApply "HΦ".
     iPureIntro.
     word.
@@ -45,7 +63,7 @@ Section proof.
   Proof.
     wp_start.
     wp_auto.
-    iApply "HΦ"; done.
+    wp_finish.
   Qed.
 
   Lemma wp_Max (a b: w64) :
@@ -56,10 +74,8 @@ Section proof.
     wp_start.
     wp_auto.
     wp_if_destruct.
-    - iApply "HΦ".
-      word.
-    - iApply "HΦ".
-      word.
+    - wp_finish.
+    - wp_finish.
   Qed.
 
   Lemma wp_Midpoint (a b: w64) :
@@ -69,8 +85,7 @@ Section proof.
   Proof.
     wp_start as "%Hoverflow".
     wp_auto.
-    iApply "HΦ".
-    word.
+    wp_finish.
   Qed.
 
   Lemma wp_Midpoint2 (a b: w64) :
@@ -81,10 +96,8 @@ Section proof.
     wp_start.
     wp_auto.
     wp_if_destruct.
-    - iApply "HΦ".
-      word.
-    - iApply "HΦ".
-      word.
+    - wp_finish.
+    - wp_finish.
   Qed.
 
   Lemma wp_Arith (a b: w64) :
@@ -95,14 +108,49 @@ Section proof.
     wp_start.
     wp_auto.
     wp_if_destruct.
-    - iApply "HΦ".
-      done.
+    - wp_finish.
     - wp_apply wp_Midpoint2.
       iIntros "%c %Heq".
       wp_auto.
-      iApply "HΦ".
-      done.
+      wp_finish.
   Qed.
 
+  Lemma wp_SumN (n: w64) :
+    {{{ is_pkg_init functional ∗ ⌜uint.Z n < 2^64-1⌝ }}}
+      @! functional.SumN #n
+    {{{ (m: w64), RET #m;
+        ⌜uint.Z m = uint.Z n * (uint.Z n + 1) / 2⌝ }}}.
+  Proof.
+    wp_start as "%Hn_bound".
+    wp_auto.
+
+    iAssert (∃ (sum i: w64),
+                "sum" :: sum_ptr ↦ sum ∗
+                "i" :: i_ptr ↦ i ∗
+                "%i_bound" :: ⌜uint.Z i ≤ uint.Z n + 1⌝ ∗
+                "%Hsum_ok" :: ⌜uint.Z sum = (uint.Z i-1) * (uint.Z i) / 2⌝)%I
+          with "[$sum $i]" as "HI".
+    { iPureIntro. split; word. }
+    wp_for "HI".
+    wp_if_destruct.
+    - wp_for_post.
+      wp_finish.
+      iPureIntro.
+      assert (uint.Z i = (uint.Z n + 1)%Z) by word.
+      word.
+    - wp_apply wp_SumAssumeNoOverflow.
+      iIntros (Hoverflow).
+      wp_auto.
+      wp_for_post.
+      iFrame.
+      iPureIntro.
+      split_and!; try word.
+      rewrite -> !word.unsigned_add_nowrap by word.
+      word.
+  Qed.
+
+```
+
+```rocq
 End proof.
 ```

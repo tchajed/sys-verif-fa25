@@ -5,6 +5,7 @@ date: 2025-09-04 08:00:00 -5
 dir:
   icon: file-lines
   order: 2
+  link: true
 ---
 
 # Assignment 1: Rocq

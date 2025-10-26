@@ -1,5 +1,5 @@
 ---
-order: 1
+order: 2
 ---
 
 # Inputting special symbols
@@ -35,7 +35,7 @@ Here are some notations that you don't have to use because they have ASCII equiv
 | `\named` | ∷      | used for named propositions | `::`               |
 | `\gamma` | γ      | Greek letter gamma          | use any other name |
 
-Note that `∀` and `∃` are overloaded for use in Coq propositions and Iris propositions (`iProp`), and within Iris only the Unicode symbol is supported, so I recommend you stick with that. However, you can write `forall` and `exists` instead.
+Note that `∀` and `∃` are overloaded for use in Rocq propositions and Iris propositions (`iProp`), and within Iris only the Unicode symbol is supported, so I recommend you stick with that. However, you can write `forall` and `exists` instead.
 
 Note that for named propositions `\named` produces the Unicode symbol `∷` but you can use `::` (two ASCII colons) instead which looks almost identical in many fonts.
 

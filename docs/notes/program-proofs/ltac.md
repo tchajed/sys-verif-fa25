@@ -6,12 +6,10 @@ order: -2
 # Ltac reference
 
 ```rocq
-From Perennial.Helpers Require Import ListLen.
+From Perennial.Helpers Require Import ListLen Integers.
 From stdpp Require Import gmap.
 
 From sys_verif Require Import options.
-
-Close Scope Z_scope.
 
 ```
 
@@ -174,7 +172,7 @@ This generalizes to more than two with `t1; [t2 | t3 | t4]` and so on.
 
 ```rocq
 Lemma add_0_r (n: nat) :
-  n + 0 = n.
+  (n + 0 = n)%nat.
 Proof.
   induction n as [ |n IHn]; simpl; [ reflexivity | ].
 ```
@@ -183,7 +181,7 @@ Proof.
 
 ```txt
   n : nat
-  IHn : n + 0 = n
+  IHn : (n + 0)%nat = n
   ============================
   S (n + 0) = S n
 ```
@@ -272,7 +270,7 @@ List.lookup_snoc:
   ∀ {A : Type} (l : list A) (x : A), (l ++ [x]) !! length l = Some x
 lookup_app_l:
   ∀ {A : Type} (l1 l2 : list A) (i : nat),
-    i < length l1 → (l1 ++ l2) !! i = l1 !! i
+    (i < length l1)%nat → (l1 ++ l2) !! i = l1 !! i
 list_lookup_middle:
   ∀ {A : Type} (l1 l2 : list A) (x : A) (n : nat),
     n = length l1 → (l1 ++ x :: l2) !! n = Some x
@@ -281,7 +279,7 @@ lookup_app_l_Some:
     l1 !! i = Some x → (l1 ++ l2) !! i = Some x
 lookup_app_r:
   ∀ {A : Type} (l1 l2 : list A) (i : nat),
-    length l1 ≤ i → (l1 ++ l2) !! i = l2 !! (i - length l1)
+    (length l1 <= i)%nat → (l1 ++ l2) !! i = l2 !! (i - length l1)%nat
 take_drop_middle:
   ∀ {A : Type} (l : list A) (i : nat) (x : A),
     l !! i = Some x → take i l ++ x :: drop (S i) l = l
@@ -299,7 +297,7 @@ lookup_app:
     (l1 ++ l2) !! i =
     match l1 !! i with
     | Some x => Some x
-    | None => l2 !! (i - length l1)
+    | None => l2 !! (i - length l1)%nat
     end
 list_elem_of_split_length:
   ∀ {A : Type} (l : list A) (i : nat) (x : A),
@@ -307,14 +305,15 @@ list_elem_of_split_length:
 lookup_snoc_Some:
   ∀ {A : Type} (x : A) (l : list A) (i : nat) (y : A),
     (l ++ [x]) !! i = Some y
-    ↔ i < length l ∧ l !! i = Some y ∨ i = length l ∧ x = y
+    ↔ (i < length l)%nat ∧ l !! i = Some y ∨ i = length l ∧ x = y
 lookup_app_Some:
   ∀ {A : Type} (l1 l2 : list A) (i : nat) (x : A),
     (l1 ++ l2) !! i = Some x
-    ↔ l1 !! i = Some x ∨ length l1 ≤ i ∧ l2 !! (i - length l1) = Some x
+    ↔ l1 !! i = Some x
+      ∨ (length l1 <= i)%nat ∧ l2 !! (i - length l1)%nat = Some x
 List.list_split2:
   ∀ {A : Type} (l : list A) (i1 i2 : nat) (x1 x2 : A),
-    i1 < i2
+    (i1 < i2)%nat
     → l !! i1 = Some x1
       → l !! i2 = Some x2
         → l =
@@ -360,7 +359,7 @@ Rewriting is the act of using `a = b` to replace `a` with `b`. It's a powerful a
 Let's first see a simple example:
 
 ```rocq
-Lemma rewriting_demo1 (n1 n2 x: nat) :
+Lemma rewriting_demo1 (n1 n2 x: Z) :
   n1 = n2 →
   n1 + x = n2 + x.
 Proof.
@@ -371,7 +370,7 @@ Proof.
 :::: info Goal diff
 
 ```txt
-  n1, n2, x : nat
+  n1, n2, x : Z
   Heq : n1 = n2
   ============================
   n1 + x = n2 + x // [!code --]
@@ -610,14 +609,23 @@ End rewriting.
 
 ## Automation tactics
 
-`lia` solves goals involving arithmetic (with `nat` or `Z`).
+`word` solves goals involving machine word arithmetic (e.g., the `w64` type, `uint.Z`, `sint.Z`, and operations like `word.add` or `word.sub`).
 
 ```rocq
-Lemma lia_example x y z :
-  x + y - 3 < z →
-  z - y <= 2 ->
-  x < 5.
-Proof. lia. Qed.
+Lemma word_example_1 (x y: w64) :
+  uint.Z x + uint.Z y < 2^64 →
+  uint.Z (word.add x y) = uint.Z x + uint.Z y.
+Proof. word. Qed.
+
+Lemma word_example_2 (x y z: w64) :
+  sint.Z x + sint.Z y - sint.Z (W64 3) < sint.Z z →
+  sint.Z z - sint.Z y <= 2 ->
+  sint.Z x < 5.
+Proof. word. Qed.
+
+Lemma word_example_3 (x: w32) :
+  sint.Z x < 2^31.
+Proof. word. Qed.
 
 ```
 

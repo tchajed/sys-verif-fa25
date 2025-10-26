@@ -5,6 +5,7 @@ shortTitle: "Assignment 4"
 dir:
   icon: file-lines
   order: 5
+  link: true
 ---
 
 # Assignment 4: concurrent sharded hash map
