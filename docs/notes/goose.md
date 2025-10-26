@@ -8,16 +8,6 @@ date: 2025-10-16 8:00:00 -5
 pageInfo: ["Date", "Category", "Tag", "Word"]
 ---
 
-```rocq
-From sys_verif.program_proof Require Import prelude empty_ffi.
-From sys_verif.program_proof Require Import heap_init functional_init.
-
-Section goose.
-Context `{hG: !heapGS Σ}.
-Context `{!globalsGS Σ} {go_ctx: GoContext}.
-
-```
-
 # Goose - Modeling and reasoning about Go
 
 > Follow these notes in Rocq at [src/sys_verif/notes/goose.v](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/src/sys_verif/notes/goose.v).
@@ -73,19 +63,31 @@ func Arith(a, b uint64) uint64 {
 translates to:
 
 ```rocq
-Definition Arith: val :=
-  rec: "Arith" "a" "b" :=
-    let: "sum" := "a" + "b" in
-    (if: "sum" = #7
-    then "a"
-    else
-      let: "mid" := Midpoint "a" "b" in
-      "mid").
+Definition Arithⁱᵐᵖˡ : val :=
+  λ: "a" "b",
+    exception_do (let: "b" := (mem.alloc "b") in
+    let: "a" := (mem.alloc "a") in
+    let: "sum" := (mem.alloc (type.zero_val #uint64T)) in
+    let: "$r0" := ((![#uint64T] "a") + (![#uint64T] "b")) in
+    do:  ("sum" <-[#uint64T] "$r0");;;
+    (if: (![#uint64T] "sum") = #(W64 7)
+    then return: (![#uint64T] "a")
+    else do:  #());;;
+    let: "mid" := (mem.alloc (type.zero_val #uint64T)) in
+    let: "$r0" := (let: "$a0" := (![#uint64T] "a") in
+    let: "$a1" := (![#uint64T] "b") in
+    (func_call #Midpoint2) "$a0" "$a1") in
+    do:  ("mid" <-[#uint64T] "$r0");;;
+    return: (![#uint64T] "mid")).
 ```
 
 An important aspect of Goose (and any verification methodology for "real" code) is to ask, what do the proofs _mean_? Another way to think about this question is, what do we believe a verified specification says about the code, and what tools do we trust to make this happen?
 
 Goose _models_ Go code using GooseLang. You can see one evidence of this modeling above: whereas the Go code has a `return` statement to stop executing a function and return to the caller, the `Arith` in Rocq (a `val`, which is a GooseLang value) instead is an expression that evaluates to an integer. If you compare the two you can convince yourself for this example that `Arith` in GooseLang, under the expected semantics you learned, evaluates to the same result as `Arith` in Go (assuming `Midpoint` is also translated correctly). When you use Goose to verify a program, you are essentially trusting that every function in that program has been modeled correctly.
+
+### Exercise: evaluation order
+
+In this exercise, you'll investigate evaluation order for function arguments. That is, if we have a function call `f(g(), h())`, what order do `g` and `h` run in? First, find out what order Go evaluates function arguments in. Then, find out what order Goose evaluates them in.
 
 ## Goose details
 
@@ -187,13 +189,13 @@ Definition Arithⁱᵐᵖˡ : val :=
 
 Note the `exception_do` wrapper, which is used to implement the control flow for function returns: a `return: e` expression inside will return early, preventing execution of code afterward. On the other hand `do: e` will run as normal and proceed to the next line. This sequencing-with-return is implemented by `;;;`, which is _not_ the same as the usual sequencing `;;`.
 
-As a user, the implementation of these control flow constructs is largely invisible. In proofs, `wp_pures` (which is called by `wp_auto`) will "step" over control flow as needed. `wp_apply` will work inside the `exception_do` wrapper. If you want an idea of the semantics of these operations, see the comments in Perennial's [defn/exception.v](https://github.com/mit-pdos/perennial/blob/master/new/golang/defn/exception.v).
+As a user of goose, the implementation of these control flow constructs is largely invisible --- In proofs, `wp_pures` (which is called by `wp_auto`) will "step" over control flow as needed. `wp_apply` will work inside the `exception_do` wrapper. If you want an idea of the semantics of these operations, see the comments in Perennial's [defn/exception.v](https://github.com/mit-pdos/perennial/blob/master/new/golang/defn/exception.v).
 
-Next this code allocates `"a"` and `"b"` on the heap, as we saw in the previous example.
+The first thing the code does within the `exception_do` is to allocate `"a"` and `"b"` on the heap for the function arguments, as we saw in the previous example.
 
-From there we see a more straightforward correspondence between the Go and the translation. Notice that the `if` has no else branch in Go, but it does have `do: #()` in GooseLang since we always need both branches.
+Next we see a more straightforward correspondence between the Go code and its translation. Notice that the `if` has no else branch in Go, but it does have `do: #()` in GooseLang since we always need both branches.
 
-The call to `Midpoint` becomes `func_call #Midpoint $a0 $a1`. What this actually does is look up the code for Midpoint by its name (`Midpoint` is just the full Go path to the function followed by the string "Midpoint") and then call it. The level of indirection is needed to allow recursion, both for one function to call itself and for multiple top-level functions to call each other. As a user of Goose, you can largely ignore this complication: we will state all separation logic triples to be about `func_call` of a function, and `wp_start` handles resolving the function call to the function's code.
+The call to `Midpoint` becomes `func_call #Midpoint $a0 $a1`. What this actually does is look up the code for Midpoint by its name (`Midpoint` is just the full Go path to the function followed by the string "Midpoint") and then call it. The level of indirection is needed to allow recursion, both for one function to call itself and for multiple top-level functions to call each other. Goose provides proof automation to handle this complexity: we will state all separation logic triples to be about `func_call` of a function, and `wp_start` handles resolving the function call to the function's code.
 
 Another set of control flow features is related to loops. Here's an example of a loop translation:
 
@@ -235,7 +237,7 @@ Definition SumNⁱᵐᵖˡ : val :=
     return: (![#uint64T] "sum")).
 ```
 
-The complexity here is mostly hidden by the `for:` syntax, which picks up the `break: #()` and appropriately stops looping at that point. There is no loop condition, hence why `(λ: <>, #true)` appears as the first argument to `for:`. If you want to see the implementation of loops, you can read it in [defn/loop.v](https://github.com/mit-pdos/perennial/blob/master/new/golang/defn/loop.v). The best place to start is `do_loop`, which models the simplest loop, `for { ... }`, which has no initializer, condition, or post-expression:
+The complexity here is mostly hidden by the `for:` syntax, which picks up the `break: #()` and appropriately stops looping at that point, using the same "exception" control flow sequencing `;;;` as we use for function returns. There is no loop condition, hence why `(λ: <>, #true)` appears as the first argument to `for:`. If you want to see the implementation of loops, you can read it in [defn/loop.v](https://github.com/mit-pdos/perennial/blob/master/new/golang/defn/loop.v). The best place to start is `do_loop`, which models the simplest loop, `for { ... }`, which has no initializer, condition, or post-expression:
 
 ```rocq
 Definition do_loop_def: val :=
@@ -251,9 +253,21 @@ Definition do_loop_def: val :=
 
 The loop body might produce `break: #()` or `continue: #()`, which get returned in `"b"`. The loop definition handles a `break` by stopping the entire loop. A `continue` doesn't need special handling; its role is to halt execution of the body, which is already handled by `;;;` inside the body.
 
+The full model of `for` loops is implemented by `do_for_def`. The initializer for a for loop is simply run before the whole loop, since it does not interact with the looping at all.
+
 ## Proofs with Goose
 
 This section shows some examples of specifications and proofs.
+
+```rocq
+From sys_verif.program_proof Require Import prelude empty_ffi.
+From sys_verif.program_proof Require Import heap_init functional_init.
+
+Section goose.
+Context `{hG: !heapGS Σ}.
+Context `{!globalsGS Σ} {go_ctx: GoContext}.
+
+```
 
 Code being verified:
 
@@ -265,7 +279,7 @@ func Add(a uint64, b uint64) uint64 {
 
 You will see `is_pkg_init <pkg>` in all preconditions for functions and methods. This asserts that the package (`functional` in this case) for the relevant function has been initialized. We need this precondition because initialization is where the code for `functional.Add` (the `Addⁱᵐᵖˡ` expression) is stored in a global variable where it is accessed by `func_call`. `wp_start` knows how to handle `is_pkg_init` and automatically puts it in the right place, so you don't mention it in the intro pattern passed to `wp_start`.
 
-We finish the proof with `wp_finish`. This is just a shorthand for `iApply "HΦ"` followed by some tactics to solve any trivial postcondition. Recall where HΦ comes from: all of our specifications are stated in continuation-passing style in the form `∀ Φ, P -∗ (Q -∗ Φ) -∗ wp e Φ`; HΦ is that second premise.
+We finish the proof with `wp_finish`. This is just a shorthand for `iApply "HΦ"` followed by some tactics to solve any trivial postcondition. Recall where `HΦ` comes from: all of our specifications are stated in continuation-passing style in the form `∀ Φ, P -∗ (Q -∗ Φ) -∗ wp e Φ`; `HΦ` is that second premise `Q -∗ Φ`.
 
 ```rocq
 Lemma wp_Add (n m: w64) :
@@ -289,11 +303,8 @@ The Goose translation uses [go/ast](https://pkg.go.dev/go/ast) and [go/types](ht
 Goose is tested at several levels:
 
 - "Golden" outputs help check if translation changes (e.g., if adding a feature, that unrelated inputs aren't affected).
-- "Semantics" tests run the same code in Go and GooseLang, using an interpreter for GooseLang.
 - Tests of the user interface - package loading, for example.
 - Continuously check that the code we're verifying matches what Goose is outputting, to avoid using stale translations.
-
-The semantics tests - a form of _differential testing_ - is one of the most valuable parts of this process. For an example, see [shortcircuiting.go](https://github.com/goose-lang/goose/blob/585abc3cfef50dd466e112d7c535dbdfccd3c0ca/internal/examples/semantics/shortcircuiting.go). The test `testShortcircuitAndTF`, for example, is designed to return `true` in Go. The goose test infrastructure (a) checks that it actually returns true in Go, (b) translates it to GooseLang, and (c) executes it with an interpreter written in Rocq for GooseLang and confirms this produces `#true`. Furthermore, the interpreter is verified to ensure that it matches the semantics, so we don't have to trust its implementation for our differential testing.
 
 ## What does a proof mean?
 
