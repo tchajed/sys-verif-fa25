@@ -2,7 +2,7 @@
 # Auto-generated from literate source. DO NOT EDIT.
 category: demo
 tags: literate
-order: 4
+order: 5
 pageInfo: ["Date", "Category", "Tag"]
 shortTitle: "Demo: stack"
 ---

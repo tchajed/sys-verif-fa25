@@ -2,7 +2,6 @@
 # Auto-generated from literate source. DO NOT EDIT.
 tags:
   - literate
-  - draft
 ---
 
 ::: warning Draft
@@ -16,10 +15,14 @@ This is still very much a work-in-progress.
 GooseLang pervasively uses types when interacting with memory (eg, loads, stores, pointers, slices). Here we explain how those types work.
 
 ```rocq
+From sys_verif.program_proof Require Import prelude empty_ffi.
+
 (* enables defining structs with nice notation, something typically only done in
 auto-generated code *)
 Open Scope struct_scope.
 
+Section proof.
+Context `{hG: heapGS Σ}.
 
 ```
 
@@ -106,3 +109,7 @@ TODO:
 - explain how points-to fact for a struct needs to account for different fields
 - explain how struct points-to is implemented in terms of a primitive single-cell points-to (which we never need as users)
 - explain how store needs to maintain the type invariant in the struct points-to and thus requires a type proof
+
+```rocq
+End proof.
+```

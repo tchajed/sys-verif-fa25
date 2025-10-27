@@ -307,6 +307,71 @@ The combination of the invariant and that test guarantee `i = n + 1`.
     word.
 Qed.
 
+Lemma Z_div_le (a b: Z) :
+  0 ≤ a →
+  0 ≤ b →
+  a `div` b ≤ a.
+Proof.
+  intros H1 H2.
+  destruct (decide (b = 0)).
+  { subst. rewrite Z.div_0_r_ext //. }
+  destruct (decide (b = 1)).
+  { subst. rewrite Z.div_1_r //. }
+  replace a with (a `div` 1) at 2.
+  {
+    apply Zdiv_le_compat_l; lia.
+  }
+  rewrite Z.div_1_r //.
+Qed.
+
+Lemma wp_SumN2 (n: w64) :
+  {{{ is_pkg_init functional ∗ ⌜0 ≤ sint.Z n < 2^63⌝ }}}
+    @! functional.SumN2 #n
+  {{{ (m: w64), RET #m;
+      ⌜uint.Z m = sint.Z n * (sint.Z n - 1) / 2⌝ }}}.
+Proof.
+  wp_start as "%Hn_bound".
+  wp_auto.
+
+  iAssert (∃ (i sum: w64),
+              "i" ∷ i_ptr ↦ i ∗
+              "sum" ∷ sum_ptr ↦ sum ∗
+              "%Hi_range" ∷ ⌜0 ≤ sint.Z i ≤ sint.Z n⌝ ∗
+              "%Hsum" ∷ ⌜uint.Z sum = sint.Z i * (sint.Z i - 1) / 2⌝
+          )%I with "[$i $sum]" as "IH".
+  { iPureIntro.
+    split_and!; try word.
+    reflexivity.
+  }
+  wp_for "IH".
+  wp_if_destruct.
+  - wp_apply wp_SumAssumeNoOverflow as "%Hsum_i".
+    wp_for_post.
+    iFrame.
+    iPureIntro.
+    split; [ word | ].
+```
+
+This is much trickier integer arithmetic reasoning than you will encounter in this class. It is due to the automation not handling the multiplication and division in this example well.
+
+```rocq
+    rewrite !word.signed_add.
+    rewrite swrap_small; [ word | ].
+    rewrite word.unsigned_add_nowrap; [ word | ].
+    rewrite Hsum.
+    replace (sint.Z i) with (uint.Z i) by word.
+    change (sint.Z (W64 1)) with 1.
+    replace (uint.Z i + 1 - 1) with (uint.Z i) by lia.
+    replace ((uint.Z i + 1) * uint.Z i) with
+      (uint.Z i * (uint.Z i - 1) + uint.Z i * 2) by lia.
+    rewrite Z_div_plus; [ lia | ].
+    lia.
+  - wp_finish.
+    iPureIntro.
+    assert (sint.Z i = sint.Z n) by word.
+    word.
+Qed.
+
 ```
 
 :::
