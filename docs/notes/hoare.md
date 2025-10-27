@@ -334,7 +334,7 @@ $$
 $$
 
 $$
-\dfrac{P' \entails P \quad (\forall v.\, Q(v) \entails Q'(v)) \quad \hoare{P}{e}{Q(v)}}{%
+\dfrac{P' \entails P \quad (\forall v.\, Q(v) \entails Q'(v)) \quad \hoare{P}{e}{\fun{v} Q(v)}}{%
 \hoare{P'}{e}{\fun{v} Q'(v)}
 }\eqnlabel{consequence}
 $$
