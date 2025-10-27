@@ -14,13 +14,13 @@ Context `{hG: !heapGS Σ}.
 
 ```
 
-You'll be pervasively working with integers in GooseLang. A few hints will help make sense of all the types and functions for reasoning about them in program proofs, in Coq.
+You'll be pervasively working with integers in GooseLang. A few hints will help make sense of all the types and functions for reasoning about them in program proofs, in Rocq.
 
-First, Goose primarily supports the Go type `uint64`, unsigned 64-bit integers. There is also support for `uint32` and preliminary support for signed integers `int64`, but it's easiest if you stick to `uint64`. Note that most Go code would use `int` as the basic integer type, which is a signed integer whose size matches the architecture.
+On the Go side, Goose supports the various integer types: the most commonly used are `int`, which is a signed 64-bit integer (we assume a 64-bit architecture), `uint64` is an unsigned 64-bit integer, and `uint32` is an unsigned 32-bit integer.
 
-Next, the type `w64` represents a 64-bit integer value. This is used both in GooseLang and in proofs.
+In Rocq, both signed and unsigned integers are represented using the `w64` type from a library for finite precision integers. The difference between signed and unsigned is reflected in how we use that type: if `x: w64` in Rocq, then `uint.Z x : Z` converts it to an integer treating it as _unsigned_, while `sint.Z x : Z` converts it as a _signed_ integer (note that **u**int stands for unsigned int and **s**int stands for signed int).
 
-In GooseLang, to use a w64 we have to turn it into a value. This is almost always written `#x`. Technically, this produces the term `LitV (LitInt x)`, but `LitInt` is inserted implicitly (this is the Coq's coercions feature) and `#` is notation for `LitV`.
+In GooseLang, to use a w64 or w32 we have to turn it into a value. This is done using `#x`, the way we convert any Gallina value into GooseLang.
 
 ```rocq
 Set Printing Coercions. Unset Printing Notations.
@@ -46,15 +46,17 @@ Unset Printing Coercions. Set Printing Notations.
 
 Reasoning about integers is always done via their mathematical representation as a `Z`, a signed integer.
 
-- `uint.Z : w64 → Z` gives the abstract value of a concrete integer.
-- `W64 : Z → w64` converts an abstract value to a concrete integer. This ends up taking the value mod $2^{64}$ since w64 is bounded.
+- `uint.Z : w64 → Z` gives the abstract value of a concrete integer as an unsigned integer.
+- `sint.Z : w64 → Z` gives the abstract value of a concrete integer as an signed integer.
+- `W64 : Z → w64` converts an abstract value to a concrete integer. This ends up taking the value mod $2^{64}$ since w64 is bounded. Signed integers are represented using two's complement.
 - `uint.nat : w64 → nat` is a shorthand for `fun x => Z.of_nat (uint.Z x)`, for cases where you need to use a `nat`. This happens often because the list functions all require `nat` and not `Z`. (I hope to eventually fix this in a future version of GooseLang.)
+- `sint.nat : w64 → nat` is similarly `fun x => Z.of_nat (sint.Z x)` (but note this somewhat unintuitively takes the absolute value for negative numbers).
 
 ## word tactic
 
-The `word` tactic is an extension of `lia` that will help you prove goals involving words and `uint.Z`, including handling overflow reasoning.
+The `word` tactic will help you prove goals involving words, `uint.Z`, and `sint.Z`, including handling overflow reasoning. It is a wrapper around Rocq's `lia` tactic, a powerful automation engine for integer arithmetic.
 
-The word tactic, among other things, uses lemmas like `word.unsigned_add` and `word.unsigned_mul` to reason about the value of `uint.Z (word.add x y)` and `uint.Z (word.mul x y)`. In some cases you may want to `rewrite` with those lemmas directly, especially if you want to do something unusual with overflow, or if `word` isn't able to prove that overflow doesn't occur.
+The word tactic, among other things, uses lemmas like `word.unsigned_add` and `word.unsigned_mul` to reason about the value of `uint.Z (word.add x y)` and `uint.Z (word.mul x y)`. In some cases you will need to `rewrite` with those lemmas directly, especially if you want to do something unusual with overflow, or if `word` isn't able to prove that overflow doesn't occur.
 
 ## An example specification
 
