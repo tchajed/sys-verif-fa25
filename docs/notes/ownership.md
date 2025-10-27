@@ -646,36 +646,21 @@ Proof.
   pose proof Hj as Hj_bound.
   apply lookup_lt_Some in Hj_bound.
 
-  iDestruct (own_slice_len with "Hs") as %Hlen.
-  (* slice.elem_ref requires calling [wp_pure] and then proving that the indices are in-bounds, since Go panics even if you just compute these indices *)
-  wp_pure.
+
 ```
 
-:::: info Goal
-
-```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
-  s : slice.t
-  xs : list w64
-  i, j, x_i, x_j : w64
-  Φ : val → iPropI Σ
-  Hi : xs !! sint.nat i = Some x_i
-  Hj : xs !! sint.nat j = Some x_j
-  Hbound : 0 ≤ sint.Z i ∧ 0 ≤ sint.Z j
-  j_ptr, i_ptr, s_ptr : loc
-  Hi_bound : (sint.nat i < length xs)%nat
-  Hj_bound : (sint.nat j < length xs)%nat
-  Hlen : length xs = sint.nat (slice.len_f s) ∧ 0 ≤ sint.Z (slice.len_f s)
-  ============================
-  0 ≤ sint.Z j < sint.Z (slice.len_f s)
-```
-
-::::
+Most proofs involving slices require you to use this lemma to relate the slice length (the field of the slice value `s`) to the length of the list in the `own_slice` predicate (the assertion `s ↦* xs`)
 
 ```rocq
+  iDestruct (own_slice_len with "Hs") as %Hlen.
+
+
+```
+
+`slice.elem_ref` requires calling `wp_pure` and then proving that the indices are in-bounds, since Go panics even if you just compute these indices
+
+```rocq
+  wp_pure.
   { word. }
   wp_apply (wp_load_slice_elem with "[$Hs]") as "Hs".
   { word. }
