@@ -5,9 +5,9 @@ tags: literate
 
 # Notation
 
-Coq has a very general mechanism for extending its syntax with what are called "notations". Even if you don't write your own notations, you'll work with them, so it's helpful to understand some aspects of their implementation.
+Rocq has a very general mechanism for extending its syntax with what are called "notations". Even if you don't write your own notations, you'll work with them, so it's helpful to understand some aspects of their implementation.
 
-For more details beyond this document you can read the Coq reference manual documentation on [syntax extensions](https://coq.inria.fr/doc/master/refman/user-extensions/syntax-extensions.html).
+For more details beyond this document you can read the Rocq reference manual documentation on [syntax extensions](https://coq.inria.fr/doc/master/refman/user-extensions/syntax-extensions.html).
 
 ## A first example
 
@@ -30,7 +30,7 @@ Notation "<< x ; y ; .. ; z >>" := (Cons x (Cons y .. (Cons z Nil) .. ))
 
 ```
 
-The notations have extended Coq's syntax:
+The notations have extended Rocq's syntax:
 
 ```rocq
 Definition ex1: List bool := <>.
@@ -38,7 +38,7 @@ Definition ex2: List Z := << 1; 34; 4; 7 >>.
 
 ```
 
-Not only that, but Coq will use these notations in _reverse_ for printing as well:
+Not only that, but Rocq will use these notations in _reverse_ for printing as well:
 
 ```rocq
 Print ex2.
@@ -98,21 +98,21 @@ Definition ex4: List nat := << 3; 4; 5 >>%nat%A.
 
 There are a few more details about notations you should know, although I won't detail how to use them.
 
-Some of the syntax you use routinely in Coq is actually not built-in but provided as notations; for example, the pair notation `(x, y)` (actually even the `pair` data type isn't built-in). The most surprising one might be that `A -> B` is actually notation for `forall (_: A), B`, but this starts getting into dependent types which I won't explain here.
+Some of the syntax you use routinely in Rocq is actually not built-in but provided as notations; for example, the pair notation `(x, y)` (actually even the `pair` data type isn't built-in). The most surprising one might be that `A -> B` is actually notation for `forall (_: A), B`, but this starts getting into dependent types which I won't explain here.
 
-Notations extend the Coq parser (which is based on the camlp5 library) at runtime. This makes it complicated to describe what's required for notations to be parseable (without ambiguity for example), and to give good error messages. One aspect that might help is to note that when notations are created, they create new tokens in the parser (really, the lexer) for the sequences of symbols (like `<<` and `>>` above) and any newly-created keywords.
+Notations extend the Rocq parser (which is based on the camlp5 library) at runtime. This makes it complicated to describe what's required for notations to be parseable (without ambiguity for example), and to give good error messages. One aspect that might help is to note that when notations are created, they create new tokens in the parser (really, the lexer) for the sequences of symbols (like `<<` and `>>` above) and any newly-created keywords.
 
 Notations can be recursive, like the `<< x ; y ; .. ; z >>` list notation above.
 
-The way notations are printed can be customized; specifically, we can control whitespace, how line breaks are inserted, and indentation if a notation overflows a line while printing. This is what enables large multi-line notations that are still printed nicely. You can actually see an example of such control above in the `format` specifier for the recursive list notation. That one is copied from Coq's built-in list notation; one of the things it does is to break up a long list by putting a newline between elements, after each semicolon, and without indentation.
+The way notations are printed can be customized; specifically, we can control whitespace, how line breaks are inserted, and indentation if a notation overflows a line while printing. This is what enables large multi-line notations that are still printed nicely. You can actually see an example of such control above in the `format` specifier for the recursive list notation. That one is copied from Rocq's built-in list notation; one of the things it does is to break up a long list by putting a newline between elements, after each semicolon, and without indentation.
 
-Notations are by default used for printing and parsing, as we saw above. They can be defined as _parsing only_ or _printing only_ instead. We might have one general notation used for printing things, but several shorthands that are useful to save typing. Printing-only notations are a bit more obscure. In the Iris Proof Mode they're used to create the goal displays you see. It turns out the goals are just an ordinary Coq proposition that the IPM tactics manipulate, but with a (fairly fancy) printing-only notation.
+Notations are by default used for printing and parsing, as we saw above. They can be defined as _parsing only_ or _printing only_ instead. We might have one general notation used for printing things, but several shorthands that are useful to save typing. Printing-only notations are a bit more obscure. In the Iris Proof Mode they're used to create the goal displays you see. It turns out the goals are just an ordinary Rocq proposition that the IPM tactics manipulate, but with a (fairly fancy) printing-only notation.
 
-The numeric notations are subject to scoping, but the way they're defined uses some features specific to parsing numbers; obviously there isn't a `Notation` command for every possible number literal. See the documentation on [number notations](https://coq.inria.fr/doc/master/refman/user-extensions/syntax-extensions.html#number-notations) for the interface Coq provides.
+The numeric notations are subject to scoping, but the way they're defined uses some features specific to parsing numbers; obviously there isn't a `Notation` command for every possible number literal. See the documentation on [number notations](https://coq.inria.fr/doc/master/refman/user-extensions/syntax-extensions.html#number-notations) for the interface Rocq provides.
 
 ## Controlling notation scope
 
-Coq has some features that allow controlling the notation scope without requiring an annotation like `%nat`. Unfortunately, these can be a bit confusing if you don't know about them, since they silently change how things are parsed.
+Rocq has some features that allow controlling the notation scope without requiring an annotation like `%nat`. Unfortunately, these can be a bit confusing if you don't know about them, since they silently change how things are parsed.
 
 The first is that notation scopes can be attached to types. This has already been done for `nat`, but here's the command that does it:
 

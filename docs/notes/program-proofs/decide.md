@@ -201,7 +201,7 @@ Fail Definition failed_color_dec (c: color) :=
 
 You should really read the error message and try to make sense of it.
 
-The reason this fails is that `Decision P` says that there's a _function_ that determines if P is true vs if ~P is true. Coq's logic is such that we actually can't do this for arbitrary propositions `P`; it requires that we can _compute_ which of `P` or `~P` is true.
+The reason this fails is that `Decision P` says that there's a _function_ that determines if P is true vs if ~P is true. Rocq's logic is such that we actually can't do this for arbitrary propositions `P`; it requires that we can _compute_ which of `P` or `~P` is true.
 
 `decide` is just looking up this function using typeclasses, but the actual function doesn't get implemented for us automatically. We can provide an instance of equality between arbitrary colors; here's a manual version of that which we'll abandon in favor of using the powerful `solve_decision` automation tactic.
 
@@ -252,7 +252,7 @@ Proof. solve_decision. Qed.
 
 ```
 
-Now Coq will use the instance we just defined when we write `decide`.
+Now Rocq will use the instance we just defined when we write `decide`.
 
 ```rocq
 Definition use_color_dec (c: color) := if decide (c = red) then true else false.
@@ -273,7 +273,7 @@ Module decide_playground.
 
 ```
 
-What is that type for `decide`? `{P} + {~P}` is notation for `sumbool` from the Coq standard library, which has the following definition:
+What is that type for `decide`? `{P} + {~P}` is notation for `sumbool` from the Rocq standard library, which has the following definition:
 
 ```rocq
   Inductive sumbool (A B : Prop): Type :=

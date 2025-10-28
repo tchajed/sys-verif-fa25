@@ -405,7 +405,7 @@ And the spec:
 - $op_1' : S \to S$ and $op_2' : S \to S$
 - $f' : S \to A$
 
-Prove that $f' (op_2' (op_1'(i'))) = f (op_2 (op_1 (i)))$ using the theorems above. (Note we typically write $f(x)$ for blackboard/on-paper reasoning on the blackboard/paper while the same function application is written `f x` in Coq).
+Prove that $f' (op_2' (op_1'(i'))) = f (op_2 (op_1 (i)))$ using the theorems above. (Note we typically write $f(x)$ for blackboard/on-paper reasoning on the blackboard/paper while the same function application is written `f x` in Rocq).
 
 :::: important What is the "specification"?
 
@@ -626,7 +626,7 @@ Module stat_db.
 
 We use `Record` here to create an inductive type, which defines a constructor `mkDb` as well as _projection functions_ `db_sum` and `db_num`.
 
-Records in Coq have some special associated syntax for constructors and projections, but we're not using it (and disable printing with that syntax as well).
+Records in Rocq have some special associated syntax for constructors and projections, but we're not using it (and disable printing with that syntax as well).
 
 ```rocq
   Record database :=

@@ -18,9 +18,9 @@ pageInfo: ["Date", "Category", "Tag", "Word"]
 
 ## Motivation
 
-We know that separation logic propositions are generally not duplicable ($P \nvdash P \sep P$). This is because we interpret propositions as asserting exclusive ownership, for example over heap locations. However, ownership does not _have_ to be exclusive. We've already seen one example with pure propositions $\lift{\phi}$, which can be freely duplicated and in the IPM even moved out of the spatial context into the Coq context. Another example where ownership isn't exlusive is if a pointer is _read-only_, it is safe to have many copies of its points-to fact, as long as those assertions are used only for reading and not writing.
+We know that separation logic propositions are generally not duplicable ($P \nvdash P \sep P$). This is because we interpret propositions as asserting exclusive ownership, for example over heap locations. However, ownership does not _have_ to be exclusive. We've already seen one example with pure propositions $\lift{\phi}$, which can be freely duplicated and in the IPM even moved out of the spatial context into the Rocq context. Another example where ownership isn't exlusive is if a pointer is _read-only_, it is safe to have many copies of its points-to fact, as long as those assertions are used only for reading and not writing.
 
-Before getting into modalities, let's revisit the mechanisms in Coq for read-only pointers.
+Before getting into modalities, let's revisit the mechanisms in Rocq for read-only pointers.
 
 ```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
@@ -137,9 +137,9 @@ P, Q: iProp Σ
 R
 ```
 
-As usual, there is a Coq context above everything. The separation logic part has separation logic hypotheses "HP" and "HQ", and separation logic conclusion R. The fact that "HP" is in the persistent context implies that P is persistent - this means $P ⊢ P ∗ P$. (The full definition is more than that, but we won't go deep enough into how Iris works to talk about it.)
+As usual, there is a Rocq context above everything. The separation logic part has separation logic hypotheses "HP" and "HQ", and separation logic conclusion R. The fact that "HP" is in the persistent context implies that P is persistent - this means $P ⊢ P ∗ P$. (The full definition is more than that, but we won't go deep enough into how Iris works to talk about it.)
 
-So what propositions are persistent? First, the pure propositions are persistent - but they can be put into the Coq context, so they aren't so interesting. The first "real" example we'll see is the persistent points-to, `l ↦□ v`.
+So what propositions are persistent? First, the pure propositions are persistent - but they can be put into the Rocq context, so they aren't so interesting. The first "real" example we'll see is the persistent points-to, `l ↦□ v`.
 
 ```rocq
 Lemma alloc_ro_spec (x: w64) :
@@ -219,7 +219,7 @@ Motivated by this kind of shared ownership, we introduce a modality called the "
 
 The main fact about persistently is that it is automatically duplicable: $□P ⊢ □P ∗ P$. It is also the case that $□P ∗ P ⊢ □P$. So $□P$ behaves a bit like $\lift{\phi}$ so far - if we prove it, it will remain true and not get "used up" in a proof.
 
-The general idea of a modality in logic is that it is a _shade of truth_ of another proposition. This can be a confusing concept, so we will approach it in several different ways. On first read, you need not understand the rest of this section; it might help to start by seeing it used in proofs in Coq before going back to the theory. We'll also be able to be more precise when we talk about concurrency.
+The general idea of a modality in logic is that it is a _shade of truth_ of another proposition. This can be a confusing concept, so we will approach it in several different ways. On first read, you need not understand the rest of this section; it might help to start by seeing it used in proofs in Rocq before going back to the theory. We'll also be able to be more precise when we talk about concurrency.
 
 To understand the explanations of persistently it helps to anticipate a little of what we will talk about when introducing ghost state to reason about concurrent programs. Thus far, we said separation logic propositions have been predicates over the heap. We will extend this to be predicates over _resources_, where individual heap locations will be just one example. In fact we've already seen that the fractional permission $\ell ↦_{1/2} v$ can't be explained as a predicate over the heap (what do we do with the $1/2$ part? what does separation mean?). We will have to leave the notion of a "resource" abstract for now, but we will have regular exclusive resources, and persistent resources. $□P$ means $P$ holds over only the persistent resources. For now, you can imagine that we divide the heap into a two parts $(h_r, h_w)$ where $h_r$ is read-only. The read-only part turns out to be duplicable, in that we can consider $h_r$ and $h_r$ to be separate for proving $P ∗ Q$; there's no conflict between them since the values in that part of the heap don't change. On the other hand if $P$ and $Q$ mention exclusive resources (locations in $h_w$), then for $P ∗ Q$ to be true in a heap those read-write locations would have to be disjoint.
 
@@ -437,7 +437,7 @@ Proof.
 
 ```
 
-Observe how in the next line we use a Hoare triple that comes _from the persistent_ context. The correctness of `f` isn't coming from a Coq lemma, but from within separation logic.
+Observe how in the next line we use a Hoare triple that comes _from the persistent_ context. The correctness of `f` isn't coming from a Rocq lemma, but from within separation logic.
 
 (Unfolding `fun_implements` isn't required, it's only there to show you the definition in the goal.)
 

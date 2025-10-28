@@ -17,6 +17,6 @@ From sys_verif.program_proof Require Import prelude empty_ffi.
 
 `↦` is `typed_pointsto`. Signature is `l ↦ v` where `IntoVal V`, `l: loc` and `v: V`. Important that the type of `v` be constrained for type inference. Also have `l ↦{dq} v` for fractional permissions.
 
-Reading Coq goals: need to understand somewhat the meaning of `exception_do` and the monadic notations, but it's not actually super important.
+Reading Rocq goals: need to understand somewhat the meaning of `exception_do` and the monadic notations, but it's not actually super important.
 
 Use `rewrite -!default_val_eq_zero_val` to process `zero_val` (although this should not be needed if you're using `wp_start`)

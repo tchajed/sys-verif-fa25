@@ -108,7 +108,7 @@ If at one step of the proof we had $\own_γ((1, v)) ⊢ \own_γ((1/2, v)) ∗ \o
 
 The rule for changing ghost variables is that the allowed changes are _frame-preserving updates_. A frame-preserving update $a \mupd b$ is one where $∀ r, \valid (a \cdot r) → \valid (b \cdot r)$. First, let's informally understand why this would make sense. Remember that in our proofs we're going to maintain that the ghost variable's value is always _valid_ according to $✓(a)$ from the RA. Also recall that while one thread might have $\own_γ(a)$, the ghost variable can have other parts in other threads (as we just saw in the problematic example). What a frame-preserving update says is, if a thread has $a$ and other threads own $r$, for any such $r$ where the composition is valid (and thus that is actually possible), then changing $a$ to $b$ retains validity of the whole ghost variable. This is what guarantees that changes don't invalidate any ownership in other threads, or the global ghost variable.
 
-To use a frame-preserving update, we need to introduce the _update modality_ $\pvs P$ (pronounced "update P"). You've already seen this come up in Coq proofs as `|==>` and ignored it with `iModIntro`.
+To use a frame-preserving update, we need to introduce the _update modality_ $\pvs P$ (pronounced "update P"). You've already seen this come up in Rocq proofs as `|==>` and ignored it with `iModIntro`.
 
 Whenever $a \mupd b$ (there is a frame preserving update from $a$ to $b$), what we formally get in the logic is an entailment $\own_γ(a) ⊢ \pvs \own_γ(b)$. The intuitive reading of the whole entailment is easier to start with than the update modality in isolation: it's possible to change ghost state so that if $\own_γ(a)$ was true before, afterward $\own_γ(b)$ is true. It's not the case that $\own_γ(a) ⊢ \own_γ(b)$; you should think of the update as actually changing (ghost) state, and $b$ isn't true previously. However, for practical purposes we'll see that while verifying a program $\pvs P$ can be turned into $P$.
 
@@ -126,7 +126,7 @@ On the other hand, $(1/2, v) \mupd (1/2, v')$ is _not_ a frame-preserving update
 
 ## Examples
 
-Let's look at some examples of ghost variables and their updates in Coq.
+Let's look at some examples of ghost variables and their updates in Rocq.
 
 ```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.

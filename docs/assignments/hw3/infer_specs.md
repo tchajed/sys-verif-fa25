@@ -8,7 +8,7 @@ shortTitle: "Assignment 3: infer specs"
 
 # Assignment 3: Inferring specifications
 
-For each `Example` function in [go/heap/exercises.go](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/go/heap/exercises.go), come up with a general specification of the snippet's behavior, state it in Coq, and prove it correct. A specification for `ExampleA` is provided below as an example.
+For each `Example` function in [go/heap/exercises.go](https://github.com/tchajed/sys-verif-fa25-proofs/blob/main/go/heap/exercises.go), come up with a general specification of the snippet's behavior, state it in Rocq, and prove it correct. A specification for `ExampleA` is provided below as an example.
 
 ```rocq
 From sys_verif Require Import prelude empty_ffi.

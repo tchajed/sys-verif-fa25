@@ -106,7 +106,7 @@ Qed.
 
 ```
 
-I said a fraction was `q ∈ (0, 1]`. This is realized with a custom type in Coq, `Qp` (the name is supposed to evoke "positive rational").
+I said a fraction was `q ∈ (0, 1]`. This is realized with a custom type in Rocq, `Qp` (the name is supposed to evoke "positive rational").
 
 ```rocq
 Lemma read_frac_spec l (x: w64) (q: Qp) :

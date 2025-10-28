@@ -9,7 +9,7 @@ order: 2
 
 ::: info
 
-This is a rendered version of the Coq assignment. You should do the assignment in the file `src/sys_verif/assignments/hw1/rocq_exercises.v`.
+This is a rendered version of the Rocq assignment. You should do the assignment in the file `src/sys_verif/assignments/hw1/rocq_exercises.v`.
 
 :::
 

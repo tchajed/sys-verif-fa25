@@ -543,7 +543,7 @@ The standard library implements a more general API than above, since the caller 
 
 ### Exercise: prove the standard library sort.Find
 
-What is Go's `sort.Find` assuming and promising? Translate the prose specification to a Coq predicate. Then, translate the invariant in the implementation to a more formal Coq predicate, similar to what you see in the proof of `BinarySearch`.
+What is Go's `sort.Find` assuming and promising? Translate the prose specification to a Rocq predicate. Then, translate the invariant in the implementation to a more formal Rocq predicate, similar to what you see in the proof of `BinarySearch`.
 
 Proving the real `sort.Find` with Goose is also a possibility, with minor tweaks to the code due to Goose translation limitations. A tricky part is that `Find` is a higher-order function: it takes a function as an argument. We already saw one such function, `For`, but this was only in GooseLang; now we have to deal with one coming from Go.
 

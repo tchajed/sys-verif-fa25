@@ -47,7 +47,7 @@ Definition Swap: val :=
 
 ```
 
-What is `uint64T`? It has type `go_type`, which is a Coq definition modeling a small subset of the Go type system:
+What is `uint64T`? It has type `go_type`, which is a Rocq definition modeling a small subset of the Go type system:
 
 ```rocq
 Print go_type.

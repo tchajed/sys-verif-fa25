@@ -25,11 +25,11 @@ Named propositions are typically used in three places:
 - In loop invariants, again to name the conjuncts.
 - After `iApply struct_fields_split`, the resulting hypothesis internally uses named propositions to automatically name the conjuncts according to the field names.
 
-The names are actually Iris intro patterns. We tend to use this power in only two ways: plain old `"HP"` is an intro pattern that just names the conjunct, and `"%H"` is an intro pattern that produces the Coq hypothesis `H` rather than a separation logic hypothesis.
+The names are actually Iris intro patterns. We tend to use this power in only two ways: plain old `"HP"` is an intro pattern that just names the conjunct, and `"%H"` is an intro pattern that produces the Rocq hypothesis `H` rather than a separation logic hypothesis.
 
 See the documentation in the source code at [named_props.v](https://github.com/tchajed/iris-named-props/blob/main/src/named_props.v) for more details on the API.
 
-You may see a use of `iNamed 1`, which is just `iIntros "Hfresh"; iNamed "Hfresh"`; if the goal is `foo -∗ ...` it applied the named struct to `foo` after introducing it. (This syntax may seem mysterious but it mirrors a Coq feature where `destruct 1` will destruct the first premise if the goal is `P → ...`.)
+You may see a use of `iNamed 1`, which is just `iIntros "Hfresh"; iNamed "Hfresh"`; if the goal is `foo -∗ ...` it applied the named struct to `foo` after introducing it. (This syntax may seem mysterious but it mirrors a Rocq feature where `destruct 1` will destruct the first premise if the goal is `P → ...`.)
 
 ```rocq
 Section goose.

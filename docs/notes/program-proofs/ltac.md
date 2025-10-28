@@ -551,7 +551,7 @@ Proof.
 
 `rewrite -> lem by t` causes it to succeed only if all side conditions can be proven with the tactic `t`. This is especially useful because if a side condition is false, the goal might become unprovable after applying the rewrite, and we want to avoid getting stuck in those situations (without realizing it).
 
-Unfortunately Coq actually has two `rewrite` tactics: one from the standard library and one from a library called SSReflect; the latter is what we're using because it has some other useful features, but `rewrite ... by t` is only in the standard one. We can use the standard rewrite with `rewrite ->`.
+Unfortunately Rocq actually has two `rewrite` tactics: one from the standard library and one from a library called SSReflect; the latter is what we're using because it has some other useful features, but `rewrite ... by t` is only in the standard one. We can use the standard rewrite with `rewrite ->`.
 
 ```rocq
   rewrite -> gmap_lookup_delete_ne by done.
@@ -633,7 +633,7 @@ Proof. word. Qed.
 
 `intuition` destructs ∧ in the hypotheses, splits ∧ in the goals, destructs ∨ in the hypotheses, looks for `H1: P → Q` and derives `Q` if it can prove `P` with `auto`, and finally calls `auto` to try to prove the goal. This is essentially all of the forward propositional reasoning above, plus `auto`. This is all relatively simple reasoning individually but collectively can be very powerful, especially because it also incorporates the power of `auto`.
 
-**Note**: the tactic name `intuition`, confusingly, does not refer to an obvious or instinctive proof, but to _intuitionistic logic_. This is a version of logic in which doesn't use _classical logic_'s "excluded middle", which says that `∀ P, P ∨ ¬P` holds. For the most part you can ignore this distinction (if you ever need it, Coq does also support adding excluded middle as an axiom and working in classical logic.)
+**Note**: the tactic name `intuition`, confusingly, does not refer to an obvious or instinctive proof, but to _intuitionistic logic_. This is a version of logic in which doesn't use _classical logic_'s "excluded middle", which says that `∀ P, P ∨ ¬P` holds. For the most part you can ignore this distinction (if you ever need it, Rocq does also support adding excluded middle as an axiom and working in classical logic.)
 
 ```rocq
 Lemma propositional_demo_3 (P Q R : Prop) :
