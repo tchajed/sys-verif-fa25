@@ -12,9 +12,9 @@ shortTitle: Assignment 3 (start here)
 
 In this assignment you'll verify imperative programs written in Go. All your proofs should be carried out in the exercises repo (sys-verif-fa25-proofs). The various parts of the assignment are divided among files in `src/sys_verif/assignments/hw3`; each part is independent.
 
-Submit your work by running `./etc/prepare-submit` and uploading `hw.tar.gz` to the Canvas assignment.
+Submit your work by running `./etc/prepare-submit` and uploading `hw.tar.gz` to the [Canvas assignment](https://canvas.wisc.edu/courses/477243/assignments/2720472).
 
-Part 1 is a tutorial and part 2 is a warmup. Part 5 has an open-ended component (you'll write almost the entire proof yourself). Please take this into account when planning how to work on the assignment.
+Part 1 is a tutorial and part 2 is a warmup. Part 5 has an open-ended component (you'll write almost the entire proof yourself). Please take this into account when planning how to work on the assignment. I would suggest **finishing parts 1-4 by Nov 10th** and the whole assignment by the due date of Nov 17th.
 
 The point values add up to 90, but the assignment will be weighted in your overall grade as specified in the syllabus.
 
