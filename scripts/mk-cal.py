@@ -66,7 +66,7 @@ class NoClass:
             expected = self.date.strftime("%a %b %d")
             actual = date.strftime("%a %b %d")
             raise ValueError(
-                f"NoClass should be on {expected} but was placed at {actual}"
+                f"NoClass {self.reason} should be on {expected} but was placed at {actual}"
             )
         return TableRow(
             None, date, f"**No class** ({self.reason})", reading="", comment=""
@@ -183,7 +183,10 @@ entries: list[Lecture | AssignmentDue | NoClass] = [
         notes_link("ownership", text="same notes"),
         comment="bring a laptop",
     ),
-    Lecture("Loop invariants", notes_link("loop_invariants")),
+    Lecture("Loop invariants (part 1)", notes_link("loop_invariants")),
+    Lecture(
+        "Loop invariants (part 2)", notes_link("loop_invariants", text="same notes")
+    ),
     Lecture("Persistence", notes_link("persistently")),
     Lecture("Concurrency intro", notes_link("concurrency")),
     Lecture("Lock invariants", notes_link("invariants")),
@@ -192,10 +195,9 @@ entries: list[Lecture | AssignmentDue | NoClass] = [
     Lecture("Atomic specs", notes_link("atomic_specs")),
     Lecture("Barrier proof (spec)", notes_link("barrier")),
     Lecture("Barrier proof", ""),
-    Lecture("Property-based testing", notes_link("pbt")),
     NoClass("Thanksgiving", datetime.date(2025, 11, 27)),
+    Lecture("Property-based testing", notes_link("pbt")),
     Lecture("Liveness", notes_link("liveness")),
-    Lecture("_slack_", ""),
     Lecture("Course wrap-up", notes_link("summary")),
     AssignmentDue("Assignment 4", "./assignments/hw4/", datetime.date(2025, 12, 11)),
 ]

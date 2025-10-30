@@ -19,18 +19,18 @@
 |    | Mon Oct 20 |  |  | _[Assignment 2](./assignments/hw2/) due (11pm)_ |
 | 12 | Tue Oct 21 | Ownership (part 1) | [notes](./notes/ownership.md) | bring a laptop |
 | 13 | Thu Oct 23 | Ownership (part 2) | [same notes](./notes/ownership.md) | bring a laptop |
-| 14 | Tue Oct 28 | Loop invariants | [notes](./notes/loop_invariants.md) |  |
-| 15 | Thu Oct 30 | Persistence | [notes](./notes/persistently.md) |  |
-| 16 | Tue Nov 4 | Concurrency intro | [notes](./notes/concurrency.md) |  |
-| 17 | Thu Nov 6 | Lock invariants | [notes](./notes/invariants.md) |  |
+| 14 | Tue Oct 28 | Loop invariants (part 1) | [notes](./notes/loop_invariants.md) |  |
+| 15 | Thu Oct 30 | Loop invariants (part 2) | [same notes](./notes/loop_invariants.md) |  |
+| 16 | Tue Nov 4 | Persistence | [notes](./notes/persistently.md) |  |
+| 17 | Thu Nov 6 | Concurrency intro | [notes](./notes/concurrency.md) |  |
+| 18 | Tue Nov 11 | Lock invariants | [notes](./notes/invariants.md) |  |
 |    | Mon Nov 10 |  |  | _[Assignment 3](./assignments/hw3/) due (11pm)_ |
-| 18 | Tue Nov 11 | Ghost state | [notes](./notes/ghost_state.md) |  |
-| 19 | Thu Nov 13 | Atomic specs | [notes](./notes/atomic_specs.md) |  |
-| 20 | Tue Nov 18 | Barrier proof (spec) | [notes](./notes/barrier.md) |  |
-| 21 | Thu Nov 20 | Barrier proof |  |  |
-| 22 | Tue Nov 25 | Property-based testing | [notes](./notes/pbt.md) |  |
+| 19 | Thu Nov 13 | Ghost state | [notes](./notes/ghost_state.md) |  |
+| 20 | Tue Nov 18 | Atomic specs | [notes](./notes/atomic_specs.md) |  |
+| 21 | Thu Nov 20 | Barrier proof (spec) | [notes](./notes/barrier.md) |  |
+| 22 | Tue Nov 25 | Barrier proof |  |  |
 |    | Thu Nov 27 | **No class** (Thanksgiving) |  |  |
-| 23 | Tue Dec 2 | Liveness | [notes](./notes/liveness.md) |  |
-| 24 | Thu Dec 4 | _slack_ |  |  |
+| 23 | Tue Dec 2 | Property-based testing | [notes](./notes/pbt.md) |  |
+| 24 | Thu Dec 4 | Liveness | [notes](./notes/liveness.md) |  |
 | 25 | Tue Dec 9 | Course wrap-up | [notes](./notes/summary.md) |  |
 |    | Thu Dec 11 |  |  | _[Assignment 4](./assignments/hw4/) due (11pm)_ |
