@@ -107,19 +107,22 @@ def to_calendar(
     print("<!-- markdownlint-disable MD041 -->", file=buffer)
     print("| | Date | Lecture | Reading | |", file=buffer)
     print("| --- | :-- | --- | --- | --- |", file=buffer)
+    prev_date = None
     for e in entries:
         row: TableRow | None = None
         if isinstance(e, Lecture):
             row = e.row(lec_num, date)
-            date = next_date(date, weekdays)
+            date, prev_date = next_date(date, weekdays), date
             lec_num += 1
         if isinstance(e, NoClass):
             row = e.row(date)
-            date = next_date(date, weekdays)
+            date, prev_date = next_date(date, weekdays), date
         if isinstance(e, AssignmentDue):
-            if not (e.date <= date):
+            if not prev_date:
+                prev_date = date
+            if not (prev_date <= e.date <= date):
                 raise ValueError(
-                    f"{e.title} due date {e.date} should be before next lecture on {date}"
+                    f"{e.title} due date {e.date} is not between {prev_date} and {date}"
                 )
             row = e.row()
         if row:
@@ -191,8 +194,8 @@ entries: list[Lecture | AssignmentDue | NoClass] = [
     Lecture("Concurrency intro", notes_link("concurrency")),
     Lecture("Lock invariants", notes_link("invariants")),
     Lecture("Ghost state", notes_link("ghost_state")),
-    Lecture("Atomic specs", notes_link("atomic_specs")),
     AssignmentDue("Assignment 3", "./assignments/hw3/", datetime.date(2025, 11, 17)),
+    Lecture("Atomic specs", notes_link("atomic_specs")),
     Lecture("Barrier proof (spec)", notes_link("barrier")),
     Lecture("Barrier proof", ""),
     NoClass("Thanksgiving", datetime.date(2025, 11, 27)),

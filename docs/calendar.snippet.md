@@ -24,8 +24,8 @@
 | 16 | Tue Nov 4 | Persistence | [notes](./notes/persistently.md) |  |
 | 17 | Thu Nov 6 | Concurrency intro | [notes](./notes/concurrency.md) |  |
 | 18 | Tue Nov 11 | Lock invariants | [notes](./notes/invariants.md) |  |
-|    | Mon Nov 10 |  |  | _[Assignment 3](./assignments/hw3/) due (11pm)_ |
 | 19 | Thu Nov 13 | Ghost state | [notes](./notes/ghost_state.md) |  |
+|    | Mon Nov 17 |  |  | _[Assignment 3](./assignments/hw3/) due (11pm)_ |
 | 20 | Tue Nov 18 | Atomic specs | [notes](./notes/atomic_specs.md) |  |
 | 21 | Thu Nov 20 | Barrier proof (spec) | [notes](./notes/barrier.md) |  |
 | 22 | Tue Nov 25 | Barrier proof |  |  |
