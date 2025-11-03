@@ -321,7 +321,7 @@ Proof.
   wp_start as "_".
   wp_auto.
   wp_alloc t_l as "Hl".
-  iDestruct (pointsto_not_null with "Hl") as %Hnot_null.
+  iDestruct (typed_pointsto_not_null with "Hl") as %Hnot_null.
   { reflexivity. }
   iApply struct_fields_split in "Hl". iNamed "Hl".
   cbn [heap.SearchTree.key' heap.SearchTree.left' heap.SearchTree.right'].

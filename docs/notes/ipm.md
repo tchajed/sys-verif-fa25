@@ -779,7 +779,6 @@ Proof.
   Φ : val → iPropI Σ
   ============================
   _ : is_pkg_init heap
-  "Hpre" : emp
   --------------------------------------□
   "HΦ" : True -∗ Φ (# ())
   --------------------------------------∗
@@ -823,7 +822,6 @@ Formally, the proof proceeds by applying the bind rule (to split the program int
   Φ : val → iPropI Σ
   ============================
   _ : is_pkg_init heap
-  "Hpre" : emp
   --------------------------------------□
   "HΦ" : True -∗ Φ (# ())
   --------------------------------------∗
@@ -911,7 +909,6 @@ At this point there is a `let:` binding which we need to apply the pure-step rul
   x : loc
   ============================
   _ : is_pkg_init heap
-  "Hpre" : emp
   --------------------------------------□
   "HΦ" : True -∗ Φ (# ())
   "Hx" : x ↦ default_val w64
@@ -957,7 +954,6 @@ The IPM can automate all of the above for allocation, load, and store:
   x, y : loc
   ============================
   _ : is_pkg_init heap
-  "Hpre" : emp
   --------------------------------------□
   "HΦ" : True -∗ Φ (# ())
   "Hx" : x ↦ W64 0
@@ -992,7 +988,6 @@ You might think we should do `iApply wp_IgnoreOne`. Let's see what happens if we
   x, y : loc
   ============================
   _ : is_pkg_init heap
-  "Hpre" : emp
   --------------------------------------□
   is_pkg_init heap ∗ x ↦ W64 0
 ```
@@ -1006,7 +1001,6 @@ You might think we should do `iApply wp_IgnoreOne`. Let's see what happens if we
   x, y : loc
   ============================
   _ : is_pkg_init heap
-  "Hpre" : emp
   --------------------------------------□
   "HΦ" : True -∗ Φ (# ())
   "Hx" : x ↦ W64 0
@@ -1051,7 +1045,6 @@ The IPM provides several mechanisms for deciding on these splits. A _specializat
   x, y : loc
   ============================
   _ : is_pkg_init heap
-  "Hpre" : emp
   --------------------------------------□
   "Hx" : x ↦ W64 0
   --------------------------------------∗

@@ -1103,7 +1103,7 @@ We need to use `iApply fupd_wp` to make `iInv` open at a single point rather tha
   "Hlock" : is_Mutex mu_l (lock_inv γ (sint.Z idx) subMap_l)
   --------------------------------------□
   "Hupd" : ∀ m : gmap w32 w64, P m ==∗ P m ∗ Q (map_get (m !! key))
-  "HΦ" : ∀ (v0 : w64) (ok0 : bool), Q (v0, ok0) -∗ Φ (v0 ::= # ok0)%V
+  "HΦ" : ∀ (v0 : w64) (ok0 : bool), Q (v0, ok0) -∗ Φ (# v0, # ok0)%V
   "hm" : hm_ptr ↦ hm_l
   "key" : key_ptr ↦ key
   "Hbuckets" : buckets_ptr ↦ b_s
