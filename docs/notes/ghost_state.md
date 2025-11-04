@@ -323,10 +323,6 @@ Proof using All.
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   ghost_varG0 : ghost_varG Σ Z
   Φ : val → iPropI Σ
   γ1, γ2 : gname

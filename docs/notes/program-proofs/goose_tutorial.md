@@ -130,10 +130,6 @@ Recall that a Hoare triple `{P} e {Q}` actually means $\forall Φ, P \wand
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   x_l, y_l : loc
   y0, z0 : w64
   Φ : val → iPropI Σ
@@ -201,7 +197,6 @@ You will need to understand what an `ipat` is (an intro pattern) and what an `sp
 | `iDestruct (lemma with spat) as ipat` |
 | `iSplitL hyps`                        |
 | `iSplitR hyps`                        |
-| `iSplit`                              |
 | `iFrame`                              |
 | `iPureIntro`                          |
 
@@ -219,14 +214,14 @@ You will need to understand what an `ipat` is (an intro pattern) and what an `sp
 
 **Some useful lemmas:**
 
-| lemma                   |
-| :---------------------- |
-| `own_slice_len`         |
-| `bool_decide_eq_true_2` |
-| `wp_load_slice_elem`    |
-| `struct_fields_split`   |
+| lemma | description |
+| :-- | :-- |
+| `own_slice_len` | If you have `s ↦* xs` (an own_slice assertion), used to relate `slice.len_f s` to `length xs`. See the [wp_SliceSwap example](../../ownership.md). |
+| `bool_decide_eq_true_2`, `bool_decide_eq_false_2` | Used to prove `bool_decide P = true` or `bool_decide P = false` |
+| `wp_load_slice_elem`, `wp_store_slice_elem` | Use with `wp_apply` to reason about loading/storing slice elements |
+| `struct_fields_split` | Split a struct pointsto `x_l ↦ x` (where `x` is a struct) into fields points-to facts of the form `x_l ↦s[StructName :: "field"] a`. |
 
-Note that you won't really be able to read the theorem statement for `struct_fields_split` - its behavior is to split a struct points-to into individual field points-to's, but the exact theorem statement is defined automatically by proofgen for each struct.
+Note that you won't get much out of the theorem statement for `struct_fields_split` - its behavior is to split a struct points-to into individual field points-to's, but the exact theorem statement is defined automatically by proofgen for each struct.
 
 ```rocq
 End proof.

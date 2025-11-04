@@ -62,10 +62,6 @@ Proof.
 :::: info Goal diff
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   l : loc
   x : w64
   Φ : val → iPropI Σ
@@ -91,10 +87,6 @@ Proof.
 :::: info Goal diff
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   l : loc
   x : w64
   Φ : val → iPropI Σ
@@ -162,10 +154,6 @@ This is the step where we persist the points-to permission and turn it into a pe
 :::: info Goal diff
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   x : w64
   Φ : val → iPropI Σ
   l : loc
@@ -318,10 +306,6 @@ Proof.
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   f_code : func.t
   f : w64 → w64
   Φ : val → iPropI Σ
@@ -357,10 +341,6 @@ Proof.
 :::: info Goal diff
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   f_code : func.t
   f : w64 → w64
   Φ : val → iPropI Σ
@@ -404,10 +384,6 @@ Proof.
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   l : loc
   f : w64 → w64
   x0 : w64
@@ -448,10 +424,6 @@ Observe how in the next line we use a Hoare triple that comes _from the persiste
 :::: info Goal diff
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   l : loc
   f : w64 → w64
   x0 : w64
@@ -508,10 +480,6 @@ Proof.
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   f : w64 → w64
   f_code : func.t
   Φ : val → iPropI Σ
@@ -557,10 +525,6 @@ Proof.
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   f : w64 → w64
   x0 : w64
   Φ : val → iPropI Σ
@@ -675,10 +639,6 @@ Setting up the memoization is the most interesting part of the proof. To use the
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   Φ : val → iPropI Σ
   m_ptr : loc
   x : w64
@@ -768,10 +728,6 @@ Proof.
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   s : slice.t
   x1, x2, x3 : w64
   Φ : val → iPropI Σ
@@ -874,10 +830,6 @@ The little proof pattern below of using `iExactEq` is sometimes useful - it allo
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   s : slice.t
   x1, x2, x3 : w64
   Φ : val → iPropI Σ

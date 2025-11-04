@@ -44,8 +44,6 @@ Proof.
 :::: info Goal diff
 
 ```txt
-  Σ : gFunctors
-  heapGS0 : heapGS Σ
   P, Q : iProp Σ
   ============================
   "H" : "HP" ∷ P ∗ "HQ" ∷ Q // [!code --]
@@ -77,8 +75,6 @@ Proof.
 :::: info Goal diff
 
 ```txt
-  Σ : gFunctors
-  heapGS0 : heapGS Σ
   l : loc
   p, r : w64 // [!code ++]
   Hbound : uint.Z p < uint.Z r // [!code ++]

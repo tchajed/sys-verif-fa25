@@ -104,10 +104,6 @@ Proof.
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   N := nroot.@"lock" : namespace
   Φ : val → iPropI Σ
   x_ptr : loc
@@ -148,10 +144,6 @@ Proof.
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   N := nroot.@"lock" : namespace
   Φ : val → iPropI Σ
   x_ptr : loc
@@ -261,10 +253,6 @@ Proof.
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   N := nroot.@"lock" : namespace
   Φ : val → iPropI Σ
   x_ptr, m_ptr, r0_l : loc
@@ -308,10 +296,6 @@ To call Unlock, we need to prove the same lock invariant.
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   N := nroot.@"lock" : namespace
   Φ : val → iPropI Σ
   x_ptr, m_ptr, r0_l : loc

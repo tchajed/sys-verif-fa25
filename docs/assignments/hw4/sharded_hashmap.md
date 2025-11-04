@@ -1060,10 +1060,6 @@ We need to use `iApply fupd_wp` to make `iInv` open at a single point rather tha
 :::: info Goal diff
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   hG1 : auth_map.auth_mapG Σ w32 w64
   hG2 : auth_map.auth_mapG Σ Z (gset w32)
   hm_l : loc

@@ -1,16 +1,10 @@
 ---
 # Auto-generated from literate source. DO NOT EDIT.
-tags:
-  - literate
+tags: literate
+date: 2025-11-03 8:00:00 -5
 ---
 
-::: warning Draft
-
-This is still very much a work-in-progress.
-
-:::
-
-# Types in GooseLang
+# Types in Perennial and Goose
 
 GooseLang pervasively uses types when interacting with memory (eg, loads, stores, pointers, slices). Here we explain how those types work.
 

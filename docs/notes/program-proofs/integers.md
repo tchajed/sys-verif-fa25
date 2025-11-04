@@ -81,8 +81,6 @@ Proof.
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
   x, y : w64
   Φ : val → iPropI Σ
   Hbound : uint.Z x + uint.Z y < 2 ^ 64
@@ -107,8 +105,6 @@ You can see in this goal that the specific word being returned is `word.add x y`
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
   x, y : w64
   Φ : val → iPropI Σ
   Hbound : uint.Z x + uint.Z y < 2 ^ 64

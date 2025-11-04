@@ -175,10 +175,6 @@ Note that we can't use this mechanism to prove a program's recursion eventually 
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   needle : w64
   l : loc
   keys : gset w64

@@ -176,10 +176,6 @@ Proof.
 :::: info Goal diff
 
 ```txt
-  Σ : gFunctors
-  heapGS0 : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   P : iProp Σ
   ============================
   "HP" : P

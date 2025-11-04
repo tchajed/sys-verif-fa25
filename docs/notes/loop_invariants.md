@@ -96,10 +96,6 @@ Proof.
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   n : w64
   Φ : val → iPropI Σ
   Hoverflow : (uint.Z n * (uint.Z n + 1)) `div` 2 < 2 ^ 64
@@ -257,10 +253,6 @@ If we use named hypotheses (e.g., the `"sum" ::` label above), then passing the 
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   n : w64
   Φ : val → iPropI Σ
   Hn_bound : uint.Z n < 2 ^ 64 - 1

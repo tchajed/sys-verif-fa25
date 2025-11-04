@@ -113,7 +113,6 @@ Proof.
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
   P, Q : iProp Σ
   ============================
   "H1" : P
@@ -139,7 +138,6 @@ Proof.
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
   φ, ψ : Prop
   H1 : φ
   H2 : ψ
@@ -207,7 +205,6 @@ Proof.
 :::: info Goal diff
 
 ```txt
-  Σ : gFunctors
   A : Type
   P, Q : iProp Σ
   R : A → iProp Σ
@@ -229,7 +226,6 @@ Proof.
 :::: info Goal diff
 
 ```txt
-  Σ : gFunctors
   A : Type
   P, Q : iProp Σ
   R : A → iProp Σ
@@ -252,7 +248,6 @@ Proof.
 :::: info Goal diff
 
 ```txt
-  Σ : gFunctors
   A : Type
   P, Q : iProp Σ
   R : A → iProp Σ
@@ -275,7 +270,6 @@ Proof.
 :::: info Goals
 
 ```txt title="goal 1"
-  Σ : gFunctors
   A : Type
   P, Q : iProp Σ
   R : A → iProp Σ
@@ -287,7 +281,6 @@ Proof.
 ```
 
 ```txt title="goal 2"
-  Σ : gFunctors
   A : Type
   P, Q : iProp Σ
   R : A → iProp Σ
@@ -331,7 +324,6 @@ Proof.
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
   P, Q : iProp Σ
   ============================
   "HP" : P
@@ -361,7 +353,6 @@ Proof.
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
   P1, P2, P3, Q : iProp Σ
   HQ : P1 ∗ P3 -∗ P2 -∗ Q
   ============================
@@ -404,7 +395,6 @@ Proof.
 :::: info Goals
 
 ```txt title="goal 1"
-  Σ : gFunctors
   P1, P2, P3, Q : iProp Σ
   HQ : P1 ∗ P3 -∗ P2 -∗ Q
   ============================
@@ -415,7 +405,6 @@ Proof.
 ```
 
 ```txt title="goal 2"
-  Σ : gFunctors
   P1, P2, P3, Q : iProp Σ
   HQ : P1 ∗ P3 -∗ P2 -∗ Q
   ============================
@@ -466,7 +455,6 @@ Proof.
 :::: info Goals
 
 ```txt title="goal 1"
-  Σ : gFunctors
   P1, P2, P3, Q : iProp Σ
   HQ : P1 ∗ P3 -∗ P2 -∗ Q
   ============================
@@ -476,7 +464,6 @@ Proof.
 ```
 
 ```txt title="goal 2"
-  Σ : gFunctors
   P1, P2, P3, Q : iProp Σ
   HQ : P1 ∗ P3 -∗ P2 -∗ Q
   ============================
@@ -608,7 +595,6 @@ Proof.
 :::: info Goal diff
 
 ```txt
-  Σ : gFunctors
   P : iProp Σ
   ============================
   "H" : P
@@ -633,7 +619,6 @@ Proof.
 :::: info Goal diff
 
 ```txt
-  Σ : gFunctors
   P : iProp Σ
   ============================
   P ==∗ P // [!code --]
@@ -772,10 +757,6 @@ Proof.
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   Φ : val → iPropI Σ
   ============================
   _ : is_pkg_init heap
@@ -815,10 +796,6 @@ Formally, the proof proceeds by applying the bind rule (to split the program int
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   Φ : val → iPropI Σ
   ============================
   _ : is_pkg_init heap
@@ -901,10 +878,6 @@ At this point there is a `let:` binding which we need to apply the pure-step rul
 :::: info Goal diff
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   Φ : val → iPropI Σ
   x : loc
   ============================
@@ -946,10 +919,6 @@ The IPM can automate all of the above for allocation, load, and store:
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   Φ : val → iPropI Σ
   x, y : loc
   ============================
@@ -980,10 +949,6 @@ You might think we should do `iApply wp_IgnoreOne`. Let's see what happens if we
 :::: info Goals
 
 ```txt title="goal 1"
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   Φ : val → iPropI Σ
   x, y : loc
   ============================
@@ -993,10 +958,6 @@ You might think we should do `iApply wp_IgnoreOne`. Let's see what happens if we
 ```
 
 ```txt title="goal 2"
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   Φ : val → iPropI Σ
   x, y : loc
   ============================
@@ -1037,10 +998,6 @@ The IPM provides several mechanisms for deciding on these splits. A _specializat
 :::: info Goal
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   Φ : val → iPropI Σ
   x, y : loc
   ============================

@@ -305,10 +305,6 @@ Notice how the following `wp_pures` call transforms `struct.field_ref` into `#(s
 :::: info Goal diff
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   firstName, lastName : go_string
   age : w64
   Φ : val → iPropI Σ
@@ -350,10 +346,6 @@ The `struct_fields_split` theorem turns a pointer to a struct into pointers for 
 :::: info Goal diff
 
 ```txt
-  Σ : gFunctors
-  hG : heapGS Σ
-  globalsGS0 : globalsGS Σ
-  go_ctx : GoContext
   firstName, lastName : go_string
   age : w64
   Φ : val → iPropI Σ
@@ -658,9 +650,45 @@ Most proofs involving slices require you to use this lemma to relate the slice l
 
 ```rocq
   iDestruct (own_slice_len with "Hs") as %Hlen.
-
-
 ```
+
+:::: info Goal diff
+
+```txt
+  s : slice.t
+  xs : list w64
+  i, j, x_i, x_j : w64
+  Φ : val → iPropI Σ
+  Hi : xs !! sint.nat i = Some x_i
+  Hj : xs !! sint.nat j = Some x_j
+  Hbound : 0 ≤ sint.Z i ∧ 0 ≤ sint.Z j
+  j_ptr, i_ptr, s_ptr : loc
+  Hi_bound : (sint.nat i < length xs)%nat
+  Hj_bound : (sint.nat j < length xs)%nat
+  Hlen : length xs = sint.nat (slice.len_f s) ∧ 0 ≤ sint.Z (slice.len_f s) // [!code ++]
+  ============================
+  _ : is_pkg_init heap
+  --------------------------------------□
+  "Hs" : s ↦* xs
+  "HΦ" : s ↦* <[sint.nat j:=x_i]> (<[sint.nat i:=x_j]> xs) -∗ Φ (# ())
+  "j" : j_ptr ↦ j
+  "i" : i_ptr ↦ i
+  "s" : s_ptr ↦ s
+  --------------------------------------∗
+  WP exception_do
+       (let: "$r0" := ![# intT] (slice.elem_ref (# intT) (# s) (# j)) in
+        let: "$r1" := ![# intT] (slice.elem_ref (# intT)
+                                   ![# sliceT] (# s_ptr) ![
+                                   # intT] (# i_ptr)) in
+        (do: slice.elem_ref (# intT) ![# sliceT] (# s_ptr)
+               ![# intT] (# i_ptr) <-[# intT] "$r0") ;;;
+        (do: slice.elem_ref (# intT) ![# sliceT] (# s_ptr)
+               ![# intT] (# j_ptr) <-[# intT] "$r1") ;;;
+        return: # ())
+  {{ v, Φ v }}
+```
+
+::::
 
 `slice.elem_ref` requires calling `wp_pure` and then proving that the indices are in-bounds, since Go panics even if you just compute these indices
 
