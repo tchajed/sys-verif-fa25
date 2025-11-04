@@ -216,7 +216,7 @@ You will need to understand what an `ipat` is (an intro pattern) and what an `sp
 
 | lemma | description |
 | :-- | :-- |
-| `own_slice_len` | If you have `s ↦* xs` (an own_slice assertion), used to relate `slice.len_f s` to `length xs`. See the [wp_SliceSwap example](../../ownership.md). |
+| `own_slice_len` | If you have `s ↦* xs` (an own_slice assertion), used to relate `slice.len_f s` to `length xs`. See the [wp_SliceSwap example](../ownership.md). |
 | `bool_decide_eq_true_2`, `bool_decide_eq_false_2` | Used to prove `bool_decide P = true` or `bool_decide P = false` |
 | `wp_load_slice_elem`, `wp_store_slice_elem` | Use with `wp_apply` to reason about loading/storing slice elements |
 | `struct_fields_split` | Split a struct pointsto `x_l ↦ x` (where `x` is a struct) into fields points-to facts of the form `x_l ↦s[StructName :: "field"] a`. |
