@@ -213,9 +213,9 @@ To understand the explanations of persistently it helps to anticipate a little o
 
 First, it is useful to ask whether $□P$ is stronger or weaker than $P$ (in general a modality could be neither, but the modalities in Iris are one or the other). In this case, the answer is that it is _stronger_: $□P ⊢ P$ but not vice versa (in general). Intuitively, it's because $□P$ requires $P$ hold using only "persistent resources".
 
-Second, the persistence modality is monotonic - if $P ⊢ Q$, then $□P ⊢ □Q$. I think in some ways this is a basic sanity test of a modality, but I am not sure about this in general.
+Second, the persistence modality is monotonic - if $P ⊢ Q$, then $□P ⊢ □Q$. This is a very basic sanity test of a modality.
 
-Third, since $□P$ is $P$ using only persistent resources, $□P ⊢ □□P$; both sides don't use resources, and saying it twice makes no difference.
+Third, since $□P$ is $P$ using only persistent resources, $□P ⊢ □□P$; both sides don't use resources, and saying it twice makes no difference. This is common for many other modalities, but it isn't required (the later modality $▷P$ in Iris is not idempotent, for example).
 
 ### Exercise: introduction rule
 
