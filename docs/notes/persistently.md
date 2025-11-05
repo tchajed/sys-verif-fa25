@@ -129,9 +129,9 @@ P, Q: iProp Σ
 R
 ```
 
-As usual, there is a Rocq context above everything. The separation logic part has separation logic hypotheses "HP" and "HQ", and separation logic conclusion R. The fact that "HP" is in the persistent context implies that P is persistent - this means $P ⊢ P ∗ P$. (The full definition is more than that, but we won't go deep enough into how Iris works to talk about it.)
+As usual, there is a Rocq context above everything. The separation logic part has separation logic hypotheses "HP" and "HQ", and separation logic conclusion R. The fact that "HP" is in the persistent context implies that P is persistent - this means $P ⊢ P ∗ P$.
 
-So what propositions are persistent? First, the pure propositions are persistent - but they can be put into the Rocq context, so they aren't so interesting. The first "real" example we'll see is the persistent points-to, `l ↦□ v`.
+So what propositions are persistent? First, the pure propositions are persistent - but they can be put into the Rocq context, so that isn't what makes persistence interesting. The first "real" example we'll see is the persistent points-to, `l ↦□ v`.
 
 ```rocq
 Lemma alloc_ro_spec (x: w64) :
@@ -254,7 +254,7 @@ You should start by quickly reading the code for this example at [go/memoize/mem
 
 As a warmup, we'll verify the "MockMemoize" implementation. This version still has to store and call the function, but there's no memoization happening - when we use `m.Call(x)` it just always calls `f(x)`.
 
-There is another difference between the two implementations: we use a `*MockMemoize` whereas we'll use `Memoize` - one is always used through a pointer, while the other is used as a value. Both would work in this case, we're just illustrating what this looks like in the proofs.
+↦ There is another difference between the two implementations: we use a `*MockMemoize` whereas we'll use `Memoize` - one is always used through a pointer, while the other is used as a value. Both would work in this case, we're just illustrating what this looks like in the proofs.
 
 ---
 
