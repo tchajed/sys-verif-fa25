@@ -22,7 +22,7 @@
 | 14 | Tue Oct 28 | Loop invariants (part 1) | [notes](./notes/loop_invariants.md) |  |
 | 15 | Thu Oct 30 | Loop invariants (part 2) | [same notes](./notes/loop_invariants.md) |  |
 | 16 | Tue Nov 4 | Persistence | [notes](./notes/persistently.md) |  |
-| 17 | Thu Nov 6 | Concurrency intro | [notes](./notes/concurrency.md) |  |
+| 17 | Thu Nov 6 | Concurrency intro: [slides](./slides/lec17.pdf) | [notes](./notes/concurrency.md) |  |
 | 18 | Tue Nov 11 | Lock invariants | [notes](./notes/invariants.md) |  |
 | 19 | Thu Nov 13 | Ghost state | [notes](./notes/ghost_state.md) |  |
 |    | Mon Nov 17 |  |  | _[Assignment 3](./assignments/hw3/) due (11pm)_ |

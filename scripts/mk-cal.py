@@ -1,10 +1,10 @@
 #!/usr/bin/env -S uv run
 
 
+import argparse
 import datetime
 import io
 from typing import final
-import argparse
 
 
 def md_link(text: str, url: str) -> str:
@@ -191,7 +191,7 @@ entries: list[Lecture | AssignmentDue | NoClass] = [
         "Loop invariants (part 2)", notes_link("loop_invariants", text="same notes")
     ),
     Lecture("Persistence", notes_link("persistently")),
-    Lecture("Concurrency intro", notes_link("concurrency")),
+    Lecture("Concurrency intro", notes_link("concurrency"), has_slides=True),
     Lecture("Lock invariants", notes_link("invariants")),
     Lecture("Ghost state", notes_link("ghost_state")),
     AssignmentDue("Assignment 3", "./assignments/hw3/", datetime.date(2025, 11, 17)),
