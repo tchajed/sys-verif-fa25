@@ -3,6 +3,7 @@ category: lecture-note
 order: 16
 shortTitle: "Concurrency intro"
 pageInfo: ["Date", "Category", "Tag", "Word"]
+date: 2025-11-06 08:00:00 -5
 ---
 
 # Concurrency introduction
@@ -76,7 +77,7 @@ hehello 1
 llo 2
 ```
 
-Depends on what is atomic. In this case, ultimately printing is a `write(2)` system call to the stdout file of the process, and these writes are turned into output on the terminal device - there's no real guarantee but most likely the write system calls are each atomic, and Go will issue one for each `fmt.Println`.
+The possibly executions depends on what the system guarantees to be _atomic_. In this case, ultimately printing is a `write(2)` system call to the stdout file of the process, and these writes are turned into output on the terminal device - it is expected that the system calls are atomic, and also expected that Go will issue one for each `fmt.Println` (unless it is too large).
 
 :::
 
@@ -111,11 +112,17 @@ To check your understanding of this rule, modify it so that $\spawn \, e$ return
 
 Recall that we defined the soundness of separation logic in terms of whether an expression got stuck: if $(e, h)$ cannot step to anything and $e$ is not a value, then we called it stuck. Soundness was partly about expressions not getting stuck (and partly about the postcondition being true if they did terminate in a value). We have to decide what to do with those definitions now that there are multiple threads.
 
-The decision we'll take is that the _concurrent separation logic_ we develop will show that after an expression has run for a while, _none of the spawned threads are stuck_, but the postcondition will only apply to the value of the "main thread", the first element of the threadpool - background threads can go into infinite loops or terminate in any value.
+The decision we'll take is that the _concurrent separation logic_ we develop will show that after an expression has run for a while, _none of the spawned threads are stuck_, and the postcondition will need to hold on the final value of the "main thread", the first element of the threadpool - background threads can go be in infinite loops or terminate in any value when the main thread terminates.
+
+::: info Exercise
+
+Is this the right model? Think about whether it is a good idea in the context of a few different runtime environments (e.g., a single Go program vs processes in Linux).
+
+:::
 
 ## Synchronizing programs
 
-Since threads interleave with each other, we will need programming mechanisms to control how they interleave. First, let's see one example of a bug due to interleavings. Then, we'll see two core synchronization primitives: mutexes provide mutual exclusion (e.g., to make more than one assembly instruction run atomically) and barriers provide waiting (e.g., to efficiently implementing waiting for several threads to finish).
+Since threads interleave with each other, to write correct programs we will need programming mechanisms to control interleavings. First, let's see one example of a bug due to interleavings. Then, we'll see two core synchronization primitives: mutexes provide mutual exclusion (e.g., to make more than one assembly instruction run atomically) and barriers provide waiting (e.g., to efficiently implementing waiting for several threads to finish).
 
 ### Bugs: race condition
 
