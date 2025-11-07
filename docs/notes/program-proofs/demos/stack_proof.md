@@ -136,30 +136,32 @@ Proof.
   rewrite length_reverse /= in Hlen.
   apply reverse_lookup_Some in Hx_last_lookup as [Hget ?].
   replace (length xs - S (sint.nat (slice.len_f s) - 1))%nat with 0%nat
-    in Hget by lia.
+    in Hget by len.
   destruct xs as [|x0 xs'].
   { exfalso; simpl in *; lia. }
-  simpl in Hget; inversion Hget; subst.
+  simpl in Hget.
+  assert (x0 = x_last) by congruence. subst.
 
   wp_finish.
   rewrite /stack_rep.
   iFrame "elements".
-  iSplit.
-  {
-    (*
-    replace (uint.nat (word.sub (slice.len_f s) (W64 1))) with
-      (uint.nat (slice.len_f s) - 1)%nat by word.
-    rewrite take_reverse. rewrite length_reverse in Hlen.
-    replace (length xs - (uint.nat (slice.len_f s) - 1))%nat with 1%nat by word.
-    iFrame.
-     *)
-    admit. (* TODO: match up ownership of s vs slice.slice_f s *)
-  }
-  iPureIntro.
-  rewrite /stack_pop.
-  reflexivity.
-  Fail idtac.
-Admitted.
+  iSplit; [ | iPureIntro; reflexivity ].
+  rewrite /named.
+  simpl in *. (* for length (x :: xs) *)
+  iApply own_slice_trivial_slice_f in "Hels".
+  iDestruct (own_slice_split (word.sub (slice.len_f s) (W64 1)) with "Hels") as "[Hfirst Hrest]".
+  { word. }
+  iDestruct (own_slice_slice_absorb_capacity with "[$Hrest $Hels_cap]") as "$".
+  { word. }
+  iExactEq "Hfirst".
+  repeat f_equal.
+  replace (sint.nat (word.sub (slice.len_f s) (W64 1)) - sint.nat (W64 0))%nat
+    with (length xs') by len.
+  rewrite reverse_cons.
+  rewrite take_app_le; [ len | ].
+  rewrite take_ge; [ len | ].
+  done.
+Qed.
 
 End proof.
 ```
