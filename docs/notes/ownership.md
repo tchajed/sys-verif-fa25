@@ -167,7 +167,9 @@ The third method, `GetAge`, however, would be problematic for this model. What p
 
 The solution Goose uses is not to store a struct in a single heap cell, but instead _one per field_. The heap locations are all laid out contiguously, just like an array. Thus the model for `GetAge` is actually `GetAge := λ: "ℓ", "ℓ" +ₗ 2`, where 2 is the index of the `Age` field.
 
-The translated code for struct operations doesn't directly use offsets but instead uses a helper function `struct.field_ref` to compute the offset from a struct type and field name. We can see this used throughout the model in the translation of the code above:
+The translated code for struct operations doesn't directly use offsets but instead uses a helper function `struct.field_ref` to compute the offset from a struct type and field name. Similarly, the reasoning principles we will use to verify code with structs will hide the exact memory layout details. However, if you look at any of the code output of Goose, you will see type annotations all over the place - this is because every load and store is passed the type in order to correctly understand how to load values from the pointer. Since every function argument and local is stored in a pointer, there are also a large number of loads and stores.
+
+We can see these struct calculations by looking at the translation of the above code:
 
 ```rocq
 Definition Person : go_type := structT [
@@ -242,7 +244,7 @@ func ExamplePersonRef() *Person {
 }
 ```
 
-This specification shows that the typed points-to can be used for something other than a base literal. The underlying mechanism is the `IntoVal` typeclass, used for both `#` and `l ↦ v`.
+This specification shows that the typed points-to can be used for something other than a base literal.
 
 ```rocq
 Lemma wp_ExamplePersonRef :
@@ -258,7 +260,9 @@ Qed.
 
 ```
 
-As discussed above, a Person struct in memory is not stored in a single location. The points-to above is actually a separating conjunction over three smaller points-to assertions, one for each field. We can break it down into _struct field points-to_ assertions of the form `l ↦s[heap.Person :: "Age"] (W64 25)`. This is actually notation for a simpler concept: `(struct.field_ref_f heap.Person "Age" l) ↦ (W64 25)`. That is, owning a struct field is simply owning an appropriate offset from the base pointer, computed based on the struct and field name.
+As discussed above, a Person struct in memory is not stored in a single location. The points-to above is actually a separating conjunction over three smaller points-to assertions, one for each field, but it behaves like any other points-to when we read and write a struct. This shouldn't be too surprising - we are used to loading and storing values to memory via a pointer without thinking about how large they are, when in reality the assembly code to do loads and stores differs considerably between values that are 1 byte, 8 bytes (one machine word), and structs large than 8 bytes.
+
+Given a struct points-to assertion, we can break it down into _struct field points-to_ assertions of the form `l ↦s[heap.Person :: "Age"] (W64 25)` that represent ownership over a single field of the original struct. This is actually notation for a simpler concept: `(struct.field_ref_f heap.Person "Age" l) ↦ (W64 25)`. That is, owning a struct field is simply owning an appropriate offset from the base pointer, computed based on the struct and field name.
 
 ```rocq
 Lemma wp_ExamplePersonRef_fields :
