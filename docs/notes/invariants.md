@@ -65,7 +65,13 @@ The proof of $\wp(e, \True)$ will in general consume some of the resources avail
 
 The resources $P$ need to be proven right away, unlike if we were verifying $e; e'$, since the scheduler could certainly choose to run $e'$ next (partly or even to completion). The postcondition of $Q$ makes sense for the whole construct because after spawning $e'$ takes over, and it establishes the postcondition $Q$.
 
-Let's see this in action.
+Here's a diagram showing what the transfer of resources looks like in CSL:
+
+<img src="/fig/csl-intuition.png" alt="concurrent separation logic intuition" width="70%" />
+
+The diagram shows the execution of code, with time flowing down. We see a thread spawned, which then proceeds independently. The idea of _separation_ in separation logic now divides the resources (the heap, for now) into two disjoint pieces, $h_1$ and $h_2$, that each thread operates on using its part of $Q_1 \sep Q_2$.
+
+Now let's see this in practice in Perennial.
 
 ```rocq
 From sys_verif.program_proof Require Import prelude empty_ffi.
@@ -75,8 +81,6 @@ From sys_verif.program_proof Require Import concurrent_init.
 Section goose.
 Context `{hG: !heapGS Σ}.
 Context `{!globalsGS Σ} {go_ctx: GoContext}.
-
-Let N := nroot .@ "lock".
 
 (*
 func SetX(x *uint64) {
@@ -115,7 +119,6 @@ Proof.
 :::: info Goal
 
 ```txt
-  N := nroot.@"lock" : namespace
   Φ : val → iPropI Σ
   x_ptr : loc
   ============================
@@ -161,7 +164,6 @@ Proof.
 :::: info Goal
 
 ```txt
-  N := nroot.@"lock" : namespace
   Φ : val → iPropI Σ
   x_ptr : loc
   ============================
@@ -258,7 +260,6 @@ Proof.
 :::: info Goal
 
 ```txt
-  N := nroot.@"lock" : namespace
   Φ : val → iPropI Σ
   x_ptr, m_ptr : loc
   ============================
@@ -333,7 +334,6 @@ This is not far off from what the proof is actually doing - the only difference 
 :::: info Goal
 
 ```txt
-  N := nroot.@"lock" : namespace
   Φ : val → iPropI Σ
   x_ptr, m_ptr : loc
   ============================
@@ -374,7 +374,6 @@ To call Unlock, we need to prove the same lock invariant.
 :::: info Goal
 
 ```txt
-  N := nroot.@"lock" : namespace
   Φ : val → iPropI Σ
   x_ptr, m_ptr : loc
   y : w64
