@@ -5,15 +5,9 @@ icon: code
 
 # Final project
 
-::: warning Replaced with Assignment 4
+Instead of doing [Assignment 4](./hw4), you can pick something open-ended to work on. You need to talk to me ahead of time to do this.
 
-If you haven't already talked to me about a project, you should do [Assignment 4](./hw4/) instead.
-
-:::
-
-For the final project, you can pick something open-ended.
-
-The idea here is for you to explore something you're interested in and complete a more substantial proof. Whatever you work on you need to write a short, 1-2 page proposal explaining what you're planning to do, and/or schedule a meeting with me, so I can give feedback (mainly so I can confirm the scope is reasonable and that you have some intermediate goals).
+The idea here is for you to explore something you're interested in and complete a more substantial proof. Whatever you work on you need to write a short, 1-2 page proposal explaining what you're planning to do, and/or present the idea to me, so I can give feedback (mainly so I can confirm the scope is reasonable and that you have some intermediate goals).
 
 The project will include a (short) written report on what you did. If you don't finish the proofs, that's okay - it's still important that you communicate what you did and what challenges you ran into. The report should be about 2--5 pages explaining what problem you tackled and what progress you made. You will submit your code, but the report is what I will start with to make sense of what you did so spend some time making that clear.
 
@@ -21,9 +15,9 @@ The project will include a (short) written report on what you did. If you don't 
 
 These are projects that I believe are doable, except that I haven't done them myself.
 
-### Verify Go's sort.Find
+### Verify pdqsort
 
-We saw a simplified binary search implementation in the notes. Specify and verify the Go binary search implementation, [sort.Find](https://pkg.go.dev/sort#Find) from the standard library.
+The standard library's basic sorting algorithm is "pdqsort" - pattern-defeating quicksort. Verify it.
 
 ### Make Memoize more useful
 
