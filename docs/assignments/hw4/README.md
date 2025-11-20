@@ -2,6 +2,7 @@
 category: assignment
 icon: circle-exclamation
 shortTitle: "Assignment 4"
+date: 2025-11-19 08:00:00 -5
 dir:
   icon: file-lines
   order: 5
