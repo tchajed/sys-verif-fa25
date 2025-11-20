@@ -26,8 +26,8 @@
 | 18 | Tue Nov 11 | Lock invariants | [notes](./notes/invariants.md) |  |
 | 19 | Thu Nov 13 | Ghost state | [notes](./notes/ghost_state.md) |  |
 |    | Mon Nov 17 |  |  | _[Assignment 3](./assignments/hw3/) due (11pm)_ |
-| 20 | Tue Nov 18 | Atomic specs | [notes](./notes/atomic_specs.md) |  |
-| 21 | Thu Nov 20 | Hashmap proof | [same notes](./notes/atomic_specs.md) |  |
+| 20 | Tue Nov 18 | Atomic specs (part 1) | [notes](./notes/atomic_specs.md) |  |
+| 21 | Thu Nov 20 | Atomic specs (part 2) | [same notes](./notes/atomic_specs.md) (also [hashmap demo](./demos/hashmap_proof.md)) |  |
 | 22 | Tue Nov 25 | In-class work |  | bring a laptop |
 |    | Thu Nov 27 | **No class** (Thanksgiving) |  |  |
 | 23 | Tue Dec 2 | Property-based testing | [notes](./notes/pbt.md) |  |

@@ -195,8 +195,11 @@ entries: list[Lecture | AssignmentDue | NoClass] = [
     Lecture("Lock invariants", notes_link("invariants")),
     Lecture("Ghost state", notes_link("ghost_state")),
     AssignmentDue("Assignment 3", "./assignments/hw3/", datetime.date(2025, 11, 17)),
-    Lecture("Atomic specs", notes_link("atomic_specs")),
-    Lecture("Hashmap proof", notes_link("atomic_specs", text="same notes")),
+    Lecture("Atomic specs (part 1)", notes_link("atomic_specs")),
+    Lecture(
+        "Atomic specs (part 2)",
+        f"{notes_link('atomic_specs', text='same notes')} (also {md_link('hashmap demo', './demos/hashmap_proof.md')})",
+    ),
     Lecture("In-class work", "", comment="bring a laptop"),
     NoClass("Thanksgiving", datetime.date(2025, 11, 27)),
     Lecture("Property-based testing", notes_link("pbt")),
