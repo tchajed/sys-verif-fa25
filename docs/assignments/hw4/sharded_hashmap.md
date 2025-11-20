@@ -407,7 +407,7 @@ Qed.
 
 ```
 
-**Exercise:** Prove this theorem using the two above. _(5 points)_
+**Exercise:** Prove this theorem using the two above. _(10 points)_
 
 ```rocq
 Lemma bucket_map_lookup_Some_iff m max_buckets (i: Z) s :
@@ -712,9 +712,9 @@ Definition is_bucket (γ: ghost_names) (l: loc) (hash_idx: Z) : iProp Σ :=
 
 ```
 
-One of the most interesting parts of this definition is how we use `P`. That's how the proof asserts how the code stores the abstract state of the data structure.
+One of the most interesting parts of this definition is how we manage the ownership of `ghost_var γ.(user_name)`, which holds the logical state of the map as seen by the user. (Remember that `own_sharded_map γ m` is just a half of this ghost variable.)
 
-Since the hashmap isn't protected by one lock but by several, where do we put `P`? It turns out we need a new idea. Instead of a _lock invariant_, we'll use an _invariant_. `inv N P` is an assertion that `P` is an invariant (ignore the namespace `N` for now). An invariant isn't related to a lock; instead, `P` simply needs to hold at all intermediate points of the program, full stop (remember that a lock invariant only holds when the lock is free). Invariants are a key feature of Iris.
+Since the hashmap isn't protected by one lock but by several, where do we put `γ.(user_name)`? We will use an _invariant_ `inv N P`. Remember that once we create this invariant, `P` needs to hold at all intermediate points of the program. There is a dedicated tactic `iInv` for accessing an invariant in a proof, which we can do as a ghost step at any time.
 
 ```rocq
 Let N := nroot .@ "sharded_hashmap".
@@ -762,7 +762,7 @@ Proof.
          "mu [Hfrag Hshard]") as "Hlock".
   { iModIntro. rewrite /lock_inv.
     iExists (∅). iFrame. }
-  wp_auto. iApply "HΦ". iFrame "#∗".
+  wp_auto. wp_finish. iFrame "#∗".
 Qed.
 
 Lemma wp_createNewBuckets (γ: ghost_names) (newSize: w32) :
@@ -827,7 +827,7 @@ Proof.
     replace (Z.of_nat (length b_ls + 0)) with (uint.Z i) by word.
     iFrame "His_buckets Hbucket".
   }
-  iApply "HΦ".
+  wp_finish.
   iFrame.
   replace (uint.Z i) with (uint.Z newSize) by word.
   iFrame "Hauth".
@@ -933,15 +933,22 @@ Proof.
   wp_auto.
 
   (* use user's atomic update on abstract state *)
+  (* Some boilerplate is needed to make this work, but notice that at the end, we get several hypotheses with the suffix "_inv", which come from "opening" the invariant. The goal has `|={⊤ ∖ ↑N, ⊤}=>`, which represents that the invariant N is unavailable and must be restored to proceed. We'll do that with "Hclose_inv", which requires re-proving the invariant. *)
   iApply fupd_wp.
   iInv "His_inv" as ">HI" "Hclose_inv".
-  iMod "Hau" as (m0) "[Hown Hclose_au]".
   iNamedSuffix "HI" "_inv".
+
+  (* The purpose of opening the invariant is to use the atomic update from the caller, so we do that before closing. *)
+  iMod "Hau" as (m0) "[Hown Hclose_au]".
+
   iDestruct (hashmap_auth_sub_get with "[$Hauth_inv $Hfrag]") as %Hget'.
   { eauto. }
   iDestruct (ghost_var_agree with "Hm_var_inv Hown") as %<-.
   rewrite Hget'.
+  (* finish firing the AU *)
   iMod ("Hclose_au" with "Hown") as "HΦ".
+
+  (* Now we are done with the invariant and need several more tactics to close it back up. Since this operation is read-only, the proof of the invariant afterward is just iFrame. *)
   iMod ("Hclose_inv" with "[Hm_var_inv Hauth_inv]").
   { iModIntro. iFrame. }
   iModIntro.
@@ -967,7 +974,7 @@ Proof.
 Admitted.
 ```
 
-After understanding the proof, how would you use it to explain to someone how per-bucket locking works? What changed from your previous explanation? **Exercise:** Write this down in a Rocq comment in your solution. _(10 points)_
+After understanding the proof, how would you use it to explain to someone how per-bucket locking works? What changed from your previous explanation? **Exercise:** Write this down in a Rocq comment in your solution. _(15 points)_
 
 ```rocq
 End proof.
