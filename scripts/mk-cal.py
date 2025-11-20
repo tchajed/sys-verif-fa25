@@ -198,7 +198,7 @@ entries: list[Lecture | AssignmentDue | NoClass] = [
     Lecture("Atomic specs (part 1)", notes_link("atomic_specs")),
     Lecture(
         "Atomic specs (part 2)",
-        f"{notes_link('atomic_specs', text='same notes')} (also {md_link('hashmap demo', './demos/hashmap_proof.md')})",
+        f"{notes_link('atomic_specs', text='same notes')} (also {md_link('hashmap demo', './notes/program-proofs/demos/hashmap_proof.md')})",
     ),
     Lecture("In-class work", "", comment="bring a laptop"),
     NoClass("Thanksgiving", datetime.date(2025, 11, 27)),
