@@ -26,9 +26,13 @@ Memoization is mostly useful when memoizing a recursive function and caching its
 
 Re-implement memoization to solve this problem. See these [lecture notes](https://www.cs.cornell.edu/courses/cs3110/2011sp/Lectures/lec22-memoization/memo.htm) (specifically the last section, "Automatic Memoization Using Higher Order Functions") for how this works. Implement a memoized fibonacci function and verify it using the new specification.
 
+### Verify the Go sync.Map
+
+The Go standard library has [sync.Map](https://pkg.go.dev/sync#Map), a concurrent hash map. Verify its standard library implementation (in [map.go](https://cs.opensource.google/go/go/+/refs/tags/go1.24.10:src/sync/map.go;l=40)). I'll help you get this set up.
+
 ## "Medium" projects
 
-These are projects that you might not finish, and which require you to figure out the scope.
+These are projects where some scoping and implementation are required to get started.
 
 ### Verify a range map data structure
 
@@ -44,9 +48,13 @@ Verify a memory allocator, using the [buddy allocator algorithm](https://www.gee
 
 ### Verify the Cloudflare trie-hard data structure
 
-Port [trie-hard](https://github.com/cloudflare/trie-hard) to Go and verify it. Specialize that implementation to u64.
+Port [trie-hard](https://github.com/cloudflare/trie-hard) to Go and verify it.
 
 This is a trie (an efficient prefix-search data structure, especially for a fixed set of search strings), but with the twist of encoding the pointers into the bits of an integer for space efficiency (without this Cloudflare found it wasn't faster than a Rust `HashMap`).
+
+### Verify a classic lock-free data structure
+
+Implement and verify a lock-free data structure, taking inspiration from existing proofs in Iris. Some good options are the Trieber stack and a blocking producer-consumer queue with a fixed (circular) buffer.
 
 ## Open-ended projects
 
@@ -57,10 +65,6 @@ These projects are more open ended.
 Did you find something difficult while doing the previous assignments? It's an open project option to fix a pain point you experienced. This could involve primarily writing documentation, but it would need to be substantial and involve code examples.
 
 This is open-ended but need not require any challenging proofs.
-
-### Verify the Go sync.Map
-
-The Go standard library has [sync.Map](https://pkg.go.dev/sync#Map), a concurrent hash map.
 
 Adapt the [implementation](https://cs.opensource.google/go/go/+/refs/tags/go1.23.0:src/sync/map.go;l=38) to develop a version that works with Goose (I can help you with this part) and verify it. You don't need to deal with the `any` type; feel free to specialize to a map from integers to integers. Focus on a few key operations, such as Load, Store, and CompareAndSwap; they'll capture the essential difficulty.
 
