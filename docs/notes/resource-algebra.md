@@ -33,7 +33,7 @@ A _model_ of the logic is an interpretation or definition for the propositions a
 
 Notice that I said **a** model and not **the** model. The same logic can have more than one model! That's exactly what we'll do today.
 
-As an example, you might be familiar with comes from geometry. Euclid's axioms include a parallel postulate: if you have a line and a point not on the line, there is exactly one line parallel to the given line which goes through the given point. If you remove that axiom, then there are multiple possible models of Euclid's axioms: Euclidean geometry, hyperbolic geometry, and elliptic geometry.
+An example you might be familiar with comes from geometry. Euclid's axioms include a parallel postulate: if you have a line and a point not on the line, there is exactly one line parallel to the given line which goes through the given point. If you remove that axiom, then there are multiple possible models of Euclid's axioms: Euclidean geometry, hyperbolic geometry, and elliptic geometry.
 
 ## Algebraic model of separation logic
 
