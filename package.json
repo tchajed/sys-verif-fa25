@@ -17,7 +17,7 @@
     "@vuepress/plugin-google-analytics": "2.0.0-rc.112",
     "@vuepress/plugin-search": "2.0.0-rc.112",
     "@vuepress/plugin-shiki": "2.0.0-rc.112",
-    "katex": "^0.16.25",
+    "katex": "^0.16.27",
     "mathjax-full": "^3.2.2",
     "mermaid": "^11.12.1",
     "prettier": "^3.6.2",
