@@ -3,11 +3,12 @@ category: lecture-note
 order: 27
 shortTitle: "Summary"
 pageInfo: ["Date", "Category", "Tag", "Word"]
+date: 2025-12-09 08:00:00 -5
 ---
 
 # Summary of the class
 
-In order to stabilize what you've learned in the class, take some time to recall what you learned and organize it. This outline give you some keywords to help you remember the broad concepts you've seen.
+In order to stabilize what you've learned in the class, take some time to recall what you learned and organize it. This outline gives you a concise summary of the topics we've covered.
 
 ## Functional programs
 
@@ -15,31 +16,29 @@ Inductive data types, recursive functions
 
 Proofs by induction, computation, and rewriting
 
-Specifying (functional) abstract data types
-
 ## Imperative programs
 
-Hoare logic; weakest preconditions
+Hoare logic
 
-Separation logic to deal with the heap; frame rule
+Separation logic: separating conjunction, frame rule
 
-Soundness theorem
+Soundness of separation logic
 
-Specifying heap-based abstract data types
+Specifying abstract data types (representation predicates)
 
 ## Concurrent programs
 
-Weakest precondition for Fork
+Fractional permissions
+
+Ghost variables
+
+Lock invariants
 
 Concurrent soundness theorem
 
-Fractional permissions
+Specifying concurrent abstract data types with atomic updates
 
-Resource algebras and ghost state
-
-Specifying concurrent abstract data types with HOCAP
-
-## Coq
+## Rocq
 
 Writing definitions and theorems
 
@@ -49,8 +48,8 @@ Translating informal proof strategy to tactics
 
 Interactive proofs: reading the context, finding existing lemmas
 
-Separation logic in Iris: understanding weakest preconditions, and Hoare triples in Coq
+Separation logic in Iris: weakest preconditions and continuation-passing style for Hoare triples
 
 Iris Proof Mode tactics
 
-GooseLang: connecting code to Goose model, writing specifications for Go functions
+Perennial: specifying Go functions and methods; struct points-to facts; slice ownership
