@@ -29,6 +29,7 @@ $$
 
 \gdef\init{\mathit{init}}
 \gdef\next{\mathit{next}}
+\gdef\locked{\mathrm{locked}}
 $$
 
 <!-- @include: ./macros.snippet.md -->
@@ -234,16 +235,16 @@ The state consists of locked (a boolean) and two program counters: t1 for thread
 
 There are three possible transitions for thread 1:
 
-- $cas\_fail_1(s, s') \triangleq s.t1 = pc_0 \land s.locked = \true \land s' = s$
-- $cas\_succ_1(s, s') \triangleq s.t1 = pc_0 \land s.locked = \false \land s'.t1 = pc_1 \land s'.locked = \true \land s'.t2 = s.t2$
-- $unlock_1(s, s') \triangleq s.t1 = pc_1 \land \land s'.t1 = pc_2 \land s'.locked = s.locked \land s'.t2 = s.t2$
+- $cas\_fail_1(s, s') \triangleq s.t1 = pc_0 \land s.\locked = \true \land s' = s$
+- $cas\_succ_1(s, s') \triangleq s.t1 = pc_0 \land s.\locked = \false \land s'.t1 = pc_1 \land s'.\locked = \true \land s'.t2 = s.t2$
+- $unlock_1(s, s') \triangleq s.t1 = pc_1 \land \land s'.t1 = pc_2 \land s'.\locked = s.\locked \land s'.t2 = s.t2$
 
 These correspond to the CompareAndSwap failing, CompareAndSwap succeeding, and the call to Unlock.
 
 The transitions for thread 2 are the same but with the roles of the threads reversed. It can be easier to read these if we introduce notation for changing just one field of the state: $s.(t2 := pc_2)$ is the state $s$ but with the field $t2$ changed to the value $pc_2$.
 
-- $cas\_fail_2(s, s') \triangleq s.t2 = pc_0 \land s.locked = \true \land s' = s$
-- $cas\_succ_2(s, s') \triangleq s.t2 = pc_0 \land s.locked = \false \land s' = s.(t2 := pc_1).(locked := \true)$
+- $cas\_fail_2(s, s') \triangleq s.t2 = pc_0 \land s.\locked = \true \land s' = s$
+- $cas\_succ_2(s, s') \triangleq s.t2 = pc_0 \land s.\locked = \false \land s' = s.(t2 := pc_1).(\locked := \true)$
 - $unlock_2(s, s') \triangleq s.t2 = pc_1 \land \land s'.t2 = pc_2 \land s' = s.(t2 := pc_2$
 
 It helps to read these as consisting of a "guard" over the initial state that says when the transition can happen together with an "update" that says how $s'$ is derived from $s$.
@@ -256,7 +257,7 @@ The entire behavior of the spinlock can now be written in temporal logic. First,
 
 The initial state is this one:
 
-$$\init(s) \triangleq s.t1 = pc_0 \land s.t2 = pc_0 \land s.locked = \false$$
+$$\init(s) \triangleq s.t1 = pc_0 \land s.t2 = pc_0 \land s.\locked = \false$$
 
 Putting it together, a valid execution of the spinlock is one satisfying:
 
