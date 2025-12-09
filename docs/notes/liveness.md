@@ -35,13 +35,13 @@ $$
 
 ## Motivation
 
-We've only talked about _safety_ so far: we prove the program "doesn't go wrong" as long as it wrongs, but the postcondition only holds if the function terminates.
+We've only talked about _safety_ so far: we prove the program "doesn't go wrong" as long as it runs. The postcondition holds if the function terminates.
 
-Real systems also care about _liveness_ properties: proving that programs terminate and systems _eventually_ produce results.
+Real systems also care about _liveness_ properties: proving that "something good happens": the program terminates or for every request a response is _eventually_ returned.
 
-In fact systems also care about (quantitative) _performance_ properties: achieving certain throughput or latency targets. These have generally been out of scope for verification simply because the properties are too hard to formalize (performance is a complex interplay between many factors), but there is still some work in this area.
+In fact systems also care about (quantitative) _performance_ properties: achieving certain throughput or latency targets (e.g., 100K operations/second on some particular hardware, or a 99.9th percentile latency of 200ms). These have generally been out of scope for verification simply because the system properties that lead to particular performance numbers are too hard to determine (performance is a complex interplay between many factors that are hard to model analytically), but there is still some work in this area.
 
-Liveness is an important topic when reasoning about distributed systems especially.
+Liveness is an important topic when reasoning about distributed systems especially. In this lecture, we focus on concurrency examples to keep things simpler and more familiar.
 
 ## Example: spinlock
 
@@ -134,13 +134,13 @@ P &\triangleq \lift{\phi} \mid \action{a} \\
 \end{aligned}
 $$
 
-The first construct $\lift{\phi}$ is actually the boring one. It _lifts_ a propositional formula $\phi$ about a single state into temporal logic about a trace; what it asserts is just that the first state in the trace satisfies $\phi$. You can think about what $\phi$ is in one of two ways: its a formula describing one state with a bunch of variables over finite domains (like booleans or the program counter `pc0 | pc1 | pc2` in the example above), or you can just imagine $\phi : \State \to \Prop$ in Coq and it describe a single state (though $\phi$ is not technically propositional in that it could use quantifiers; this distinction isn't important to understand LTL). We can take any such formula $\phi$ for a single state and turn it into an LTL formula with $\lift{\phi}$ (this is intentionally the same notation we used to lift pure propositions into separation logic).
+The first construct $\lift{\phi}$ is used to describe individual states in the trace. It _lifts_ a propositional formula $\phi$ about a single state into temporal logic about a trace; what it asserts is just that the first state in the trace satisfies $\phi$ (you'll later see how this is useful). You can think about $\phi$ in one of two ways: it's a formula describing one state with a bunch of variables over finite domains (like booleans or the program counter `pc0 | pc1 | pc2` in the example above), or you can just imagine $\phi : \State \to \Prop$ in Rocq which is a predicate over a single state. We can take any such formula $\phi$ for a single state and turn it into an LTL formula with $\lift{\phi}$ (this is the same notation we used to lift pure propositions into separation logic, with a similar idea: it is "importing" a statement from a simpler logic).
 
 Next we have an _action_ $\langle a \rangle$ where $a : (\State \times \State) \to \Prop$ (a relation between two states). This construct is used to describe _transition systems_ within LTL; we will see that it allows us to easily say that a trace corresponds to the behavior of a state machine, where $a$ is the relation describing the state machine's transitions. In temporal logic $\action{a}$ says that the $a$ holds between the first and second states of the trace.
 
 The second row has the key novelty of LTL: the temporal operators. $\always P$ (pronounced "always $P$") says that $P$ holds _from now onward_ or _henceforth_. $\eventually P$ (pronounced "eventually $P$") says that $P$ holds _eventually_; that is, starting at some point in the future from the current moment.
 
-The third row has the usual connectives of a logic, negation, $P \land Q$ (logical and), and $P \lor Q$. There's nothing exceptional about these in LTL. We can write $P \Rightarrow Q$ for implication, and it's the same as $\lnot P \lor Q$ as in regular propositional logic.
+The third row has the usual connectives of a logic, negation, $P \land Q$ (logical and), and $P \lor Q$. There's nothing exceptional about these in LTL, unlike in separation logic. We can write $P \Rightarrow Q$ for implication, and it's the same as $\lnot P \lor Q$ as in regular propositional logic.
 
 ### Semantics
 
@@ -160,7 +160,7 @@ $(\always P)(t) = \forall k.\, P(t[k..])$
 
 $(\eventually P)(t) = \exists k.\, P(t[k..])$
 
-The other connectives are boring (they don't talk about time in any interesting way):
+The other connectives are boring in that they don't talk about time in any interesting way:
 
 $(\lnot P)(t) = \lnot (P(t))$
 

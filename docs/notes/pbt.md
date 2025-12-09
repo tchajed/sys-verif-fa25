@@ -90,7 +90,7 @@ type Person struct {
 // Sort sorts arr by increasing Age.
 func Sort(arr []Person) {
   // Bubble sort arr in-place
-  // ... code committed ...
+  // ... code omitted ...
 }
 ```
 
