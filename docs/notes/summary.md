@@ -2,7 +2,7 @@
 category: lecture-note
 order: 27
 shortTitle: "Summary"
-pageInfo: ["Date", "Category", "Tag", "Word"]
+pageInfo: ["Date", "Category", "Tag"]
 date: 2025-12-09 08:00:00 -5
 ---
 
