@@ -192,7 +192,7 @@ entries: list[Lecture | AssignmentDue | NoClass] = [
     ),
     Lecture("Persistence", notes_link("persistently")),
     Lecture("Concurrency intro", notes_link("concurrency"), has_slides=True),
-    Lecture("Lock invariants", notes_link("invariants")),
+    Lecture("Lock invariants", notes_link("invariants"), has_slides=True),
     Lecture("Ghost state", notes_link("ghost_state")),
     AssignmentDue("Assignment 3", "./assignments/hw3/", datetime.date(2025, 11, 17)),
     Lecture("Atomic specs (part 1)", notes_link("atomic_specs")),
